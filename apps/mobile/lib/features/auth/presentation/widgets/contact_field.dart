@@ -22,6 +22,10 @@ class ContactField extends StatefulWidget {
     required this.onSubmit,
     this.error,
     this.shakes = 0,
+    this.phoneOnly = false,
+    this.label,
+    this.hint,
+    this.fieldKey = const Key('contact'),
     super.key,
   });
 
@@ -35,6 +39,14 @@ class ContactField extends StatefulWidget {
 
   /// Goes up each time the field should shake.
   final int shakes;
+
+  /// A mobile number alone (a free trial): its own label, keyboard and hint.
+  final bool phoneOnly;
+
+  /// The field's name over it, and the line under it while nothing is wrong (null: the sign-in's).
+  final String? label;
+  final String? hint;
+  final Key fieldKey;
 
   @override
   State<ContactField> createState() => _ContactFieldState();
@@ -83,8 +95,10 @@ class _ContactFieldState extends State<ContactField> {
     final l = context.l10n;
     final c = context.colors;
     final wrong = widget.error != null;
-    final showCountry = _kind == ContactKind.phone && !Contact.international(widget.controller.text);
+    final showCountry =
+        (_kind == ContactKind.phone || (widget.phoneOnly && _kind == ContactKind.none)) && !Contact.international(widget.controller.text);
     final icon = switch (_kind) {
+      _ when widget.phoneOnly => Icons.phone_iphone_rounded,
       ContactKind.phone => Icons.phone_iphone_rounded,
       ContactKind.email => Icons.mail_outline_rounded,
       ContactKind.none => Icons.person_outline_rounded,
@@ -115,25 +129,27 @@ class _ContactFieldState extends State<ContactField> {
               scale: CurvedAnimation(parent: a, curve: Curves.easeOutBack),
               child: child,
             ),
-            child: Icon(icon, key: ValueKey(icon), size: 24, color: _kind == ContactKind.none ? c.muted : c.brand),
+            child: Icon(icon, key: ValueKey(icon), size: 24, color: _kind == ContactKind.none && !widget.phoneOnly ? c.muted : c.brand),
           ),
           const Gap(10),
           Expanded(
             child: TextField(
-              key: const Key('contact'),
+              key: widget.fieldKey,
               controller: widget.controller,
               focusNode: _focus,
-              keyboardType: TextInputType.emailAddress,
+              keyboardType: widget.phoneOnly ? TextInputType.phone : TextInputType.emailAddress,
               autocorrect: false,
               enableSuggestions: false,
-              autofillHints: const [AutofillHints.email, AutofillHints.telephoneNumber],
+              autofillHints: widget.phoneOnly
+                  ? const [AutofillHints.telephoneNumber]
+                  : const [AutofillHints.email, AutofillHints.telephoneNumber],
               inputFormatters: const [LatinDigits()],
               textDirection: TextDirection.ltr,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => widget.onSubmit(),
               style: TextStyle(fontSize: 17, color: c.ink),
               decoration: InputDecoration(
-                hintText: l.contactPlaceholder,
+                hintText: widget.phoneOnly ? l.phonePlaceholder : l.contactPlaceholder,
                 hintTextDirection: TextDirection.ltr,
                 hintStyle: TextStyle(fontSize: 16, color: c.faint),
                 border: InputBorder.none,
@@ -152,6 +168,12 @@ class _ContactFieldState extends State<ContactField> {
     );
     final hint = switch ((widget.error, _kind)) {
       (final String e, _) => _Hint(key: ValueKey('error:$e'), text: e, icon: Icons.error_outline_rounded, colour: c.danger, strong: true),
+      (_, _) when widget.hint != null => _Hint(
+        key: const ValueKey('own'),
+        text: widget.hint!,
+        icon: Icons.chat_bubble_outline_rounded,
+        colour: c.muted,
+      ),
       (_, ContactKind.phone) => _Hint(
         key: const ValueKey('phone'),
         text: l.phoneHint,
@@ -165,7 +187,7 @@ class _ContactFieldState extends State<ContactField> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          l.contactLabel,
+          widget.label ?? l.contactLabel,
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: c.ink),
         ),
         const Gap(Space.s),

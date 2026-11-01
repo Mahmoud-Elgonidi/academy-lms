@@ -9,10 +9,13 @@ import '../../../../core/l10n/l10n.dart';
 /// API asked to wait (its Retry-After). Then it calls [onDone] and the step
 /// works again. The countdown runs on the screen's own clock, not a timer.
 class RetryWait extends StatefulWidget {
-  const RetryWait({required this.seconds, required this.onDone, super.key});
+  const RetryWait({required this.seconds, required this.onDone, this.body, super.key});
 
   final int seconds;
   final VoidCallback onDone;
+
+  /// Why the wait, when it is not about an account (null: the sign-in's words).
+  final String? body;
 
   @override
   State<RetryWait> createState() => _RetryWaitState();
@@ -67,7 +70,7 @@ class _RetryWaitState extends State<RetryWait> with SingleTickerProviderStateMix
               ],
             ),
             const SizedBox(height: 6),
-            Text(l.tooManyBody, style: TextStyle(fontSize: 14, height: 1.55, color: c.ink)),
+            Text(widget.body ?? l.tooManyBody, style: TextStyle(fontSize: 14, height: 1.55, color: c.ink)),
             const SizedBox(height: 10),
             AnimatedBuilder(
               animation: _c,

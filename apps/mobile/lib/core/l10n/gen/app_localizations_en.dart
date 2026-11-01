@@ -4838,4 +4838,366 @@ class AppLocalizationsEn extends AppLocalizations {
   String quranExamSaved(String status) {
     return 'Result saved: $status';
   }
+
+  @override
+  String get phonePlaceholder => '05xxxxxxxx';
+
+  @override
+  String get trialEntryTitle => 'New here? Book a free trial lesson';
+
+  @override
+  String get trialEntryBody => 'Pick a time that suits you, with no account and no payment.';
+
+  @override
+  String get trialTitle => 'Free trial lesson';
+
+  @override
+  String trialStepOf(int n, int total) {
+    return 'Step $n of $total';
+  }
+
+  @override
+  String get trialNext => 'Next';
+
+  @override
+  String get trialEdit => 'Edit';
+
+  @override
+  String get trialAcademyTitle => 'Which academy is the lesson with?';
+
+  @override
+  String get trialAcademyLead => 'Type the academy\'s code to see its subjects and times.';
+
+  @override
+  String get trialAcademyHint => 'It\'s on the academy\'s page or in its message to you.';
+
+  @override
+  String get trialAcademyOpening => 'Opening the academy\'s page…';
+
+  @override
+  String get trialAcademyNotFound =>
+      'We couldn\'t find an academy taking free trial requests with this code. Check the code with the academy, or type it exactly as they sent it.';
+
+  @override
+  String get trialAcademyChange => 'Another academy';
+
+  @override
+  String get trialWhoTitle => 'Who is the lesson for?';
+
+  @override
+  String get trialWhoMe => 'For me';
+
+  @override
+  String get trialWhoMeHint => 'I\'m the one learning.';
+
+  @override
+  String get trialWhoChild => 'For my child';
+
+  @override
+  String get trialWhoChildHint => 'I\'m the parent; my child will learn.';
+
+  @override
+  String get trialWhoMissing => 'Choose who the lesson is for.';
+
+  @override
+  String get trialYourName => 'Your name';
+
+  @override
+  String get trialYourNameParent => 'Your own name';
+
+  @override
+  String get trialYourNameHint => 'We\'ll use it in our messages to you.';
+
+  @override
+  String get trialChildName => 'Your child\'s name';
+
+  @override
+  String get trialChildAge => 'How old is your child?';
+
+  @override
+  String trialAgeYears(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n years old', one: '1 year old');
+    return '$_temp0';
+  }
+
+  @override
+  String get trialNameMissing => 'Type the name.';
+
+  @override
+  String get trialNameShort => 'Type the whole name.';
+
+  @override
+  String get trialAgeMissing => 'Choose your child\'s age.';
+
+  @override
+  String get trialSubjectTitle => 'Choose the subject';
+
+  @override
+  String get trialSubjectLead => 'What would you like to start with? You can also ask us to help you choose.';
+
+  @override
+  String trialSubjectLevels(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n levels', one: '1 level', zero: '');
+    return '$_temp0';
+  }
+
+  @override
+  String get trialHelpChoose => 'Help me choose';
+
+  @override
+  String get trialHelpChooseHint => 'We\'ll get in touch to choose the right subject and level together.';
+
+  @override
+  String trialHelpChooseWith(String subject) {
+    return 'We\'ll start with a lesson in $subject and choose together what suits after it.';
+  }
+
+  @override
+  String get trialNoSubjects => 'The academy hasn\'t listed its subjects yet. Ask for help choosing and we\'ll get in touch.';
+
+  @override
+  String get trialWishesTitle => 'When suits you?';
+
+  @override
+  String get trialWishesLead => 'All optional; they help us find the teacher and the time.';
+
+  @override
+  String get trialDays => 'Days that suit you';
+
+  @override
+  String get trialDaysAny => 'Any day';
+
+  @override
+  String get trialDayPart => 'Time of day';
+
+  @override
+  String get trialPartAny => 'Any time';
+
+  @override
+  String get trialPartMorning => 'Morning';
+
+  @override
+  String get trialPartAfternoon => 'Afternoon';
+
+  @override
+  String get trialPartEvening => 'Evening';
+
+  @override
+  String get trialTeacher => 'Teacher';
+
+  @override
+  String get trialTeacherAny => 'No preference';
+
+  @override
+  String get trialTeacherFemale => 'A woman teacher';
+
+  @override
+  String get trialTeacherMale => 'A man teacher';
+
+  @override
+  String get trialTimeTitle => 'Pick the time';
+
+  @override
+  String trialTimeLead(String zone) {
+    return 'Times are on $zone time, soonest first.';
+  }
+
+  @override
+  String trialTimesCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n times', one: '1 time');
+    return '$_temp0';
+  }
+
+  @override
+  String get trialOnlySuiting => 'Only what suits you';
+
+  @override
+  String get trialNoneSuit => 'Nothing on the days and hours you chose, so here are all the free times.';
+
+  @override
+  String get trialLoadingTimes => 'Looking for free times…';
+
+  @override
+  String get trialNoTimesTitle => 'No free times right now';
+
+  @override
+  String trialNoTimesBody(String hours) {
+    return 'No teacher is free for this subject in the next two weeks. Send your request and we\'ll agree on a time within $hours.';
+  }
+
+  @override
+  String get trialNoTimesGender => 'Nobody you chose is free now; another teacher may be.';
+
+  @override
+  String get trialAnyTeacher => 'Show times with any teacher';
+
+  @override
+  String get trialSendInstead => 'Send the request without a time';
+
+  @override
+  String get trialNoTimeSuits => 'None of these suit me';
+
+  @override
+  String trialChosen(String label) {
+    return 'You chose: $label';
+  }
+
+  @override
+  String get trialPickFirst => 'Choose a time from the list.';
+
+  @override
+  String get trialBookThis => 'Book this time';
+
+  @override
+  String get trialContactTitle => 'Your mobile number';
+
+  @override
+  String get trialContactTitleRequest => 'How do we reach you?';
+
+  @override
+  String get trialContactLeadCode => 'We\'ll send a 6-digit code on WhatsApp to check the number, then book the time.';
+
+  @override
+  String trialContactLeadRequest(String hours) {
+    return 'We\'ll confirm on WhatsApp and get in touch within $hours.';
+  }
+
+  @override
+  String get trialPhoneLabel => 'Mobile number (WhatsApp)';
+
+  @override
+  String get trialPhoneHint => 'The code and the lesson details come to it.';
+
+  @override
+  String get trialPhoneHintRequest => 'The confirmation comes to it, and we\'ll reach you on it.';
+
+  @override
+  String get trialPhoneMissing => 'Type your mobile number.';
+
+  @override
+  String get trialPhoneNotEmail => 'Type a mobile number; the email has its own field below.';
+
+  @override
+  String get trialEmailLabel => 'Email';
+
+  @override
+  String get trialEmailHint => 'We send a copy of the confirmation there.';
+
+  @override
+  String get trialSummary => 'Your request';
+
+  @override
+  String trialSummaryFor(String name) {
+    return 'For $name';
+  }
+
+  @override
+  String get trialSummaryHelp => 'We\'ll choose the subject together';
+
+  @override
+  String get trialSummaryNoTime => 'We\'ll agree on the time with you';
+
+  @override
+  String get trialSendRequest => 'Send the request';
+
+  @override
+  String get trialPickTimeAfterAll => 'I\'d rather pick the time myself';
+
+  @override
+  String get trialCodeLead => 'We\'ll book the time as soon as you type the code.';
+
+  @override
+  String get trialBooking => 'Booking your time…';
+
+  @override
+  String get trialCodeLocked => 'This code is locked';
+
+  @override
+  String get trialCodeExpired => 'This code has ended';
+
+  @override
+  String get trialChangeNumber => 'Change the number';
+
+  @override
+  String get trialRefusedTitle => 'This trial can\'t be booked from here';
+
+  @override
+  String get trialRefusedSend => 'Send the request and we\'ll get in touch';
+
+  @override
+  String get trialWhatsapp => 'Message the academy on WhatsApp';
+
+  @override
+  String get trialSignIn => 'Sign in with this number';
+
+  @override
+  String get trialBookedTitle => 'Your free trial is booked';
+
+  @override
+  String trialBookedWith(String subject, String academy) {
+    return '$subject with $academy';
+  }
+
+  @override
+  String trialBookedTeacher(String teacher) {
+    return 'With $teacher';
+  }
+
+  @override
+  String get trialNextTitle => 'What happens next';
+
+  @override
+  String get trialBookedNext1 => 'A WhatsApp message brings the time and the link to join.';
+
+  @override
+  String get trialBookedNext2 => 'The same message has a link to change the time, and one if you can\'t come.';
+
+  @override
+  String get trialBookedNext3 => 'We remind you a day before.';
+
+  @override
+  String get trialBookedNext4 => 'Sign in to the app with this number any time to see the lesson and join it.';
+
+  @override
+  String get trialAnotherChild => 'Book for another child';
+
+  @override
+  String get trialAnotherTrial => 'Book another free trial';
+
+  @override
+  String get trialLater => 'I\'ll sign in later';
+
+  @override
+  String get trialRequestedTitle => 'We got your request';
+
+  @override
+  String trialRequestedBody(String hours) {
+    return 'We\'ll get in touch on WhatsApp within $hours to agree on the time.';
+  }
+
+  @override
+  String trialRequestedHelp(String hours) {
+    return 'We\'ll get in touch on WhatsApp within $hours to choose the subject and the time together.';
+  }
+
+  @override
+  String get trialRequestedNext1 => 'A confirmation reaches you on WhatsApp now.';
+
+  @override
+  String get trialRequestedNext1Pick => 'A WhatsApp message reaches you now, with a link to pick the time yourself whenever you like.';
+
+  @override
+  String trialRequestedNext2(String hours) {
+    return 'The academy\'s team gets in touch within $hours.';
+  }
+
+  @override
+  String get trialRequestedNext3 => 'Once agreed, the time and the link to join reach you.';
+
+  @override
+  String get trialTooMany =>
+      'Many codes were asked for from this device or for this number, so we paused for a little while to keep it safe. Wait for the countdown, then try again.';
+
+  @override
+  String get trialDone => 'Done';
 }

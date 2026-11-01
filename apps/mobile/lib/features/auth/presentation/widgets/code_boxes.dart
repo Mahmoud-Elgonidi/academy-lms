@@ -96,7 +96,10 @@ class _CodeBoxesState extends State<CodeBoxes> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            ExcludeSemantics(child: boxes),
+            // A narrow phone with large text: the six boxes shrink together rather than run off the side.
+            ExcludeSemantics(
+              child: FittedBox(fit: BoxFit.scaleDown, child: boxes),
+            ),
             Positioned.fill(
               // Unseen but there: tapped, read aloud and filled like any field.
               child: Opacity(

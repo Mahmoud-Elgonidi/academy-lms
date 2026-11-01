@@ -66,6 +66,7 @@ import '../../features/teaching/presentation/pages/performance_page.dart';
 import '../../features/teaching/presentation/pages/today_page.dart';
 import '../../features/teaching/presentation/pages/week_page.dart';
 import '../../features/teaching/domain/teaching.dart';
+import '../../features/trial/presentation/trial_page.dart';
 import '../../features/teaching/presentation/widgets/waiting.dart';
 import 'areas.dart';
 import 'shell.dart';
@@ -143,12 +144,14 @@ GoRouter buildRouter(SessionCubit session) {
   List<RouteBase> signIn(String base) => [
     page(
       base,
-      (_) => WelcomePage(base: base),
+      (s) => WelcomePage(base: base, contact: s.uri.queryParameters['contact']),
       routes: [
         step('code', (_) => CodePage(base: base)),
         step('accounts', (_) => AccountsPage(base: base)),
         step('password', (_) => PasswordPage(base: base)),
         step('two-factor', (_) => TwoFactorPage(base: base)),
+        // A free trial before signing in (another account's academy is offered first when adding one).
+        step('trial', (_) => TrialPage(base: base, academy: base == '/add' ? session.state.current?.academySlug : null)),
       ],
     ),
   ];

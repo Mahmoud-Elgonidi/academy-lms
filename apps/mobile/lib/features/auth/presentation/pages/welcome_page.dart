@@ -19,17 +19,20 @@ import '../widgets/sign_in_frame.dart';
 /// Step one: one field for a mobile number or an email (told apart as it
 /// is typed), then a code to it. Or a password, or Google or Apple.
 class WelcomePage extends StatefulWidget {
-  const WelcomePage({this.base = '/welcome', super.key});
+  const WelcomePage({this.base = '/welcome', this.contact, super.key});
 
   /// /welcome when signed out, /add when adding another account.
   final String base;
+
+  /// A number to start with (a family that just booked a free trial with it).
+  final String? contact;
 
   @override
   State<WelcomePage> createState() => _WelcomePageState();
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-  final _contact = TextEditingController();
+  late final _contact = TextEditingController(text: widget.contact ?? '');
   late String _country = Contact.countryFor(context.read<SessionCubit>().state.deviceTimezone);
 
   /// What is missing, found here before asking the API.
@@ -45,6 +48,13 @@ class _WelcomePageState extends State<WelcomePage> {
       final cubit = context.read<SignInCubit>();
       if (cubit.state.problem != null && !cubit.state.busy) cubit.clearProblem();
     });
+  }
+
+  @override
+  void didUpdateWidget(WelcomePage old) {
+    super.didUpdateWidget(old);
+    final contact = widget.contact;
+    if (contact != null && contact != old.contact) _contact.text = contact;
   }
 
   @override
@@ -203,6 +213,13 @@ class _WelcomePageState extends State<WelcomePage> {
                 child: Text(l.havePassword, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
               ),
               ..._socialButtons(context, state),
+              const Gap(Space.m),
+              _TrialEntry(
+                onTap: () {
+                  context.read<SignInCubit>().clearProblem();
+                  context.push('${widget.base}/trial');
+                },
+              ),
             ],
           ),
           children: [
@@ -217,6 +234,69 @@ class _WelcomePageState extends State<WelcomePage> {
           ],
         );
       },
+    );
+  }
+}
+
+/// "New here? Book a free trial lesson": a family that has no account yet
+/// asks for one (or books its own time) from here.
+class _TrialEntry extends StatelessWidget {
+  const _TrialEntry({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    return Semantics(
+      button: true,
+      label: '${l.trialEntryTitle}. ${l.trialEntryBody}',
+      excludeSemantics: true,
+      child: PressScale(
+        onTap: onTap,
+        child: Container(
+          key: const Key('book-trial'),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: c.attentionSoft,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: c.attention.withValues(alpha: 0.45), width: 1.5),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(color: c.card, borderRadius: BorderRadius.circular(14)),
+                child: Icon(Icons.card_giftcard_rounded, color: c.attentionInk, size: 26),
+              ),
+              const Gap(Space.m),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l.trialEntryTitle,
+                      style: TextStyle(
+                        fontFamily: context.shape.headingFont,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: c.ink,
+                        height: 1.35,
+                      ),
+                    ),
+                    const Gap(2),
+                    Text(l.trialEntryBody, style: TextStyle(fontSize: 13.5, height: 1.45, color: c.muted)),
+                  ],
+                ),
+              ),
+              const Gap(Space.s),
+              Icon(Icons.chevron_right_rounded, color: c.attentionInk, textDirection: Directionality.of(context)),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

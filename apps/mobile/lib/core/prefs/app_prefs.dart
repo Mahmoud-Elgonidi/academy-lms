@@ -7,8 +7,9 @@ import '../time/clock_style.dart';
 /// Small choices that are not secrets: the app's language, each academy's
 /// last known look (so the app opens in its colours), the clock the person
 /// chose to see times on and how each account last read a clock (so times
-/// open written their way), whether the app plays sounds, and whether the
-/// three slides about the app were seen (they come once, before signing in).
+/// open written their way), whether the app plays sounds, whether the
+/// three slides about the app were seen (they come once, before signing in),
+/// and the academy a family last asked for a free trial at.
 class AppPrefs {
   AppPrefs(this._prefs);
 
@@ -18,6 +19,7 @@ class AppPrefs {
   static const _timeFormatKey = 'lms.time_format.';
   static const _soundsKey = 'lms.sounds';
   static const _introKey = 'lms.intro';
+  static const _trialAcademyKey = 'lms.trial_academy';
 
   final SharedPreferencesAsync _prefs;
 
@@ -33,6 +35,11 @@ class AppPrefs {
   Future<bool> seenIntro() async => await _prefs.getBool(_introKey) ?? false;
 
   Future<void> setSeenIntro() => _prefs.setBool(_introKey, true);
+
+  /// The academy code typed last for a free trial (offered again next time).
+  Future<String?> trialAcademy() => _prefs.getString(_trialAcademyKey);
+
+  Future<void> setTrialAcademy(String slug) => _prefs.setString(_trialAcademyKey, slug);
 
   Future<Map<String, dynamic>?> branding(String academy) async {
     final raw = await _prefs.getString('$_brandingKey$academy');

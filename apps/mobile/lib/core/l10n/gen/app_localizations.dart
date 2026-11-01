@@ -8191,6 +8191,660 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'سُجّلت النتيجة: {status}'**
   String quranExamSaved(String status);
+
+  /// No description provided for @phonePlaceholder.
+  ///
+  /// In ar, this message translates to:
+  /// **'05xxxxxxxx'**
+  String get phonePlaceholder;
+
+  /// No description provided for @trialEntryTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'جديد معنا؟ احجز حصة تجريبية مجانية'**
+  String get trialEntryTitle;
+
+  /// No description provided for @trialEntryBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر الموعد الذي يناسبك، دون حساب ودون دفع.'**
+  String get trialEntryBody;
+
+  /// No description provided for @trialTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصة تجريبية مجانية'**
+  String get trialTitle;
+
+  /// No description provided for @trialStepOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخطوة {n} من {total}'**
+  String trialStepOf(int n, int total);
+
+  /// No description provided for @trialNext.
+  ///
+  /// In ar, this message translates to:
+  /// **'التالي'**
+  String get trialNext;
+
+  /// No description provided for @trialEdit.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعديل'**
+  String get trialEdit;
+
+  /// No description provided for @trialAcademyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'في أي أكاديمية تريد الحصة؟'**
+  String get trialAcademyTitle;
+
+  /// No description provided for @trialAcademyLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب رمز الأكاديمية لنعرض لك موادها ومواعيدها.'**
+  String get trialAcademyLead;
+
+  /// No description provided for @trialAcademyHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'تجده على صفحة الأكاديمية أو في رسالتها إليك.'**
+  String get trialAcademyHint;
+
+  /// No description provided for @trialAcademyOpening.
+  ///
+  /// In ar, this message translates to:
+  /// **'نفتح صفحة الأكاديمية…'**
+  String get trialAcademyOpening;
+
+  /// No description provided for @trialAcademyNotFound.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم نجد أكاديمية تستقبل طلبات الحصص التجريبية بهذا الرمز. تأكّد من الرمز مع الأكاديمية، أو اكتبه كما يصلك منها.'**
+  String get trialAcademyNotFound;
+
+  /// No description provided for @trialAcademyChange.
+  ///
+  /// In ar, this message translates to:
+  /// **'أكاديمية أخرى'**
+  String get trialAcademyChange;
+
+  /// No description provided for @trialWhoTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لمن الحصة؟'**
+  String get trialWhoTitle;
+
+  /// No description provided for @trialWhoMe.
+  ///
+  /// In ar, this message translates to:
+  /// **'لي'**
+  String get trialWhoMe;
+
+  /// No description provided for @trialWhoMeHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'أنا من سيتعلّم.'**
+  String get trialWhoMeHint;
+
+  /// No description provided for @trialWhoChild.
+  ///
+  /// In ar, this message translates to:
+  /// **'لطفلي'**
+  String get trialWhoChild;
+
+  /// No description provided for @trialWhoChildHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'أنا وليّ الأمر، وطفلي من سيتعلّم.'**
+  String get trialWhoChildHint;
+
+  /// No description provided for @trialWhoMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر لمن الحصة.'**
+  String get trialWhoMissing;
+
+  /// No description provided for @trialYourName.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسمك'**
+  String get trialYourName;
+
+  /// No description provided for @trialYourNameParent.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسمك أنت'**
+  String get trialYourNameParent;
+
+  /// No description provided for @trialYourNameHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'نخاطبك به في رسائلنا.'**
+  String get trialYourNameHint;
+
+  /// No description provided for @trialChildName.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم طفلك'**
+  String get trialChildName;
+
+  /// No description provided for @trialChildAge.
+  ///
+  /// In ar, this message translates to:
+  /// **'كم عمر طفلك؟'**
+  String get trialChildAge;
+
+  /// No description provided for @trialAgeYears.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{سنة واحدة} =2{سنتان} few{{n} سنوات} other{{n} سنة}}'**
+  String trialAgeYears(int n);
+
+  /// No description provided for @trialNameMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب الاسم.'**
+  String get trialNameMissing;
+
+  /// No description provided for @trialNameShort.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب الاسم كاملًا.'**
+  String get trialNameShort;
+
+  /// No description provided for @trialAgeMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر عمر طفلك.'**
+  String get trialAgeMissing;
+
+  /// No description provided for @trialSubjectTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر المادة'**
+  String get trialSubjectTitle;
+
+  /// No description provided for @trialSubjectLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'ما الذي تريد أن تبدأ به؟ يمكنك أيضًا أن تطلب مساعدتنا في الاختيار.'**
+  String get trialSubjectLead;
+
+  /// No description provided for @trialSubjectLevels.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{} =1{مستوى واحد} =2{مستويان} few{{n} مستويات} other{{n} مستوى}}'**
+  String trialSubjectLevels(int n);
+
+  /// No description provided for @trialHelpChoose.
+  ///
+  /// In ar, this message translates to:
+  /// **'ساعدوني في الاختيار'**
+  String get trialHelpChoose;
+
+  /// No description provided for @trialHelpChooseHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'نتواصل معك لنختار معًا المادة والمستوى المناسبين.'**
+  String get trialHelpChooseHint;
+
+  /// No description provided for @trialHelpChooseWith.
+  ///
+  /// In ar, this message translates to:
+  /// **'نبدأ بحصة في {subject}، ونختار معًا ما يناسب بعدها.'**
+  String trialHelpChooseWith(String subject);
+
+  /// No description provided for @trialNoSubjects.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم تعرض الأكاديمية موادها بعد. اطلب المساعدة في الاختيار، وسنتواصل معك.'**
+  String get trialNoSubjects;
+
+  /// No description provided for @trialWishesTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'ما الأوقات التي تناسبكم؟'**
+  String get trialWishesTitle;
+
+  /// No description provided for @trialWishesLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلها اختيارية، وتساعدنا في اختيار المعلّم والموعد.'**
+  String get trialWishesLead;
+
+  /// No description provided for @trialDays.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأيام المناسبة'**
+  String get trialDays;
+
+  /// No description provided for @trialDaysAny.
+  ///
+  /// In ar, this message translates to:
+  /// **'أي يوم'**
+  String get trialDaysAny;
+
+  /// No description provided for @trialDayPart.
+  ///
+  /// In ar, this message translates to:
+  /// **'الوقت من اليوم'**
+  String get trialDayPart;
+
+  /// No description provided for @trialPartAny.
+  ///
+  /// In ar, this message translates to:
+  /// **'أي وقت'**
+  String get trialPartAny;
+
+  /// No description provided for @trialPartMorning.
+  ///
+  /// In ar, this message translates to:
+  /// **'صباحًا'**
+  String get trialPartMorning;
+
+  /// No description provided for @trialPartAfternoon.
+  ///
+  /// In ar, this message translates to:
+  /// **'بعد الظهر'**
+  String get trialPartAfternoon;
+
+  /// No description provided for @trialPartEvening.
+  ///
+  /// In ar, this message translates to:
+  /// **'مساءً'**
+  String get trialPartEvening;
+
+  /// No description provided for @trialTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'المعلّم'**
+  String get trialTeacher;
+
+  /// No description provided for @trialTeacherAny.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يهم'**
+  String get trialTeacherAny;
+
+  /// No description provided for @trialTeacherFemale.
+  ///
+  /// In ar, this message translates to:
+  /// **'معلّمة'**
+  String get trialTeacherFemale;
+
+  /// No description provided for @trialTeacherMale.
+  ///
+  /// In ar, this message translates to:
+  /// **'معلّم'**
+  String get trialTeacherMale;
+
+  /// No description provided for @trialTimeTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر موعد الحصة'**
+  String get trialTimeTitle;
+
+  /// No description provided for @trialTimeLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'المواعيد بتوقيت {zone}، والأقرب أولًا.'**
+  String trialTimeLead(String zone);
+
+  /// No description provided for @trialTimesCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{موعد واحد} =2{موعدان} few{{n} مواعيد} other{{n} موعدًا}}'**
+  String trialTimesCount(int n);
+
+  /// No description provided for @trialOnlySuiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'ما يناسبكم فقط'**
+  String get trialOnlySuiting;
+
+  /// No description provided for @trialNoneSuit.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا مواعيد في الأيام والساعات التي اخترتها، فهذه كل المواعيد المتاحة.'**
+  String get trialNoneSuit;
+
+  /// No description provided for @trialLoadingTimes.
+  ///
+  /// In ar, this message translates to:
+  /// **'نبحث عن المواعيد المتاحة…'**
+  String get trialLoadingTimes;
+
+  /// No description provided for @trialNoTimesTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد مواعيد متاحة الآن'**
+  String get trialNoTimesTitle;
+
+  /// No description provided for @trialNoTimesBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يوجد معلّم متاح لهذه المادة خلال الأسبوعين القادمين. أرسل طلبك، وسنتفق معك على موعد خلال {hours}.'**
+  String trialNoTimesBody(String hours);
+
+  /// No description provided for @trialNoTimesGender.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد مواعيد مع من اخترت الآن، وقد تجد موعدًا مع معلّم آخر.'**
+  String get trialNoTimesGender;
+
+  /// No description provided for @trialAnyTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'أظهر مواعيد كل المعلّمين'**
+  String get trialAnyTeacher;
+
+  /// No description provided for @trialSendInstead.
+  ///
+  /// In ar, this message translates to:
+  /// **'أرسل الطلب دون موعد'**
+  String get trialSendInstead;
+
+  /// No description provided for @trialNoTimeSuits.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يناسبني أي موعد'**
+  String get trialNoTimeSuits;
+
+  /// No description provided for @trialChosen.
+  ///
+  /// In ar, this message translates to:
+  /// **'اخترت: {label}'**
+  String trialChosen(String label);
+
+  /// No description provided for @trialPickFirst.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر موعدًا من القائمة.'**
+  String get trialPickFirst;
+
+  /// No description provided for @trialBookThis.
+  ///
+  /// In ar, this message translates to:
+  /// **'احجز هذا الموعد'**
+  String get trialBookThis;
+
+  /// No description provided for @trialContactTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم هاتفك'**
+  String get trialContactTitle;
+
+  /// No description provided for @trialContactTitleRequest.
+  ///
+  /// In ar, this message translates to:
+  /// **'كيف نتواصل معك؟'**
+  String get trialContactTitleRequest;
+
+  /// No description provided for @trialContactLeadCode.
+  ///
+  /// In ar, this message translates to:
+  /// **'نرسل رمزًا من 6 أرقام على واتساب لنتأكّد من الرقم، ثم نحجز الموعد.'**
+  String get trialContactLeadCode;
+
+  /// No description provided for @trialContactLeadRequest.
+  ///
+  /// In ar, this message translates to:
+  /// **'نرسل إليك تأكيد الطلب على واتساب، ونتواصل معك خلال {hours}.'**
+  String trialContactLeadRequest(String hours);
+
+  /// No description provided for @trialPhoneLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم الهاتف (واتساب)'**
+  String get trialPhoneLabel;
+
+  /// No description provided for @trialPhoneHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'يصلك عليه الرمز وتفاصيل الحصة.'**
+  String get trialPhoneHint;
+
+  /// No description provided for @trialPhoneHintRequest.
+  ///
+  /// In ar, this message translates to:
+  /// **'يصلك عليه تأكيد الطلب، ونتواصل معك منه.'**
+  String get trialPhoneHintRequest;
+
+  /// No description provided for @trialPhoneMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب رقم هاتفك.'**
+  String get trialPhoneMissing;
+
+  /// No description provided for @trialPhoneNotEmail.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب رقم هاتف، وضع البريد الإلكتروني في خانته تحته.'**
+  String get trialPhoneNotEmail;
+
+  /// No description provided for @trialEmailLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'البريد الإلكتروني'**
+  String get trialEmailLabel;
+
+  /// No description provided for @trialEmailHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'نرسل إليه نسخة من التأكيد.'**
+  String get trialEmailHint;
+
+  /// No description provided for @trialSummary.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلبك'**
+  String get trialSummary;
+
+  /// No description provided for @trialSummaryFor.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحصة لـ{name}'**
+  String trialSummaryFor(String name);
+
+  /// No description provided for @trialSummaryHelp.
+  ///
+  /// In ar, this message translates to:
+  /// **'نختار المادة معًا'**
+  String get trialSummaryHelp;
+
+  /// No description provided for @trialSummaryNoTime.
+  ///
+  /// In ar, this message translates to:
+  /// **'نتفق على الموعد معك'**
+  String get trialSummaryNoTime;
+
+  /// No description provided for @trialSendRequest.
+  ///
+  /// In ar, this message translates to:
+  /// **'أرسل الطلب'**
+  String get trialSendRequest;
+
+  /// No description provided for @trialPickTimeAfterAll.
+  ///
+  /// In ar, this message translates to:
+  /// **'أفضّل أن أختار الموعد بنفسي'**
+  String get trialPickTimeAfterAll;
+
+  /// No description provided for @trialCodeLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'نحجز الموعد فور كتابة الرمز.'**
+  String get trialCodeLead;
+
+  /// No description provided for @trialBooking.
+  ///
+  /// In ar, this message translates to:
+  /// **'نحجز موعدك…'**
+  String get trialBooking;
+
+  /// No description provided for @trialCodeLocked.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرمز مقفل'**
+  String get trialCodeLocked;
+
+  /// No description provided for @trialCodeExpired.
+  ///
+  /// In ar, this message translates to:
+  /// **'انتهى الرمز'**
+  String get trialCodeExpired;
+
+  /// No description provided for @trialChangeNumber.
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّر الرقم'**
+  String get trialChangeNumber;
+
+  /// No description provided for @trialRefusedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يمكن حجز هذه الحصة من هنا'**
+  String get trialRefusedTitle;
+
+  /// No description provided for @trialRefusedSend.
+  ///
+  /// In ar, this message translates to:
+  /// **'أرسل الطلب وسنتواصل معك'**
+  String get trialRefusedSend;
+
+  /// No description provided for @trialWhatsapp.
+  ///
+  /// In ar, this message translates to:
+  /// **'راسل الأكاديمية على واتساب'**
+  String get trialWhatsapp;
+
+  /// No description provided for @trialSignIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادخل بهذا الرقم'**
+  String get trialSignIn;
+
+  /// No description provided for @trialBookedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حُجزت الحصة التجريبية'**
+  String get trialBookedTitle;
+
+  /// No description provided for @trialBookedWith.
+  ///
+  /// In ar, this message translates to:
+  /// **'{subject} مع {academy}'**
+  String trialBookedWith(String subject, String academy);
+
+  /// No description provided for @trialBookedTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'مع {teacher}'**
+  String trialBookedTeacher(String teacher);
+
+  /// No description provided for @trialNextTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'ما الذي يحدث الآن'**
+  String get trialNextTitle;
+
+  /// No description provided for @trialBookedNext1.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصلك رسالة على واتساب فيها الموعد ورابط دخول الحصة.'**
+  String get trialBookedNext1;
+
+  /// No description provided for @trialBookedNext2.
+  ///
+  /// In ar, this message translates to:
+  /// **'في الرسالة نفسها رابط لتغيير الموعد، ورابط إن لم تستطيعوا الحضور.'**
+  String get trialBookedNext2;
+
+  /// No description provided for @trialBookedNext3.
+  ///
+  /// In ar, this message translates to:
+  /// **'نذكّرك بالحصة قبلها بيوم.'**
+  String get trialBookedNext3;
+
+  /// No description provided for @trialBookedNext4.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادخل إلى التطبيق بهذا الرقم متى شئت لترى الحصة وتدخلها.'**
+  String get trialBookedNext4;
+
+  /// No description provided for @trialAnotherChild.
+  ///
+  /// In ar, this message translates to:
+  /// **'احجز لطفل آخر'**
+  String get trialAnotherChild;
+
+  /// No description provided for @trialAnotherTrial.
+  ///
+  /// In ar, this message translates to:
+  /// **'احجز حصة تجريبية أخرى'**
+  String get trialAnotherTrial;
+
+  /// No description provided for @trialLater.
+  ///
+  /// In ar, this message translates to:
+  /// **'سأدخل لاحقًا'**
+  String get trialLater;
+
+  /// No description provided for @trialRequestedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'وصل طلبك'**
+  String get trialRequestedTitle;
+
+  /// No description provided for @trialRequestedBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'نتواصل معك على واتساب خلال {hours} لنتفق على موعد الحصة.'**
+  String trialRequestedBody(String hours);
+
+  /// No description provided for @trialRequestedHelp.
+  ///
+  /// In ar, this message translates to:
+  /// **'نتواصل معك على واتساب خلال {hours} لنختار معًا المادة والموعد.'**
+  String trialRequestedHelp(String hours);
+
+  /// No description provided for @trialRequestedNext1.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصلك الآن رسالة تأكيد على واتساب.'**
+  String get trialRequestedNext1;
+
+  /// No description provided for @trialRequestedNext1Pick.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصلك الآن رسالة على واتساب فيها رابط تختار منه الموعد بنفسك متى شئت.'**
+  String get trialRequestedNext1Pick;
+
+  /// No description provided for @trialRequestedNext2.
+  ///
+  /// In ar, this message translates to:
+  /// **'يتواصل معك فريق الأكاديمية خلال {hours}.'**
+  String trialRequestedNext2(String hours);
+
+  /// No description provided for @trialRequestedNext3.
+  ///
+  /// In ar, this message translates to:
+  /// **'بعد الاتفاق يصلك الموعد ورابط دخول الحصة.'**
+  String get trialRequestedNext3;
+
+  /// No description provided for @trialTooMany.
+  ///
+  /// In ar, this message translates to:
+  /// **'طُلبت رموز كثيرة من هذا الجهاز أو لهذا الرقم، فأوقفنا الطلب قليلًا لحمايته. انتظر حتى ينتهي العدّاد، ثم حاول مرة أخرى.'**
+  String get trialTooMany;
+
+  /// No description provided for @trialDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم'**
+  String get trialDone;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

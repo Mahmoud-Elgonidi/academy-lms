@@ -5153,4 +5153,374 @@ class AppLocalizationsAr extends AppLocalizations {
   String quranExamSaved(String status) {
     return 'سُجّلت النتيجة: $status';
   }
+
+  @override
+  String get phonePlaceholder => '05xxxxxxxx';
+
+  @override
+  String get trialEntryTitle => 'جديد معنا؟ احجز حصة تجريبية مجانية';
+
+  @override
+  String get trialEntryBody => 'اختر الموعد الذي يناسبك، دون حساب ودون دفع.';
+
+  @override
+  String get trialTitle => 'حصة تجريبية مجانية';
+
+  @override
+  String trialStepOf(int n, int total) {
+    return 'الخطوة $n من $total';
+  }
+
+  @override
+  String get trialNext => 'التالي';
+
+  @override
+  String get trialEdit => 'تعديل';
+
+  @override
+  String get trialAcademyTitle => 'في أي أكاديمية تريد الحصة؟';
+
+  @override
+  String get trialAcademyLead => 'اكتب رمز الأكاديمية لنعرض لك موادها ومواعيدها.';
+
+  @override
+  String get trialAcademyHint => 'تجده على صفحة الأكاديمية أو في رسالتها إليك.';
+
+  @override
+  String get trialAcademyOpening => 'نفتح صفحة الأكاديمية…';
+
+  @override
+  String get trialAcademyNotFound =>
+      'لم نجد أكاديمية تستقبل طلبات الحصص التجريبية بهذا الرمز. تأكّد من الرمز مع الأكاديمية، أو اكتبه كما يصلك منها.';
+
+  @override
+  String get trialAcademyChange => 'أكاديمية أخرى';
+
+  @override
+  String get trialWhoTitle => 'لمن الحصة؟';
+
+  @override
+  String get trialWhoMe => 'لي';
+
+  @override
+  String get trialWhoMeHint => 'أنا من سيتعلّم.';
+
+  @override
+  String get trialWhoChild => 'لطفلي';
+
+  @override
+  String get trialWhoChildHint => 'أنا وليّ الأمر، وطفلي من سيتعلّم.';
+
+  @override
+  String get trialWhoMissing => 'اختر لمن الحصة.';
+
+  @override
+  String get trialYourName => 'اسمك';
+
+  @override
+  String get trialYourNameParent => 'اسمك أنت';
+
+  @override
+  String get trialYourNameHint => 'نخاطبك به في رسائلنا.';
+
+  @override
+  String get trialChildName => 'اسم طفلك';
+
+  @override
+  String get trialChildAge => 'كم عمر طفلك؟';
+
+  @override
+  String trialAgeYears(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n سنة', few: '$n سنوات', two: 'سنتان', one: 'سنة واحدة');
+    return '$_temp0';
+  }
+
+  @override
+  String get trialNameMissing => 'اكتب الاسم.';
+
+  @override
+  String get trialNameShort => 'اكتب الاسم كاملًا.';
+
+  @override
+  String get trialAgeMissing => 'اختر عمر طفلك.';
+
+  @override
+  String get trialSubjectTitle => 'اختر المادة';
+
+  @override
+  String get trialSubjectLead => 'ما الذي تريد أن تبدأ به؟ يمكنك أيضًا أن تطلب مساعدتنا في الاختيار.';
+
+  @override
+  String trialSubjectLevels(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n مستوى',
+      few: '$n مستويات',
+      two: 'مستويان',
+      one: 'مستوى واحد',
+      zero: '',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get trialHelpChoose => 'ساعدوني في الاختيار';
+
+  @override
+  String get trialHelpChooseHint => 'نتواصل معك لنختار معًا المادة والمستوى المناسبين.';
+
+  @override
+  String trialHelpChooseWith(String subject) {
+    return 'نبدأ بحصة في $subject، ونختار معًا ما يناسب بعدها.';
+  }
+
+  @override
+  String get trialNoSubjects => 'لم تعرض الأكاديمية موادها بعد. اطلب المساعدة في الاختيار، وسنتواصل معك.';
+
+  @override
+  String get trialWishesTitle => 'ما الأوقات التي تناسبكم؟';
+
+  @override
+  String get trialWishesLead => 'كلها اختيارية، وتساعدنا في اختيار المعلّم والموعد.';
+
+  @override
+  String get trialDays => 'الأيام المناسبة';
+
+  @override
+  String get trialDaysAny => 'أي يوم';
+
+  @override
+  String get trialDayPart => 'الوقت من اليوم';
+
+  @override
+  String get trialPartAny => 'أي وقت';
+
+  @override
+  String get trialPartMorning => 'صباحًا';
+
+  @override
+  String get trialPartAfternoon => 'بعد الظهر';
+
+  @override
+  String get trialPartEvening => 'مساءً';
+
+  @override
+  String get trialTeacher => 'المعلّم';
+
+  @override
+  String get trialTeacherAny => 'لا يهم';
+
+  @override
+  String get trialTeacherFemale => 'معلّمة';
+
+  @override
+  String get trialTeacherMale => 'معلّم';
+
+  @override
+  String get trialTimeTitle => 'اختر موعد الحصة';
+
+  @override
+  String trialTimeLead(String zone) {
+    return 'المواعيد بتوقيت $zone، والأقرب أولًا.';
+  }
+
+  @override
+  String trialTimesCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n موعدًا', few: '$n مواعيد', two: 'موعدان', one: 'موعد واحد');
+    return '$_temp0';
+  }
+
+  @override
+  String get trialOnlySuiting => 'ما يناسبكم فقط';
+
+  @override
+  String get trialNoneSuit => 'لا مواعيد في الأيام والساعات التي اخترتها، فهذه كل المواعيد المتاحة.';
+
+  @override
+  String get trialLoadingTimes => 'نبحث عن المواعيد المتاحة…';
+
+  @override
+  String get trialNoTimesTitle => 'لا توجد مواعيد متاحة الآن';
+
+  @override
+  String trialNoTimesBody(String hours) {
+    return 'لا يوجد معلّم متاح لهذه المادة خلال الأسبوعين القادمين. أرسل طلبك، وسنتفق معك على موعد خلال $hours.';
+  }
+
+  @override
+  String get trialNoTimesGender => 'لا توجد مواعيد مع من اخترت الآن، وقد تجد موعدًا مع معلّم آخر.';
+
+  @override
+  String get trialAnyTeacher => 'أظهر مواعيد كل المعلّمين';
+
+  @override
+  String get trialSendInstead => 'أرسل الطلب دون موعد';
+
+  @override
+  String get trialNoTimeSuits => 'لا يناسبني أي موعد';
+
+  @override
+  String trialChosen(String label) {
+    return 'اخترت: $label';
+  }
+
+  @override
+  String get trialPickFirst => 'اختر موعدًا من القائمة.';
+
+  @override
+  String get trialBookThis => 'احجز هذا الموعد';
+
+  @override
+  String get trialContactTitle => 'رقم هاتفك';
+
+  @override
+  String get trialContactTitleRequest => 'كيف نتواصل معك؟';
+
+  @override
+  String get trialContactLeadCode => 'نرسل رمزًا من 6 أرقام على واتساب لنتأكّد من الرقم، ثم نحجز الموعد.';
+
+  @override
+  String trialContactLeadRequest(String hours) {
+    return 'نرسل إليك تأكيد الطلب على واتساب، ونتواصل معك خلال $hours.';
+  }
+
+  @override
+  String get trialPhoneLabel => 'رقم الهاتف (واتساب)';
+
+  @override
+  String get trialPhoneHint => 'يصلك عليه الرمز وتفاصيل الحصة.';
+
+  @override
+  String get trialPhoneHintRequest => 'يصلك عليه تأكيد الطلب، ونتواصل معك منه.';
+
+  @override
+  String get trialPhoneMissing => 'اكتب رقم هاتفك.';
+
+  @override
+  String get trialPhoneNotEmail => 'اكتب رقم هاتف، وضع البريد الإلكتروني في خانته تحته.';
+
+  @override
+  String get trialEmailLabel => 'البريد الإلكتروني';
+
+  @override
+  String get trialEmailHint => 'نرسل إليه نسخة من التأكيد.';
+
+  @override
+  String get trialSummary => 'طلبك';
+
+  @override
+  String trialSummaryFor(String name) {
+    return 'الحصة لـ$name';
+  }
+
+  @override
+  String get trialSummaryHelp => 'نختار المادة معًا';
+
+  @override
+  String get trialSummaryNoTime => 'نتفق على الموعد معك';
+
+  @override
+  String get trialSendRequest => 'أرسل الطلب';
+
+  @override
+  String get trialPickTimeAfterAll => 'أفضّل أن أختار الموعد بنفسي';
+
+  @override
+  String get trialCodeLead => 'نحجز الموعد فور كتابة الرمز.';
+
+  @override
+  String get trialBooking => 'نحجز موعدك…';
+
+  @override
+  String get trialCodeLocked => 'الرمز مقفل';
+
+  @override
+  String get trialCodeExpired => 'انتهى الرمز';
+
+  @override
+  String get trialChangeNumber => 'غيّر الرقم';
+
+  @override
+  String get trialRefusedTitle => 'لا يمكن حجز هذه الحصة من هنا';
+
+  @override
+  String get trialRefusedSend => 'أرسل الطلب وسنتواصل معك';
+
+  @override
+  String get trialWhatsapp => 'راسل الأكاديمية على واتساب';
+
+  @override
+  String get trialSignIn => 'ادخل بهذا الرقم';
+
+  @override
+  String get trialBookedTitle => 'حُجزت الحصة التجريبية';
+
+  @override
+  String trialBookedWith(String subject, String academy) {
+    return '$subject مع $academy';
+  }
+
+  @override
+  String trialBookedTeacher(String teacher) {
+    return 'مع $teacher';
+  }
+
+  @override
+  String get trialNextTitle => 'ما الذي يحدث الآن';
+
+  @override
+  String get trialBookedNext1 => 'تصلك رسالة على واتساب فيها الموعد ورابط دخول الحصة.';
+
+  @override
+  String get trialBookedNext2 => 'في الرسالة نفسها رابط لتغيير الموعد، ورابط إن لم تستطيعوا الحضور.';
+
+  @override
+  String get trialBookedNext3 => 'نذكّرك بالحصة قبلها بيوم.';
+
+  @override
+  String get trialBookedNext4 => 'ادخل إلى التطبيق بهذا الرقم متى شئت لترى الحصة وتدخلها.';
+
+  @override
+  String get trialAnotherChild => 'احجز لطفل آخر';
+
+  @override
+  String get trialAnotherTrial => 'احجز حصة تجريبية أخرى';
+
+  @override
+  String get trialLater => 'سأدخل لاحقًا';
+
+  @override
+  String get trialRequestedTitle => 'وصل طلبك';
+
+  @override
+  String trialRequestedBody(String hours) {
+    return 'نتواصل معك على واتساب خلال $hours لنتفق على موعد الحصة.';
+  }
+
+  @override
+  String trialRequestedHelp(String hours) {
+    return 'نتواصل معك على واتساب خلال $hours لنختار معًا المادة والموعد.';
+  }
+
+  @override
+  String get trialRequestedNext1 => 'تصلك الآن رسالة تأكيد على واتساب.';
+
+  @override
+  String get trialRequestedNext1Pick => 'تصلك الآن رسالة على واتساب فيها رابط تختار منه الموعد بنفسك متى شئت.';
+
+  @override
+  String trialRequestedNext2(String hours) {
+    return 'يتواصل معك فريق الأكاديمية خلال $hours.';
+  }
+
+  @override
+  String get trialRequestedNext3 => 'بعد الاتفاق يصلك الموعد ورابط دخول الحصة.';
+
+  @override
+  String get trialTooMany =>
+      'طُلبت رموز كثيرة من هذا الجهاز أو لهذا الرقم، فأوقفنا الطلب قليلًا لحمايته. انتظر حتى ينتهي العدّاد، ثم حاول مرة أخرى.';
+
+  @override
+  String get trialDone => 'تم';
 }

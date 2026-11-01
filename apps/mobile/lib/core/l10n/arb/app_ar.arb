@@ -3711,5 +3711,225 @@
         "type": "String"
       }
     }
-  }
+  },
+  "phonePlaceholder": "05xxxxxxxx",
+  "trialEntryTitle": "جديد معنا؟ احجز حصة تجريبية مجانية",
+  "trialEntryBody": "اختر الموعد الذي يناسبك، دون حساب ودون دفع.",
+  "trialTitle": "حصة تجريبية مجانية",
+  "trialStepOf": "الخطوة {n} من {total}",
+  "@trialStepOf": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "trialNext": "التالي",
+  "trialEdit": "تعديل",
+  "trialAcademyTitle": "في أي أكاديمية تريد الحصة؟",
+  "trialAcademyLead": "اكتب رمز الأكاديمية لنعرض لك موادها ومواعيدها.",
+  "trialAcademyHint": "تجده على صفحة الأكاديمية أو في رسالتها إليك.",
+  "trialAcademyOpening": "نفتح صفحة الأكاديمية…",
+  "trialAcademyNotFound": "لم نجد أكاديمية تستقبل طلبات الحصص التجريبية بهذا الرمز. تأكّد من الرمز مع الأكاديمية، أو اكتبه كما يصلك منها.",
+  "trialAcademyChange": "أكاديمية أخرى",
+  "trialWhoTitle": "لمن الحصة؟",
+  "trialWhoMe": "لي",
+  "trialWhoMeHint": "أنا من سيتعلّم.",
+  "trialWhoChild": "لطفلي",
+  "trialWhoChildHint": "أنا وليّ الأمر، وطفلي من سيتعلّم.",
+  "trialWhoMissing": "اختر لمن الحصة.",
+  "trialYourName": "اسمك",
+  "trialYourNameParent": "اسمك أنت",
+  "trialYourNameHint": "نخاطبك به في رسائلنا.",
+  "trialChildName": "اسم طفلك",
+  "trialChildAge": "كم عمر طفلك؟",
+  "trialAgeYears": "{n, plural, =1{سنة واحدة} =2{سنتان} few{{n} سنوات} other{{n} سنة}}",
+  "@trialAgeYears": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "trialNameMissing": "اكتب الاسم.",
+  "trialNameShort": "اكتب الاسم كاملًا.",
+  "trialAgeMissing": "اختر عمر طفلك.",
+  "trialSubjectTitle": "اختر المادة",
+  "trialSubjectLead": "ما الذي تريد أن تبدأ به؟ يمكنك أيضًا أن تطلب مساعدتنا في الاختيار.",
+  "trialSubjectLevels": "{n, plural, =0{} =1{مستوى واحد} =2{مستويان} few{{n} مستويات} other{{n} مستوى}}",
+  "@trialSubjectLevels": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "trialHelpChoose": "ساعدوني في الاختيار",
+  "trialHelpChooseHint": "نتواصل معك لنختار معًا المادة والمستوى المناسبين.",
+  "trialHelpChooseWith": "نبدأ بحصة في {subject}، ونختار معًا ما يناسب بعدها.",
+  "@trialHelpChooseWith": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "trialNoSubjects": "لم تعرض الأكاديمية موادها بعد. اطلب المساعدة في الاختيار، وسنتواصل معك.",
+  "trialWishesTitle": "ما الأوقات التي تناسبكم؟",
+  "trialWishesLead": "كلها اختيارية، وتساعدنا في اختيار المعلّم والموعد.",
+  "trialDays": "الأيام المناسبة",
+  "trialDaysAny": "أي يوم",
+  "trialDayPart": "الوقت من اليوم",
+  "trialPartAny": "أي وقت",
+  "trialPartMorning": "صباحًا",
+  "trialPartAfternoon": "بعد الظهر",
+  "trialPartEvening": "مساءً",
+  "trialTeacher": "المعلّم",
+  "trialTeacherAny": "لا يهم",
+  "trialTeacherFemale": "معلّمة",
+  "trialTeacherMale": "معلّم",
+  "trialTimeTitle": "اختر موعد الحصة",
+  "trialTimeLead": "المواعيد بتوقيت {zone}، والأقرب أولًا.",
+  "@trialTimeLead": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "trialTimesCount": "{n, plural, =1{موعد واحد} =2{موعدان} few{{n} مواعيد} other{{n} موعدًا}}",
+  "@trialTimesCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "trialOnlySuiting": "ما يناسبكم فقط",
+  "trialNoneSuit": "لا مواعيد في الأيام والساعات التي اخترتها، فهذه كل المواعيد المتاحة.",
+  "trialLoadingTimes": "نبحث عن المواعيد المتاحة…",
+  "trialNoTimesTitle": "لا توجد مواعيد متاحة الآن",
+  "trialNoTimesBody": "لا يوجد معلّم متاح لهذه المادة خلال الأسبوعين القادمين. أرسل طلبك، وسنتفق معك على موعد خلال {hours}.",
+  "@trialNoTimesBody": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "trialNoTimesGender": "لا توجد مواعيد مع من اخترت الآن، وقد تجد موعدًا مع معلّم آخر.",
+  "trialAnyTeacher": "أظهر مواعيد كل المعلّمين",
+  "trialSendInstead": "أرسل الطلب دون موعد",
+  "trialNoTimeSuits": "لا يناسبني أي موعد",
+  "trialChosen": "اخترت: {label}",
+  "@trialChosen": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "trialPickFirst": "اختر موعدًا من القائمة.",
+  "trialBookThis": "احجز هذا الموعد",
+  "trialContactTitle": "رقم هاتفك",
+  "trialContactTitleRequest": "كيف نتواصل معك؟",
+  "trialContactLeadCode": "نرسل رمزًا من 6 أرقام على واتساب لنتأكّد من الرقم، ثم نحجز الموعد.",
+  "trialContactLeadRequest": "نرسل إليك تأكيد الطلب على واتساب، ونتواصل معك خلال {hours}.",
+  "@trialContactLeadRequest": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "trialPhoneLabel": "رقم الهاتف (واتساب)",
+  "trialPhoneHint": "يصلك عليه الرمز وتفاصيل الحصة.",
+  "trialPhoneHintRequest": "يصلك عليه تأكيد الطلب، ونتواصل معك منه.",
+  "trialPhoneMissing": "اكتب رقم هاتفك.",
+  "trialPhoneNotEmail": "اكتب رقم هاتف، وضع البريد الإلكتروني في خانته تحته.",
+  "trialEmailLabel": "البريد الإلكتروني",
+  "trialEmailHint": "نرسل إليه نسخة من التأكيد.",
+  "trialSummary": "طلبك",
+  "trialSummaryFor": "الحصة لـ{name}",
+  "@trialSummaryFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "trialSummaryHelp": "نختار المادة معًا",
+  "trialSummaryNoTime": "نتفق على الموعد معك",
+  "trialSendRequest": "أرسل الطلب",
+  "trialPickTimeAfterAll": "أفضّل أن أختار الموعد بنفسي",
+  "trialCodeLead": "نحجز الموعد فور كتابة الرمز.",
+  "trialBooking": "نحجز موعدك…",
+  "trialCodeLocked": "الرمز مقفل",
+  "trialCodeExpired": "انتهى الرمز",
+  "trialChangeNumber": "غيّر الرقم",
+  "trialRefusedTitle": "لا يمكن حجز هذه الحصة من هنا",
+  "trialRefusedSend": "أرسل الطلب وسنتواصل معك",
+  "trialWhatsapp": "راسل الأكاديمية على واتساب",
+  "trialSignIn": "ادخل بهذا الرقم",
+  "trialBookedTitle": "حُجزت الحصة التجريبية",
+  "trialBookedWith": "{subject} مع {academy}",
+  "@trialBookedWith": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      },
+      "academy": {
+        "type": "String"
+      }
+    }
+  },
+  "trialBookedTeacher": "مع {teacher}",
+  "@trialBookedTeacher": {
+    "placeholders": {
+      "teacher": {
+        "type": "String"
+      }
+    }
+  },
+  "trialNextTitle": "ما الذي يحدث الآن",
+  "trialBookedNext1": "تصلك رسالة على واتساب فيها الموعد ورابط دخول الحصة.",
+  "trialBookedNext2": "في الرسالة نفسها رابط لتغيير الموعد، ورابط إن لم تستطيعوا الحضور.",
+  "trialBookedNext3": "نذكّرك بالحصة قبلها بيوم.",
+  "trialBookedNext4": "ادخل إلى التطبيق بهذا الرقم متى شئت لترى الحصة وتدخلها.",
+  "trialAnotherChild": "احجز لطفل آخر",
+  "trialAnotherTrial": "احجز حصة تجريبية أخرى",
+  "trialLater": "سأدخل لاحقًا",
+  "trialRequestedTitle": "وصل طلبك",
+  "trialRequestedBody": "نتواصل معك على واتساب خلال {hours} لنتفق على موعد الحصة.",
+  "@trialRequestedBody": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "trialRequestedHelp": "نتواصل معك على واتساب خلال {hours} لنختار معًا المادة والموعد.",
+  "@trialRequestedHelp": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "trialRequestedNext1": "تصلك الآن رسالة تأكيد على واتساب.",
+  "trialRequestedNext1Pick": "تصلك الآن رسالة على واتساب فيها رابط تختار منه الموعد بنفسك متى شئت.",
+  "trialRequestedNext2": "يتواصل معك فريق الأكاديمية خلال {hours}.",
+  "@trialRequestedNext2": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "trialRequestedNext3": "بعد الاتفاق يصلك الموعد ورابط دخول الحصة.",
+  "trialTooMany": "طُلبت رموز كثيرة من هذا الجهاز أو لهذا الرقم، فأوقفنا الطلب قليلًا لحمايته. انتظر حتى ينتهي العدّاد، ثم حاول مرة أخرى.",
+  "trialDone": "تم"
 }
