@@ -9,6 +9,7 @@ use Modules\Billing\Payments\CheckoutRequest;
 use Modules\Billing\Payments\CheckoutSession;
 use Modules\Billing\Payments\CheckoutState;
 use Modules\Billing\Payments\GatewayEvent;
+use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Payments\PaymentGateway;
 use Modules\SharedKernel\Money\Money;
 
@@ -20,6 +21,8 @@ use Modules\SharedKernel\Money\Money;
  */
 final class DemoGateway implements PaymentGateway
 {
+    public function __construct(private readonly PayLinks $links) {}
+
     public function refuses(Money $amount): ?string
     {
         return null;
@@ -33,7 +36,8 @@ final class DemoGateway implements PaymentGateway
             'description' => $request->description, 'return' => $request->returnUrl,
         ], $request->expiresAt->addDay());
 
-        return new CheckoutSession($ref, url(URL::temporarySignedRoute('billing.demo-gateway', $request->expiresAt, ['ref' => $ref], absolute: false)));
+        // Its page is on the academy's host (a checkout begun through the API's shared host too); its forms post back there.
+        return new CheckoutSession($ref, $this->links->forBrowser(URL::temporarySignedRoute('billing.demo-gateway', $request->expiresAt, ['ref' => $ref], absolute: false)));
     }
 
     public function fetch(string $providerRef): CheckoutState

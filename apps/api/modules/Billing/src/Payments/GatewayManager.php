@@ -67,7 +67,7 @@ final class GatewayManager
             'moyasar' => new MoyasarGateway($credentials),
             'tap' => new TapGateway($credentials),
             'paymob' => new PaymobGateway($credentials),
-            'demo' => $this->demoAllowed() ? new DemoGateway : throw new GatewayException('The demo gateway is off on this server.'),
+            'demo' => $this->demoAllowed() ? app(DemoGateway::class) : throw new GatewayException('The demo gateway is off on this server.'),
             default => throw new GatewayException("Unknown gateway {$account->gateway}."),
         };
     }

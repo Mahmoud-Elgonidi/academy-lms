@@ -25,6 +25,7 @@ use Modules\Communication\Models\Notification;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
+use Modules\Platform\Contracts\TenantDirectory;
 use Modules\SharedKernel\Money\Money;
 use Tests\Support\EnrolledStudent;
 
@@ -244,6 +245,26 @@ it('opens the invoice from its signed link, pays, and comes back to say so; nobo
 
     $stranger = $this->createAcademy(['slug' => 'other']);
     $this->call('POST', "http://noor.lms.test/webhooks/payments/{$stranger->id}/{$account->id}", [], [], [], ['CONTENT_TYPE' => 'application/json'], '{}')->assertNotFound();
+});
+
+it('puts the demo gateway\'s page on the academy\'s host for a checkout begun through the API\'s shared host', function () {
+    $account = gateway('demo');
+    $token = User::query()->findOrFail($this->payer)->createToken('phone')->plainTextToken;
+    $this->clearTenant();
+    app('auth')->forgetGuards();
+
+    // The app, or the portal's server, on the API's own address: the browser then opens the page without that header.
+    $url = $this->withToken($token)->withHeaders(['X-Academy' => 'noor', 'Idempotency-Key' => 'demo-host'])
+        ->postJson("http://127.0.0.1:8000/api/v1/family/invoices/{$this->invoice->id}/checkout", ['account_id' => $account->id])
+        ->assertCreated()->json('url');
+    $host = rtrim(app(TenantDirectory::class)->baseUrl(app(TenantDirectory::class)->bySlug('noor')), '/');
+    expect($host)->not->toContain('127.0.0.1')->and($url)->toStartWith($host.'/pay/demo/');
+
+    $page = $this->get($url)->assertOk()->assertSee(__('billing::payments.demo.pay'));
+    preg_match('#action="([^"]*pay=1[^"]*)"#', $page->getContent(), $pay);
+    expect($pay[1])->toStartWith('/pay/demo/');                                            // the form posts back to that same host
+    $back = $this->post($host.html_entity_decode($pay[1]))->assertRedirect();
+    expect($back->headers->get('Location'))->toStartWith($host.'/');
 });
 
 it('puts the payer\'s own pay link in the invoice message', function () {

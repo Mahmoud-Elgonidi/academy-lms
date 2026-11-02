@@ -1,5 +1,5 @@
 import type { BrowserContext, Page } from '@playwright/test';
-import { API, coupon, endTestStarts, endTrialOffer, freeTestTrials, planPrice, removeTestHolidays, takeTrialSlot, testHoliday, trialAfter, type TrialAfter } from './backend';
+import { coupon, endTestStarts, endTrialOffer, freeTestTrials, planPrice, removeTestHolidays, serveAcademyHost, takeTrialSlot, testHoliday, trialAfter, type TrialAfter } from './backend';
 import { expect, fitsTheScreen, noRawKeys, test } from './helpers';
 
 /*
@@ -200,17 +200,20 @@ let returnPath = '';
 
 /** Pays the invoice on screen on the demo gateway and comes back to the portal's /pay/return; its path. */
 async function payOnTheDemoGateway(page: Page, baseURL: string | undefined): Promise<string> {
+  // The gateway's pretend page and the way back are on the academy's own host, served here as the server's Caddy would.
+  const host = await serveAcademyHost(page, baseURL ?? 'http://127.0.0.1:3000');
   await page.locator('[data-pay]').getByRole('button', { name: /^ادفع / }).click();
   await page.waitForURL(/\/pay\/demo\//, { waitUntil: 'commit' });
-  // On a laptop the gateway's pretend page is the API's own (on a server it is the same host).
-  const gateway = new URL(page.url());
-  if (!gateway.href.startsWith(API)) await page.goto(`${API}${gateway.pathname}${gateway.search}`);
+  expect(new URL(page.url()).host).toBe(host);
   await page.getByRole('button', { name: 'ادفع', exact: true }).click();
   await page.waitForURL(/\/pay\/return\?invoice=/, { waitUntil: 'commit' });
   const back = new URL(page.url());
+  expect(back.host).toBe(host);
   expect(back.pathname).toBe('/ar/pay/return');
+  // The portal answers there, paid; the welcome of this start is in this tab's own storage, on the portal's address here.
+  await expect(page.locator('[data-pay-state="paid"]')).toBeVisible();
   const path = `${back.pathname}${back.search}`;
-  if (!back.href.startsWith(baseURL ?? '')) await page.goto(path);
+  await page.goto(path);
   return path;
 }
 

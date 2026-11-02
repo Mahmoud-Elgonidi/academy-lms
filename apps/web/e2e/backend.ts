@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { closeSync, fstatSync, openSync, readFileSync, readSync } from 'node:fs';
 import { resolve } from 'node:path';
+import type { Page } from '@playwright/test';
 
 /**
  * The API's side of the end-to-end tests: artisan in apps/api (E2E_API_DIR),
@@ -82,6 +83,46 @@ export const API = process.env.E2E_API_URL ?? 'http://127.0.0.1:8000';
 /** A request to the API for this path as the academy's own host would make it (its host may have no DNS here). */
 export function onAcademyHost(path: string): [string, { headers: Record<string, string> }] {
   return [`${API}${path}`, { headers: { Host: fixtures().academy_host } }];
+}
+
+/**
+ * The academy's own host in this page's browser, as the server's Caddy serves
+ * it (its host has no DNS here): the portal's paths (/ar, /en, /_next, /bff)
+ * to the portal, everything else (the gateway's pretend page, the way back
+ * from it) to the API with that Host. The request's own headers (cookies,
+ * X-Forwarded-For, the portal's session) go along. A redirect within that
+ * host comes to the browser as an immediate refresh to the same address, with
+ * its cookies: a browser follows a fulfilled redirect without asking this
+ * route again.
+ */
+export async function serveAcademyHost(page: Page, portal: string): Promise<string> {
+  const host = fixtures().academy_host;
+  const origin = `http://${host}`;
+  // The portal's session goes along, as it is on the academy's host on a server.
+  const session = await page.context().cookies(portal);
+  await page.context().addCookies(session.map(({ name, value, expires, httpOnly, secure, sameSite }) => ({ name, value, expires, httpOnly, secure, sameSite, url: origin })));
+  await page.route(`${origin}/**`, async (route) => {
+    const url = new URL(route.request().url());
+    const toPortal = /^\/(ar|en|_next|bff)(\/|$)/.test(url.pathname);
+    const headers = { ...(await route.request().allHeaders()), host };
+    const response = await route.fetch({ url: `${toPortal ? portal : API}${url.pathname}${url.search}`, headers, maxRedirects: 0 });
+    const location = response.headers()['location'];
+    const next = location === undefined ? null : new URL(location, origin);
+    if (response.status() >= 300 && response.status() < 400 && next?.origin === origin) {
+      const kept = Object.fromEntries(Object.entries(response.headers()).filter(([name]) => !['location', 'content-length', 'content-type', 'content-encoding'].includes(name)));
+      const to = next.href.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+      await route.fulfill({ status: 200, headers: kept, contentType: 'text/html', body: `<!doctype html><meta http-equiv="refresh" content="0;url=${to}">` });
+      return;
+    }
+    await route.fulfill({ response });
+  });
+  // The academy's logo is at the API's APP_URL, which a page here does not reach (a failed load, tolerated): from a
+  // page on this host Chromium would refuse it outright as a loopback address, so it fails the same way here.
+  await page.route(
+    (url) => url.host !== host && url.pathname.startsWith('/storage/'),
+    async (route) => (route.request().frame().url().startsWith(`${origin}/`) ? route.abort('connectionrefused') : route.fallback()),
+  );
+  return host;
 }
 
 /** A lesson whose room is open now (for a quarter of an hour at least), on its teacher's outside link: Khaled's or Ziad's, found or booked as the test goes in. */
