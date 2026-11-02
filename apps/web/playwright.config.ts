@@ -55,6 +55,8 @@ export default defineConfig({
     { name: 'trial', testMatch: /trial-booking\.spec\.ts/, use: { ...devices['Pixel 7'] } },
     // After the free trial: the report and its offer from the family's link and in their account, the second trial, booking again (no setup: its own families).
     { name: 'trial-report', testMatch: /trial-report\.spec\.ts/, use: { ...devices['Pixel 7'] } },
+    // The family starts a course and pays on its own (J3): from the report to a paid course, refusals on the way, coupons, calling it off (its own families).
+    { name: 'start', testMatch: /start-course\.spec\.ts/, use: { ...devices['Pixel 7'] } },
   ],
   webServer: process.env.E2E_SERVE
     ? { command: 'npm run start', url: `${base}/ar/sign-in`, reuseExistingServer: true, timeout: 120_000 }

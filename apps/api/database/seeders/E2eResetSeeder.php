@@ -8,6 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Modules\Billing\Actions\Discounts\SaveCoupon;
 use Modules\Billing\Actions\Proofs\ApprovePaymentProof;
 use Modules\Billing\Actions\Proofs\RejectPaymentProof;
 use Modules\Billing\Contracts\BillingApi;
@@ -36,7 +37,9 @@ use Modules\Quran\Models\QuranLessonResult;
 use Modules\Quran\Programs\Plans;
 use Modules\Quran\Support\QuranArea;
 use Modules\Scheduling\Actions\ApplyAttendanceDeadlines;
+use Modules\Scheduling\Actions\CancelSession;
 use Modules\Scheduling\Actions\CancelUnpaidSessions;
+use Modules\Scheduling\Actions\Courses\EndEnrollment;
 use Modules\Scheduling\Actions\FundSessions;
 use Modules\Scheduling\Actions\Groups\GroupOutcomes;
 use Modules\Scheduling\Actions\Groups\GroupSeats;
@@ -334,6 +337,98 @@ final class E2eResetSeeder extends Seeder
             DB::table('coupons')->where('id', $coupon)->update(['expires_at' => $past]);
 
             return $coupon;
+        });
+    }
+
+    /**
+     * A plan's price in the region of this currency changes, as the office would change it while a family looks at it
+     * (J3's price_changed): the new price in minor units; returns the old one, for the test to put back.
+     */
+    public static function planPrice(string $planId, string $currency, int $minor): int
+    {
+        $academy = self::demo(app(TenantDirectory::class));
+
+        return app(TenantContext::class)->run($academy, function () use ($planId, $currency, $minor): int {
+            $row = DB::table('plan_prices')->where('plan_id', $planId)->where('currency', strtoupper($currency))->first(['id', 'amount_minor'])
+                ?? throw new RuntimeException("No {$currency} price for plan {$planId}.");
+            DB::table('plan_prices')->where('id', $row->id)->update(['amount_minor' => $minor, 'updated_at' => now()]);
+
+            return (int) $row->amount_minor;
+        });
+    }
+
+    /**
+     * The courses the end-to-end families started on their own (J3; trialAfter's children, all named ليان) end today,
+     * as the office would end them (EndEnrollment), so the demo's teachers keep their weekly room from run to run.
+     * Returns how many ended.
+     */
+    public static function endTestStarts(): int
+    {
+        $academy = self::demo(app(TenantDirectory::class));
+
+        return app(TenantContext::class)->run($academy, function (): int {
+            $owner = (string) DB::table('users')->where('email', 'owner@demo.test')->value('id');
+            $today = CarbonImmutable::now()->setTimezone((string) (DB::table('academies')->value('default_timezone') ?: 'UTC'))->toDateString();
+            $ids = DB::table('course_starts as c')->join('users as u', 'u.id', '=', 'c.learner_id')->join('enrollments as e', 'e.id', '=', 'c.enrollment_id')
+                ->where('u.name', 'ليان')->whereNull('c.cancelled_at')->whereNotIn('e.status', ['ended', 'cancelled'])->whereNull('e.ends_on')
+                ->pluck('c.enrollment_id');
+            $ended = 0;
+            foreach ($ids as $id) {
+                try {
+                    app(EndEnrollment::class)->handle((string) $id, $today, 'E2E', $owner ?: null);
+                    $ended++;
+                } catch (ValidationException) {
+                    // Ended or ending already.
+                }
+            }
+
+            return $ended;
+        });
+    }
+
+    /**
+     * The free trials earlier end-to-end runs booked for families of their own (their numbers: +2010/+2011 from
+     * trialAfter, +9665 from the trial booking tests) and that are still to come are cancelled by the academy
+     * (CancelSession), so they stop filling the demo teachers' days (their daily cap) run after run. Returns how many.
+     */
+    public static function freeTestTrials(): int
+    {
+        $academy = self::demo(app(TenantDirectory::class));
+
+        return app(TenantContext::class)->run($academy, function (): int {
+            $owner = (string) DB::table('users')->where('email', 'owner@demo.test')->value('id');
+            $learners = DB::table('leads')->whereNotNull('learner_id')
+                ->where(fn ($q) => $q->where('phone_e164', 'like', '+2010%')->orWhere('phone_e164', 'like', '+2011%')->orWhere('phone_e164', 'like', '+9665%'))
+                ->pluck('learner_id')->all();
+            $sessions = Session::query()->where('type', 'trial')->where('status', 'scheduled')->where('starts_at', '>', now())
+                ->whereHas('participants', fn ($q) => $q->whereIn('user_id', $learners)->where('role', 'student'))->get();
+            $done = 0;
+            foreach ($sessions as $session) {
+                try {
+                    app(CancelSession::class)->handle($session, 'academy', 'other', 'E2E', $owner ?: null, true);
+                    $done++;
+                } catch (ValidationException) {
+                    // Past its time to cancel.
+                }
+            }
+
+            return $done;
+        });
+    }
+
+    /** A general coupon the academy hands out (a percentage off one block, any plan), saved as the office would (SaveCoupon); returns its code. */
+    public static function coupon(string $code, int $percent): string
+    {
+        $academy = self::demo(app(TenantDirectory::class));
+
+        return app(TenantContext::class)->run($academy, function () use ($code, $percent): string {
+            $owner = (string) DB::table('users')->where('email', 'owner@demo.test')->value('id');
+            $found = DB::table('coupons')->where('code', strtoupper($code))->value('id');
+            $saved = app(SaveCoupon::class)->handle($found === null ? null : (string) $found, [
+                'code' => strtoupper($code), 'name' => 'E2E', 'kind' => 'percent', 'percent' => $percent, 'blocks' => 1, 'is_active' => true,
+            ], $owner ?: null);
+
+            return (string) $saved->code;
         });
     }
 

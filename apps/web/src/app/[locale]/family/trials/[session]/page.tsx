@@ -78,7 +78,7 @@ export default async function FamilyTrial({ params }: Props) {
         look={classic ? 'family' : 'student'}
         locale={locale}
         now={now}
-        start={<StartWays report={report} whatsapp={whatsapp} help={`/${locale}/family/help`} lessons={`/${locale}/family/lessons`} />}
+        start={classic ? <StartWays report={report} whatsapp={whatsapp} locale={locale} family /> : null}
         next={next ? (
           <div id="next" className="scroll-mt-24">
             {next.available ? (

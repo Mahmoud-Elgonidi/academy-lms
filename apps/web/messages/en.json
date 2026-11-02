@@ -107,7 +107,8 @@
       "hifz": "Hifz map",
       "mistakes": "Mistakes notebook",
       "quran": "Quran",
-      "trials": "Free trials"
+      "trials": "Free trials",
+      "start": "Start a course"
     },
     "kids": {
       "menu": "Menu",
@@ -327,7 +328,8 @@
     "excusePolicy": "What happens to the balance:",
     "excuseYes": "Yes, I won't attend",
     "excuseKeep": "I'll attend",
-    "excused": "The teacher knows you won't attend this lesson; the seat in the group stays for the lessons after it."
+    "excused": "The teacher knows you won't attend this lesson; the seat in the group stays for the lessons after it.",
+    "invoiceDetails": "Details and coupon"
   },
   "teach": {
     "todayHeader": "{date} · {zone} time",
@@ -2093,7 +2095,8 @@
           "paused": "Paused for now"
         },
         "open": "Sign in to your account",
-        "openFamily": "{learner}'s lessons"
+        "openFamily": "{learner}'s lessons",
+        "pay": "Pay the course's invoice"
       },
       "start": {
         "cta": "Start with this plan",
@@ -2106,7 +2109,13 @@
         "wordsAny": "Hello, I would like {learner} to start {subject}.",
         "wordsOffer": " I received the offer after the free trial ({percent}% off).",
         "signIn": "or sign in to your account",
-        "help": "Write to the academy"
+        "help": "Write to the academy",
+        "flow": "Choose the teacher and the times, and check the invoice before confirming. Then pay from your account.",
+        "flowOffer": "Choose the teacher and the times, and check the invoice before confirming. The offer applies by itself while it is open.",
+        "flowSignIn": "Sign in with your mobile number, then choose the teacher and the times and check the invoice before confirming.",
+        "flowSignInOffer": "Sign in with your mobile number, then choose the teacher and the times. The offer applies to the invoice by itself while it is open.",
+        "orChat": "Or talk to the academy on WhatsApp",
+        "openCourse": "Open the lessons"
       },
       "next": {
         "title": "Not the right teacher?",
@@ -2446,5 +2455,317 @@
     "revokedNote": "The academy revoked this certificate; it no longer counts.",
     "missingTitle": "We couldn't find this certificate",
     "missingLead": "Check the verification code printed on the certificate, then try again."
+  },
+  "start": {
+    "metaTitle": "Start a course",
+    "kicker": "A new course",
+    "backToReport": "Free trial report",
+    "title": "Start {learner}'s course",
+    "titleSelf": "Start your course",
+    "titleAny": "Start a new course",
+    "progress": "Step {step} of {count}",
+    "goBackTo": "Back to the {step} step",
+    "back": "Previous step",
+    "continue": "Continue",
+    "confirming": "Booking the times…",
+    "steps": {
+      "learner": "Who is the course for?",
+      "subject": "Choose the subject",
+      "plan": "Choose the plan",
+      "teacher": "Choose the teacher",
+      "group": "Choose the group",
+      "times": "Choose the weekly times",
+      "review": "Check before confirming"
+    },
+    "short": {
+      "learner": "Learner",
+      "subject": "Subject",
+      "plan": "Plan",
+      "teacher": "Teacher",
+      "group": "Group",
+      "times": "Times",
+      "review": "Review"
+    },
+    "hints": {
+      "learner": "Choose who will study. You can start a course for each of them.",
+      "subject": "The subjects the academy's teachers take {learner} in now.",
+      "plan": "Prices are for the whole plan, with one lesson's share. Nothing is paid before the review.",
+      "teacher": "The teachers who take new students in this subject at this age.",
+      "group": "The open groups of this shape with a seat free.",
+      "times": "{count, plural, one {Choose one time a week.} other {Choose # times a week, each on a different day.}}",
+      "review": "This is everything before confirming. Then the times are booked and the invoice is issued."
+    },
+    "refused": {
+      "offline": "We could not reach the academy. Your choices are kept; try again in a moment.",
+      "problem": "Something went wrong. Try again in a moment.",
+      "payIt": "Pay its invoice",
+      "openCourse": "Open the lessons",
+      "otherSubject": "Choose another subject",
+      "writeToUs": "Write to the academy",
+      "whatsapp": "Message the academy on WhatsApp",
+      "keptPicks": "We kept the times you chose that are still free; choose the rest from the times free now.",
+      "checkPrice": "The new price shows on the first invoice below and in the summary. Check it, then confirm."
+    },
+    "review": {
+      "confirm": "Confirm and start the course",
+      "confirmNew": "Confirm at the new price",
+      "course": "The course",
+      "times": "Weekly times",
+      "first": "First lesson: <b>{when}</b>",
+      "formingFirst": "The group starts once it has enough students; we will tell you the first lesson.",
+      "zone": "Times are on your clock, and messages come on the same clock.",
+      "money": "The first invoice",
+      "total": "Total",
+      "vat": "VAT shows on the invoice if the academy charges it.",
+      "offerOn": "Your free trial's offer is on: {percent}% off. It stays yours if you confirm before {until}.",
+      "offerOnAny": "Your free trial's offer is on: {percent}% off.",
+      "siblingBigger": "The sibling discount is bigger than the free trial's offer, so it applies instead; the two never add up.",
+      "offerEnded": "The free trial's offer has ended, so this is the usual price.",
+      "howPaying": "How paying works",
+      "pay1": "When you confirm, the times are booked for you and the first invoice is issued at once.",
+      "pay1Group": "When you confirm, your seat in the group is booked and the first invoice is issued at once.",
+      "pay2": "Pay it at least {hours} hours before the first lesson. Unpaid lessons are cancelled then, with nothing charged.",
+      "pay2Any": "Pay it before the first lesson to keep the lessons.",
+      "pay2Group": "Pay it to keep your seat until the group starts.",
+      "pay3": "You can call it off before paying with one press, and you owe nothing.",
+      "renews": "{count, plural, one {The next plan's invoice comes when one lesson is left, and you can stop any time.} other {The next plan's invoice comes when # lessons are left, and you can stop any time.}}",
+      "consentAhead": "{learner}'s account waits for your consent. We will show you the consent when you confirm, then carry on by ourselves."
+    },
+    "summary": {
+      "title": "Your choices",
+      "learner": "Learner",
+      "me": "Me ({name})",
+      "subject": "Subject",
+      "plan": "Plan",
+      "teacher": "Teacher",
+      "group": "Group",
+      "times": "Times",
+      "first": "First lesson",
+      "open": "See the summary",
+      "noPlan": "Choose the plan",
+      "close": "Close the summary",
+      "noCharge": "Nothing is charged before you check the invoice and choose to pay.",
+      "notYet": "Not chosen yet",
+      "firstInvoice": "The first invoice",
+      "perLesson": "That is {price} a lesson"
+    },
+    "shape": {
+      "line": "{perWeek, plural, one {One lesson} other {# lessons}} a week · {minutes} minutes",
+      "perWeek": "{count, plural, one {One lesson} other {# lessons}} a week",
+      "minutes": "{minutes} minutes",
+      "block": "{count, plural, one {One lesson} other {# lessons}} in the plan",
+      "validity": "valid {days, plural, one {one day} other {# days}}"
+    },
+    "consent": {
+      "kicker": "One last step before starting",
+      "why": "{learner}'s account needs your consent as their guardian before the course starts. Read the following, then agree and we carry on with the booking.",
+      "tickFirst": "Tick the consent first.",
+      "going": "Saving your consent and carrying on…",
+      "agree": "I agree, carry on",
+      "after": "You can withdraw your consent any time from \"Children's privacy\"."
+    },
+    "joined": {
+      "title": "{learner}'s {subject} course joined your shared package",
+      "text": "Its lessons come from the shared package's balance, so there is no new invoice.",
+      "lessons": "Go to the lessons"
+    },
+    "learner": {
+      "me": "Me ({name})",
+      "forMe": "A course I study myself",
+      "forChild": "A course for your child",
+      "consentWaiting": "Waits for your consent",
+      "consentLater": "You agree to their account before confirming, at the last step."
+    },
+    "subject": {
+      "none": "The academy's teachers are not taking new students right now. Write to the academy to hear when a place opens.",
+      "already": "Subjects {learner} studies now",
+      "status": {
+        "pending_payment": "Waiting for payment",
+        "paused": "Paused",
+        "active": "Running"
+      },
+      "payIt": "Pay its invoice",
+      "openCourse": "Open the lessons"
+    },
+    "plan": {
+      "none": "There are no plans priced in your region right now. Write to the academy for help.",
+      "recommended": "The teacher recommends it",
+      "shared": "Shared package",
+      "offerBadge": "{percent}% off",
+      "firstInvoice": "The first invoice after the discount",
+      "perBlock": "for the whole plan",
+      "perLesson": "{price} a lesson",
+      "renews": "{count, plural, one {Renews when one lesson is left, and you can stop any time.} other {Renews when # lessons are left, and you can stop any time.}}",
+      "sharedHint": "One balance for all the learner's subjects on this plan.",
+      "offerTitle": "Your free trial's offer: {percent}% off the first invoice.",
+      "offerUntil": "It applies by itself if you confirm before {until}.",
+      "offerEnded": "The free trial's offer has ended, so these are the usual prices.",
+      "privateTitle": "Private lessons",
+      "privateHint": "The teacher with the learner alone, at times you choose.",
+      "groupTitle": "Group lessons",
+      "groupHint": "With students of the same age, at the group's fixed times and a lower price.",
+      "region": "Prices for {region}, in {currency}."
+    },
+    "teacher": {
+      "trialGone": "The free trial's teacher is not taking new students right now, so choose another teacher from the list.",
+      "none": "No teacher is taking new students in this subject right now. Try a group plan, or write to the academy.",
+      "yourTrialTeacher": "Your free trial's teacher",
+      "trialTeacher": "{learner}'s free trial teacher"
+    },
+    "group": {
+      "none": "There is no open group of this shape with a seat right now. Choose private lessons, or write to the academy to hear when a group opens.",
+      "private": "Choose private lessons",
+      "ask": "Write to the academy",
+      "forming": "Forming now",
+      "running": "Running",
+      "seats": "{free, plural, one {One seat free} other {# seats free}} of {capacity}",
+      "startsAt": "It starts once it has {count} students; it has {taken} now.",
+      "next": "Next lesson: {when}",
+      "held": "{count, plural, one {It has held one lesson} other {It has held # lessons}}; the academy decides how what was missed is made up."
+    },
+    "times": {
+      "none": "{teacher} has no room for new weekly times right now.",
+      "fewDays": "{teacher} has no room right now for {count} different days a week.",
+      "otherTeacher": "Choose another teacher",
+      "fewerLessons": "Choose a plan with fewer lessons",
+      "chosen": "{count} of {of} chosen",
+      "zone": "On your clock: {zone}",
+      "firstDay": "The earliest start is {day}, leaving time to pay before the first lesson.",
+      "suggested": "The times with a dotted frame are suggested for you; you can change them.",
+      "full": "{count, plural, one {You chose the week's time. Press it to take it off, then choose another.} other {You chose # times. Press one to take it off, then choose another.}}",
+      "timeLabel": "{time}, first lesson {first}",
+      "firstOn": "from {day}",
+      "ready": "All times chosen. Continue to review."
+    },
+    "closed": {
+      "familyOnly": "A guardian starts the course",
+      "title": "It cannot be started here",
+      "text": "Write to the academy for help starting the course.",
+      "academyTitle": "The academy enrols students itself",
+      "home": "Home"
+    },
+    "entry": {
+      "title": "Start a new course",
+      "text": "Choose the subject, the plan, the teacher and the times, then pay here."
+    }
+  },
+  "invoice": {
+    "metaTitle": "Invoice",
+    "back": "Payments",
+    "kicker": "Before paying",
+    "title": "Invoice {number}",
+    "due": "Invoice due: {when}",
+    "payTitle": "Paying",
+    "noOnline": "Paying online is not available right now. Pay by transfer from the payments page.",
+    "otherWays": "Other ways to pay (transfer and sending the receipt)",
+    "paidAll": "The invoice is fully paid. Thank you!",
+    "voidShort": "This invoice was cancelled",
+    "void": "This invoice was cancelled and a new one issued instead, or the course was called off. Your current invoices are on the payments page.",
+    "lessons": "Go to the lessons",
+    "document": "Invoice to print",
+    "cancelHint": "Before paying only, with nothing charged.",
+    "subtotal": "Subtotal before VAT",
+    "vatIncluded": "Including {rate}% VAT",
+    "vatAdded": "VAT {rate}%",
+    "total": "Total",
+    "paid": "Paid",
+    "left": "Left to pay",
+    "pickGateway": "Choose how to pay",
+    "going": "Taking you to the payment page…",
+    "opening": "Opening the payment page…",
+    "payAmount": "Pay {amount}",
+    "secure": "You type the card on the gateway's secure page; the academy never sees it.",
+    "problem": "Something went wrong. Try again in a moment.",
+    "coupon": {
+      "offerOn": "Your free trial's offer is on this invoice.",
+      "offerStays": "It stays on so you do not lose it. If you have another coupon, write to the academy.",
+      "on": "Coupon {code} applied",
+      "remove": "Remove the coupon",
+      "working": "One moment…",
+      "label": "Have a coupon?",
+      "placeholder": "Type the code",
+      "apply": "Apply",
+      "hint": "The invoice is issued again with the discount, under a new number.",
+      "empty": "Type the coupon code first.",
+      "problem": "That did not work right now. Try again in a moment.",
+      "applied": "The coupon is on: here is your new invoice with the discount.",
+      "removed": "The coupon is off: here is your new invoice."
+    },
+    "cancel": {
+      "action": "Call off the course before paying",
+      "title": "Call off the course before paying?",
+      "lessons": "The booked lessons are cancelled and the times are free for the teacher again.",
+      "invoice": "The invoice is cancelled, and nothing is paid.",
+      "again": "You can start a new course any time.",
+      "keep": "Keep the course",
+      "confirm": "Yes, call it off",
+      "working": "Calling it off…",
+      "problem": "It could not be called off right now. Try again in a moment.",
+      "startAgain": "Start a new course",
+      "done": "The course is called off and nothing was paid; the times are free again. You can start a new course any time."
+    },
+    "welcome": {
+      "plainTitle": "The times are booked; paying is left",
+      "plainText": "Pay the invoice below to keep the lessons. The course is in your lessons once paid.",
+      "waitingTitle": "{learner}'s {subject} course is booked",
+      "paidTitle": "Welcome, {learner}, to {subject}!",
+      "waitingText": "The times are held for you. Pay the invoice to keep them.",
+      "paidText": "Enrolment is complete, and we sent you the details too.",
+      "group": "Group and teacher",
+      "teacher": "Teacher",
+      "first": "First lesson",
+      "firstLater": "When the group has enough students",
+      "weekly": "Weekly times",
+      "booked": "{count, plural, one {One lesson is booked so far; the rest are booked week by week.} other {# lessons are booked so far; the rest are booked week by week.}}",
+      "skipped": "{count, plural, one {One day was skipped because the teacher or the learner was busy.} other {# days were skipped because the teacher or the learner was busy.}}"
+    }
+  },
+  "payReturn": {
+    "metaTitle": "Payment result",
+    "app": {
+      "title": "Back to the app",
+      "text": "You started paying in the app. Go back to it to see the invoice and the course.",
+      "open": "Open the app",
+      "hint": "If the app does not open, go back to it yourself; the payment shows under \"Payments\"."
+    },
+    "signIn": {
+      "title": "Sign in to see the payment",
+      "text": "The invoice and the payment show once you sign in to your account.",
+      "action": "Sign in"
+    },
+    "missing": "This link carries no invoice. Your invoices are on the payments page once you sign in.",
+    "notYours": {
+      "title": "This invoice is not in your account",
+      "text": "Perhaps another account in the family pays it. Your invoices are on the payments page."
+    },
+    "money": "Payments",
+    "paid": {
+      "join": "Lessons and the join link",
+      "home": "Home",
+      "joinHint": "The lesson's link opens on the lessons page a few minutes before it, in the browser or the app.",
+      "app": "Get the app for reminders and joining lessons easily",
+      "android": "Android",
+      "ios": "iPhone",
+      "title": "Enrolment is complete",
+      "first": "First lesson: {when}, with {teacher}.",
+      "text": "Your lessons and their times are on the lessons page."
+    },
+    "state": {
+      "paid": "Paid, thank you!",
+      "confirming": "Confirming the payment with the gateway…",
+      "failed": "The payment did not go through",
+      "refund": "We received more than was due",
+      "waiting": "Not paid yet"
+    },
+    "hint": {
+      "paid": "The lessons are confirmed, and the receipt is on its way.",
+      "confirming": "This page updates by itself once the gateway confirms.",
+      "failed": "Nothing was charged. Try again or choose another way.",
+      "refund": "The academy will refund you the difference.",
+      "waiting": "Pay the invoice to keep the lessons."
+    },
+    "invoice": "Invoice {number}",
+    "otherWays": "Other ways to pay",
+    "confirmingNote": "Do not pay again: if you were charged, it is recorded as soon as the gateway confirms."
   }
 }

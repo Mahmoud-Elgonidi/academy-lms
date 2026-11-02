@@ -104,6 +104,23 @@ function openHomework(list: Homework[]): Homework | undefined {
   return list.find((h) => h.status === 'assigned' || h.status === 'missed');
 }
 
+/** Starting a new course on one's own (J3): whoever pays, in the classic look. */
+async function StartCourseCard() {
+  const t = await getTranslations('start');
+  return (
+    <Link href="/family/start" className="lift flex items-center gap-3 rounded-card border border-dashed border-brand-line bg-white p-4" data-start-card>
+      <span className="grid size-11 shrink-0 place-items-center rounded-control bg-brand text-white" aria-hidden="true">
+        <Icon name="plus" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold">{t('entry.title')}</span>
+        <span className="block text-sm text-muted">{t('entry.text')}</span>
+      </span>
+      <Icon name="chevron" className="shrink-0 text-muted rtl:-scale-x-100" />
+    </Link>
+  );
+}
+
 /** A guardian's (or an adult student's) home: the next lesson, lessons left and what is owed, the journey's card (and today's hifz review), homework, and notices. */
 export async function ClassicHome({ name, learner, lessons, notices, balanceLessons, invoices, homework, journey }: {
   name: string;
@@ -147,6 +164,7 @@ export async function ClassicHome({ name, learner, lessons, notices, balanceLess
       <JourneyCard journey={journey} learner={learner} />
       {journey.hifz ? <HifzCard hifz={journey.hifz} /> : null}
       <HomeworkDue homework={openHomework(homework)} />
+      {invoices ? <StartCourseCard /> : null}
       {notices.length > 0 ? (
         <section>
           <SectionTitle>{t('notices')}</SectionTitle>

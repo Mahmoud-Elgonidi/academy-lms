@@ -44,7 +44,6 @@ export default async function TrialReportPage({ params }: Props) {
     );
   }
   const report = found.data.data;
-  const signIn = `/${locale}/sign-in?next=${encodeURIComponent(`/${locale}/family/trials/${report.id}`)}`;
   const next = report.next_trial;
   return (
     <TrialShell look={look} path={path}>
@@ -53,7 +52,7 @@ export default async function TrialReportPage({ params }: Props) {
         look="family"
         locale={locale}
         now={now}
-        start={<StartWays report={report} whatsapp={whatsapp} signIn={signIn} />}
+        start={<StartWays report={report} whatsapp={whatsapp} locale={locale} />}
         next={next ? (next.available ? (
           <NextTrialPanel
             source={{ from: 'report', token }}

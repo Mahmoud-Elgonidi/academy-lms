@@ -23,7 +23,8 @@ export type NavItem = { href: string; key: string; icon: IconName; also?: string
  * the academy's plan has the Quran (`quran`), everyone has its page (the
  * plan, the hifz map, exams, certificates) after messages, so the tabs stay.
  * Everyone has their free trials (the teacher's reports after them) after
- * the notifications, never as a tab.
+ * the notifications, never as a tab. Whoever pays (the classic look) starts
+ * a new course from its own place after money.
  */
 export function itemsOf(stage: Stage, money: boolean, guardian = false, quran = false): { all: NavItem[]; tabs: NavItem[] } {
   const lessons: NavItem = { href: '/family/lessons', key: 'lessons', icon: 'calendar' };
@@ -36,7 +37,9 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false, quran = 
   // The Quran (its page, and the hifz map under it): only while the academy's plan has it.
   const quranItems: NavItem[] = quran ? [{ href: '/family/quran', key: 'quran', icon: 'book', also: ['/family/hifz'] }] : [];
   const home: NavItem = stage === 'classic' ? { href: '/family', key: 'home', icon: 'home' } : { href: '/family', key: 'home', icon: 'map', also: ['/family/journey'] };
-  const pay: NavItem[] = money ? [{ href: '/family/money', key: 'money', icon: 'coins' }] : [];
+  const pay: NavItem[] = money ? [{ href: '/family/money', key: 'money', icon: 'coins', also: ['/family/invoices'] }] : [];
+  // Starting a new course and paying for it (docs/architecture/02, section 27, J3): whoever pays, in the classic look.
+  const start: NavItem[] = money ? [{ href: '/family/start', key: 'start', icon: 'plus' }] : [];
   const privacy: NavItem[] = guardian ? [{ href: '/family/privacy', key: 'privacy', icon: 'shield' }] : [];
   // Lesson recordings (consent, and the ones to watch): everyone but a child in the kids' look (their guardian decides).
   const recordings: NavItem[] = stage === 'kids' ? [] : [{ href: '/family/recordings', key: 'recordings', icon: 'video' }];
@@ -53,7 +56,7 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false, quran = 
 
   if (stage === 'classic') {
     return {
-      all: [home, lessons, journey, messages, ...quranItems, homework, ...pay, inbox, trials, ...recordings, ...privacy, ...help, tellUs, ...account, myData],
+      all: [home, lessons, journey, messages, ...quranItems, homework, ...pay, ...start, inbox, trials, ...recordings, ...privacy, ...help, tellUs, ...account, myData],
       tabs: [home, lessons, journey, ...(money ? pay : [homework]), more],
     };
   }

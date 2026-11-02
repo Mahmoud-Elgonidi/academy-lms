@@ -56,7 +56,40 @@ export type TrialReport = {
   offer_state: OfferState;
   offer: ReportOffer | null;
   next_trial: NextTrial | null;
+  /**
+   * Starting a course from the report (J3, the classic look): whether the
+   * family may start now and, if not, why (reason: self_serve_off, has_course,
+   * course_pending_own, …), with what the start flow opens with: the learner,
+   * the subject, the recommended plan while offered, the trial's teacher while
+   * they take the learner, and the course that stands in the way.
+   */
+  start?: ReportStart | null;
 };
+
+export type ReportStart = {
+  available: boolean;
+  why_not: string | null;
+  reason: string | null;
+  learner_id: string | null;
+  subject_id: string | null;
+  plan_id: string | null;
+  teacher_id: string | null;
+  enrollment_id: string | null;
+};
+
+/** The start flow's address for a report's start: the learner, subject, plan and teacher it names, the plan marked as recommended, and the trial to go back to. */
+export function startPathOf(start: ReportStart, trial: string): string {
+  const query = new URLSearchParams();
+  if (start.learner_id) query.set('learner', start.learner_id);
+  if (start.subject_id) query.set('subject', start.subject_id);
+  if (start.plan_id) {
+    query.set('plan', start.plan_id);
+    query.set('rec', start.plan_id);
+  }
+  if (start.teacher_id) query.set('teacher', start.teacher_id);
+  query.set('trial', trial);
+  return `/family/start?${query.toString()}`;
+}
 
 /** A trial that did not take place, from its "book again" link (GET site/trials/rebook/{token}). */
 export type RebookInfo = {

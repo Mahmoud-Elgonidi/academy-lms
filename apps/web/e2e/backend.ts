@@ -169,3 +169,27 @@ export function endTrialOffer(session: string): void {
   if (!/^[0-9a-f-]{36}$/.test(session)) throw new Error(`Not a lesson: ${session}`);
   artisan(['tinker', `--execute=echo Database\\Seeders\\E2eResetSeeder::endTrialOffer('${session}');`]);
 }
+
+/* ── Starting a course on one's own (J3) ── */
+
+/** A plan's price in the region of this currency changes meanwhile (as the office would); returns the old one, to put back. */
+export function planPrice(plan: string, currency: string, minor: number): number {
+  if (!/^[0-9a-f-]{36}$/.test(plan) || !/^[A-Z]{3}$/.test(currency) || !Number.isInteger(minor)) throw new Error('Not a plan, currency and price');
+  return Number(artisan(['tinker', `--execute=echo Database\\Seeders\\E2eResetSeeder::planPrice('${plan}', '${currency}', ${minor});`]).trim().split('\n').pop());
+}
+
+/** A general coupon the academy hands out (a percentage off one block); returns its code. */
+export function coupon(code: string, percent: number): string {
+  if (!/^[A-Z0-9-]{3,32}$/.test(code) || !Number.isInteger(percent)) throw new Error(`Not a coupon: ${code}`);
+  return artisan(['tinker', `--execute=echo Database\\Seeders\\E2eResetSeeder::coupon('${code}', ${percent});`]).trim().split('\n').pop() ?? '';
+}
+
+/** The courses the end-to-end families started end today (E2eResetSeeder::endTestStarts), so the demo's teachers keep their weekly room. */
+export function endTestStarts(): number {
+  return Number(artisan(['tinker', '--execute=echo Database\\Seeders\\E2eResetSeeder::endTestStarts();']).trim().split('\n').pop());
+}
+
+/** Earlier runs' free trials still to come are cancelled (E2eResetSeeder::freeTestTrials), so they stop filling the demo teachers' days. */
+export function freeTestTrials(): number {
+  return Number(artisan(['tinker', '--execute=echo Database\\Seeders\\E2eResetSeeder::freeTestTrials();']).trim().split('\n').pop());
+}

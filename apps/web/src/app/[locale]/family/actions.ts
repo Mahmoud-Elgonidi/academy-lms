@@ -119,15 +119,34 @@ export async function cheersSeen(): Promise<void> {
   await send('post', '/v1/learning/cheers/seen');
 }
 
-/** Opens a checkout at the academy's gateway; the page then goes there. */
-export async function payInvoice(id: string, accountId: string | null, key: string): Promise<{ ok: true; url: string } | { ok: false; message?: string }> {
+/**
+ * Opens a checkout at the academy's gateway; the page then goes there. With
+ * `back: 'portal'` the gateway brings the payer back to the portal's
+ * /{locale}/pay/return (the invoice and the payment as they stand), else to
+ * the academy's pay page as before.
+ */
+export async function payInvoice(id: string, accountId: string | null, key: string, back?: 'portal'): Promise<{ ok: true; url: string } | { ok: false; message?: string }> {
   const opened = await send<{ url: string }>('post', '/v1/family/invoices/{invoice}/checkout', {
     params: { invoice: id },
-    body: accountId ? { account_id: accountId } : {},
+    body: { ...(accountId ? { account_id: accountId } : {}), ...(back ? { return: back } : {}) },
     idempotencyKey: key,
   });
   if (!opened.ok) return { ok: false, message: Object.values(opened.problem.errors)[0]?.[0] ?? (opened.problem.title || undefined) };
   return { ok: true, url: opened.data.url };
+}
+
+/**
+ * The payer puts a coupon on an invoice before paying, or takes one off: the
+ * invoice is issued again, so the answer names the new one (the page goes to
+ * it). One key per press. Refusals come back in the payer's words.
+ */
+export async function couponOnInvoice(id: string, code: string | null, key: string): Promise<{ ok: true; invoice: string; message: string } | { ok: false; message?: string }> {
+  const done = code === null
+    ? await send<{ data: { id: string }; message: string }>('delete', '/v1/family/invoices/{invoice}/coupon', { params: { invoice: id }, idempotencyKey: key })
+    : await send<{ data: { id: string }; message: string }>('post', '/v1/family/invoices/{invoice}/coupon', { params: { invoice: id }, body: { code }, idempotencyKey: key });
+  if (!done.ok) return { ok: false, message: Object.values(done.problem.errors)[0]?.[0] ?? (done.problem.title || undefined) };
+  refresh();
+  return { ok: true, invoice: done.data.data.id, message: done.data.message };
 }
 
 /**

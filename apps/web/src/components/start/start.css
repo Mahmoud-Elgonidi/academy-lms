@@ -1,0 +1,348 @@
+/*
+ * The family's start flow and its invoice (docs/architecture/02, section 27,
+ * J3), on the academy's tokens only: a stepper whose progress shows, cards to
+ * choose from (a group always in its own tone), a summary that stays beside
+ * the steps on a wide screen and rises from the bottom on a phone. Motion is
+ * transform and opacity, only when the person allows it.
+ */
+
+.st-progress {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.st-steps {
+  display: flex;
+  gap: 0.375rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block: 0.125rem;
+}
+.st-steps::-webkit-scrollbar {
+  display: none;
+}
+
+.st-step {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  padding-inline: 0.55rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  background: white;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.st-step[data-state='done'] {
+  border-color: var(--color-brand-line);
+  color: var(--color-brand-strong);
+}
+.st-step[data-state='done']:hover {
+  background: var(--color-brand-soft);
+}
+.st-step[data-state='current'] {
+  border-color: var(--color-brand);
+  background: var(--color-brand);
+  color: white;
+}
+.st-step-n {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--color-paper);
+  font-size: 0.75rem;
+}
+.st-step[data-state='done'] .st-step-n {
+  background: var(--color-brand-soft);
+}
+.st-step[data-state='current'] .st-step-n {
+  background: color-mix(in oklab, white 22%, transparent);
+  color: white;
+}
+
+.st-bar {
+  height: 0.375rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-line) 80%, white);
+  overflow: hidden;
+}
+.st-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-brand);
+  transform-origin: left;
+}
+[dir='rtl'] .st-bar > span {
+  transform-origin: right;
+}
+
+/* A card to choose: a radio in a list, the whole card pressable. */
+.st-choice {
+  position: relative;
+  display: block;
+  width: 100%;
+  text-align: start;
+  border-radius: var(--radius-card);
+  border: 1.5px solid var(--color-line);
+  background: white;
+  padding: 1rem 1.1rem;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+.st-choice:hover:not([aria-disabled='true']) {
+  border-color: var(--color-brand-line);
+}
+.st-choice[aria-checked='true'] {
+  border-color: var(--color-brand);
+  background: var(--color-brand-soft);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-brand) 14%, transparent);
+}
+.st-choice[aria-disabled='true'] {
+  background: var(--color-paper);
+  cursor: default;
+}
+.st-choice[data-format='group'] {
+  border-color: var(--color-group-line);
+  border-inline-start-width: 5px;
+  border-inline-start-color: var(--color-group);
+}
+.st-choice[data-format='group'][aria-checked='true'] {
+  border-color: var(--color-group);
+  background: var(--color-group-soft);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-group) 16%, transparent);
+}
+.st-tick {
+  position: absolute;
+  inset-inline-end: 0.85rem;
+  top: 0.85rem;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-line);
+  background: white;
+  color: transparent;
+}
+.st-choice[aria-checked='true'] .st-tick {
+  border-color: var(--color-brand);
+  background: var(--color-brand);
+  color: white;
+}
+.st-choice[data-format='group'][aria-checked='true'] .st-tick {
+  border-color: var(--color-group);
+  background: var(--color-group);
+}
+
+.st-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 999px;
+  object-fit: cover;
+  background: var(--color-brand-soft);
+  color: var(--color-brand-strong);
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.st-price b {
+  font-family: var(--font-heading, inherit);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.st-was {
+  color: var(--color-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+/* A weekly time: a toggle in a day's row. */
+.st-time {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  min-width: 6.25rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-control);
+  border: 1.5px solid var(--color-line);
+  background: white;
+  font-weight: 700;
+  line-height: 1.2;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+.st-time small {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+.st-time:hover {
+  border-color: var(--color-brand-line);
+}
+.st-time[aria-pressed='true'] {
+  border-color: var(--color-brand);
+  background: var(--color-brand);
+  color: white;
+}
+.st-time[aria-pressed='true'] small {
+  color: color-mix(in oklab, white 85%, transparent);
+}
+.st-time[data-suggested='true']:not([aria-pressed='true']) {
+  border-style: dashed;
+  border-color: var(--color-brand-line);
+}
+
+.st-day[data-picked='true'] .st-day-name {
+  color: var(--color-brand-strong);
+}
+
+/* The picks counter: a dot for each lesson of the week. */
+.st-count {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+.st-count i {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-brand);
+}
+.st-count i[data-on='true'] {
+  background: var(--color-brand);
+}
+
+/* The summary: beside the steps on a wide screen; a sheet from the bottom on a phone. */
+.st-layout {
+  display: grid;
+  gap: 1.25rem;
+}
+@media (min-width: 1024px) {
+  .st-layout {
+    grid-template-columns: minmax(0, 1fr) 18.5rem;
+    align-items: start;
+  }
+  .st-aside {
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+
+.st-dock {
+  position: sticky;
+  bottom: calc(4rem + env(safe-area-inset-bottom));
+  z-index: 15;
+  margin-inline: -0.25rem;
+  margin-top: 1.25rem;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-line);
+  background: color-mix(in oklab, white 94%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 -10px 30px -18px color-mix(in oklab, var(--neutral) 60%, transparent);
+  padding: 0.65rem 0.75rem;
+}
+@media (min-width: 1024px) {
+  .st-dock {
+    display: none;
+  }
+}
+
+.st-sheet-back {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: color-mix(in oklab, var(--color-ink) 45%, transparent);
+}
+.st-sheet {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 41;
+  max-height: 85dvh;
+  overflow-y: auto;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  background: white;
+  padding: 0.75rem 1rem calc(1.25rem + env(safe-area-inset-bottom));
+}
+.st-sheet-grip {
+  width: 2.75rem;
+  height: 0.3rem;
+  margin: 0 auto 0.75rem;
+  border-radius: 999px;
+  background: var(--color-line);
+}
+
+.st-lines {
+  display: grid;
+  gap: 0.4rem;
+}
+.st-lines > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.st-lines dd {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.st-lines [data-kind='discount'] {
+  color: var(--color-brand-strong);
+}
+.st-lines [data-kind='total'] {
+  border-top: 1px dashed var(--color-line);
+  padding-top: 0.55rem;
+  margin-top: 0.15rem;
+  font-weight: 800;
+  font-size: 1.125rem;
+}
+
+.st-flash {
+  outline: 3px solid color-mix(in oklab, var(--color-attention) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: 0.4rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .st-bar > span {
+    transition: transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .st-panel {
+    animation: st-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+  .st-sheet {
+    animation: st-up 260ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+  .st-sheet-back {
+    animation: st-fade 200ms ease backwards;
+  }
+  .st-choice[aria-checked='true'] .st-tick,
+  .st-time[aria-pressed='true'] {
+    animation: st-pop 220ms cubic-bezier(0.2, 0.8, 0.2, 1.4) backwards;
+  }
+  .st-celebrate {
+    animation: st-pop 420ms cubic-bezier(0.2, 0.8, 0.2, 1.4) backwards;
+  }
+}
+
+@keyframes st-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+@keyframes st-up {
+  from { transform: translateY(100%); }
+}
+@keyframes st-fade {
+  from { opacity: 0; }
+}
+@keyframes st-pop {
+  from { transform: scale(0.85); opacity: 0.4; }
+}

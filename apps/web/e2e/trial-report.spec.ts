@@ -76,15 +76,19 @@ test('the report from the family\'s link: the report card, the plan and its pric
   await expect(timer.locator('small').first()).toHaveText(/يوم|أيام/);
   await expect(timer).toContainText(/حتى .+ · /);
 
-  // Start: a WhatsApp chat with the academy that names the learner, the subject, the plan and the offer; or signing in.
+  // Start: the family's own flow (J3), opened with the learner, the subject and the recommended plan (signing in first);
+  // or a WhatsApp chat with the academy that names the learner, the subject, the plan and the offer.
   const start = page.locator('[data-start]');
   await expect(start).toHaveText(/ابدأ بهذه الباقة/);
+  await expect(start).toHaveAttribute('data-start', 'flow');
   const href = (await start.getAttribute('href')) ?? '';
-  expect(href).toMatch(/^https:\/\/wa\.me\/\d+\?text=/);
-  const words = decodeURIComponent(href.split('text=')[1] ?? '');
+  expect(href).toMatch(/^\/ar\/family\/start\?learner=[\w-]+&subject=[\w-]+&plan=[\w-]+&rec=[\w-]+&trial=/);
+  expect(href).toContain(`trial=${family.session}`);
+  const chat = (await page.locator('.lr-start a.lt-link').getAttribute('href')) ?? '';
+  expect(chat).toMatch(/^https:\/\/wa\.me\/\d+\?text=/);
+  const words = decodeURIComponent(chat.split('text=')[1] ?? '');
   expect(words).toContain('ليان');
   expect(words).toContain('خصم 10%');
-  await expect(page.getByRole('link', { name: 'أو ادخل إلى حسابك' })).toHaveAttribute('href', `/ar/sign-in?next=${encodeURIComponent(`/ar/family/trials/${family.session}`)}`);
 
   await expect(page.getByRole('heading', { name: 'لم يناسبك المعلّم؟' })).toBeVisible();
   await fitsTheScreen(page);
@@ -162,7 +166,7 @@ test('once the offer ended, the report shows the usual price and says so calmly'
   await expect(page.getByText('خصم 10%')).toHaveCount(0);
   await expect(page.locator('.lr-plan .lr-price b')).toBeVisible();
   // Starting still names the plan, now without the offer.
-  const words = decodeURIComponent(((await page.locator('[data-start]').getAttribute('href')) ?? '').split('text=')[1] ?? '');
+  const words = decodeURIComponent(((await page.locator('.lr-start a.lt-link').getAttribute('href')) ?? '').split('text=')[1] ?? '');
   expect(words).toContain('ليان');
   expect(words).not.toContain('خصم');
   await fitsTheScreen(page);

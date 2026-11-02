@@ -7,7 +7,7 @@ import { TransferDetails } from '@/components/family/transfer-details';
 import { Icon } from '@/components/icons';
 import { FormatBadge } from '@/components/lesson-format';
 import { Badge, Empty, Heading, Notice, SectionTitle, join, type Tone } from '@/components/ui';
-import { redirect } from '@/i18n/navigation';
+import { Link, redirect } from '@/i18n/navigation';
 import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
 import { seesMoney } from '@/lib/family/rules';
@@ -84,6 +84,10 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
                       <p className="text-sm text-muted">{i.due_at ? t('invoiceDue', { number: i.number, when: i.due_at.label }) : i.number}</p>
                       <p className="font-semibold">{i.for}</p>
                       <Discounts invoice={i} />
+                      <Link href={`/family/invoices/${i.id}`} className="mt-1 inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-brand-strong" data-invoice-details={i.id}>
+                        {t('invoiceDetails')}
+                        <Icon name="chevron" size={16} className="rtl:-scale-x-100" />
+                      </Link>
                     </div>
                     <div className="text-end">
                       <p className="font-heading text-2xl font-bold tabular-nums">{i.outstanding}</p>

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { initialOf } from '@/lib/site/initial';
-import { formatMinor, hasPlan, itemsOf, offerStateAt, perLessonMinor, type Money, type TrialReport } from '@/lib/site/report';
+import { formatMinor, hasPlan, itemsOf, offerStateAt, perLessonMinor, startPathOf, type Money, type TrialReport } from '@/lib/site/report';
 import { whatsappLink } from '@/lib/site/trial';
 import { Icon, WhatsAppIcon } from '../icons';
 import { OfferTimer } from './offer-timer';
@@ -230,31 +230,39 @@ async function Recommendation({ report, locale, now, start }: { report: TrialRep
 }
 
 /**
- * The way to start, until J3's own flow: a WhatsApp chat with the academy
- * that already names the learner, the subject, the plan and the offer, so its
- * team completes the enrolment (and counts the offer while it is open); else
- * signing in (the family's link) or writing to the academy from Help (their
- * account). A course already started leads to the family's lessons instead.
+ * The way to start (J3): the family's own start flow, opened with the
+ * learner, the subject, the recommended plan and the trial's teacher (the
+ * public link signs in first and comes back to it); or why it cannot start
+ * now in the API's words, with the way to the course in the way or to the
+ * academy. While the academy enrols families itself, a WhatsApp chat with
+ * it that already names the learner, the subject, the plan and the offer
+ * (else writing from Help, or signing in). A course already started leads to
+ * the family's lessons, or to its invoice while it waits for payment.
  */
-export async function StartWays({ report, whatsapp, signIn, help, lessons }: {
+export async function StartWays({ report, whatsapp, locale, family }: {
   report: TrialReport;
   whatsapp: string | null;
-  /** The family's link: signing in, back to this report in their account. */
-  signIn?: string;
-  /** Their account: writing to the academy. */
-  help?: string;
-  /** Their account: the learner's lessons, once a course started. */
-  lessons?: string;
+  locale: string;
+  /** In the family's account (else the report's own link: the flow signs in first). */
+  family?: boolean;
 }) {
   const t = await getTranslations('site.report');
+  const signIn = `/${locale}/sign-in?next=${encodeURIComponent(`/${locale}/family/trials/${report.id}`)}`;
+  const at = (path: string) => `/${locale}${path}`;
   const started = report.offer_state === 'started' || report.course !== null;
+  const start = report.start ?? null;
   if (started) {
-    const href = lessons ?? signIn;
-    return href ? (
+    const waiting = report.course?.status === 'pending_payment';
+    return (
       <div className="lr-start">
-        <a className="ls-btn ls-btn-dark" href={href}>{lessons ? t('started.openFamily', { learner: report.learner }) : t('started.open')}<Icon name="chevron" className="ls-flip" /></a>
+        {waiting ? (
+          <a className="ls-btn ls-btn-main" href={at('/family/money')} data-start="pay">{t('started.pay')}<Icon name="chevron" className="ls-flip" /></a>
+        ) : (
+          <a className="ls-btn ls-btn-dark" href={family ? at('/family/lessons') : signIn}>{family ? t('started.openFamily', { learner: report.learner }) : t('started.open')}<Icon name="chevron" className="ls-flip" /></a>
+        )}
+        {waiting && start?.why_not ? <p>{start.why_not}</p> : null}
       </div>
-    ) : null;
+    );
   }
   const plan = hasPlan(report) ? report.recommendation.plan : null;
   const open = report.offer_state === 'open' && report.offer ? report.offer : null;
@@ -265,21 +273,42 @@ export async function StartWays({ report, whatsapp, signIn, help, lessons }: {
   const chat = whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(words)}` : null;
   const label = plan ? t('start.cta') : t('start.ctaAny');
 
+  // The family's own flow, opened where the report leaves off.
+  if (start?.available) {
+    return (
+      <div className="lr-start">
+        <a className="ls-btn ls-btn-main" href={at(startPathOf(start, report.id))} data-start="flow">{label}<Icon name="chevron" className="ls-flip" /></a>
+        <p>{family ? (open ? t('start.flowOffer') : t('start.flow')) : (open ? t('start.flowSignInOffer') : t('start.flowSignIn'))}</p>
+        {chat ? <a className="lt-link" href={chat} target="_blank" rel="noopener">{t('start.orChat')}</a> : null}
+      </div>
+    );
+  }
+  // Not now, and not because the academy enrols families itself: why, and the way on.
+  if (start && start.reason && start.reason !== 'self_serve_off' && start.why_not) {
+    const course = ['has_course', 'course_paused', 'course_ending'].includes(start.reason);
+    return (
+      <div className="lr-start" data-start="why-not">
+        <p className="lr-note">{start.why_not}</p>
+        {course ? <a className="ls-btn ls-btn-dark" href={family ? at('/family/lessons') : signIn}>{t('start.openCourse')}<Icon name="chevron" className="ls-flip" /></a> : null}
+        {chat ? <a className="lt-link" href={chat} target="_blank" rel="noopener">{t('start.orChat')}</a> : null}
+      </div>
+    );
+  }
+
   if (chat) {
     return (
       <div className="lr-start">
         <a className="ls-btn ls-btn-main" href={chat} target="_blank" rel="noopener" data-start="whatsapp">{label}<Icon name="chevron" className="ls-flip" /></a>
         <p>{open ? t('start.how') : t('start.howNoOffer')}</p>
-        {signIn ? <a className="lt-link" href={signIn}>{t('start.signIn')}</a> : null}
+        {family ? null : <a className="lt-link" href={signIn}>{t('start.signIn')}</a>}
       </div>
     );
   }
-  const href = help ?? signIn;
-  if (!href) return null;
+  const href = family ? at('/family/help') : signIn;
   return (
     <div className="lr-start">
-      <a className="ls-btn ls-btn-main" href={href} data-start={help ? 'help' : 'sign-in'}>{label}<Icon name="chevron" className="ls-flip" /></a>
-      <p>{help ? t('start.howHelp') : t('start.howSignIn')}</p>
+      <a className="ls-btn ls-btn-main" href={href} data-start={family ? 'help' : 'sign-in'}>{label}<Icon name="chevron" className="ls-flip" /></a>
+      <p>{family ? t('start.howHelp') : t('start.howSignIn')}</p>
     </div>
   );
 }
