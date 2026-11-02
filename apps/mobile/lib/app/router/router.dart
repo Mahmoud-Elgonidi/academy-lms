@@ -46,6 +46,9 @@ import '../../features/profile/presentation/pages/family_more_page.dart';
 import '../../features/roadmap/presentation/pages/progress_page.dart';
 import '../../features/roadmap/presentation/pages/reports_page.dart';
 import '../../features/schedule/presentation/pages/lessons_page.dart';
+import '../../features/start/domain/start.dart';
+import '../../features/start/presentation/pay/pay_page.dart';
+import '../../features/start/presentation/start_page.dart';
 import '../../features/safeguarding/presentation/documents_page.dart';
 import '../../features/safeguarding/presentation/tell_us_page.dart';
 import '../../features/support/presentation/help_page.dart';
@@ -249,6 +252,20 @@ GoRouter buildRouter(SessionCubit session) {
           // The open proposal's conversation with the academy.
           GoRoute(path: 'chat', pageBuilder: (_, s) => fadeScalePage(s, const ShiftChatPage())),
         ],
+      ),
+      // Starting a course on the family's own, and paying its invoice (the classic look's: a child's own look never comes here).
+      page(
+        '/family/start',
+        (s) => StartPage(
+          learnerId: s.uri.queryParameters['learner'],
+          subjectId: s.uri.queryParameters['subject'],
+          planId: s.uri.queryParameters['plan'],
+          teacherId: s.uri.queryParameters['teacher'],
+        ),
+      ),
+      page(
+        '/family/pay/:invoice',
+        (s) => PayPage(invoiceId: s.pathParameters['invoice']!, started: s.extra is StartedCourse ? s.extra! as StartedCourse : null),
       ),
       page('/reports/:enrollment', (s) => ReportsPage(enrollmentId: s.pathParameters['enrollment'], title: s.uri.queryParameters['title'])),
 

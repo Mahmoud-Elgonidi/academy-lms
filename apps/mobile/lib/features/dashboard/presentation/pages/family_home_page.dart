@@ -106,6 +106,19 @@ class _Home extends StatelessWidget {
             children: [for (final h in home.homework) _HomeworkRow(homework: h, onTap: () => context.go('/family/journey/homework'))],
           ),
         ],
+        // Another subject, or another child: starting a course and paying for it on their own.
+        const Gap(Space.l),
+        MenuGroup(
+          children: [
+            MenuRow(
+              key: const Key('home-start'),
+              icon: Icons.rocket_launch_outlined,
+              label: l.startNewCourse,
+              subtitle: l.startNewCourseHint,
+              onTap: () => context.push('/family/start'),
+            ),
+          ],
+        ),
       ]),
     );
   }

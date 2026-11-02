@@ -7,13 +7,15 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
 import '../../../../core/realtime/live.dart';
 import '../../../../core/state/load_cubit.dart';
+import '../../../../shared/motion/done_moment.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../dashboard/presentation/bloc/learner_cubit.dart';
+import '../../../start/data/start_repository.dart';
+import '../../../start/presentation/start_page.dart';
 import '../../data/trial_reports_repository.dart';
 import '../../domain/trial_report.dart';
 import 'offer_countdown.dart';
-import 'start_plan_sheet.dart';
 import 'trials_page.dart';
 
 /// A trial as its page shows it: the report when it is ready, else the trial
@@ -149,9 +151,6 @@ class _TrialReportViewState extends State<TrialReportView> {
   /// The countdown reached the end before the reload said so.
   bool _ended = false;
 
-  /// The request to start, sent from here: its ticket.
-  String? _sent;
-
   @override
   void didUpdateWidget(TrialReportView old) {
     super.didUpdateWidget(old);
@@ -163,9 +162,18 @@ class _TrialReportViewState extends State<TrialReportView> {
     context.read<LoadCubit<TrialView>?>()?.load();
   }
 
+  /// «ابدأ بهذه الباقة»: the start flow with the plan and the trial's teacher chosen; the report reads again on the way back.
   Future<void> _start() async {
-    final sent = await StartPlanSheet.show(context, report: widget.report, learnerId: widget.learnerId);
-    if (sent != null && mounted) setState(() => _sent = sent);
+    final start = widget.report.start;
+    await context.push(
+      StartPage.location(
+        learner: start?.learnerId ?? widget.learnerId,
+        subject: start?.subjectId,
+        plan: start?.planId ?? widget.report.recommendation.plan?.id,
+        teacher: start?.teacherId,
+      ),
+    );
+    if (mounted) await context.read<LoadCubit<TrialView>?>()?.load();
   }
 
   @override
@@ -204,7 +212,7 @@ class _TrialReportViewState extends State<TrialReportView> {
       ],
       if (r.classic) ...[
         SectionHeader(l.trialPlanTitle),
-        _PlanCard(report: r, open: r.openAt(widget.clock()) && !_ended, sent: _sent, onStart: _start, onEnded: _offerEnded),
+        _PlanCard(report: r, open: r.openAt(widget.clock()) && !_ended, onStart: _start, onEnded: _offerEnded),
         if (next != null) ...[const Gap(Space.l), _NextCard(report: r, next: next, base: widget.base)],
       ] else if (r.started) ...[
         const Gap(Space.l),
@@ -480,11 +488,10 @@ class _Quote extends StatelessWidget {
 /// while it is open (its time left, the price after it and the saving), and
 /// the way to start; or the course already begun.
 class _PlanCard extends StatelessWidget {
-  const _PlanCard({required this.report, required this.open, required this.sent, required this.onStart, required this.onEnded});
+  const _PlanCard({required this.report, required this.open, required this.onStart, required this.onEnded});
 
   final TrialReport report;
   final bool open;
-  final String? sent;
   final VoidCallback onStart;
   final VoidCallback onEnded;
 
@@ -532,7 +539,18 @@ class _PlanCard extends StatelessWidget {
               : _Price(key: const ValueKey('price'), report: report, ended: ended),
         ),
         const Gap(Space.l),
-        if (sent == null)
+        if (report.start case final start? when !start.available) ...[
+          Note(start.whyNot ?? l.startBlockedTitle, key: const Key('report-start-why'), icon: Icons.info_outline_rounded),
+          if (start.reason == 'self_serve_off') ...[
+            const Gap(Space.s),
+            SecondaryAction(
+              l.startOffHelp,
+              key: const Key('report-start-help'),
+              icon: Icons.forum_outlined,
+              onPressed: () => context.go('/family/me/help'),
+            ),
+          ],
+        ] else
           SizedBox(
             height: 54,
             child: PrimaryAction(
@@ -541,17 +559,7 @@ class _PlanCard extends StatelessWidget {
               icon: Icons.rocket_launch_outlined,
               onPressed: onStart,
             ),
-          )
-        else ...[
-          Note(l.trialStartSent, tone: Tone.brand, icon: Icons.mark_email_read_outlined),
-          const Gap(Space.s),
-          SecondaryAction(
-            l.trialStartFollow,
-            key: const Key('report-follow'),
-            icon: Icons.forum_outlined,
-            onPressed: () => context.go('/family/me/help/$sent'),
           ),
-        ],
       ],
     ];
     return LmsCard(
@@ -583,8 +591,38 @@ class _PlanCard extends StatelessWidget {
           height: 52,
           child: PrimaryAction(l.trialOpenMoney, icon: Icons.account_balance_wallet_outlined, onPressed: () => context.go('/family/money')),
         ),
+        // A course the family started here and has not paid: it may be called off, after asking.
+        if (report.start case final start? when start.ownPending) ...[
+          const Gap(Space.s),
+          SecondaryAction(
+            l.startCancelPending,
+            key: const Key('report-cancel'),
+            icon: Icons.event_busy_outlined,
+            onPressed: () => _cancel(context, start.enrollmentId!),
+          ),
+        ],
       ],
     ];
+  }
+
+  Future<void> _cancel(BuildContext context, String enrollmentId) async {
+    final l = context.l10n;
+    final sure = await confirmDestructive(
+      context,
+      title: l.startCancelTitle,
+      body: l.startCancelBody,
+      confirm: l.startCancelYes,
+      keep: l.startCancelKeep,
+    );
+    if (!sure || !context.mounted) return;
+    try {
+      final message = await context.read<StartRepository>().cancel(enrollmentId);
+      if (!context.mounted) return;
+      DoneMoment.show(context, title: message);
+      await context.read<LoadCubit<TrialView>?>()?.load();
+    } on ApiProblem catch (p) {
+      if (context.mounted) showSnack(context, context.problemText(p));
+    }
   }
 }
 

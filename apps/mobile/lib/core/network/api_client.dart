@@ -94,9 +94,10 @@ class ApiClient {
 
   Future<Map<String, dynamic>> patch(String path, {Object? body}) => _send('PATCH', path, body: body);
 
-  /// [academy] and [token] act as another account on this device, as for [post].
-  Future<Map<String, dynamic>> delete(String path, {Object? body, String? academy, String? token}) =>
-      _send('DELETE', path, body: body, academy: academy, token: token, retry: true);
+  /// [academy] and [token] act as another account on this device, as for [post];
+  /// [idempotent] for one that moves money (taking a coupon off an invoice).
+  Future<Map<String, dynamic>> delete(String path, {Object? body, String? academy, String? token, bool idempotent = false}) =>
+      _send('DELETE', path, body: body, academy: academy, token: token, idempotent: idempotent, retry: true);
 
   Future<Map<String, dynamic>> _send(
     String method,

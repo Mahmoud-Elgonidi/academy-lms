@@ -4131,57 +4131,7 @@
   "trialCoursePaused": "الدورة متوقفة مؤقتًا.",
   "trialOpenMoney": "افتح المدفوعات",
   "trialStartPlan": "ابدأ بهذه الباقة",
-  "trialStartAsk": "اطلب باقة مناسبة",
-  "trialStartFollow": "تابع طلبك",
-  "trialStartTitle": "نبدأ معكم",
-  "trialStartLead": "التسجيل والدفع من التطبيق قادمان قريبًا. أرسلوا طلبكم الآن إلى الأكاديمية، فيرتّب فريقها الدورة ويرسل إليكم الفاتورة، ويصلكم رده في «المساعدة».",
-  "trialStartOfferNote": "يطبّق الفريق خصم العرض على أول فاتورة إن سجّلكم قبل انتهائه، فأرسلوا مبكرًا.",
-  "trialStartWhat": "ما سنرسله",
-  "trialStartSubject": "البدء بباقة {plan} لـ{name}",
-  "@trialStartSubject": {
-    "placeholders": {
-      "plan": {
-        "type": "String"
-      },
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "trialStartSubjectAny": "البدء في {subject} لـ{name}",
-  "@trialStartSubjectAny": {
-    "placeholders": {
-      "subject": {
-        "type": "String"
-      },
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "trialStartBody": "نودّ أن نبدأ في {subject} بباقة {plan} كما اقترح المعلّم بعد الحصة التجريبية.",
-  "@trialStartBody": {
-    "placeholders": {
-      "subject": {
-        "type": "String"
-      },
-      "plan": {
-        "type": "String"
-      }
-    }
-  },
-  "trialStartBodyAny": "نودّ أن نبدأ الدراسة في {subject} بعد الحصة التجريبية، ونرجو مساعدتنا في اختيار الباقة.",
-  "@trialStartBodyAny": {
-    "placeholders": {
-      "subject": {
-        "type": "String"
-      }
-    }
-  },
-  "trialStartNote": "هل تريدون إضافة شيء؟ الأيام والأوقات المناسبة مثلًا",
-  "trialStartSend": "أرسل إلى الأكاديمية",
-  "trialStartSent": "وصل طلبكم إلى الأكاديمية",
-  "trialStartNoHelp": "تواصلوا مع الأكاديمية بطرقها المعتادة لتبدؤوا بهذه الباقة.",
+  "trialStartAsk": "اختاروا باقة وابدؤوا",
   "trialSecondTitle": "لم يناسبكم المعلّم؟",
   "trialSecondBody": "جرّبوا حصة تجريبية ثانية مجانية مع معلّم آخر، حتى {label}.",
   "@trialSecondBody": {
@@ -4245,5 +4195,323 @@
         "type": "String"
       }
     }
-  }
+  },
+  "startNewCourse": "ابدأ دورة جديدة",
+  "startNewCourseHint": "اختاروا الباقة والمعلّم والمواعيد، وادفعوا من التطبيق.",
+  "startTitle": "بدء دورة",
+  "startStepOf": "الخطوة {n} من {total}",
+  "@startStepOf": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "startContinue": "متابعة",
+  "startChange": "تغيير",
+  "startOffTitle": "تسجّل الأكاديمية الدورات بنفسها",
+  "startOffHelp": "راسلوا الأكاديمية",
+  "startWhoTitle": "لمن الدورة؟",
+  "startWhoLead": "اختاروا من سيدرس؛ لكل متعلّم دورته وفاتورته.",
+  "startWhoSelf": "لي أنا",
+  "startWhoConsent": "سنطلب موافقتكم على حسابه قبل البدء",
+  "startSubjectTitle": "ماذا سيدرس {name}؟",
+  "@startSubjectTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "startSubjectTitleSelf": "ماذا تريد أن تدرس؟",
+  "startSubjectLead": "المواد التي فيها معلّمون يستقبلون طلابًا جددًا الآن.",
+  "startSubjectNone": "لا توجد مادة متاحة للبدء الآن. راسلوا الأكاديمية لتساعدكم.",
+  "startCourseWaiting": "بانتظار الدفع",
+  "startCourseActive": "جارية",
+  "startCoursePaused": "متوقفة مؤقتًا",
+  "startOpenLessons": "افتح الحصص",
+  "startCancelPending": "ألغِ هذه الدورة",
+  "startPlanTitle": "اختاروا الباقة",
+  "startPlanLead": "الأسعار بعملة منطقتكم ({region}).",
+  "@startPlanLead": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "startPlanLeadAny": "اختاروا ما يناسب وقتكم وميزانيتكم.",
+  "startPlanNone": "لا توجد باقة بسعر في منطقتكم بعد. راسلوا الأكاديمية.",
+  "startPlanPrivateLine": "حصص فردية، بمواعيد تختارونها",
+  "startPlanGroupLine": "مقعد في مجموعة صغيرة، بمواعيد ثابتة",
+  "startPlanShared": "باقة مشتركة: رصيد واحد لكل الدورات عليها.",
+  "startRecommended": "اقترحها المعلّم",
+  "startPerLesson": "{price} للحصة",
+  "@startPerLesson": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "startBlockPrice": "سعر الباقة",
+  "startFirstInvoice": "أول فاتورة",
+  "startOfferApplied": "عرض الحصة التجريبية ({percent}٪)",
+  "@startOfferApplied": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "startOfferUntil": "يُطبَّق عرض الحصة التجريبية ({percent}٪) على أول فاتورة حتى {when}.",
+  "@startOfferUntil": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "startRenews": "تصل فاتورة الباقة التالية {n, plural, =1{حين تبقى حصة واحدة} =2{حين تبقى حصتان} few{حين تبقى {n} حصص} other{حين تبقى {n} حصة}}، ويمكنكم التوقف متى شئتم.",
+  "@startRenews": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "startTeacherTitle": "اختاروا المعلّم",
+  "startTeacherLead": "يستقبل كل هؤلاء طلابًا جددًا في {subject}.",
+  "@startTeacherLead": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "startTrialTeacher": "معلّم الحصة التجريبية",
+  "startTrialTeacherGone": "لم يعد معلّم الحصة التجريبية يستقبل طلابًا جددًا، فاختاروا معلّمًا آخر.",
+  "startTeacherNone": "لا يوجد معلّم يستقبل طلابًا جددًا في هذه المادة الآن. جرّبوا باقة جماعية، أو راسلوا الأكاديمية.",
+  "startGroupTitle": "اختاروا المجموعة",
+  "startGroupLead": "مجموعات مفتوحة فيها مقعد لـ{name}، بمواعيدها الثابتة.",
+  "@startGroupLead": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "startGroupNone": "لا توجد مجموعة مفتوحة لهذه الباقة الآن. اختاروا باقة فردية، أو راسلوا الأكاديمية.",
+  "startGroupWith": "مع {name}",
+  "@startGroupWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "startGroupForming": "قيد التكوين",
+  "startGroupRunning": "بدأت حصصها",
+  "startGroupToStart": "{n, plural, =0{تبدأ بانضمامكم} =1{تبدأ حين ينضم طالب واحد آخر} =2{تبدأ حين ينضم طالبان آخران} few{تبدأ حين ينضم {n} طلاب آخرين} other{تبدأ حين ينضم {n} طالبًا آخر}}",
+  "@startGroupToStart": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "startGroupFree": "{n, plural, =1{مقعد واحد متاح} =2{مقعدان متاحان} few{{n} مقاعد متاحة} other{{n} مقعدًا متاحًا}}",
+  "@startGroupFree": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "startGroupNext": "الحصة القادمة: {when}",
+  "@startGroupNext": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "startGroupHeld": "{n, plural, =1{عُقدت حصة واحدة قبل انضمامكم} =2{عُقدت حصتان قبل انضمامكم} few{عُقدت {n} حصص قبل انضمامكم} other{عُقدت {n} حصة قبل انضمامكم}}، وتعوّض الأكاديمية ما فات بالطريقة التي تختارها.",
+  "@startGroupHeld": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "startTimesTitle": "{n, plural, =1{اختاروا موعدًا أسبوعيًا} =2{اختاروا موعدين أسبوعيين} few{اختاروا {n} مواعيد أسبوعية} other{اختاروا {n} موعدًا أسبوعيًا}}",
+  "@startTimesTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "startTimesTitleShared": "اختاروا مواعيدكم الأسبوعية",
+  "startTimesLead": "كل موعد في يوم مختلف، ويتكرر كل أسبوع. المواعيد بتوقيتكم، ولكل موعد أول حصة فيه.",
+  "startTimesSuggested": "اخترنا لكم مواعيد مقترحة، ويمكنكم تغييرها.",
+  "startTimesCount": "اخترتم {picked} من {total}",
+  "@startTimesCount": {
+    "placeholders": {
+      "picked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "startTimesDayFull": "اخترتم كل المواعيد. ألغوا موعدًا أولًا لتختاروا يومًا آخر.",
+  "startTimesFirst": "أول حصة {day}",
+  "@startTimesFirst": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "startTimesFrom": "أقرب بداية {day}، ليبقى لكم وقت للدفع.",
+  "@startTimesFrom": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "startTimesNone": "لا مواعيد متاحة مع هذا المعلّم في الأسابيع الأربعة القادمة.",
+  "startOtherTeacher": "اختاروا معلّمًا آخر",
+  "startTimesTooFew": "لا تكفي الأيام المتاحة لدى هذا المعلّم لهذه الباقة، فلكل حصة في الأسبوع يوم مختلف. اختاروا معلّمًا آخر، أو باقة بحصص أقل في الأسبوع.",
+  "startOtherPlan": "اختاروا باقة أخرى",
+  "startReviewTitle": "راجعوا قبل التأكيد",
+  "startReviewLead": "لن يُسحب أي مبلغ الآن: تصدر الفاتورة، وتدفعونها في الخطوة التالية.",
+  "startReviewLearner": "المتعلّم",
+  "startReviewSubject": "المادة",
+  "startReviewPlan": "الباقة",
+  "startReviewTeacher": "المعلّم",
+  "startReviewGroup": "المجموعة",
+  "startReviewTimes": "المواعيد الأسبوعية",
+  "startReviewFirst": "أول حصة",
+  "startReviewMoney": "ما ستدفعونه",
+  "startReviewTotal": "الإجمالي قبل الضريبة",
+  "startReviewVat": "تظهر ضريبة القيمة المضافة، إن وُجدت، في الفاتورة قبل الدفع.",
+  "startReviewPayBy": "ادفعوا قبل أول حصة {n, plural, =1{بساعة} =2{بساعتين} few{بـ{n} ساعات} other{بـ{n} ساعة}} على الأقل؛ فالحصة التي لم تُدفع قبل موعدها بهذه المدة تُلغى.",
+  "@startReviewPayBy": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "startReviewPayAny": "ادفعوا قبل أول حصة لتثبيت الحصص.",
+  "startReviewCancel": "ويمكنكم إلغاء الدورة قبل الدفع دون أي رسوم.",
+  "startConfirm": "أكّدوا وانتقلوا إلى الدفع",
+  "startConfirmAgain": "أكّدوا بالسعر الجديد",
+  "startConsentTitle": "موافقتكم على حساب {name}",
+  "@startConsentTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "startConsentAgree": "أوافق، وتابعوا البدء",
+  "startBlockedTitle": "لا يمكن البدء الآن",
+  "startBlockedOver": "ابدؤوا من جديد",
+  "startCancelTitle": "أتلغون هذه الدورة؟",
+  "startCancelBody": "تُلغى حصصها وفاتورتها دون أي رسوم، ويمكنكم البدء من جديد متى شئتم.",
+  "startCancelYes": "نعم، ألغوها",
+  "startCancelKeep": "أبقوها",
+  "payTitle": "دفع الفاتورة",
+  "payCreatedTitle": "جُهّزت الدورة، وبقيت خطوة واحدة",
+  "payCreatedLead": "ادفعوا الفاتورة لتثبيت حصص {subject} لـ{name}.",
+  "@payCreatedLead": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "payInvoiceNumber": "فاتورة {number}",
+  "@payInvoiceNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "paySubtotal": "المجموع قبل الضريبة",
+  "payVat": "ضريبة القيمة المضافة {rate}٪",
+  "@payVat": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "payVatIncluded": "منها ضريبة القيمة المضافة {rate}٪",
+  "@payVatIncluded": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "payTotal": "الإجمالي",
+  "payPaidSoFar": "المدفوع",
+  "payLeft": "المتبقي",
+  "payCouponTitle": "لديكم كوبون خصم؟",
+  "payCouponField": "رمز الكوبون",
+  "payCouponApply": "طبّق",
+  "payCouponRemove": "أزل",
+  "payCouponOn": "الكوبون {code} مطبّق",
+  "@payCouponOn": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "payOfferStays": "عرض الحصة التجريبية مطبّق، ويبقى على الفاتورة.",
+  "payNoGateway": "لا تقبل الأكاديمية الدفع الإلكتروني لهذه الفاتورة. حوّلوا المبلغ وأرسلوا الإيصال من «المدفوعات».",
+  "payTransferInstead": "دفعتم بالتحويل؟ أرسلوا الإيصال",
+  "payWaitingTitle": "نتأكد من الدفع مع البوابة",
+  "payCheckNow": "تحقّق الآن",
+  "payTryAgain": "حاولوا الدفع مرة أخرى",
+  "payReadInvoice": "اقرؤوا الفاتورة",
+  "payVoid": "أُلغيت هذه الفاتورة، فلا شيء عليكم لدفعه.",
+  "payCancelCourse": "ألغوا الدورة قبل الدفع",
+  "paidTitle": "تم الدفع، وبدأت الدورة!",
+  "paidLead": "أهلًا بـ{name} في {subject}. هذا ما ينتظركم:",
+  "@paidLead": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "paidLeadPlain": "وصل الدفع، وتجدون الحصص في «الحصص».",
+  "paidTeacher": "المعلّم",
+  "paidTimes": "المواعيد الأسبوعية",
+  "paidFirst": "أول حصة",
+  "paidFirstLater": "حين تكتمل المجموعة، ونرسل إليكم موعدها ورابطها.",
+  "paidJoin": "كيف تنضمون",
+  "paidJoinHow": "افتحوا الحصة من «الحصص» قبل موعدها ببضع دقائق، واضغطوا «انضم».",
+  "packageTitle": "انضمت الدورة إلى باقتكم المشتركة"
 }

@@ -21,6 +21,7 @@ import '../../features/profile/data/profile_repository.dart';
 import '../../features/quran/data/quran_repository.dart';
 import '../../features/roadmap/data/learning_repository.dart';
 import '../../features/schedule/data/lessons_repository.dart';
+import '../../features/start/data/start_repository.dart';
 import '../../features/consent/data/consent_repository.dart';
 import '../../features/privacy/data/privacy_repository.dart';
 import '../../features/recordings/data/recordings_repository.dart';
@@ -61,6 +62,7 @@ class Services {
       messages = MessagesRepository(api),
       trial = TrialRepository(api),
       trialReports = TrialReportsRepository(api),
+      start = StartRepository(api),
       live = Live(source: LiveRepository(api), apiBaseUrl: api.dio.options.baseUrl) {
     home = HomeLoader(lessons: lessons, billing: billing, learning: learning, homework: homework, journey: journey, trials: trialReports);
   }
@@ -105,6 +107,9 @@ class Services {
   /// A signed-in family's free trials: their reports, the offer and one more trial.
   final TrialReportsRepository trialReports;
 
+  /// Starting a course and paying its invoice on the family's own.
+  final StartRepository start;
+
   /// The person's own signals while the app is open (screens reload on them).
   final Live live;
   late final HomeLoader home;
@@ -125,6 +130,7 @@ class Services {
       RepositoryProvider.value(value: messages),
       RepositoryProvider.value(value: trial),
       RepositoryProvider.value(value: trialReports),
+      RepositoryProvider.value(value: start),
       RepositoryProvider.value(value: learning),
       RepositoryProvider.value(value: homework),
       RepositoryProvider.value(value: classroom),

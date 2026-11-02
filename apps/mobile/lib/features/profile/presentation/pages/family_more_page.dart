@@ -47,6 +47,14 @@ class FamilyMorePage extends StatelessWidget {
                       title: l.moreChildren,
                       children: [
                         MenuRow(
+                          key: const Key('open-start'),
+                          icon: Icons.rocket_launch_outlined,
+                          tone: Tone.brand,
+                          label: l.startNewCourse,
+                          subtitle: l.startNewCourseHint,
+                          onTap: () => context.push('/family/start'),
+                        ),
+                        MenuRow(
                           key: const Key('open-trials'),
                           icon: Icons.school_outlined,
                           tone: Tone.info,
@@ -91,6 +99,14 @@ class FamilyMorePage extends StatelessWidget {
                     children: [
                       // An adult student's own trials and recordings are theirs to see too.
                       if (!guardian) ...[
+                        MenuRow(
+                          key: const Key('open-start'),
+                          icon: Icons.rocket_launch_outlined,
+                          tone: Tone.brand,
+                          label: l.startNewCourse,
+                          subtitle: l.startNewCourseHint,
+                          onTap: () => context.push('/family/start'),
+                        ),
                         MenuRow(
                           key: const Key('open-trials'),
                           icon: Icons.school_outlined,

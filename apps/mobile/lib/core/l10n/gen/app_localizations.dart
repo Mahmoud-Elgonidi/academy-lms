@@ -9299,86 +9299,8 @@ abstract class AppLocalizations {
   /// No description provided for @trialStartAsk.
   ///
   /// In ar, this message translates to:
-  /// **'اطلب باقة مناسبة'**
+  /// **'اختاروا باقة وابدؤوا'**
   String get trialStartAsk;
-
-  /// No description provided for @trialStartFollow.
-  ///
-  /// In ar, this message translates to:
-  /// **'تابع طلبك'**
-  String get trialStartFollow;
-
-  /// No description provided for @trialStartTitle.
-  ///
-  /// In ar, this message translates to:
-  /// **'نبدأ معكم'**
-  String get trialStartTitle;
-
-  /// No description provided for @trialStartLead.
-  ///
-  /// In ar, this message translates to:
-  /// **'التسجيل والدفع من التطبيق قادمان قريبًا. أرسلوا طلبكم الآن إلى الأكاديمية، فيرتّب فريقها الدورة ويرسل إليكم الفاتورة، ويصلكم رده في «المساعدة».'**
-  String get trialStartLead;
-
-  /// No description provided for @trialStartOfferNote.
-  ///
-  /// In ar, this message translates to:
-  /// **'يطبّق الفريق خصم العرض على أول فاتورة إن سجّلكم قبل انتهائه، فأرسلوا مبكرًا.'**
-  String get trialStartOfferNote;
-
-  /// No description provided for @trialStartWhat.
-  ///
-  /// In ar, this message translates to:
-  /// **'ما سنرسله'**
-  String get trialStartWhat;
-
-  /// No description provided for @trialStartSubject.
-  ///
-  /// In ar, this message translates to:
-  /// **'البدء بباقة {plan} لـ{name}'**
-  String trialStartSubject(String plan, String name);
-
-  /// No description provided for @trialStartSubjectAny.
-  ///
-  /// In ar, this message translates to:
-  /// **'البدء في {subject} لـ{name}'**
-  String trialStartSubjectAny(String subject, String name);
-
-  /// No description provided for @trialStartBody.
-  ///
-  /// In ar, this message translates to:
-  /// **'نودّ أن نبدأ في {subject} بباقة {plan} كما اقترح المعلّم بعد الحصة التجريبية.'**
-  String trialStartBody(String subject, String plan);
-
-  /// No description provided for @trialStartBodyAny.
-  ///
-  /// In ar, this message translates to:
-  /// **'نودّ أن نبدأ الدراسة في {subject} بعد الحصة التجريبية، ونرجو مساعدتنا في اختيار الباقة.'**
-  String trialStartBodyAny(String subject);
-
-  /// No description provided for @trialStartNote.
-  ///
-  /// In ar, this message translates to:
-  /// **'هل تريدون إضافة شيء؟ الأيام والأوقات المناسبة مثلًا'**
-  String get trialStartNote;
-
-  /// No description provided for @trialStartSend.
-  ///
-  /// In ar, this message translates to:
-  /// **'أرسل إلى الأكاديمية'**
-  String get trialStartSend;
-
-  /// No description provided for @trialStartSent.
-  ///
-  /// In ar, this message translates to:
-  /// **'وصل طلبكم إلى الأكاديمية'**
-  String get trialStartSent;
-
-  /// No description provided for @trialStartNoHelp.
-  ///
-  /// In ar, this message translates to:
-  /// **'تواصلوا مع الأكاديمية بطرقها المعتادة لتبدؤوا بهذه الباقة.'**
-  String get trialStartNoHelp;
 
   /// No description provided for @trialSecondTitle.
   ///
@@ -9517,6 +9439,732 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'جرّبوا معلّمًا آخر في {subject}'**
   String trialHomeSecond(String subject);
+
+  /// No description provided for @startNewCourse.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدأ دورة جديدة'**
+  String get startNewCourse;
+
+  /// No description provided for @startNewCourseHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختاروا الباقة والمعلّم والمواعيد، وادفعوا من التطبيق.'**
+  String get startNewCourseHint;
+
+  /// No description provided for @startTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'بدء دورة'**
+  String get startTitle;
+
+  /// No description provided for @startStepOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخطوة {n} من {total}'**
+  String startStepOf(int n, int total);
+
+  /// No description provided for @startContinue.
+  ///
+  /// In ar, this message translates to:
+  /// **'متابعة'**
+  String get startContinue;
+
+  /// No description provided for @startChange.
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير'**
+  String get startChange;
+
+  /// No description provided for @startOffTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجّل الأكاديمية الدورات بنفسها'**
+  String get startOffTitle;
+
+  /// No description provided for @startOffHelp.
+  ///
+  /// In ar, this message translates to:
+  /// **'راسلوا الأكاديمية'**
+  String get startOffHelp;
+
+  /// No description provided for @startWhoTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لمن الدورة؟'**
+  String get startWhoTitle;
+
+  /// No description provided for @startWhoLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختاروا من سيدرس؛ لكل متعلّم دورته وفاتورته.'**
+  String get startWhoLead;
+
+  /// No description provided for @startWhoSelf.
+  ///
+  /// In ar, this message translates to:
+  /// **'لي أنا'**
+  String get startWhoSelf;
+
+  /// No description provided for @startWhoConsent.
+  ///
+  /// In ar, this message translates to:
+  /// **'سنطلب موافقتكم على حسابه قبل البدء'**
+  String get startWhoConsent;
+
+  /// No description provided for @startSubjectTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'ماذا سيدرس {name}؟'**
+  String startSubjectTitle(String name);
+
+  /// No description provided for @startSubjectTitleSelf.
+  ///
+  /// In ar, this message translates to:
+  /// **'ماذا تريد أن تدرس؟'**
+  String get startSubjectTitleSelf;
+
+  /// No description provided for @startSubjectLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'المواد التي فيها معلّمون يستقبلون طلابًا جددًا الآن.'**
+  String get startSubjectLead;
+
+  /// No description provided for @startSubjectNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد مادة متاحة للبدء الآن. راسلوا الأكاديمية لتساعدكم.'**
+  String get startSubjectNone;
+
+  /// No description provided for @startCourseWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'بانتظار الدفع'**
+  String get startCourseWaiting;
+
+  /// No description provided for @startCourseActive.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارية'**
+  String get startCourseActive;
+
+  /// No description provided for @startCoursePaused.
+  ///
+  /// In ar, this message translates to:
+  /// **'متوقفة مؤقتًا'**
+  String get startCoursePaused;
+
+  /// No description provided for @startOpenLessons.
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح الحصص'**
+  String get startOpenLessons;
+
+  /// No description provided for @startCancelPending.
+  ///
+  /// In ar, this message translates to:
+  /// **'ألغِ هذه الدورة'**
+  String get startCancelPending;
+
+  /// No description provided for @startPlanTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختاروا الباقة'**
+  String get startPlanTitle;
+
+  /// No description provided for @startPlanLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأسعار بعملة منطقتكم ({region}).'**
+  String startPlanLead(String region);
+
+  /// No description provided for @startPlanLeadAny.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختاروا ما يناسب وقتكم وميزانيتكم.'**
+  String get startPlanLeadAny;
+
+  /// No description provided for @startPlanNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد باقة بسعر في منطقتكم بعد. راسلوا الأكاديمية.'**
+  String get startPlanNone;
+
+  /// No description provided for @startPlanPrivateLine.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصص فردية، بمواعيد تختارونها'**
+  String get startPlanPrivateLine;
+
+  /// No description provided for @startPlanGroupLine.
+  ///
+  /// In ar, this message translates to:
+  /// **'مقعد في مجموعة صغيرة، بمواعيد ثابتة'**
+  String get startPlanGroupLine;
+
+  /// No description provided for @startPlanShared.
+  ///
+  /// In ar, this message translates to:
+  /// **'باقة مشتركة: رصيد واحد لكل الدورات عليها.'**
+  String get startPlanShared;
+
+  /// No description provided for @startRecommended.
+  ///
+  /// In ar, this message translates to:
+  /// **'اقترحها المعلّم'**
+  String get startRecommended;
+
+  /// No description provided for @startPerLesson.
+  ///
+  /// In ar, this message translates to:
+  /// **'{price} للحصة'**
+  String startPerLesson(String price);
+
+  /// No description provided for @startBlockPrice.
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر الباقة'**
+  String get startBlockPrice;
+
+  /// No description provided for @startFirstInvoice.
+  ///
+  /// In ar, this message translates to:
+  /// **'أول فاتورة'**
+  String get startFirstInvoice;
+
+  /// No description provided for @startOfferApplied.
+  ///
+  /// In ar, this message translates to:
+  /// **'عرض الحصة التجريبية ({percent}٪)'**
+  String startOfferApplied(String percent);
+
+  /// No description provided for @startOfferUntil.
+  ///
+  /// In ar, this message translates to:
+  /// **'يُطبَّق عرض الحصة التجريبية ({percent}٪) على أول فاتورة حتى {when}.'**
+  String startOfferUntil(String percent, String when);
+
+  /// No description provided for @startRenews.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصل فاتورة الباقة التالية {n, plural, =1{حين تبقى حصة واحدة} =2{حين تبقى حصتان} few{حين تبقى {n} حصص} other{حين تبقى {n} حصة}}، ويمكنكم التوقف متى شئتم.'**
+  String startRenews(int n);
+
+  /// No description provided for @startTeacherTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختاروا المعلّم'**
+  String get startTeacherTitle;
+
+  /// No description provided for @startTeacherLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'يستقبل كل هؤلاء طلابًا جددًا في {subject}.'**
+  String startTeacherLead(String subject);
+
+  /// No description provided for @startTrialTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'معلّم الحصة التجريبية'**
+  String get startTrialTeacher;
+
+  /// No description provided for @startTrialTeacherGone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يعد معلّم الحصة التجريبية يستقبل طلابًا جددًا، فاختاروا معلّمًا آخر.'**
+  String get startTrialTeacherGone;
+
+  /// No description provided for @startTeacherNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يوجد معلّم يستقبل طلابًا جددًا في هذه المادة الآن. جرّبوا باقة جماعية، أو راسلوا الأكاديمية.'**
+  String get startTeacherNone;
+
+  /// No description provided for @startGroupTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختاروا المجموعة'**
+  String get startGroupTitle;
+
+  /// No description provided for @startGroupLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'مجموعات مفتوحة فيها مقعد لـ{name}، بمواعيدها الثابتة.'**
+  String startGroupLead(String name);
+
+  /// No description provided for @startGroupNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد مجموعة مفتوحة لهذه الباقة الآن. اختاروا باقة فردية، أو راسلوا الأكاديمية.'**
+  String get startGroupNone;
+
+  /// No description provided for @startGroupWith.
+  ///
+  /// In ar, this message translates to:
+  /// **'مع {name}'**
+  String startGroupWith(String name);
+
+  /// No description provided for @startGroupForming.
+  ///
+  /// In ar, this message translates to:
+  /// **'قيد التكوين'**
+  String get startGroupForming;
+
+  /// No description provided for @startGroupRunning.
+  ///
+  /// In ar, this message translates to:
+  /// **'بدأت حصصها'**
+  String get startGroupRunning;
+
+  /// No description provided for @startGroupToStart.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{تبدأ بانضمامكم} =1{تبدأ حين ينضم طالب واحد آخر} =2{تبدأ حين ينضم طالبان آخران} few{تبدأ حين ينضم {n} طلاب آخرين} other{تبدأ حين ينضم {n} طالبًا آخر}}'**
+  String startGroupToStart(int n);
+
+  /// No description provided for @startGroupFree.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{مقعد واحد متاح} =2{مقعدان متاحان} few{{n} مقاعد متاحة} other{{n} مقعدًا متاحًا}}'**
+  String startGroupFree(int n);
+
+  /// No description provided for @startGroupNext.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحصة القادمة: {when}'**
+  String startGroupNext(String when);
+
+  /// No description provided for @startGroupHeld.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{عُقدت حصة واحدة قبل انضمامكم} =2{عُقدت حصتان قبل انضمامكم} few{عُقدت {n} حصص قبل انضمامكم} other{عُقدت {n} حصة قبل انضمامكم}}، وتعوّض الأكاديمية ما فات بالطريقة التي تختارها.'**
+  String startGroupHeld(int n);
+
+  /// No description provided for @startTimesTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{اختاروا موعدًا أسبوعيًا} =2{اختاروا موعدين أسبوعيين} few{اختاروا {n} مواعيد أسبوعية} other{اختاروا {n} موعدًا أسبوعيًا}}'**
+  String startTimesTitle(int n);
+
+  /// No description provided for @startTimesTitleShared.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختاروا مواعيدكم الأسبوعية'**
+  String get startTimesTitleShared;
+
+  /// No description provided for @startTimesLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل موعد في يوم مختلف، ويتكرر كل أسبوع. المواعيد بتوقيتكم، ولكل موعد أول حصة فيه.'**
+  String get startTimesLead;
+
+  /// No description provided for @startTimesSuggested.
+  ///
+  /// In ar, this message translates to:
+  /// **'اخترنا لكم مواعيد مقترحة، ويمكنكم تغييرها.'**
+  String get startTimesSuggested;
+
+  /// No description provided for @startTimesCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'اخترتم {picked} من {total}'**
+  String startTimesCount(int picked, int total);
+
+  /// No description provided for @startTimesDayFull.
+  ///
+  /// In ar, this message translates to:
+  /// **'اخترتم كل المواعيد. ألغوا موعدًا أولًا لتختاروا يومًا آخر.'**
+  String get startTimesDayFull;
+
+  /// No description provided for @startTimesFirst.
+  ///
+  /// In ar, this message translates to:
+  /// **'أول حصة {day}'**
+  String startTimesFirst(String day);
+
+  /// No description provided for @startTimesFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'أقرب بداية {day}، ليبقى لكم وقت للدفع.'**
+  String startTimesFrom(String day);
+
+  /// No description provided for @startTimesNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا مواعيد متاحة مع هذا المعلّم في الأسابيع الأربعة القادمة.'**
+  String get startTimesNone;
+
+  /// No description provided for @startOtherTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختاروا معلّمًا آخر'**
+  String get startOtherTeacher;
+
+  /// No description provided for @startTimesTooFew.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا تكفي الأيام المتاحة لدى هذا المعلّم لهذه الباقة، فلكل حصة في الأسبوع يوم مختلف. اختاروا معلّمًا آخر، أو باقة بحصص أقل في الأسبوع.'**
+  String get startTimesTooFew;
+
+  /// No description provided for @startOtherPlan.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختاروا باقة أخرى'**
+  String get startOtherPlan;
+
+  /// No description provided for @startReviewTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'راجعوا قبل التأكيد'**
+  String get startReviewTitle;
+
+  /// No description provided for @startReviewLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'لن يُسحب أي مبلغ الآن: تصدر الفاتورة، وتدفعونها في الخطوة التالية.'**
+  String get startReviewLead;
+
+  /// No description provided for @startReviewLearner.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتعلّم'**
+  String get startReviewLearner;
+
+  /// No description provided for @startReviewSubject.
+  ///
+  /// In ar, this message translates to:
+  /// **'المادة'**
+  String get startReviewSubject;
+
+  /// No description provided for @startReviewPlan.
+  ///
+  /// In ar, this message translates to:
+  /// **'الباقة'**
+  String get startReviewPlan;
+
+  /// No description provided for @startReviewTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'المعلّم'**
+  String get startReviewTeacher;
+
+  /// No description provided for @startReviewGroup.
+  ///
+  /// In ar, this message translates to:
+  /// **'المجموعة'**
+  String get startReviewGroup;
+
+  /// No description provided for @startReviewTimes.
+  ///
+  /// In ar, this message translates to:
+  /// **'المواعيد الأسبوعية'**
+  String get startReviewTimes;
+
+  /// No description provided for @startReviewFirst.
+  ///
+  /// In ar, this message translates to:
+  /// **'أول حصة'**
+  String get startReviewFirst;
+
+  /// No description provided for @startReviewMoney.
+  ///
+  /// In ar, this message translates to:
+  /// **'ما ستدفعونه'**
+  String get startReviewMoney;
+
+  /// No description provided for @startReviewTotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإجمالي قبل الضريبة'**
+  String get startReviewTotal;
+
+  /// No description provided for @startReviewVat.
+  ///
+  /// In ar, this message translates to:
+  /// **'تظهر ضريبة القيمة المضافة، إن وُجدت، في الفاتورة قبل الدفع.'**
+  String get startReviewVat;
+
+  /// No description provided for @startReviewPayBy.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادفعوا قبل أول حصة {n, plural, =1{بساعة} =2{بساعتين} few{بـ{n} ساعات} other{بـ{n} ساعة}} على الأقل؛ فالحصة التي لم تُدفع قبل موعدها بهذه المدة تُلغى.'**
+  String startReviewPayBy(int n);
+
+  /// No description provided for @startReviewPayAny.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادفعوا قبل أول حصة لتثبيت الحصص.'**
+  String get startReviewPayAny;
+
+  /// No description provided for @startReviewCancel.
+  ///
+  /// In ar, this message translates to:
+  /// **'ويمكنكم إلغاء الدورة قبل الدفع دون أي رسوم.'**
+  String get startReviewCancel;
+
+  /// No description provided for @startConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'أكّدوا وانتقلوا إلى الدفع'**
+  String get startConfirm;
+
+  /// No description provided for @startConfirmAgain.
+  ///
+  /// In ar, this message translates to:
+  /// **'أكّدوا بالسعر الجديد'**
+  String get startConfirmAgain;
+
+  /// No description provided for @startConsentTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'موافقتكم على حساب {name}'**
+  String startConsentTitle(String name);
+
+  /// No description provided for @startConsentAgree.
+  ///
+  /// In ar, this message translates to:
+  /// **'أوافق، وتابعوا البدء'**
+  String get startConsentAgree;
+
+  /// No description provided for @startBlockedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يمكن البدء الآن'**
+  String get startBlockedTitle;
+
+  /// No description provided for @startBlockedOver.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدؤوا من جديد'**
+  String get startBlockedOver;
+
+  /// No description provided for @startCancelTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أتلغون هذه الدورة؟'**
+  String get startCancelTitle;
+
+  /// No description provided for @startCancelBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تُلغى حصصها وفاتورتها دون أي رسوم، ويمكنكم البدء من جديد متى شئتم.'**
+  String get startCancelBody;
+
+  /// No description provided for @startCancelYes.
+  ///
+  /// In ar, this message translates to:
+  /// **'نعم، ألغوها'**
+  String get startCancelYes;
+
+  /// No description provided for @startCancelKeep.
+  ///
+  /// In ar, this message translates to:
+  /// **'أبقوها'**
+  String get startCancelKeep;
+
+  /// No description provided for @payTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'دفع الفاتورة'**
+  String get payTitle;
+
+  /// No description provided for @payCreatedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'جُهّزت الدورة، وبقيت خطوة واحدة'**
+  String get payCreatedTitle;
+
+  /// No description provided for @payCreatedLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادفعوا الفاتورة لتثبيت حصص {subject} لـ{name}.'**
+  String payCreatedLead(String subject, String name);
+
+  /// No description provided for @payInvoiceNumber.
+  ///
+  /// In ar, this message translates to:
+  /// **'فاتورة {number}'**
+  String payInvoiceNumber(String number);
+
+  /// No description provided for @paySubtotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'المجموع قبل الضريبة'**
+  String get paySubtotal;
+
+  /// No description provided for @payVat.
+  ///
+  /// In ar, this message translates to:
+  /// **'ضريبة القيمة المضافة {rate}٪'**
+  String payVat(String rate);
+
+  /// No description provided for @payVatIncluded.
+  ///
+  /// In ar, this message translates to:
+  /// **'منها ضريبة القيمة المضافة {rate}٪'**
+  String payVatIncluded(String rate);
+
+  /// No description provided for @payTotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإجمالي'**
+  String get payTotal;
+
+  /// No description provided for @payPaidSoFar.
+  ///
+  /// In ar, this message translates to:
+  /// **'المدفوع'**
+  String get payPaidSoFar;
+
+  /// No description provided for @payLeft.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتبقي'**
+  String get payLeft;
+
+  /// No description provided for @payCouponTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لديكم كوبون خصم؟'**
+  String get payCouponTitle;
+
+  /// No description provided for @payCouponField.
+  ///
+  /// In ar, this message translates to:
+  /// **'رمز الكوبون'**
+  String get payCouponField;
+
+  /// No description provided for @payCouponApply.
+  ///
+  /// In ar, this message translates to:
+  /// **'طبّق'**
+  String get payCouponApply;
+
+  /// No description provided for @payCouponRemove.
+  ///
+  /// In ar, this message translates to:
+  /// **'أزل'**
+  String get payCouponRemove;
+
+  /// No description provided for @payCouponOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكوبون {code} مطبّق'**
+  String payCouponOn(String code);
+
+  /// No description provided for @payOfferStays.
+  ///
+  /// In ar, this message translates to:
+  /// **'عرض الحصة التجريبية مطبّق، ويبقى على الفاتورة.'**
+  String get payOfferStays;
+
+  /// No description provided for @payNoGateway.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا تقبل الأكاديمية الدفع الإلكتروني لهذه الفاتورة. حوّلوا المبلغ وأرسلوا الإيصال من «المدفوعات».'**
+  String get payNoGateway;
+
+  /// No description provided for @payTransferInstead.
+  ///
+  /// In ar, this message translates to:
+  /// **'دفعتم بالتحويل؟ أرسلوا الإيصال'**
+  String get payTransferInstead;
+
+  /// No description provided for @payWaitingTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'نتأكد من الدفع مع البوابة'**
+  String get payWaitingTitle;
+
+  /// No description provided for @payCheckNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقّق الآن'**
+  String get payCheckNow;
+
+  /// No description provided for @payTryAgain.
+  ///
+  /// In ar, this message translates to:
+  /// **'حاولوا الدفع مرة أخرى'**
+  String get payTryAgain;
+
+  /// No description provided for @payReadInvoice.
+  ///
+  /// In ar, this message translates to:
+  /// **'اقرؤوا الفاتورة'**
+  String get payReadInvoice;
+
+  /// No description provided for @payVoid.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُلغيت هذه الفاتورة، فلا شيء عليكم لدفعه.'**
+  String get payVoid;
+
+  /// No description provided for @payCancelCourse.
+  ///
+  /// In ar, this message translates to:
+  /// **'ألغوا الدورة قبل الدفع'**
+  String get payCancelCourse;
+
+  /// No description provided for @paidTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم الدفع، وبدأت الدورة!'**
+  String get paidTitle;
+
+  /// No description provided for @paidLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'أهلًا بـ{name} في {subject}. هذا ما ينتظركم:'**
+  String paidLead(String name, String subject);
+
+  /// No description provided for @paidLeadPlain.
+  ///
+  /// In ar, this message translates to:
+  /// **'وصل الدفع، وتجدون الحصص في «الحصص».'**
+  String get paidLeadPlain;
+
+  /// No description provided for @paidTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'المعلّم'**
+  String get paidTeacher;
+
+  /// No description provided for @paidTimes.
+  ///
+  /// In ar, this message translates to:
+  /// **'المواعيد الأسبوعية'**
+  String get paidTimes;
+
+  /// No description provided for @paidFirst.
+  ///
+  /// In ar, this message translates to:
+  /// **'أول حصة'**
+  String get paidFirst;
+
+  /// No description provided for @paidFirstLater.
+  ///
+  /// In ar, this message translates to:
+  /// **'حين تكتمل المجموعة، ونرسل إليكم موعدها ورابطها.'**
+  String get paidFirstLater;
+
+  /// No description provided for @paidJoin.
+  ///
+  /// In ar, this message translates to:
+  /// **'كيف تنضمون'**
+  String get paidJoin;
+
+  /// No description provided for @paidJoinHow.
+  ///
+  /// In ar, this message translates to:
+  /// **'افتحوا الحصة من «الحصص» قبل موعدها ببضع دقائق، واضغطوا «انضم».'**
+  String get paidJoinHow;
+
+  /// No description provided for @packageTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'انضمت الدورة إلى باقتكم المشتركة'**
+  String get packageTitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

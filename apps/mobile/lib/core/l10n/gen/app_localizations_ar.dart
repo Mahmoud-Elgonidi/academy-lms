@@ -5785,55 +5785,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get trialStartPlan => 'ابدأ بهذه الباقة';
 
   @override
-  String get trialStartAsk => 'اطلب باقة مناسبة';
-
-  @override
-  String get trialStartFollow => 'تابع طلبك';
-
-  @override
-  String get trialStartTitle => 'نبدأ معكم';
-
-  @override
-  String get trialStartLead =>
-      'التسجيل والدفع من التطبيق قادمان قريبًا. أرسلوا طلبكم الآن إلى الأكاديمية، فيرتّب فريقها الدورة ويرسل إليكم الفاتورة، ويصلكم رده في «المساعدة».';
-
-  @override
-  String get trialStartOfferNote => 'يطبّق الفريق خصم العرض على أول فاتورة إن سجّلكم قبل انتهائه، فأرسلوا مبكرًا.';
-
-  @override
-  String get trialStartWhat => 'ما سنرسله';
-
-  @override
-  String trialStartSubject(String plan, String name) {
-    return 'البدء بباقة $plan لـ$name';
-  }
-
-  @override
-  String trialStartSubjectAny(String subject, String name) {
-    return 'البدء في $subject لـ$name';
-  }
-
-  @override
-  String trialStartBody(String subject, String plan) {
-    return 'نودّ أن نبدأ في $subject بباقة $plan كما اقترح المعلّم بعد الحصة التجريبية.';
-  }
-
-  @override
-  String trialStartBodyAny(String subject) {
-    return 'نودّ أن نبدأ الدراسة في $subject بعد الحصة التجريبية، ونرجو مساعدتنا في اختيار الباقة.';
-  }
-
-  @override
-  String get trialStartNote => 'هل تريدون إضافة شيء؟ الأيام والأوقات المناسبة مثلًا';
-
-  @override
-  String get trialStartSend => 'أرسل إلى الأكاديمية';
-
-  @override
-  String get trialStartSent => 'وصل طلبكم إلى الأكاديمية';
-
-  @override
-  String get trialStartNoHelp => 'تواصلوا مع الأكاديمية بطرقها المعتادة لتبدؤوا بهذه الباقة.';
+  String get trialStartAsk => 'اختاروا باقة وابدؤوا';
 
   @override
   String get trialSecondTitle => 'لم يناسبكم المعلّم؟';
@@ -5913,4 +5865,462 @@ class AppLocalizationsAr extends AppLocalizations {
   String trialHomeSecond(String subject) {
     return 'جرّبوا معلّمًا آخر في $subject';
   }
+
+  @override
+  String get startNewCourse => 'ابدأ دورة جديدة';
+
+  @override
+  String get startNewCourseHint => 'اختاروا الباقة والمعلّم والمواعيد، وادفعوا من التطبيق.';
+
+  @override
+  String get startTitle => 'بدء دورة';
+
+  @override
+  String startStepOf(int n, int total) {
+    return 'الخطوة $n من $total';
+  }
+
+  @override
+  String get startContinue => 'متابعة';
+
+  @override
+  String get startChange => 'تغيير';
+
+  @override
+  String get startOffTitle => 'تسجّل الأكاديمية الدورات بنفسها';
+
+  @override
+  String get startOffHelp => 'راسلوا الأكاديمية';
+
+  @override
+  String get startWhoTitle => 'لمن الدورة؟';
+
+  @override
+  String get startWhoLead => 'اختاروا من سيدرس؛ لكل متعلّم دورته وفاتورته.';
+
+  @override
+  String get startWhoSelf => 'لي أنا';
+
+  @override
+  String get startWhoConsent => 'سنطلب موافقتكم على حسابه قبل البدء';
+
+  @override
+  String startSubjectTitle(String name) {
+    return 'ماذا سيدرس $name؟';
+  }
+
+  @override
+  String get startSubjectTitleSelf => 'ماذا تريد أن تدرس؟';
+
+  @override
+  String get startSubjectLead => 'المواد التي فيها معلّمون يستقبلون طلابًا جددًا الآن.';
+
+  @override
+  String get startSubjectNone => 'لا توجد مادة متاحة للبدء الآن. راسلوا الأكاديمية لتساعدكم.';
+
+  @override
+  String get startCourseWaiting => 'بانتظار الدفع';
+
+  @override
+  String get startCourseActive => 'جارية';
+
+  @override
+  String get startCoursePaused => 'متوقفة مؤقتًا';
+
+  @override
+  String get startOpenLessons => 'افتح الحصص';
+
+  @override
+  String get startCancelPending => 'ألغِ هذه الدورة';
+
+  @override
+  String get startPlanTitle => 'اختاروا الباقة';
+
+  @override
+  String startPlanLead(String region) {
+    return 'الأسعار بعملة منطقتكم ($region).';
+  }
+
+  @override
+  String get startPlanLeadAny => 'اختاروا ما يناسب وقتكم وميزانيتكم.';
+
+  @override
+  String get startPlanNone => 'لا توجد باقة بسعر في منطقتكم بعد. راسلوا الأكاديمية.';
+
+  @override
+  String get startPlanPrivateLine => 'حصص فردية، بمواعيد تختارونها';
+
+  @override
+  String get startPlanGroupLine => 'مقعد في مجموعة صغيرة، بمواعيد ثابتة';
+
+  @override
+  String get startPlanShared => 'باقة مشتركة: رصيد واحد لكل الدورات عليها.';
+
+  @override
+  String get startRecommended => 'اقترحها المعلّم';
+
+  @override
+  String startPerLesson(String price) {
+    return '$price للحصة';
+  }
+
+  @override
+  String get startBlockPrice => 'سعر الباقة';
+
+  @override
+  String get startFirstInvoice => 'أول فاتورة';
+
+  @override
+  String startOfferApplied(String percent) {
+    return 'عرض الحصة التجريبية ($percent٪)';
+  }
+
+  @override
+  String startOfferUntil(String percent, String when) {
+    return 'يُطبَّق عرض الحصة التجريبية ($percent٪) على أول فاتورة حتى $when.';
+  }
+
+  @override
+  String startRenews(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'حين تبقى $n حصة',
+      few: 'حين تبقى $n حصص',
+      two: 'حين تبقى حصتان',
+      one: 'حين تبقى حصة واحدة',
+    );
+    return 'تصل فاتورة الباقة التالية $_temp0، ويمكنكم التوقف متى شئتم.';
+  }
+
+  @override
+  String get startTeacherTitle => 'اختاروا المعلّم';
+
+  @override
+  String startTeacherLead(String subject) {
+    return 'يستقبل كل هؤلاء طلابًا جددًا في $subject.';
+  }
+
+  @override
+  String get startTrialTeacher => 'معلّم الحصة التجريبية';
+
+  @override
+  String get startTrialTeacherGone => 'لم يعد معلّم الحصة التجريبية يستقبل طلابًا جددًا، فاختاروا معلّمًا آخر.';
+
+  @override
+  String get startTeacherNone => 'لا يوجد معلّم يستقبل طلابًا جددًا في هذه المادة الآن. جرّبوا باقة جماعية، أو راسلوا الأكاديمية.';
+
+  @override
+  String get startGroupTitle => 'اختاروا المجموعة';
+
+  @override
+  String startGroupLead(String name) {
+    return 'مجموعات مفتوحة فيها مقعد لـ$name، بمواعيدها الثابتة.';
+  }
+
+  @override
+  String get startGroupNone => 'لا توجد مجموعة مفتوحة لهذه الباقة الآن. اختاروا باقة فردية، أو راسلوا الأكاديمية.';
+
+  @override
+  String startGroupWith(String name) {
+    return 'مع $name';
+  }
+
+  @override
+  String get startGroupForming => 'قيد التكوين';
+
+  @override
+  String get startGroupRunning => 'بدأت حصصها';
+
+  @override
+  String startGroupToStart(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'تبدأ حين ينضم $n طالبًا آخر',
+      few: 'تبدأ حين ينضم $n طلاب آخرين',
+      two: 'تبدأ حين ينضم طالبان آخران',
+      one: 'تبدأ حين ينضم طالب واحد آخر',
+      zero: 'تبدأ بانضمامكم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String startGroupFree(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n مقعدًا متاحًا',
+      few: '$n مقاعد متاحة',
+      two: 'مقعدان متاحان',
+      one: 'مقعد واحد متاح',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String startGroupNext(String when) {
+    return 'الحصة القادمة: $when';
+  }
+
+  @override
+  String startGroupHeld(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'عُقدت $n حصة قبل انضمامكم',
+      few: 'عُقدت $n حصص قبل انضمامكم',
+      two: 'عُقدت حصتان قبل انضمامكم',
+      one: 'عُقدت حصة واحدة قبل انضمامكم',
+    );
+    return '$_temp0، وتعوّض الأكاديمية ما فات بالطريقة التي تختارها.';
+  }
+
+  @override
+  String startTimesTitle(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'اختاروا $n موعدًا أسبوعيًا',
+      few: 'اختاروا $n مواعيد أسبوعية',
+      two: 'اختاروا موعدين أسبوعيين',
+      one: 'اختاروا موعدًا أسبوعيًا',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get startTimesTitleShared => 'اختاروا مواعيدكم الأسبوعية';
+
+  @override
+  String get startTimesLead => 'كل موعد في يوم مختلف، ويتكرر كل أسبوع. المواعيد بتوقيتكم، ولكل موعد أول حصة فيه.';
+
+  @override
+  String get startTimesSuggested => 'اخترنا لكم مواعيد مقترحة، ويمكنكم تغييرها.';
+
+  @override
+  String startTimesCount(int picked, int total) {
+    return 'اخترتم $picked من $total';
+  }
+
+  @override
+  String get startTimesDayFull => 'اخترتم كل المواعيد. ألغوا موعدًا أولًا لتختاروا يومًا آخر.';
+
+  @override
+  String startTimesFirst(String day) {
+    return 'أول حصة $day';
+  }
+
+  @override
+  String startTimesFrom(String day) {
+    return 'أقرب بداية $day، ليبقى لكم وقت للدفع.';
+  }
+
+  @override
+  String get startTimesNone => 'لا مواعيد متاحة مع هذا المعلّم في الأسابيع الأربعة القادمة.';
+
+  @override
+  String get startOtherTeacher => 'اختاروا معلّمًا آخر';
+
+  @override
+  String get startTimesTooFew =>
+      'لا تكفي الأيام المتاحة لدى هذا المعلّم لهذه الباقة، فلكل حصة في الأسبوع يوم مختلف. اختاروا معلّمًا آخر، أو باقة بحصص أقل في الأسبوع.';
+
+  @override
+  String get startOtherPlan => 'اختاروا باقة أخرى';
+
+  @override
+  String get startReviewTitle => 'راجعوا قبل التأكيد';
+
+  @override
+  String get startReviewLead => 'لن يُسحب أي مبلغ الآن: تصدر الفاتورة، وتدفعونها في الخطوة التالية.';
+
+  @override
+  String get startReviewLearner => 'المتعلّم';
+
+  @override
+  String get startReviewSubject => 'المادة';
+
+  @override
+  String get startReviewPlan => 'الباقة';
+
+  @override
+  String get startReviewTeacher => 'المعلّم';
+
+  @override
+  String get startReviewGroup => 'المجموعة';
+
+  @override
+  String get startReviewTimes => 'المواعيد الأسبوعية';
+
+  @override
+  String get startReviewFirst => 'أول حصة';
+
+  @override
+  String get startReviewMoney => 'ما ستدفعونه';
+
+  @override
+  String get startReviewTotal => 'الإجمالي قبل الضريبة';
+
+  @override
+  String get startReviewVat => 'تظهر ضريبة القيمة المضافة، إن وُجدت، في الفاتورة قبل الدفع.';
+
+  @override
+  String startReviewPayBy(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'بـ$n ساعة', few: 'بـ$n ساعات', two: 'بساعتين', one: 'بساعة');
+    return 'ادفعوا قبل أول حصة $_temp0 على الأقل؛ فالحصة التي لم تُدفع قبل موعدها بهذه المدة تُلغى.';
+  }
+
+  @override
+  String get startReviewPayAny => 'ادفعوا قبل أول حصة لتثبيت الحصص.';
+
+  @override
+  String get startReviewCancel => 'ويمكنكم إلغاء الدورة قبل الدفع دون أي رسوم.';
+
+  @override
+  String get startConfirm => 'أكّدوا وانتقلوا إلى الدفع';
+
+  @override
+  String get startConfirmAgain => 'أكّدوا بالسعر الجديد';
+
+  @override
+  String startConsentTitle(String name) {
+    return 'موافقتكم على حساب $name';
+  }
+
+  @override
+  String get startConsentAgree => 'أوافق، وتابعوا البدء';
+
+  @override
+  String get startBlockedTitle => 'لا يمكن البدء الآن';
+
+  @override
+  String get startBlockedOver => 'ابدؤوا من جديد';
+
+  @override
+  String get startCancelTitle => 'أتلغون هذه الدورة؟';
+
+  @override
+  String get startCancelBody => 'تُلغى حصصها وفاتورتها دون أي رسوم، ويمكنكم البدء من جديد متى شئتم.';
+
+  @override
+  String get startCancelYes => 'نعم، ألغوها';
+
+  @override
+  String get startCancelKeep => 'أبقوها';
+
+  @override
+  String get payTitle => 'دفع الفاتورة';
+
+  @override
+  String get payCreatedTitle => 'جُهّزت الدورة، وبقيت خطوة واحدة';
+
+  @override
+  String payCreatedLead(String subject, String name) {
+    return 'ادفعوا الفاتورة لتثبيت حصص $subject لـ$name.';
+  }
+
+  @override
+  String payInvoiceNumber(String number) {
+    return 'فاتورة $number';
+  }
+
+  @override
+  String get paySubtotal => 'المجموع قبل الضريبة';
+
+  @override
+  String payVat(String rate) {
+    return 'ضريبة القيمة المضافة $rate٪';
+  }
+
+  @override
+  String payVatIncluded(String rate) {
+    return 'منها ضريبة القيمة المضافة $rate٪';
+  }
+
+  @override
+  String get payTotal => 'الإجمالي';
+
+  @override
+  String get payPaidSoFar => 'المدفوع';
+
+  @override
+  String get payLeft => 'المتبقي';
+
+  @override
+  String get payCouponTitle => 'لديكم كوبون خصم؟';
+
+  @override
+  String get payCouponField => 'رمز الكوبون';
+
+  @override
+  String get payCouponApply => 'طبّق';
+
+  @override
+  String get payCouponRemove => 'أزل';
+
+  @override
+  String payCouponOn(String code) {
+    return 'الكوبون $code مطبّق';
+  }
+
+  @override
+  String get payOfferStays => 'عرض الحصة التجريبية مطبّق، ويبقى على الفاتورة.';
+
+  @override
+  String get payNoGateway => 'لا تقبل الأكاديمية الدفع الإلكتروني لهذه الفاتورة. حوّلوا المبلغ وأرسلوا الإيصال من «المدفوعات».';
+
+  @override
+  String get payTransferInstead => 'دفعتم بالتحويل؟ أرسلوا الإيصال';
+
+  @override
+  String get payWaitingTitle => 'نتأكد من الدفع مع البوابة';
+
+  @override
+  String get payCheckNow => 'تحقّق الآن';
+
+  @override
+  String get payTryAgain => 'حاولوا الدفع مرة أخرى';
+
+  @override
+  String get payReadInvoice => 'اقرؤوا الفاتورة';
+
+  @override
+  String get payVoid => 'أُلغيت هذه الفاتورة، فلا شيء عليكم لدفعه.';
+
+  @override
+  String get payCancelCourse => 'ألغوا الدورة قبل الدفع';
+
+  @override
+  String get paidTitle => 'تم الدفع، وبدأت الدورة!';
+
+  @override
+  String paidLead(String name, String subject) {
+    return 'أهلًا بـ$name في $subject. هذا ما ينتظركم:';
+  }
+
+  @override
+  String get paidLeadPlain => 'وصل الدفع، وتجدون الحصص في «الحصص».';
+
+  @override
+  String get paidTeacher => 'المعلّم';
+
+  @override
+  String get paidTimes => 'المواعيد الأسبوعية';
+
+  @override
+  String get paidFirst => 'أول حصة';
+
+  @override
+  String get paidFirstLater => 'حين تكتمل المجموعة، ونرسل إليكم موعدها ورابطها.';
+
+  @override
+  String get paidJoin => 'كيف تنضمون';
+
+  @override
+  String get paidJoinHow => 'افتحوا الحصة من «الحصص» قبل موعدها ببضع دقائق، واضغطوا «انضم».';
+
+  @override
+  String get packageTitle => 'انضمت الدورة إلى باقتكم المشتركة';
 }

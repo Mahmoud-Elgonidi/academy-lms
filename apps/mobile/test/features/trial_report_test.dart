@@ -2,42 +2,20 @@ import 'package:academy_app/app/app.dart';
 import 'package:academy_app/app/router/areas.dart';
 import 'package:academy_app/app/router/targets.dart';
 import 'package:academy_app/core/time/local_time.dart';
-import 'package:academy_app/features/support/data/support_repository.dart';
 import 'package:academy_app/features/trial/data/trial_reports_repository.dart';
 import 'package:academy_app/features/trial/domain/trial.dart';
 import 'package:academy_app/features/trial/domain/trial_report.dart';
 import 'package:academy_app/features/trial/presentation/reports/next_trial_cubit.dart';
 import 'package:academy_app/features/trial/presentation/reports/offer_countdown.dart';
-import 'package:academy_app/features/trial/presentation/reports/start_plan_cubit.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../fixtures/journey.dart';
+import '../fixtures/start.dart';
 import '../fixtures/trial_report.dart';
 import '../helpers.dart';
 import 'sign_in_flow_test.dart' show frames;
-
-Map<String, Object?> _ticket() => {
-  'data': {
-    'id': 't9',
-    'reference': '#9',
-    'subject': 'البدء',
-    'kind': {'key': 'billing', 'label': 'الدفع والفواتير'},
-    'status': {'key': 'open', 'label': 'مفتوحة'},
-    'learner': {'id': 'c1', 'name': 'سلمى رامي'},
-    'created_at': null,
-    'last_message_at': null,
-    'your_turn': false,
-    'lesson': null,
-    'can_reply': true,
-    'can_reopen': false,
-    'can_close': true,
-    'reopen_until': null,
-    'messages': <Object>[],
-  },
-};
 
 Map<String, Object?> _options({List<String> kinds = const ['complaint', 'billing', 'technical', 'other'], bool lesson = true}) => {
   'data': {
@@ -263,61 +241,6 @@ void main() {
     });
   });
 
-  group('StartPlanCubit', () {
-    late TestApp app;
-    setUp(() async {
-      app = await TestApp.create(accounts: [guardian]);
-      await app.session.start();
-    });
-
-    test('writes about money, about the learner, linked to the trial lesson', () async {
-      app.api
-        ..on('GET', 'support/new', _options())
-        ..on('POST', 'support/tickets', _ticket(), status: 201);
-      final cubit = StartPlanCubit(SupportRepository(app.services.api), learnerId: 'c1', lessonId: 's1');
-      await cubit.load();
-      expect(cubit.kind, 'billing');
-      expect(await cubit.send(subject: 'البدء', body: 'نودّ أن نبدأ.', note: 'السبت مساءً'), isTrue);
-      expect(cubit.state.sentId, 't9');
-      final form = Map.fromEntries((app.api.sent('POST', 'support/tickets').single.data as FormData).fields);
-      expect(form, {'kind': 'billing', 'subject': 'البدء', 'body': 'نودّ أن نبدأ.\n\nالسبت مساءً', 'learner_id': 'c1', 'session_id': 's1'});
-      await cubit.close();
-    });
-
-    test('anything else when money is not offered; the lesson only when Help offers it', () async {
-      app.api
-        ..on('GET', 'support/new', _options(kinds: ['complaint', 'technical', 'other'], lesson: false))
-        ..on('POST', 'support/tickets', _ticket(), status: 201);
-      final cubit = StartPlanCubit(SupportRepository(app.services.api), learnerId: 'c1', lessonId: 's1');
-      await cubit.load();
-      expect(cubit.kind, 'other');
-      await cubit.send(subject: 'a', body: 'b');
-      expect(Map.fromEntries((app.api.sent('POST', 'support/tickets').single.data as FormData).fields).containsKey('session_id'), isFalse);
-      await cubit.close();
-    });
-
-    test('Help closed or not this family’s: the usual ways, nothing sent', () async {
-      app.api.on('GET', 'support/new', {'type': 'forbidden', 'title': 'لا.', 'status': 403}, status: 403);
-      final cubit = StartPlanCubit(SupportRepository(app.services.api), learnerId: 'c1', lessonId: 's1');
-      await cubit.load();
-      expect(cubit.state.noHelp, isTrue);
-      expect(await cubit.send(subject: 'a', body: 'b'), isFalse);
-      expect(app.api.sent('POST', 'support/tickets'), isEmpty);
-      await cubit.close();
-    });
-
-    test('a send that fails keeps the sheet with why', () async {
-      app.api
-        ..on('GET', 'support/new', _options())
-        ..on('POST', 'support/tickets', {'type': 'too-many', 'title': 'انتظر قليلًا.', 'status': 429}, status: 429);
-      final cubit = StartPlanCubit(SupportRepository(app.services.api), learnerId: 'c1', lessonId: 's1');
-      await cubit.load();
-      expect(await cubit.send(subject: 'a', body: 'b'), isFalse);
-      expect(cubit.state.sendProblem?.message, 'انتظر قليلًا.');
-      await cubit.close();
-    });
-  });
-
   group('the report', () {
     testWidgets('open offer: the teacher, the level, their words, the plan in plain words, the price after it and the time left', (
       tester,
@@ -393,7 +316,7 @@ void main() {
     testWidgets('withdrawn plan: said plainly, and asking for one that suits', (tester) async {
       await _open(tester, '/family/me/trials/s1', report: fxReport(withdrawn: true));
       expect(find.byKey(const Key('report-withdrawn')), findsOneWidget);
-      expect(find.text('اطلب باقة مناسبة'), findsOneWidget);
+      expect(find.text('اختاروا باقة وابدؤوا'), findsOneWidget);
       // The offer stands for any plan, without a price.
       expect(find.text('يُطبَّق الخصم على أول فاتورة من أي باقة تختارونها.'), findsOneWidget);
       await _close(tester);
@@ -501,32 +424,55 @@ void main() {
   });
 
   group('starting', () {
-    testWidgets('start with this plan: what happens, what is sent, sent to Help, then followed there', (tester) async {
-      final app = await _open(tester, '/family/me/trials/s1');
-      app.api.on('POST', 'support/tickets', _ticket(), status: 201);
-      await _tap(tester, find.byKey(const Key('report-start')));
-      expect(find.byKey(const Key('start-sheet')), findsOneWidget);
-      expect(find.text('البدء بباقة باقة التجويد الأساسية لـجنى'), findsOneWidget);
-      expect(find.textContaining('خصم العرض'), findsOneWidget);
-      await tester.enterText(find.byKey(const Key('start-note')), 'السبت مساءً');
-      await _tap(tester, find.byKey(const Key('start-send')), 20);
-      final form = Map.fromEntries((app.api.sent('POST', 'support/tickets').single.data as FormData).fields);
-      expect(form['kind'], 'billing');
-      expect(form['learner_id'], 'c1');
-      expect(form['session_id'], 's1');
-      expect(form['body'], endsWith('السبت مساءً'));
-      expect(find.byKey(const Key('report-start')), findsNothing);
-      await _tap(tester, find.byKey(const Key('report-follow')));
-      expect(_where(tester), '/family/me/help/t9');
+    testWidgets('start with this plan: the start flow opens on the plan, the recommended one and the trial teacher chosen', (tester) async {
+      final app = await _open(tester, '/family/me/trials/s1', more: (api) => startRoutes(api));
+      await _tap(tester, find.byKey(const Key('report-start')), 20);
+      expect(_where(tester), '/family/start?learner=c1&subject=sub1&plan=p1&teacher=t1');
+      expect(find.text('اختاروا الباقة'), findsOneWidget);
+      expect(find.text('اقترحها المعلّم'), findsOneWidget);
+      final asked = app.api.sent('GET', 'family/start/options').last.queryParameters;
+      expect(asked, {'learner_id': 'c1', 'subject_id': 'sub1'});
       await _close(tester);
     });
 
-    testWidgets('Help not open to the family: the usual ways, no button to send', (tester) async {
-      final app = await _open(tester, '/family/me/trials/s1');
-      app.api.on('GET', 'support/new', {'type': 'forbidden', 'title': 'لا.', 'status': 403}, status: 403);
-      await _tap(tester, find.byKey(const Key('report-start')));
-      expect(find.byKey(const Key('start-no-help')), findsOneWidget);
-      expect(find.byKey(const Key('start-send')), findsNothing);
+    testWidgets("why not, in the API's words, in place of the button; the academy enrolling itself: the way to message it", (tester) async {
+      await _open(
+        tester,
+        '/family/me/trials/s1',
+        report: fxReport(
+          start: fxStart(available: false, reason: 'self_serve_off', why: 'تسجّل الأكاديمية الكورسات بنفسها.'),
+        ),
+      );
+      expect(find.byKey(const Key('report-start')), findsNothing);
+      expect(find.text('تسجّل الأكاديمية الكورسات بنفسها.'), findsOneWidget);
+      await _tap(tester, find.byKey(const Key('report-start-help')));
+      expect(_where(tester), '/family/me/help');
+      await _close(tester);
+    });
+
+    testWidgets('a course the family started and has not paid: pay it, or call it off after asking', (tester) async {
+      final app = await _open(
+        tester,
+        '/family/me/trials/s1',
+        report: fxReport(
+          course: 'pending_payment',
+          start: fxStart(available: false, reason: 'course_pending_own', enrollment: 'e9'),
+        ),
+      );
+      app.api.on('POST', 'family/courses/e9/cancel', {
+        'data': {
+          'enrollment_id': 'e9',
+          'status': 'ended',
+          'lessons_cancelled': 4,
+          'invoice_number': 'INV-9',
+          'message': 'أُلغيت الدورة ولم يُحسب شيء.',
+        },
+      });
+      await _tap(tester, find.byKey(const Key('report-cancel')));
+      expect(find.text('أتلغون هذه الدورة؟'), findsOneWidget);
+      await _tap(tester, find.text('نعم، ألغوها'), 20);
+      final sent = app.api.sent('POST', 'family/courses/e9/cancel').single;
+      expect(sent.headers['Idempotency-Key'], isNotNull);
       await _close(tester);
     });
   });

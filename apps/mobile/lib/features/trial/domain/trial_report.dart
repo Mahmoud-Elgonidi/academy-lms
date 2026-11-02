@@ -266,6 +266,61 @@ class TrialOffer extends Equatable {
   List<Object?> get props => [percent, endsAt, price, saving, familyDiscountBigger];
 }
 
+/// «ابدأ بهذه الباقة» (J3, classic look only): whether the family may start
+/// the course on its own now and what the start flow opens with, else why
+/// not in the API's words with its reason (a course in the subject already,
+/// the academy enrolling itself).
+class ReportStart extends Equatable {
+  const ReportStart({
+    required this.available,
+    this.whyNot,
+    this.reason,
+    this.learnerId,
+    this.subjectId,
+    this.planId,
+    this.teacherId,
+    this.enrollmentId,
+  });
+
+  static ReportStart? fromJson(Object? json) {
+    if (json is! Map<String, dynamic>) return null;
+    final why = json['why_not'] as String?;
+    return ReportStart(
+      available: json['available'] == true,
+      whyNot: why == null || why.trim().isEmpty ? null : why.trim(),
+      reason: json['reason'] as String?,
+      learnerId: json['learner_id'] as String?,
+      subjectId: json['subject_id'] as String?,
+      planId: json['plan_id'] as String?,
+      teacherId: json['teacher_id'] as String?,
+      enrollmentId: json['enrollment_id'] as String?,
+    );
+  }
+
+  final bool available;
+  final String? whyNot;
+
+  /// self_serve_off, has_course, course_pending_own, course_pending, course_paused, course_ending.
+  final String? reason;
+  final String? learnerId;
+  final String? subjectId;
+
+  /// The recommended plan while the academy offers it.
+  final String? planId;
+
+  /// The trial's teacher while they still take the learner.
+  final String? teacherId;
+
+  /// The learner's course in the subject, when that is why not.
+  final String? enrollmentId;
+
+  /// A course the family started is waiting for its first payment: it may be paid, or called off.
+  bool get ownPending => reason == 'course_pending_own' && enrollmentId != null;
+
+  @override
+  List<Object?> get props => [available, whyNot, reason, learnerId, subjectId, planId, teacherId, enrollmentId];
+}
+
 /// The teacher's card on the academy's page, when it shows one.
 class TeacherCard extends Equatable {
   const TeacherCard({required this.name, this.bio, this.photoUrl});
@@ -309,6 +364,7 @@ class TrialReport extends Equatable {
     this.offerState = OfferState.none,
     this.offer,
     this.next,
+    this.start,
   });
 
   factory TrialReport.fromJson(Map<String, dynamic> json) {
@@ -337,6 +393,7 @@ class TrialReport extends Equatable {
       offerState: OfferState.of(data['offer_state']),
       offer: TrialOffer.fromJson(data['offer']),
       next: NextTrial.fromJson(data['next_trial']),
+      start: ReportStart.fromJson(data['start']),
       stage: json['viewer_stage'] as String? ?? data['viewer_stage'] as String? ?? 'classic',
     );
   }
@@ -363,6 +420,9 @@ class TrialReport extends Equatable {
   final OfferState offerState;
   final TrialOffer? offer;
   final NextTrial? next;
+
+  /// Starting the course from the report (classic look only; null from an earlier server).
+  final ReportStart? start;
 
   /// kids, middle, teen or classic.
   final String stage;
@@ -397,6 +457,7 @@ class TrialReport extends Equatable {
     offerState,
     offer,
     next,
+    start,
     stage,
   ];
 }

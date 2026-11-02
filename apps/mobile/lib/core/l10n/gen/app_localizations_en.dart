@@ -5462,55 +5462,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trialStartPlan => 'Start with this plan';
 
   @override
-  String get trialStartAsk => 'Ask for a plan that suits';
-
-  @override
-  String get trialStartFollow => 'Follow your request';
-
-  @override
-  String get trialStartTitle => 'Let\'s get started';
-
-  @override
-  String get trialStartLead =>
-      'Signing up and paying in the app are coming soon. Send your request to the academy now: its team sets up the course and sends you the invoice, and you\'ll find their answer under Help.';
-
-  @override
-  String get trialStartOfferNote => 'The team puts the offer on your first invoice if they sign you up before it ends, so send early.';
-
-  @override
-  String get trialStartWhat => 'What we send';
-
-  @override
-  String trialStartSubject(String plan, String name) {
-    return 'Starting $plan for $name';
-  }
-
-  @override
-  String trialStartSubjectAny(String subject, String name) {
-    return 'Starting $subject for $name';
-  }
-
-  @override
-  String trialStartBody(String subject, String plan) {
-    return 'We would like to start $subject with the $plan plan, as the teacher recommended after the trial.';
-  }
-
-  @override
-  String trialStartBodyAny(String subject) {
-    return 'We would like to start $subject after the trial; please help us choose the plan.';
-  }
-
-  @override
-  String get trialStartNote => 'Anything to add? The days and times that suit you, say';
-
-  @override
-  String get trialStartSend => 'Send to the academy';
-
-  @override
-  String get trialStartSent => 'Your request reached the academy';
-
-  @override
-  String get trialStartNoHelp => 'Get in touch with the academy the usual way to start with this plan.';
+  String get trialStartAsk => 'Choose a plan and start';
 
   @override
   String get trialSecondTitle => 'Not the right teacher?';
@@ -5590,4 +5542,433 @@ class AppLocalizationsEn extends AppLocalizations {
   String trialHomeSecond(String subject) {
     return 'Try another teacher for $subject';
   }
+
+  @override
+  String get startNewCourse => 'Start a new course';
+
+  @override
+  String get startNewCourseHint => 'Choose the plan, the teacher and the times, and pay in the app.';
+
+  @override
+  String get startTitle => 'Start a course';
+
+  @override
+  String startStepOf(int n, int total) {
+    return 'Step $n of $total';
+  }
+
+  @override
+  String get startContinue => 'Continue';
+
+  @override
+  String get startChange => 'Change';
+
+  @override
+  String get startOffTitle => 'The academy enrols students itself';
+
+  @override
+  String get startOffHelp => 'Message the academy';
+
+  @override
+  String get startWhoTitle => 'Who is the course for?';
+
+  @override
+  String get startWhoLead => 'Choose who will study; each learner has their own course and invoice.';
+
+  @override
+  String get startWhoSelf => 'For me';
+
+  @override
+  String get startWhoConsent => 'We will ask for your consent to their account before starting';
+
+  @override
+  String startSubjectTitle(String name) {
+    return 'What will $name study?';
+  }
+
+  @override
+  String get startSubjectTitleSelf => 'What would you like to study?';
+
+  @override
+  String get startSubjectLead => 'Subjects with teachers taking new students now.';
+
+  @override
+  String get startSubjectNone => 'No subject is open to start right now. Message the academy for help.';
+
+  @override
+  String get startCourseWaiting => 'Waiting for payment';
+
+  @override
+  String get startCourseActive => 'Running';
+
+  @override
+  String get startCoursePaused => 'Paused';
+
+  @override
+  String get startOpenLessons => 'Open Lessons';
+
+  @override
+  String get startCancelPending => 'Call this course off';
+
+  @override
+  String get startPlanTitle => 'Choose a plan';
+
+  @override
+  String startPlanLead(String region) {
+    return 'Prices in your region ($region).';
+  }
+
+  @override
+  String get startPlanLeadAny => 'Choose what suits your time and budget.';
+
+  @override
+  String get startPlanNone => 'No plan has a price in your region yet. Message the academy.';
+
+  @override
+  String get startPlanPrivateLine => 'One-to-one lessons, at times you choose';
+
+  @override
+  String get startPlanGroupLine => 'A seat in a small group, at set times';
+
+  @override
+  String get startPlanShared => 'A shared package: one balance for all the courses on it.';
+
+  @override
+  String get startRecommended => 'The teacher recommends it';
+
+  @override
+  String startPerLesson(String price) {
+    return '$price a lesson';
+  }
+
+  @override
+  String get startBlockPrice => 'The plan\'s price';
+
+  @override
+  String get startFirstInvoice => 'First invoice';
+
+  @override
+  String startOfferApplied(String percent) {
+    return 'Trial offer ($percent%)';
+  }
+
+  @override
+  String startOfferUntil(String percent, String when) {
+    return 'The trial offer ($percent%) goes on the first invoice until $when.';
+  }
+
+  @override
+  String startRenews(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n lessons are', one: '1 lesson is');
+    return 'The next invoice comes when $_temp0 left, and you can stop any time.';
+  }
+
+  @override
+  String get startTeacherTitle => 'Choose the teacher';
+
+  @override
+  String startTeacherLead(String subject) {
+    return 'All of them take new students in $subject.';
+  }
+
+  @override
+  String get startTrialTeacher => 'Your trial teacher';
+
+  @override
+  String get startTrialTeacherGone => 'Your trial teacher no longer takes new students, so choose another teacher.';
+
+  @override
+  String get startTeacherNone => 'No teacher takes new students in this subject now. Try a group plan, or message the academy.';
+
+  @override
+  String get startGroupTitle => 'Choose a group';
+
+  @override
+  String startGroupLead(String name) {
+    return 'Open groups with a seat for $name, at their set times.';
+  }
+
+  @override
+  String get startGroupNone => 'No group is open for this plan now. Choose a one-to-one plan, or message the academy.';
+
+  @override
+  String startGroupWith(String name) {
+    return 'With $name';
+  }
+
+  @override
+  String get startGroupForming => 'Forming';
+
+  @override
+  String get startGroupRunning => 'Under way';
+
+  @override
+  String startGroupToStart(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Starts when $n more students join',
+      one: 'Starts when 1 more student joins',
+      zero: 'Starts as you join',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String startGroupFree(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n seats free', one: '1 seat free');
+    return '$_temp0';
+  }
+
+  @override
+  String startGroupNext(String when) {
+    return 'Next lesson: $when';
+  }
+
+  @override
+  String startGroupHeld(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n lessons were', one: '1 lesson was');
+    return '$_temp0 held before you join; the academy makes them up its own way.';
+  }
+
+  @override
+  String startTimesTitle(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Choose $n weekly times', one: 'Choose a weekly time');
+    return '$_temp0';
+  }
+
+  @override
+  String get startTimesTitleShared => 'Choose your weekly times';
+
+  @override
+  String get startTimesLead => 'Each on a different day, every week. The times are on your clock, each with its first lesson.';
+
+  @override
+  String get startTimesSuggested => 'We picked suggested times; change them as you like.';
+
+  @override
+  String startTimesCount(int picked, int total) {
+    return 'Chosen $picked of $total';
+  }
+
+  @override
+  String get startTimesDayFull => 'You have chosen them all. Let one go to choose another day.';
+
+  @override
+  String startTimesFirst(String day) {
+    return 'First lesson $day';
+  }
+
+  @override
+  String startTimesFrom(String day) {
+    return 'The earliest start is $day, leaving you time to pay.';
+  }
+
+  @override
+  String get startTimesNone => 'This teacher has no times free over the next four weeks.';
+
+  @override
+  String get startOtherTeacher => 'Choose another teacher';
+
+  @override
+  String get startTimesTooFew =>
+      'This teacher\'s free days are too few for this plan: each weekly lesson needs a day of its own. Choose another teacher, or a plan with fewer lessons a week.';
+
+  @override
+  String get startOtherPlan => 'Choose another plan';
+
+  @override
+  String get startReviewTitle => 'Check before confirming';
+
+  @override
+  String get startReviewLead => 'Nothing is charged now: the invoice is issued and you pay it next.';
+
+  @override
+  String get startReviewLearner => 'Learner';
+
+  @override
+  String get startReviewSubject => 'Subject';
+
+  @override
+  String get startReviewPlan => 'Plan';
+
+  @override
+  String get startReviewTeacher => 'Teacher';
+
+  @override
+  String get startReviewGroup => 'Group';
+
+  @override
+  String get startReviewTimes => 'Weekly times';
+
+  @override
+  String get startReviewFirst => 'First lesson';
+
+  @override
+  String get startReviewMoney => 'What you pay';
+
+  @override
+  String get startReviewTotal => 'Total before VAT';
+
+  @override
+  String get startReviewVat => 'VAT, if any, shows on the invoice before you pay.';
+
+  @override
+  String startReviewPayBy(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n hours', one: '1 hour');
+    return 'Pay at least $_temp0 before the first lesson; a lesson still unpaid by then is cancelled.';
+  }
+
+  @override
+  String get startReviewPayAny => 'Pay before the first lesson to keep the lessons.';
+
+  @override
+  String get startReviewCancel => 'You can call the course off before paying, free of charge.';
+
+  @override
+  String get startConfirm => 'Confirm and go to payment';
+
+  @override
+  String get startConfirmAgain => 'Confirm at the new price';
+
+  @override
+  String startConsentTitle(String name) {
+    return 'Your consent to $name\'s account';
+  }
+
+  @override
+  String get startConsentAgree => 'I agree, carry on';
+
+  @override
+  String get startBlockedTitle => 'This can\'t start right now';
+
+  @override
+  String get startBlockedOver => 'Start over';
+
+  @override
+  String get startCancelTitle => 'Call this course off?';
+
+  @override
+  String get startCancelBody => 'Its lessons and invoice are cancelled with nothing charged, and you can start again any time.';
+
+  @override
+  String get startCancelYes => 'Yes, call it off';
+
+  @override
+  String get startCancelKeep => 'Keep it';
+
+  @override
+  String get payTitle => 'Pay the invoice';
+
+  @override
+  String get payCreatedTitle => 'The course is ready: one step left';
+
+  @override
+  String payCreatedLead(String subject, String name) {
+    return 'Pay the invoice to keep $name\'s $subject lessons.';
+  }
+
+  @override
+  String payInvoiceNumber(String number) {
+    return 'Invoice $number';
+  }
+
+  @override
+  String get paySubtotal => 'Subtotal before VAT';
+
+  @override
+  String payVat(String rate) {
+    return 'VAT $rate%';
+  }
+
+  @override
+  String payVatIncluded(String rate) {
+    return 'Includes VAT $rate%';
+  }
+
+  @override
+  String get payTotal => 'Total';
+
+  @override
+  String get payPaidSoFar => 'Paid';
+
+  @override
+  String get payLeft => 'Left to pay';
+
+  @override
+  String get payCouponTitle => 'Have a coupon?';
+
+  @override
+  String get payCouponField => 'Coupon code';
+
+  @override
+  String get payCouponApply => 'Apply';
+
+  @override
+  String get payCouponRemove => 'Remove';
+
+  @override
+  String payCouponOn(String code) {
+    return 'Coupon $code applied';
+  }
+
+  @override
+  String get payOfferStays => 'Your trial offer is on the invoice, and it stays.';
+
+  @override
+  String get payNoGateway =>
+      'The academy takes no online payment for this invoice. Transfer the amount and send the receipt from Payments.';
+
+  @override
+  String get payTransferInstead => 'Paid by transfer? Send the receipt';
+
+  @override
+  String get payWaitingTitle => 'Confirming the payment with the gateway';
+
+  @override
+  String get payCheckNow => 'Check now';
+
+  @override
+  String get payTryAgain => 'Try paying again';
+
+  @override
+  String get payReadInvoice => 'Read the invoice';
+
+  @override
+  String get payVoid => 'This invoice was cancelled; there is nothing to pay.';
+
+  @override
+  String get payCancelCourse => 'Call the course off before paying';
+
+  @override
+  String get paidTitle => 'Paid: the course has begun!';
+
+  @override
+  String paidLead(String name, String subject) {
+    return 'Welcome to $subject, $name. Here is what comes next:';
+  }
+
+  @override
+  String get paidLeadPlain => 'The payment arrived; the lessons are under Lessons.';
+
+  @override
+  String get paidTeacher => 'Teacher';
+
+  @override
+  String get paidTimes => 'Weekly times';
+
+  @override
+  String get paidFirst => 'First lesson';
+
+  @override
+  String get paidFirstLater => 'When the group is complete; we will send you its time and link.';
+
+  @override
+  String get paidJoin => 'How to join';
+
+  @override
+  String get paidJoinHow => 'Open the lesson under Lessons a few minutes before it starts and tap Join.';
+
+  @override
+  String get packageTitle => 'The course joined your shared package';
 }

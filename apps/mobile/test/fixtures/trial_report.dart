@@ -39,6 +39,7 @@ Map<String, Object?> fxReport({
   String? course,
   bool card = true,
   bool second = false,
+  Map<String, Object?>? start,
 }) {
   final classic = stage == 'classic';
   final open = classic && offerState == 'open';
@@ -79,6 +80,7 @@ Map<String, Object?> fxReport({
             }
           : null,
       'next_trial': classic ? next : null,
+      'start': classic ? (start ?? fxStart(plan: plan && !withdrawn ? 'p1' : null)) : null,
     },
   };
 }
@@ -122,4 +124,16 @@ Map<String, Object?> fxSlots() => {
     {'starts_at': time('2099-11-07T16:00:00Z', '2099-11-07T19:00:00+03:00', label: 'السبت 7 نوفمبر · 7:00 م')},
     {'starts_at': time('2099-11-08T15:00:00Z', '2099-11-08T18:00:00+03:00', label: 'الأحد 8 نوفمبر · 6:00 م')},
   ],
+};
+
+/// The report's «ابدأ بهذه الباقة» (J3): open with the plan and the trial's teacher, or why not.
+Map<String, Object?> fxStart({bool available = true, String? why, String? reason, String? plan = 'p1', String? enrollment}) => {
+  'available': available,
+  'why_not': why,
+  'reason': reason,
+  'learner_id': 'c1',
+  'subject_id': 'sub1',
+  'plan_id': plan,
+  'teacher_id': available ? 't1' : null,
+  'enrollment_id': enrollment,
 };
