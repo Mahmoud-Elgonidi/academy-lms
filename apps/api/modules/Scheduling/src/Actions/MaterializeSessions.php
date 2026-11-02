@@ -16,6 +16,7 @@ use Modules\Scheduling\Domain\Models\LessonGroup;
 use Modules\Scheduling\Domain\Models\RecurringSlot;
 use Modules\Scheduling\Domain\Models\SchedulingSettings;
 use Modules\Scheduling\Domain\Models\Session;
+use Modules\Scheduling\Domain\Models\SlotSkip;
 use Modules\Scheduling\Support\CourseDays;
 use Modules\SharedKernel\Time\LocalTimeResolver;
 
@@ -25,9 +26,10 @@ use Modules\SharedKernel\Time\LocalTimeResolver;
  * date) makes a second run a no-op. A date the teacher or the student is
  * already booked on is skipped and reported, never double-booked; a date on
  * an academy holiday is left out, and so is one of a course's paused days
- * or after its end (CourseDays). A paused or ended course makes none at all.
- * Times are resolved on the teacher's clock,
- * so DST moves the student's side only. Two runs at once (the nightly one
+ * or after its end (CourseDays), and a week its weekly time was set up
+ * without (slot_skips: a family's own start skipped it). A paused or ended
+ * course makes none at all. Times are resolved on the teacher's clock, so DST
+ * moves the student's side only. Two runs at once (the nightly one
  * and a teacher change) make each date once: the unique occurrence key
  * holds it, and the run that comes second leaves the date alone.
  *
@@ -167,12 +169,15 @@ final class MaterializeSessions
             ->get();
 
         $holidays = AcademyHoliday::query()->where('ends_at', '>', $now)->where('starts_at', '<', $now->addWeeks($horizon + 1))->get();
+        $without = SlotSkip::query()->whereIn('slot_id', $slots->pluck('id'))->get()
+            ->groupBy('slot_id')->map(fn ($skips) => $skips->map(fn (SlotSkip $s) => $s->on_date->toDateString())->all());
 
         $created = [];
         $skipped = [];
         foreach ($slots as $slot) {
             $today = $now->setTimezone($slot->anchor_tz)->startOfDay();
             $from = $slot->startsOn()->max($today);
+            $skips = $without->get($slot->id, []);
             $to = $today->addWeeks($horizon);
             if ($slot->endsOn() !== null) {
                 $to = $to->min($slot->endsOn());
@@ -183,7 +188,7 @@ final class MaterializeSessions
 
             foreach ($dates as $date) {
                 $key = "{$slot->id}:{$date}";
-                if (in_array($key, $done, true)) {
+                if (in_array($key, $done, true) || in_array($date, $skips, true)) {
                     continue;
                 }
                 $startsAt = $this->resolver->resolve($date, $slot->weeklyTime()->clock(), $slot->anchor_tz)->utc;

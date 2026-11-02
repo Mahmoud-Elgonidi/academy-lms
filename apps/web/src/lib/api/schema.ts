@@ -3142,10 +3142,11 @@ export interface paths {
         };
         /**
          * A teacher's weekly times, or the open groups, for a plan
-         * @description A private plan (teacher_id required): the teacher's weekly times on the viewer's clock, each free in all of the first
-         *     four weeks, on whole and half hours, never when the learner already has a lesson, from the first day the family may
-         *     start (time to pay before an unpaid lesson would be cancelled), with each time's first lesson and a suggested pattern
-         *     of per_week days. Choose per_week of them (one a day) and send their keys. A group plan: the open groups of its shape
+         * @description A private plan (teacher_id required): the teacher's weekly times on the viewer's clock, each free in the first four
+         *     weeks but at most one skipped for an academy holiday or the teacher's leave (no lesson that day; skips says which and
+         *     why), on whole and half hours, never when the learner already has a lesson, from the first day the family may start
+         *     (time to pay before an unpaid lesson would be cancelled), with each time's first lesson (the first week not skipped)
+         *     and a suggested pattern of per_week days (times with no week skipped first). Choose per_week of them (one a day) and send their keys. A group plan: the open groups of its shape
          *     with a seat for the learner (teacher_id narrows them). 422 start-refused (teacher_unavailable, no_plan, ...).
          */
         get: operations["family.start.slots"];
@@ -15868,8 +15869,20 @@ export interface operations {
                             } | null;
                             /** @description Lessons booked so far (more are made week by week). */
                             lessons: number;
-                            /** @description Days skipped because the teacher or the learner was already booked (Y-m-d on the teacher's clock). */
+                            /** @description Days with no lesson (Y-m-d on the teacher's clock): the skipped weeks below, and any the teacher or the learner was already booked on. */
                             skipped_dates: unknown[];
+                            /** @description The first weeks the course starts without (an academy holiday or the teacher's leave), as GET family/start/slots gave them. */
+                            skipped: {
+                                date: string;
+                                reason: string;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: string;
+                                    label: string;
+                                } | null;
+                                text: string;
+                            }[];
                             /** @description It joined the learner's shared package: its lessons draw on that balance, with no invoice of its own. */
                             joined_package: boolean;
                             group: {

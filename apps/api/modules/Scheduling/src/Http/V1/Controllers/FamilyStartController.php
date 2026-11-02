@@ -213,10 +213,11 @@ final class FamilyStartController
     /**
      * A teacher's weekly times, or the open groups, for a plan.
      *
-     * A private plan (teacher_id required): the teacher's weekly times on the viewer's clock, each free in all of the first
-     * four weeks, on whole and half hours, never when the learner already has a lesson, from the first day the family may
-     * start (time to pay before an unpaid lesson would be cancelled), with each time's first lesson and a suggested pattern
-     * of per_week days. Choose per_week of them (one a day) and send their keys. A group plan: the open groups of its shape
+     * A private plan (teacher_id required): the teacher's weekly times on the viewer's clock, each free in the first four
+     * weeks but at most one skipped for an academy holiday or the teacher's leave (no lesson that day; skips says which and
+     * why), on whole and half hours, never when the learner already has a lesson, from the first day the family may start
+     * (time to pay before an unpaid lesson would be cancelled), with each time's first lesson (the first week not skipped)
+     * and a suggested pattern of per_week days (times with no week skipped first). Choose per_week of them (one a day) and send their keys. A group plan: the open groups of its shape
      * with a seat for the learner (teacher_id narrows them). 422 start-refused (teacher_unavailable, no_plan, ...).
      */
     public function slots(Request $request, StartSlots $slots, StartOwnCourse $start): JsonResponse
@@ -281,8 +282,10 @@ final class FamilyStartController
                 'start' => $c->studentTime,
                 'end' => $c->studentEnd($plan->sessionMinutes),
                 'label' => $this->weekly($c->studentWeekday, $c->studentTime),
-                /** This weekly time's first lesson. */
+                /** This weekly time's first lesson (the first week not skipped). */
                 'first' => $this->time->present(CarbonImmutable::createFromTimestamp($c->occurrences[0], 'UTC'), $zone),
+                /** Weeks among the first four with no lesson at this time (an academy holiday or the teacher's leave): never booked. */
+                'skips' => $this->skipped($c->skipped, $zone),
             ];
         }
         $first = app()->getLocale() === 'ar' ? 6 : 1;
@@ -392,8 +395,10 @@ final class FamilyStartController
             'first_lesson' => $this->time->present($done->firstLesson, $zone),
             /** Lessons booked so far (more are made week by week). */
             'lessons' => $done->lessons,
-            /** Days skipped because the teacher or the learner was already booked (Y-m-d on the teacher's clock). */
+            /** Days with no lesson (Y-m-d on the teacher's clock): the skipped weeks below, and any the teacher or the learner was already booked on. */
             'skipped_dates' => array_values(array_map('strval', $done->skippedDates)),
+            /** The first weeks the course starts without (an academy holiday or the teacher's leave), as GET family/start/slots gave them. */
+            'skipped' => $this->skipped($done->skippedWeeks, $zone),
             /** It joined the learner's shared package: its lessons draw on that balance, with no invoice of its own. */
             'joined_package' => (bool) $done->joinedPackage,
             'group' => $group === null ? null : [
@@ -509,6 +514,30 @@ final class FamilyStartController
     }
 
     /** A weekly time as a family reads it ("الثلاثاء 6:00 م"). */
+    /**
+     * Weeks with no lesson, on the viewer's clock: the day (Y-m-d), why (holiday: the academy's; teacher_leave: never the
+     * leave's own reason), when the lesson would have been, and the note to show («لا حصة يوم الثلاثاء 17 نوفمبر: إجازة الأكاديمية»).
+     *
+     * @param  list<array{at: int, date: string, reason: string}>  $weeks
+     * @return list<array{date: string, reason: string, at: array<string, string>|null, text: string}>
+     */
+    private function skipped(array $weeks, string $zone): array
+    {
+        $out = [];
+        foreach ($weeks as $week) {
+            $at = CarbonImmutable::createFromTimestamp($week['at'], 'UTC');
+            $day = $at->setTimezone($zone);
+            $out[] = [
+                'date' => $day->toDateString(),
+                'reason' => (string) $week['reason'],
+                'at' => $this->time->present($at, $zone),
+                'text' => (string) __('scheduling::start.skipped.'.$week['reason'], ['day' => $day->locale(app()->getLocale())->translatedFormat('l j F')]),
+            ];
+        }
+
+        return $out;
+    }
+
     private function weekly(int $weekday, string $start): string
     {
         return __('scheduling::shifts.days.'.$weekday).' '.Clock::wall($start);

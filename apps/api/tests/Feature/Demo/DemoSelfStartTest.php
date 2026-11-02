@@ -19,12 +19,12 @@ use Modules\Scheduling\Database\Seeders\DemoShiftsSeeder;
 
 /*
  * The family starts a course on its own in the demo (docs/architecture/02,
- * section 27, J3): a weekly time is offered only when it is free in all of the
- * first four weeks, and the demo's mid-term holiday and Nour's leave take whole
- * weekdays out of them, so the Quran and Tajweed teachers work evenings on more
- * days (DemoOpenHoursSeeder) and Sara, who gave Jana (13) her Tajweed trial,
- * teaches middle school: Jana's mother can start the plans of two and three
- * lessons a week from the report, with Sara.
+ * section 27, J3): a weekly time is offered when it is free in its first four
+ * weeks but one skipped for the demo's mid-term holiday or Nour's leave (no
+ * lesson that day, said with the time), the Quran and Tajweed teachers work
+ * evenings on more days (DemoOpenHoursSeeder) and Sara, who gave Jana (13)
+ * her Tajweed trial, teaches middle school: Jana's mother can start the plans
+ * of two and three lessons a week from the report, with Sara.
  */
 
 beforeEach(function () {

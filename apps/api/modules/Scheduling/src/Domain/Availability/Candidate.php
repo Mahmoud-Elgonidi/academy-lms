@@ -12,6 +12,7 @@ final readonly class Candidate
     /**
      * @param  list<int>  $occurrences  UTC start of every week's session in the horizon
      * @param  list<string>  $conflictDates  teacher-local dates (Y-m-d) where it is not free
+     * @param  list<array{at: int, date: string, reason: string}>  $skipped  weeks left out (J3: a holiday or the teacher's leave; at UTC, date teacher-local)
      */
     public function __construct(
         public int $teacherWeekday,
@@ -23,13 +24,14 @@ final readonly class Candidate
         public array $occurrences,
         public array $conflictDates,
         public bool $typed = false,
+        public array $skipped = [],
     ) {}
 
     /** The same time, marked as typed by hand ("another time…") rather than proposed. */
     public function asTyped(): self
     {
         return new self($this->teacherWeekday, $this->teacherTime, $this->studentWeekday, $this->studentTime,
-            $this->coverage, $this->weeks, $this->occurrences, $this->conflictDates, true);
+            $this->coverage, $this->weeks, $this->occurrences, $this->conflictDates, true, $this->skipped);
     }
 
     /** The student-clock end of a lesson of this length ("18:25"; past midnight it wraps). */

@@ -35,6 +35,11 @@ return [
         'not_for_plan' => 'عرضكم لا يشمل هذه الباقة، فبدأ الكورس بسعرها العادي.',
         'package' => 'انضم الكورس إلى باقتكم المشتركة، فلا فاتورة جديدة له.',
     ],
+    // A week the course starts without (StartSlots: at most one of its first four per weekly time); never the leave's own reason.
+    'skipped' => [
+        'holiday' => 'لا حصة يوم :day: إجازة الأكاديمية',
+        'teacher_leave' => 'لا حصة يوم :day: إجازة المعلّم',
+    ],
     'pay' => [
         'by' => 'ادفعوا قبل :when لتبقى الحصة الأولى في موعدها؛ فالحصة التي لم تُدفع قبل موعدها بـ:hours ساعة تُلغى.',
         'any_time' => 'ادفعوا قبل الحصة الأولى لتثبيت الحصص.',

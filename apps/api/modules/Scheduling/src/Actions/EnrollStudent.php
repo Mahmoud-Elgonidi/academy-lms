@@ -2,6 +2,7 @@
 
 namespace Modules\Scheduling\Actions;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Contracts\BillingApi;
@@ -14,6 +15,8 @@ use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Contracts\DTOs\EnrollmentBooked;
 use Modules\Scheduling\Contracts\DTOs\EnrollmentTerms;
 use Modules\Scheduling\Domain\Models\BookingHold;
+use Modules\Scheduling\Domain\Models\RecurringSlot;
+use Modules\Scheduling\Domain\Models\SlotSkip;
 use Modules\Scheduling\Domain\Slots\WeeklyTime;
 use Modules\Scheduling\Support\MinorsGuard;
 
@@ -29,7 +32,10 @@ use Modules\Scheduling\Support\MinorsGuard;
  * the package is paid. A shared plan's weekly lessons are across courses,
  * so a course on one only has to match its lesson length. A child whose
  * account still waits for a guardian's consent has the guardians asked now
- * (a free trial did not ask them).
+ * (a free trial did not ask them). Weeks the course starts without ($skip:
+ * a family's own start skips a holiday or the teacher's leave among its
+ * first weeks, StartSlots) are kept on their weekly time, so no run makes
+ * their lessons.
  */
 final class EnrollStudent
 {
@@ -45,7 +51,10 @@ final class EnrollStudent
         private readonly PeopleApi $people,
     ) {}
 
-    public function handle(string $batchId, string $studentId, string $subjectId, EnrollmentTerms $terms, string $coordinatorId): EnrollmentBooked
+    /**
+     * @param  list<array{at: int, reason: string}>  $skip  weeks with no lesson: the UTC start each would have had, and why
+     */
+    public function handle(string $batchId, string $studentId, string $subjectId, EnrollmentTerms $terms, string $coordinatorId, array $skip = []): EnrollmentBooked
     {
         $holds = $this->batch->handle($batchId, $coordinatorId);
         $first = $holds->first();
@@ -80,7 +89,7 @@ final class EnrollStudent
             throw ValidationException::withMessages(['coupon' => __('scheduling::find.errors.coupon_on_package')]);
         }
 
-        return DB::transaction(function () use ($first, $teacherTz, $times, $studentId, $subjectId, $terms, $coordinatorId, $subject, $batchId, $plan, $package) {
+        return DB::transaction(function () use ($first, $teacherTz, $times, $studentId, $subjectId, $terms, $coordinatorId, $subject, $batchId, $plan, $package, $skip) {
             $enrollmentId = $this->enrollments->create(new NewEnrollment($studentId, $subjectId, $first->teacher_id, min(array_column($times, 'from')), $coordinatorId));
 
             $invoice = null;
@@ -107,7 +116,14 @@ final class EnrollStudent
                 ));
             }
 
-            $this->slots->handle($enrollmentId, $first->teacher_id, $studentId, $teacherTz, $times, $coordinatorId);
+            $slots = $this->slots->handle($enrollmentId, $first->teacher_id, $studentId, $teacherTz, $times, $coordinatorId);
+            foreach ($skip as $week) {
+                $local = CarbonImmutable::createFromTimestamp($week['at'], $teacherTz);
+                $slot = collect($slots)->first(fn (RecurringSlot $s) => $s->weekday === $local->dayOfWeekIso && substr($s->local_start, 0, 5) === $local->format('H:i'));
+                if ($slot !== null) {
+                    SlotSkip::query()->create(['slot_id' => $slot->id, 'on_date' => $local->toDateString(), 'reason' => $week['reason']]);
+                }
+            }
             BookingHold::query()->where('batch_id', $batchId)->delete();
             $result = $this->materialize->handle([$enrollmentId], actorId: $coordinatorId);
             $this->fund->handle($enrollmentId);

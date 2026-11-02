@@ -47,9 +47,14 @@ use Modules\SharedKernel\Plans\PlanLimitReached;
  *    client shows the wording and agrees through POST family/consents/{id});
  *  - no course of the learner in the subject that has not ended;
  *  - the teacher still takes them (StartRules::teachers, MinorsGuard), the
- *    plan's number of weekly times, one a day, each still free in all of
- *    its first weeks (else time_taken, with the fresh times), held and
- *    confirmed (PlaceBookingHold, EnrollStudent);
+ *    plan's number of weekly times, one a day, each still free in its first
+ *    weeks but a skipped one (StartSlots: an academy holiday or the
+ *    teacher's leave, at most WEEKS - MIN_WEEKS of them; else time_taken,
+ *    with the fresh times), its lessons held and confirmed without the
+ *    skipped weeks (PlaceBookingHold, EnrollStudent, which keeps them off
+ *    the weekly time); when the skipped weeks would carry the first block's
+ *    last lesson past the plan's validity, the course keeps the days
+ *    (course_starts.extra_validity_days, given at the first payment);
  *  - a group with a seat for them, of the plan's shape (JoinGroup's lock and
  *    rules: seats, ages, minors with adults, level);
  *  - room in the academy's plan (CreateEnrollment: academy_full).
@@ -140,6 +145,8 @@ final class StartOwnCourse
                 'enrollment_id' => $enrollmentId, 'learner_id' => $start->learnerId, 'started_by' => $start->viewerId, 'payer_id' => $start->viewerId,
                 'plan_id' => $plan->id, 'teacher_id' => $teacherId, 'group_id' => $groupId, 'price_minor' => $price->minor, 'currency' => $price->currency,
                 'offer_applied' => $offer === 'applied',
+                // Days the first block lasts longer for its skipped weeks; none when it joined a package's balance.
+                'extra_validity_days' => $invoiceId === null ? 0 : (int) ($extra['extra_days'] ?? 0),
             ]);
             app(AuditTrail::class)->record('enrollment.started_own', 'enrollment', $enrollmentId, array_filter([
                 'plan' => $plan->name, 'price' => $price->format(), 'format' => $plan->group ? 'group' : 'private', 'offer' => $offer, 'package' => $package ?: null,
@@ -162,7 +169,7 @@ final class StartOwnCourse
                 weeklyTimes: $this->times->weekly($enrollmentId, $now),
                 firstLesson: $first['at'] ?? null,
                 lessons: (int) ($extra['lessons'] ?? 0),
-                skippedDates: $extra['skipped'] ?? [],
+                skippedDates: collect([...array_column($extra['weeks'] ?? [], 'date'), ...($extra['skipped'] ?? [])])->map(fn ($d) => (string) $d)->unique()->sort()->values()->all(),
                 joinedPackage: $package,
                 offer: $offer,
                 offerPercentBp: $percent,
@@ -171,6 +178,7 @@ final class StartOwnCourse
                 capacity: $extra['capacity'] ?? null,
                 groupStarted: (bool) ($extra['started'] ?? false),
                 payBy: $payBy,
+                skippedWeeks: $extra['weeks'] ?? [],
             );
         });
     }
@@ -231,7 +239,10 @@ final class StartOwnCourse
             throw StartRefused::because('times_count', ['count' => count($chosen)]);
         }
 
+        // The lessons only: a skipped week (a holiday, the teacher's leave) is booked never, and kept off the weekly time.
         $occurrences = array_merge(...array_map(fn (Candidate $c) => $c->occurrences, $chosen));
+        $weeks = array_merge(...array_map(fn (Candidate $c) => $c->skipped, $chosen));
+        usort($weeks, fn (array $a, array $b) => $a['at'] <=> $b['at']);
         try {
             $batch = $this->hold->handle((string) $teacher->id, $start->learnerId, $occurrences, $plan->sessionMinutes, $start->viewerId);
         } catch (ValidationException) {
@@ -241,7 +252,7 @@ final class StartOwnCourse
         $terms = fn (?string $c) => new EnrollmentTerms($plan->id, $start->viewerId, $region->id, $c);
         $ended = false;
         try {
-            $booked = $this->enrol->handle($batch, $start->learnerId, $start->subjectId, $terms($code), $start->viewerId);
+            $booked = $this->enrol->handle($batch, $start->learnerId, $start->subjectId, $terms($code), $start->viewerId, $weeks);
         } catch (PlanLimitReached $e) {
             throw $e;
         } catch (ValidationException $e) {
@@ -249,12 +260,14 @@ final class StartOwnCourse
                 throw $e;
             }
             // The offer's moment passed between the quote and the invoice: the course starts at the plain price.
-            $booked = $this->enrol->handle($batch, $start->learnerId, $start->subjectId, $terms(null), $start->viewerId);
+            $booked = $this->enrol->handle($batch, $start->learnerId, $start->subjectId, $terms(null), $start->viewerId, $weeks);
             $ended = true;
         }
 
-        return [$booked->enrollmentId, $booked->invoice?->id, (string) $teacher->id, null,
-            ['lessons' => $booked->sessions, 'skipped' => $booked->skippedDates], $ended];
+        return [$booked->enrollmentId, $booked->invoice?->id, (string) $teacher->id, null, [
+            'lessons' => $booked->sessions, 'skipped' => $booked->skippedDates, 'weeks' => $weeks,
+            'extra_days' => StartSlots::extraDays($chosen, $plan->sessionsPerBlock, $plan->validityDays, $now),
+        ], $ended];
     }
 
     /** @return array{0: string, 1: ?string, 2: string, 3: string, 4: array<string, mixed>, 5: bool} */

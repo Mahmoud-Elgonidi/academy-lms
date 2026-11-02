@@ -35,6 +35,11 @@ return [
         'not_for_plan' => 'Your offer does not cover this plan, so the course started at its usual price.',
         'package' => 'The course joined your shared package, so it has no invoice of its own.',
     ],
+    // A week the course starts without (StartSlots: at most one of its first four per weekly time); never the leave's own reason.
+    'skipped' => [
+        'holiday' => "No lesson on :day: the academy's holiday",
+        'teacher_leave' => 'No lesson on :day: the teacher is on leave',
+    ],
     'pay' => [
         'by' => 'Pay before :when to keep the first lesson; a lesson still unpaid :hours hours before it starts is cancelled.',
         'any_time' => 'Pay before the first lesson to keep the lessons.',

@@ -64,6 +64,7 @@ use Modules\Scheduling\Filament\Pages\TimeOffReview;
 use Modules\Scheduling\Filament\Teacher\MyTimeOff;
 use Modules\Scheduling\Filament\Teacher\MyWeek;
 use Modules\Scheduling\Listeners\FundSessionsFromNewCredit;
+use Modules\Scheduling\Listeners\GiveSkippedWeeksBack;
 use Modules\Scheduling\Listeners\SendSchedulingNotifications;
 use Modules\Scheduling\Listeners\TellGroupStarted;
 use Modules\Scheduling\Listeners\WelcomeToCourse;
@@ -189,6 +190,7 @@ final class SchedulingServiceProvider extends ServiceProvider
         Event::listen(EnrollmentPaused::class, [SendSchedulingNotifications::class, 'coursePaused']);
         Event::listen(EnrollmentResumed::class, [SendSchedulingNotifications::class, 'courseResumed']);
         Event::listen(EnrollmentEnded::class, [SendSchedulingNotifications::class, 'courseEnded']);
+        Event::listen(EnrollmentActivated::class, GiveSkippedWeeksBack::class);
         Event::listen(EnrollmentActivated::class, WelcomeToCourse::class);
         foreach ([ShiftProposalApproved::class, ShiftProposalRejected::class, ShiftProposalChangesRequested::class, ShiftProposalCountered::class] as $answer) {
             Event::listen($answer, [SendSchedulingNotifications::class, 'proposalAnswered']);

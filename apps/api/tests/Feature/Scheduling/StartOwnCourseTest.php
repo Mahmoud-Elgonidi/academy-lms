@@ -37,7 +37,10 @@ use Modules\Scheduling\Actions\ConfirmBooking;
 use Modules\Scheduling\Actions\Courses\PauseEnrollment;
 use Modules\Scheduling\Actions\EnrollStudent;
 use Modules\Scheduling\Actions\Groups\CreateGroup;
+use Modules\Scheduling\Actions\Holidays\DeclareHoliday;
+use Modules\Scheduling\Actions\MaterializeSessions;
 use Modules\Scheduling\Actions\PlaceBookingHold;
+use Modules\Scheduling\Actions\TimeOff\RequestTimeOff;
 use Modules\Scheduling\Contracts\DTOs\EnrollmentTerms;
 use Modules\Scheduling\Contracts\DTOs\NewGroup;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
@@ -673,4 +676,102 @@ it('catches up the learners and parents the CRM made before, from their lead, on
     $this->artisan('crm:learner-countries')->assertSuccessful();
     $this->actAsTenant($this->academy);
     expect($people->countryOf($this->yara))->toBe('AE');
+});
+
+/** The days (on the Cairo teacher's clock) of a course's lessons that are still on. */
+function j3LessonDays(string $enrollmentId): array
+{
+    return DB::table('sessions')->where('enrollment_id', $enrollmentId)->where('status', 'scheduled')->orderBy('starts_at')->pluck('starts_at')
+        ->map(fn ($at) => CarbonImmutable::parse($at)->setTimezone('Africa/Cairo')->toDateString())->all();
+}
+
+/** The weekly times offered on a weekday (on the family's clock). */
+function j3TimesOn(array $slots, int $weekday): array
+{
+    return collect($slots['days'])->firstWhere('weekday', $weekday)['times'] ?? [];
+}
+
+it('keeps a weekday with an academy holiday in its first weeks: that week is skipped, never booked, and said', function () {
+    j3Consent();
+    // The first day is Friday 9 October: Tuesdays 13, 20, 27 October and 3 November; the academy is closed on the 20th.
+    app(DeclareHoliday::class)->handle('Mid-term break', '2026-10-20', '2026-10-20', $this->admin->id);
+
+    $slots = j3Slots();
+    $tuesday = j3TimesOn($slots, 2);
+    expect(array_column($slots['days'], 'weekday'))->toEqualCanonicalizing([2, 6])
+        ->and($slots['suggested'])->toHaveCount(2)
+        ->and($tuesday)->not->toBeEmpty();
+    foreach ($tuesday as $time) {
+        expect($time['skips'])->toHaveCount(1)
+            ->and($time['skips'][0])->toMatchArray(['date' => '2026-10-20', 'reason' => 'holiday'])
+            ->and($time['skips'][0]['text'])->toBe('لا حصة يوم الثلاثاء 20 أكتوبر: إجازة الأكاديمية')
+            // The first lesson is the first week not skipped.
+            ->and(CarbonImmutable::parse($time['first']['utc'])->setTimezone('Asia/Riyadh')->toDateString())->toBe('2026-10-13');
+    }
+    expect(collect(j3TimesOn($slots, 6))->every(fn ($t) => $t['skips'] === []))->toBeTrue();
+
+    $answer = j3Start(['times' => $slots['suggested']])->assertCreated()->json('data');
+    expect($answer['skipped_dates'])->toBe(['2026-10-20'])
+        ->and($answer['skipped'])->toHaveCount(1)
+        ->and($answer['skipped'][0])->toMatchArray(['date' => '2026-10-20', 'reason' => 'holiday'])
+        ->and($answer['skipped'][0]['text'])->toContain('إجازة الأكاديمية');
+    $days = j3LessonDays($answer['enrollment_id']);
+    expect($days)->not->toContain('2026-10-20')->toContain('2026-10-13')->toContain('2026-10-27')
+        ->and(DB::table('sessions')->where('enrollment_id', $answer['enrollment_id'])->count())->toBe($answer['lessons']);
+    // The validity (42 days from now) reaches the eighth lesson anyway: nothing to give back.
+    expect(CourseStart::query()->where('enrollment_id', $answer['enrollment_id'])->value('extra_validity_days'))->toBe(0);
+});
+
+it('keeps a weekday with the teacher\'s leave in its first weeks, never saying why, and never books that day, now or later', function () {
+    j3Consent();
+    app(RequestTimeOff::class)->handle($this->teacher->id, '2026-10-24', '2026-10-24', null, null, 'personal', 'My sister\'s wedding', $this->admin->id, grant: true);
+
+    $slots = j3Slots();
+    $saturday = j3TimesOn($slots, 6);
+    expect($saturday)->not->toBeEmpty();
+    foreach ($saturday as $time) {
+        expect($time['skips'][0])->toMatchArray(['date' => '2026-10-24', 'reason' => 'teacher_leave'])
+            ->and($time['skips'][0]['text'])->toBe('لا حصة يوم السبت 24 أكتوبر: إجازة المعلّم');
+    }
+    expect(json_encode($slots))->not->toContain('wedding')->not->toContain('personal');
+
+    $answer = j3Start(['times' => $slots['suggested']])->assertCreated()->json('data');
+    expect($answer['skipped'][0]['reason'])->toBe('teacher_leave')
+        ->and($answer['skipped_dates'])->toBe(['2026-10-24'])
+        ->and(json_encode($answer))->not->toContain('wedding')
+        ->and(j3LessonDays($answer['enrollment_id']))->not->toContain('2026-10-24')->toContain('2026-10-17')->toContain('2026-10-31');
+
+    // The nightly run (and any later one) leaves the day out too, while the teacher's other lessons that day are the office's to cover.
+    app(MaterializeSessions::class)->handle();
+    expect(j3LessonDays($answer['enrollment_id']))->not->toContain('2026-10-24')
+        ->and(DB::table('slot_skips')->where('on_date', '2026-10-24')->value('reason'))->toBe('teacher_leave');
+});
+
+it('takes a weekday away when two of its first four weeks are lost, and an existing lesson still blocks its time', function () {
+    j3Consent();
+    app(DeclareHoliday::class)->handle('First break', '2026-10-13', '2026-10-13', $this->admin->id);
+    app(DeclareHoliday::class)->handle('Second break', '2026-10-20', '2026-10-20', $this->admin->id);
+
+    $slots = j3Slots();
+    expect(array_column($slots['days'], 'weekday'))->toBe([6])
+        ->and($slots['suggested'])->toBeNull();
+    // The adult student's Saturday lessons with her at 18:00 Cairo stay hers: that time is not offered, holiday or not.
+    expect(collect(j3TimesOn($slots, 6))->pluck('start')->all())->not->toContain('18:00');
+});
+
+it('gives the first block the days its skipped week takes, once paid, when the plan\'s validity would end before its last lesson', function () {
+    j3Consent();
+    // 28 days from now end on 3 November, the eighth lesson's day; the holiday moves the eighth to Saturday 7 November.
+    $this->plan->update(['validity_days' => 28]);
+    app(DeclareHoliday::class)->handle('Mid-term break', '2026-10-20', '2026-10-20', $this->admin->id);
+
+    $answer = j3Start()->assertCreated()->json('data');
+    expect(CourseStart::query()->where('enrollment_id', $answer['enrollment_id'])->value('extra_validity_days'))->toBe(4);
+
+    app(BillingApi::class)->recordPayment($answer['invoice']['id'], 'cash', Money::of(36000, 'SAR'), null, CarbonImmutable::now(), $this->admin->id);
+    $funded = DB::table('sessions')->where('enrollment_id', $answer['enrollment_id'])->where('funding_status', 'funded')->orderBy('starts_at')->pluck('starts_at')
+        ->map(fn ($at) => CarbonImmutable::parse($at)->setTimezone('Africa/Cairo')->toDateString())->all();
+    expect($funded)->toHaveCount(8)->toContain('2026-11-07')->not->toContain('2026-10-20');
+    $account = app(EnrollmentApi::class)->find($answer['enrollment_id'])->creditAccountId;
+    expect(DB::table('credit_entries')->where('account_id', $account)->where('type', 'extend')->count())->toBe(1);
 });

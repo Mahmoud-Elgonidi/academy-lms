@@ -33846,7 +33846,7 @@
         "/v1/family/start/slots": {
             "get": {
                 "operationId": "family.start.slots",
-                "description": "A private plan (teacher_id required): the teacher's weekly times on the viewer's clock, each free in all of the first\nfour weeks, on whole and half hours, never when the learner already has a lesson, from the first day the family may\nstart (time to pay before an unpaid lesson would be cancelled), with each time's first lesson and a suggested pattern\nof per_week days. Choose per_week of them (one a day) and send their keys. A group plan: the open groups of its shape\nwith a seat for the learner (teacher_id narrows them). 422 start-refused (teacher_unavailable, no_plan, ...).",
+                "description": "A private plan (teacher_id required): the teacher's weekly times on the viewer's clock, each free in the first four\nweeks but at most one skipped for an academy holiday or the teacher's leave (no lesson that day; skips says which and\nwhy), on whole and half hours, never when the learner already has a lesson, from the first day the family may start\n(time to pay before an unpaid lesson would be cancelled), with each time's first lesson (the first week not skipped)\nand a suggested pattern of per_week days (times with no week skipped first). Choose per_week of them (one a day) and send their keys. A group plan: the open groups of its shape\nwith a seat for the learner (teacher_id narrows them). 422 start-refused (teacher_unavailable, no_plan, ...).",
                 "summary": "A teacher's weekly times, or the open groups, for a plan",
                 "tags": [
                     "Scheduling"
@@ -35334,8 +35334,58 @@
                                                 },
                                                 "skipped_dates": {
                                                     "type": "array",
-                                                    "description": "Days skipped because the teacher or the learner was already booked (Y-m-d on the teacher's clock).",
+                                                    "description": "Days with no lesson (Y-m-d on the teacher's clock): the skipped weeks below, and any the teacher or the learner was already booked on.",
                                                     "items": {}
+                                                },
+                                                "skipped": {
+                                                    "type": "array",
+                                                    "description": "The first weeks the course starts without (an academy holiday or the teacher's leave), as GET family/start/slots gave them.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "date": {
+                                                                "type": "string"
+                                                            },
+                                                            "reason": {
+                                                                "type": "string"
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            },
+                                                            "text": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "date",
+                                                            "reason",
+                                                            "at",
+                                                            "text"
+                                                        ]
+                                                    }
                                                 },
                                                 "joined_package": {
                                                     "type": "boolean",
@@ -35718,6 +35768,7 @@
                                                 "first_lesson",
                                                 "lessons",
                                                 "skipped_dates",
+                                                "skipped",
                                                 "joined_package",
                                                 "group",
                                                 "invoice",
