@@ -4,10 +4,11 @@ import { HifzCard } from '@/components/hifz/card';
 import { Icon } from '@/components/icons';
 import { FormatBadge } from '@/components/lesson-format';
 import { Card, Empty, Progress, SectionTitle, buttonLook, join } from '@/components/ui';
-import type { FamilyLesson, Homework, Invoices, Learner } from '@/lib/family/types';
+import type { CourseBalance, FamilyLesson, Homework, Invoices, Learner } from '@/lib/family/types';
 import { hasStars, hereIsland } from '@/lib/journey/journey';
 import type { JourneyMap } from '@/lib/journey/types';
 import { courseGroup } from '@/lib/lesson-format';
+import { CourseBalanceCard } from './course-balance';
 import { FamilyLessonCard } from './lesson-card';
 
 /** The lesson on now or next to come: booked, and not over by the clock. */
@@ -121,19 +122,42 @@ async function StartCourseCard() {
   );
 }
 
-/** A guardian's (or an adult student's) home: the next lesson, lessons left and what is owed, the journey's card (and today's hifz review), homework, and notices. */
-export async function ClassicHome({ name, learner, lessons, notices, balanceLessons, invoices, homework, journey }: {
+/** A guardian adds a child of theirs (J5a), then goes straight to choosing the child's course. */
+async function AddChildCard() {
+  const t = await getTranslations('addChild');
+  return (
+    <Link href="/family/children/new" className="lift flex items-center gap-3 rounded-card border border-dashed border-line bg-white p-4" data-add-child-card>
+      <span className="grid size-11 shrink-0 place-items-center rounded-control bg-brand-soft text-brand-strong" aria-hidden="true">
+        <Icon name="people" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold">{t('action')}</span>
+        <span className="block text-sm text-muted">{t('actionHint')}</span>
+      </span>
+      <Icon name="chevron" className="shrink-0 text-muted rtl:-scale-x-100" />
+    </Link>
+  );
+}
+
+/** A guardian's (or an adult student's) home: the next lesson, each course's balance and what is owed, the journey's card (and today's hifz review), homework, and notices. */
+export async function ClassicHome({ name, learner, lessons, notices, courses, guardian, invoices, homework, journey }: {
   name: string;
   learner: Learner;
   lessons: FamilyLesson[];
   notices: string[];
-  balanceLessons: number;
+  /** The learner's courses, each with its balance (GET family/courses/{enrollment}/balance). */
+  courses: { subject: string | null; balance: CourseBalance }[];
+  /** Whether the person signed in is a guardian (they may add a child). */
+  guardian: boolean;
   invoices: Invoices | null;
   homework: Homework[];
   journey: JourneyMap;
 }) {
   const t = await getTranslations('family');
   const due = invoices?.data.find((i) => i.outstanding_minor > 0);
+  // Only owed beyond what the course cards already show with their own "pay" (another invoice: extra lessons, an older one).
+  const shownOnCards = new Set(courses.map((c) => c.balance.waiting_invoice?.id).filter(Boolean));
+  const owedElsewhere = invoices?.data.some((i) => i.outstanding_minor > 0 && !shownOnCards.has(i.id)) ?? false;
   return (
     <div className="stagger space-y-5">
       <header>
@@ -141,12 +165,20 @@ export async function ClassicHome({ name, learner, lessons, notices, balanceLess
         {!learner.is_self ? <p className="text-muted">{t('progressOf', { name: learner.name })}</p> : null}
       </header>
       <NextLesson lesson={nextOf(lessons)} />
+      <section aria-labelledby="home-balance">
+        <SectionTitle id="home-balance">{t('balance')}</SectionTitle>
+        {courses.length === 0 ? (
+          <Empty>{t('lessonsLeft', { n: 0 })}</Empty>
+        ) : (
+          <div className={join('grid gap-3', courses.length > 1 && 'lg:grid-cols-2')}>
+            {courses.map((c) => (
+              <CourseBalanceCard key={c.balance.enrollment_id} balance={c.balance} subject={c.subject} href={`/family/progress/${c.balance.enrollment_id}`} />
+            ))}
+          </div>
+        )}
+      </section>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Card>
-          <p className="text-sm text-muted">{t('balance')}</p>
-          <p className="mt-1 font-heading text-2xl font-bold">{t('lessonsLeft', { n: balanceLessons })}</p>
-        </Card>
-        {invoices ? (
+        {invoices && (owedElsewhere || !due) ? (
           <Card className={due ? 'border-attention/40' : undefined}>
             <p className="text-sm text-muted">{t('owed')}</p>
             <p className="mt-1 font-heading text-2xl font-bold">{due ? (invoices.owed ?? due.outstanding) : t('nothingOwed')}</p>
@@ -164,7 +196,12 @@ export async function ClassicHome({ name, learner, lessons, notices, balanceLess
       <JourneyCard journey={journey} learner={learner} />
       {journey.hifz ? <HifzCard hifz={journey.hifz} /> : null}
       <HomeworkDue homework={openHomework(homework)} />
-      {invoices ? <StartCourseCard /> : null}
+      {invoices || guardian ? (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {invoices ? <StartCourseCard /> : null}
+          {guardian && invoices ? <AddChildCard /> : null}
+        </div>
+      ) : null}
       {notices.length > 0 ? (
         <section>
           <SectionTitle>{t('notices')}</SectionTitle>

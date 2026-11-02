@@ -84,6 +84,8 @@ export function StartFlow({ options, choice, step, slots, slotsProblem, zoneLabe
   const teacher = options.teachers.find((x) => x.id === choice.teacher);
   const group = slots?.groups.find((g) => g.id === choice.group) ?? null;
   const steps = stepsFor(options.learners.length, plan);
+  // A guardian (whoever follows a child) may add another child here and come back to this flow for them.
+  const guardian = options.learners.some((l) => !l.is_self);
   const free = timesByKey(slots);
   // The times chosen: what was pressed here (still free), else those in the address or the suggested pattern.
   const picks = keepFree(picked ?? initialPicks(choice.times, slots), [...free.keys()]);
@@ -292,10 +294,17 @@ export function StartFlow({ options, choice, step, slots, slotsProblem, zoneLabe
           {refusal && refusal.kind !== 'consent' ? <RefusalCard refusal={refusal} step={step} help={help} whatsapp={whatsapp} onSubject={() => go('subject', { learner: choice.learner, times: [] })} /> : null}
 
           {step === 'learner' ? (
-            <LearnerStep learners={options.learners} chosen={choice.learner} onChoose={(id) => advance(choose(choice, 'learner', id), 'learner')} />
+            <>
+              <LearnerStep learners={options.learners} chosen={choice.learner} onChoose={(id) => advance(choose(choice, 'learner', id), 'learner')} />
+              {guardian ? <AddChildEntry /> : null}
+            </>
           ) : null}
           {step === 'subject' ? (
-            <SubjectStep subjects={options.subjects} chosen={choice.subject} learner={learner?.name ?? options.learner.name} onChoose={(id) => advance(choose(choice, 'subject', id), 'subject')} />
+            <>
+              <SubjectStep subjects={options.subjects} chosen={choice.subject} learner={learner?.name ?? options.learner.name} onChoose={(id) => advance(choose(choice, 'subject', id), 'subject')} />
+              {/* With one child there is no "whose course" step: another child is added from here. */}
+              {guardian && options.learners.length === 1 ? <AddChildEntry quiet /> : null}
+            </>
           ) : null}
           {step === 'plan' ? (
             <PlanStep plans={options.plans} chosen={choice.plan} recommended={recommended} offer={options.offer} region={options.region} onChoose={(id) => advance(choose(choice, 'plan', id, options.plans), 'plan')} />
@@ -553,5 +562,28 @@ function Joined({ course }: { course: StartedCourse }) {
       <p className="mt-3">{course.payment.text}</p>
       <Link href="/family/lessons" className={join(buttonLook('primary'), 'mt-5')}>{t('lessons')}</Link>
     </section>
+  );
+}
+
+/** «إضافة طفل» from the start flow: a card under the learners, or one quiet line when there is no learner step. */
+function AddChildEntry({ quiet = false }: { quiet?: boolean }) {
+  const t = useTranslations('addChild');
+  if (quiet) {
+    return (
+      <p className="text-sm text-muted" data-add-child-entry>
+        {t('fromStart')}{' '}
+        <Link href="/family/children/new?from=start" className="font-semibold text-brand-strong underline-offset-4 hover:underline">{t('fromStartAction')}</Link>
+      </p>
+    );
+  }
+  return (
+    <Link href="/family/children/new?from=start" className="lift flex items-center gap-3 rounded-card border border-dashed border-brand-line bg-white p-4" data-add-child-entry>
+      <span className="grid size-11 shrink-0 place-items-center rounded-full bg-brand-soft text-brand-strong" aria-hidden="true"><Icon name="plus" /></span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold">{t('action')}</span>
+        <span className="block text-sm text-muted">{t('fromStart')}</span>
+      </span>
+      <Icon name="chevron" size={18} className="shrink-0 text-muted rtl:-scale-x-100" />
+    </Link>
   );
 }

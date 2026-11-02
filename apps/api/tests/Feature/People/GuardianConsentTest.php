@@ -232,7 +232,10 @@ it('lets the apps list, agree with the wording\'s version, and take back', funct
         ->assertJsonPath('children.0.student.name', 'Yousef')
         ->assertJsonPath('children.0.state', 'waiting')
         ->assertJsonPath('children.0.text.version', GuardianConsent::VERSION)
-        ->assertJsonStructure(['children' => [['text' => ['title', 'intro', 'sections' => [['title', 'body']], 'agree']]]]);
+        ->assertJsonStructure(['children' => [['text' => ['title', 'intro', 'sections' => [['title', 'body']], 'agree']]]])
+        // The wording for a child about to be added, with {child} where the typed name goes.
+        ->assertJsonPath('new_child.version', GuardianConsent::VERSION)
+        ->assertJsonPath('new_child.agree', fn (string $agree) => str_contains($agree, '{child}'));
     $api($this->father)->postJson('/api/v1/family/consents/'.$this->yousef->id, ['agree' => true, 'version' => 0])->assertUnprocessable()->assertJsonValidationErrors('version');
     $api($this->father)->postJson('/api/v1/family/consents/'.$this->yousef->id, ['version' => GuardianConsent::VERSION])->assertUnprocessable()->assertJsonValidationErrors('agree');
     $api($this->yousef)->postJson('/api/v1/family/consents/'.$this->yousef->id, ['agree' => true, 'version' => GuardianConsent::VERSION])->assertForbidden();

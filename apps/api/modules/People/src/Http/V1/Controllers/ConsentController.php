@@ -20,7 +20,8 @@ final class ConsentController
      *
      * Each child of the guardian signed in who needs a guardian's consent (under the academy's consent age), or has one:
      * waiting or granted, who agreed and when, and the wording to agree to (send its version back when agreeing).
-     * A student signed in, or a guardian with no such child, gets an empty list.
+     * A student signed in, or a guardian with no such child, gets an empty list. new_child is the wording for a child
+     * about to be added (POST family/children), with {child} where the name goes.
      */
     public function index(Request $request, FamilyConsents $consents, BrandingApi $branding, LocalTimePresenter $time): JsonResponse
     {
@@ -58,7 +59,29 @@ final class ConsentController
             ];
         }
 
-        return response()->json(['age' => $consents->text('', $academy)['age'], 'children' => $children]);
+        // The wording for a child not added yet («إضافة طفل», POST family/children): {child} stands where their name goes.
+        $fresh = $consents->text('{child}', $academy);
+        $newSections = [];
+        foreach ($fresh['sections'] as $part) {
+            $newSections[] = ['title' => (string) $part['title'], 'body' => (string) $part['body']];
+        }
+
+        return response()->json([
+            'age' => $fresh['age'],
+            'children' => $children,
+            /**
+             * The wording a guardian agrees to when adding a child (POST family/children sends its version back): {child}
+             * stands for the name being typed, for the app or the portal to fill in.
+             */
+            'new_child' => [
+                'version' => (int) $fresh['version'],
+                'title' => (string) $fresh['title'],
+                'intro' => (string) $fresh['intro'],
+                /** Each part: a heading and its words. */
+                'sections' => $newSections,
+                'agree' => (string) $fresh['agree'],
+            ],
+        ]);
     }
 
     /**

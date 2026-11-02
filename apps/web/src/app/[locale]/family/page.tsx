@@ -7,8 +7,9 @@ import { Empty } from '@/components/ui';
 import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
 import { momentsOf } from '@/lib/live';
+import { balanceMoments } from '@/lib/family/balance';
 import { isGuardian, seesMoney } from '@/lib/family/rules';
-import type { Balance, Consents, FamilyLessons, Homework, Invoices } from '@/lib/family/types';
+import type { Balance, Consents, CourseBalance, FamilyLessons, Homework, Invoices } from '@/lib/family/types';
 import type { JourneyMap } from '@/lib/journey/types';
 import { me } from '@/lib/viewer';
 
@@ -33,17 +34,25 @@ export default async function FamilyHome() {
     isGuardian(fam.learners) ? get<Consents>('/v1/family/consents') : Promise.resolve(null),
   ]);
   const waiting = consents?.children.filter((c) => c.state === 'waiting').map((c) => c.student.name) ?? [];
+  // Each course's own balance (J5a): the lessons left, the plan, expiry, and the invoice waiting or coming.
+  const courses = await Promise.all(
+    balance.data.map(async (b) => ({
+      subject: b.subject,
+      balance: (await get<{ data: CourseBalance }>('/v1/family/courses/{enrollment}/balance', { params: { enrollment: b.enrollment_id } })).data,
+    })),
+  );
   return (
     <>
-      {/* The next lesson's room opens and closes by the clock alone. */}
-      <RefreshAt moments={momentsOf(lessons.data)} />
+      {/* The next lesson's room opens and closes by the clock alone; an invoice comes due by it too. */}
+      <RefreshAt moments={[...momentsOf(lessons.data), ...courses.flatMap((c) => balanceMoments(c.balance))]} />
       {waiting.length > 0 ? <ConsentBanner names={waiting} /> : null}
       <ClassicHome
         name={person.name}
         learner={learner}
         lessons={lessons.data}
         notices={lessons.notices}
-        balanceLessons={balance.data.reduce((n, b) => n + (b.sessions ?? 0), 0)}
+        courses={courses}
+        guardian={isGuardian(fam.learners)}
         invoices={invoices}
         homework={homework.data}
         journey={journey.data}

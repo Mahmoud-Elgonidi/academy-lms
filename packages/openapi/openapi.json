@@ -19165,7 +19165,7 @@
         "/v1/family/consents": {
             "get": {
                 "operationId": "family.consents",
-                "description": "Each child of the guardian signed in who needs a guardian's consent (under the academy's consent age), or has one:\nwaiting or granted, who agreed and when, and the wording to agree to (send its version back when agreeing).\nA student signed in, or a guardian with no such child, gets an empty list.",
+                "description": "Each child of the guardian signed in who needs a guardian's consent (under the academy's consent age), or has one:\nwaiting or granted, who agreed and when, and the wording to agree to (send its version back when agreeing).\nA student signed in, or a guardian with no such child, gets an empty list. new_child is the wording for a child\nabout to be added (POST family/children), with {child} where the name goes.",
                 "summary": "My children's consent",
                 "tags": [
                     "People"
@@ -19329,11 +19329,56 @@
                                                     "text"
                                                 ]
                                             }
+                                        },
+                                        "new_child": {
+                                            "type": "object",
+                                            "description": "The wording a guardian agrees to when adding a child (POST family/children sends its version back): {child}\nstands for the name being typed, for the app or the portal to fill in.",
+                                            "properties": {
+                                                "version": {
+                                                    "type": "integer"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "intro": {
+                                                    "type": "string"
+                                                },
+                                                "sections": {
+                                                    "type": "array",
+                                                    "description": "Each part: a heading and its words.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "title": {
+                                                                "type": "string"
+                                                            },
+                                                            "body": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "title",
+                                                            "body"
+                                                        ]
+                                                    }
+                                                },
+                                                "agree": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "version",
+                                                "title",
+                                                "intro",
+                                                "sections",
+                                                "agree"
+                                            ]
                                         }
                                     },
                                     "required": [
                                         "age",
-                                        "children"
+                                        "children",
+                                        "new_child"
                                     ]
                                 }
                             }

@@ -134,6 +134,15 @@ describe('where a notification opens', () => {
   it('opens an invoice only for whoever sees money, and anything else at home', () => {
     expect(familyTargetOf('invoice', true)).toBe('/family/money');
     expect(familyTargetOf('invoice', false)).toBe('/family');
+    // J5a: an invoice opens its own page; a course's balance its card; starting again the start flow for that learner.
+    expect(familyTargetOf('invoice', true, 'inv-1')).toBe('/family/invoices/inv-1');
+    expect(familyTargetOf('invoice', false, 'inv-1')).toBe('/family');
+    expect(familyTargetOf('course_balance', true, 'e1')).toBe('/family/progress/e1#balance-e1');
+    expect(familyTargetOf('course_balance', false, 'e1')).toBe('/family/progress/e1#balance-e1');
+    expect(familyTargetOf('course_balance', true)).toBe('/family/money');
+    expect(familyTargetOf('start', true, 'l1')).toBe('/family/start?learner=l1');
+    expect(familyTargetOf('start', true)).toBe('/family/start');
+    expect(familyTargetOf('start', false, 'l1')).toBe('/family');
     expect(familyTargetOf('write_report', true)).toBe('/family');
     expect(familyTargetOf(null, true)).toBe('/family');
     expect(familyTargetOf('guardian_consent', true)).toBe('/family/privacy');

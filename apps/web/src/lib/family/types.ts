@@ -106,4 +106,60 @@ export type ChildConsent = {
   can_withdraw: boolean;
   text: { version: number; title: string; intro: string; sections: { title: string; body: string }[]; agree: string };
 };
-export type Consents = { age: number; children: ChildConsent[] };
+/** The consent wording, as GET family/consents gives it per child (and for a child about to be added: new_child, {child} for the name). */
+export type ConsentText = ChildConsent['text'];
+export type Consents = { age: number; children: ChildConsent[]; new_child?: ConsentText };
+
+/**
+ * One course's balance (GET family/courses/{enrollment}/balance; docs/architecture/02,
+ * section 27, J5a), by the look of the person reading: the kids' look has the
+ * lessons left alone, middle school and teens no money, the classic look all
+ * of it. Sentences are the API's (its numbers, days and sums written once).
+ */
+export type CourseBalance = {
+  enrollment_id: string;
+  status: 'pending_payment' | 'active' | 'paused' | 'ended' | string;
+  viewer_stage: Stage;
+  lessons_left: number | null;
+  lessons_text: string | null;
+  makeup_lessons: number | null;
+  minutes_left: number | null;
+  plan: {
+    id: string;
+    name: string;
+    format: 'private' | 'group' | string;
+    shared: boolean;
+    session_minutes: number;
+    sessions_per_week: number;
+    sessions_per_block: number;
+    renews_at_lessons_left: number;
+  } | null;
+  expiry: { at: LocalTime | null; lessons: number; soon: boolean; text: string } | null;
+  paused_until: LocalTime | null;
+  ends_on: LocalTime | null;
+  is_payer: boolean | null;
+  renews: boolean | null;
+  waiting_invoice: {
+    id: string | null;
+    number: string;
+    outstanding: string;
+    outstanding_minor: number;
+    currency: string;
+    due_at: LocalTime | null;
+    text: string;
+  } | null;
+  next_invoice: {
+    at_lessons_left: number;
+    lessons_until: number;
+    amount: string;
+    amount_minor: number;
+    currency: string;
+    on: LocalTime | null;
+    text: string;
+  } | null;
+  renewal_note: string | null;
+  auto_renew: null;
+};
+
+/** POST family/children's answer: the child, and the start flow to go to. */
+export type AddedChild = { id: string; name: string; stage: Stage; consent: 'granted' | 'not_needed'; start: { learner_id: string } };

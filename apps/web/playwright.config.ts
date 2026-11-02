@@ -57,6 +57,8 @@ export default defineConfig({
     { name: 'trial-report', testMatch: /trial-report\.spec\.ts/, use: { ...devices['Pixel 7'] } },
     // The family starts a course and pays on its own (J3): from the report to a paid course, refusals on the way, coupons, calling it off (its own families).
     { name: 'start', testMatch: /start-course\.spec\.ts/, use: { ...devices['Pixel 7'] } },
+    // A clear balance on each course and adding a child (J5a): the demo's Hala with an invoice due tomorrow, students in their looks, a new guardian adding a child (its own families).
+    { name: 'balance', testMatch: /balance\.spec\.ts/, use: { ...devices['Pixel 7'] } },
   ],
   webServer: process.env.E2E_SERVE
     ? { command: 'npm run start', url: `${base}/ar/sign-in`, reuseExistingServer: true, timeout: 120_000 }

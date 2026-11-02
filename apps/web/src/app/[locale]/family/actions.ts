@@ -4,7 +4,8 @@ import { refresh } from 'next/cache';
 import { cookies, headers } from 'next/headers';
 import { call, send, type Outcome } from '@/lib/api/server';
 import { LEARNER_COOKIE } from '@/lib/family/context';
-import type { CancelPreview, Rating } from '@/lib/family/types';
+import type { ChildBody } from '@/lib/family/add-child';
+import type { AddedChild, CancelPreview, Rating } from '@/lib/family/types';
 import type { OpenedChest } from '@/lib/journey/types';
 
 /**
@@ -185,6 +186,18 @@ export async function buyExtraLessons(enrollment: string, learnerId: string, les
 /** A guardian agrees to a child's account, to the wording (version) they read. */
 export async function grantConsent(student: string, version: number, agree: boolean): Promise<Result> {
   return result(await send('post', '/v1/family/consents/{student}', { params: { student }, body: { agree, version } }));
+}
+
+/**
+ * A guardian adds their own child («إضافة طفل», J5a), agreeing to the consent
+ * wording's version they read: the child, and the start flow to go to. One
+ * key per press, so a retry adds them once; refusals come back by field.
+ */
+export async function addChild(body: ChildBody, key: string): Promise<{ ok: true; child: AddedChild; message: string } | { ok: false; status: number; message?: string; errors: Record<string, string[]> }> {
+  const sent = await send<{ data: AddedChild; message: string }>('post', '/v1/family/children', { body, idempotencyKey: key });
+  if (!sent.ok) return { ok: false, status: sent.problem.status, message: sent.problem.title || undefined, errors: sent.problem.errors };
+  refresh();
+  return { ok: true, child: sent.data.data, message: sent.data.message };
 }
 
 /** A guardian takes their consent back: the child is signed out everywhere. */

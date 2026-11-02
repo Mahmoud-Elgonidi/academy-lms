@@ -2002,7 +2002,8 @@ export interface paths {
          * My children's consent
          * @description Each child of the guardian signed in who needs a guardian's consent (under the academy's consent age), or has one:
          *     waiting or granted, who agreed and when, and the wording to agree to (send its version back when agreeing).
-         *     A student signed in, or a guardian with no such child, gets an empty list.
+         *     A student signed in, or a guardian with no such child, gets an empty list. new_child is the wording for a child
+         *     about to be added (POST family/children), with {child} where the name goes.
          */
         get: operations["family.consents"];
         put?: never;
@@ -10824,6 +10825,21 @@ export interface operations {
                                 agree: string;
                             };
                         }[];
+                        /**
+                         * @description The wording a guardian agrees to when adding a child (POST family/children sends its version back): {child}
+                         *     stands for the name being typed, for the app or the portal to fill in.
+                         */
+                        new_child: {
+                            version: number;
+                            title: string;
+                            intro: string;
+                            /** @description Each part: a heading and its words. */
+                            sections: {
+                                title: string;
+                                body: string;
+                            }[];
+                            agree: string;
+                        };
                     };
                 };
             };

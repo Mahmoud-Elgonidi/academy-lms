@@ -51,10 +51,11 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
   if (!seesMoney(fam.stage)) redirect({ href: '/family', locale });
   const learner = fam.current;
 
-  const [invoices, balance, f] = await Promise.all([
+  const [invoices, balance, f, bt] = await Promise.all([
     get<Invoices>('/v1/family/invoices'),
     learner ? get<Balance>('/v1/family/balance', { query: { learner_id: learner.id } }) : Promise.resolve(null),
     getTranslations('format'),
+    getTranslations('balance'),
   ]);
   const owed = invoices.data.filter((i) => i.outstanding_minor > 0);
   // Where to transfer, once per text: named by invoice only when the payer's invoices go to different places.
@@ -131,6 +132,10 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
                   <CourseState course={b} />
                   <p className="mt-1 font-heading text-2xl font-bold">{t('lessonsLeft', { n: b.sessions ?? 0 })}</p>
                   <p className="text-sm tabular-nums text-muted">{t('minutesLeft', { n: b.minutes })}</p>
+                  <Link href={`/family/progress/${b.enrollment_id}#balance-${b.enrollment_id}`} className="mt-1 inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-brand-strong" data-balance-details={b.enrollment_id}>
+                    {bt('details')}
+                    <Icon name="chevron" size={16} className="rtl:-scale-x-100" />
+                  </Link>
                   {b.extra ? <ExtraLessons enrollment={b.enrollment_id} learnerId={learner.id} subject={b.subject ?? ''} offer={b.extra} /> : null}
                 </li>
                 );
@@ -150,7 +155,8 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
             <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-white">
               {invoices.data.map((i) => (
                 <li key={i.id} className="px-4 py-3">
-                  <div className="flex items-start justify-between gap-3">
+                  {/* The whole row opens the invoice's own page (its lines, paying it, its document). */}
+                  <Link href={`/family/invoices/${i.id}`} className="-mx-2 flex items-start justify-between gap-3 rounded-control px-2 py-1 hover:bg-paper" data-invoice-row={i.id}>
                     <div className="min-w-0">
                       <p className="flex flex-wrap items-center gap-2">
                         <span className="whitespace-nowrap font-semibold tabular-nums">{i.number}</span>
@@ -162,8 +168,11 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
                       </p>
                       <Discounts invoice={i} />
                     </div>
-                    <p className="shrink-0 font-semibold tabular-nums">{i.total}</p>
-                  </div>
+                    <span className="flex shrink-0 items-center gap-1">
+                      <span className="font-semibold tabular-nums">{i.total}</span>
+                      <Icon name="chevron" size={16} className="text-muted rtl:-scale-x-100" />
+                    </span>
+                  </Link>
                   {i.proof && (i.proof.status !== 'rejected' || i.outstanding_minor > 0) ? (
                     <p className={join('mt-1 text-sm', i.proof.status === 'rejected' ? 'text-danger' : 'text-muted')}>{i.proof.text}</p>
                   ) : null}
