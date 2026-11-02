@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
+use Modules\Crm\Console\FillLearnerCountriesCommand;
 use Modules\Crm\Console\FollowUpLeadsCommand;
 use Modules\Crm\Contracts\Events\LeadAssigned;
 use Modules\Crm\Contracts\Events\LeadStageChanged;
@@ -93,7 +94,7 @@ final class CrmServiceProvider extends ServiceProvider
         Event::listen(LeadStageChanged::class, [FollowSiteRequests::class, 'stageChanged']);
 
         if ($this->app->runningInConsole()) {
-            $this->commands([FollowUpLeadsCommand::class]);
+            $this->commands([FollowUpLeadsCommand::class, FillLearnerCountriesCommand::class]);
         }
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             // Leads nobody answered within the academy's hours, trials still waiting for their assessment, offers ending within a day.

@@ -83,15 +83,18 @@ afterEach(function () {
     AuditActor::forget();
 });
 
-/** Umm Yara's lead, the trial with the Cairo teacher on Tuesday 19:00 Riyadh, held and assessed (the offer is made). */
-function j3Trial(): LeadTrial
+/**
+ * Umm Yara's lead, the trial with the Cairo teacher on Tuesday 19:00 Riyadh, held and assessed (the offer is made);
+ * or another family's ($lead over hers), with this teacher at this moment.
+ */
+function j3Trial(array $lead = [], ?string $teacherId = null, string $at = '2026-10-06 19:00'): LeadTrial
 {
-    $lead = app(CreateLead::class)->handle([
+    $lead = app(CreateLead::class)->handle($lead + [
         'contact_name' => 'Umm Yara', 'phone_e164' => '+966501234567', 'email' => 'umm.yara@example.test', 'country' => 'SA', 'timezone' => 'Asia/Riyadh',
         'for_child' => true, 'learner_name' => 'Yara Salem', 'learner_birth_year' => 2017, 'subject_id' => test()->quran, 'source' => 'website',
     ], test()->sales->id);
     $learner = app(PrepareLearner::class)->handle($lead, test()->sales->id);
-    $batch = app(PlaceBookingHold::class)->handle(test()->teacher->id, $learner, [CarbonImmutable::parse('2026-10-06 19:00', 'Asia/Riyadh')->getTimestamp()], 30, test()->admin->id);
+    $batch = app(PlaceBookingHold::class)->handle($teacherId ?? test()->teacher->id, $learner, [CarbonImmutable::parse($at, 'Asia/Riyadh')->getTimestamp()], 30, test()->admin->id);
     $session = app(ConfirmBooking::class)->trial($batch, $learner, test()->quran, test()->admin->id);
     $trial = LeadTrial::query()->with('lead')->where('session_id', $session->id)->sole();
 
@@ -209,8 +212,12 @@ it('starts the course: its lessons waiting to be paid, the invoice with the offe
         ->and($answer['payment']['unpaid_cancel_hours'])->toBe(24)
         ->and($answer['payment']['renews'])->toContain('2')
         ->and($answer['can_cancel'])->toBeTrue();
-    // Pay before the first lesson's unpaid deadline: 24 hours before it.
-    expect(CarbonImmutable::parse($answer['payment']['pay_by']['utc'])->equalTo(CarbonImmutable::parse($answer['first_lesson']['utc'])->subHours(24)))->toBeTrue();
+    // Pay before the first lesson's unpaid deadline: 24 hours before it. The invoice is due at that same moment,
+    // not the academy's general days (nor the offer's end): one deadline on every screen.
+    $payBy = CarbonImmutable::parse($answer['payment']['pay_by']['utc']);
+    expect($payBy->equalTo(CarbonImmutable::parse($answer['first_lesson']['utc'])->subHours(24)))->toBeTrue()
+        ->and(CarbonImmutable::parse($invoice['due_at']['utc'])->equalTo($payBy))->toBeTrue()
+        ->and(Invoice::query()->findOrFail($invoice['id'])->due_at->equalTo($payBy))->toBeTrue();
     // The lessons wait unpaid; the course is the family's own start, audited.
     expect(DB::table('sessions')->where('enrollment_id', $answer['enrollment_id'])->where('funding_status', 'unfunded')->count())->toBe($answer['lessons'])
         ->and(CourseStart::query()->where('enrollment_id', $answer['enrollment_id'])->sole()->only(['payer_id', 'price_minor', 'offer_applied']))
@@ -241,7 +248,9 @@ it('refuses a price that changed since the family saw it, with the new price, an
     $refused = j3Start()->assertStatus(409);
     expect($refused->json('reason'))->toBe('price_changed')
         ->and($refused->json('price.amount_minor'))->toBe(44000)
-        ->and($refused->json('detail'))->toContain('440');
+        ->and($refused->json('detail'))->toContain('440')
+        // The Arabic amount ends in "ر.س." already: the sentence reads it once, never "ر.س..".
+        ->and(preg_replace('/[\x{2068}\x{2069}]/u', '', (string) $refused->json('detail')))->toContain('ر.س.)')->not->toContain('..');
 
     j3Start(['price_minor' => 44000])->assertCreated();
     expect(Invoice::query()->where('status', 'issued')->latest('issued_at')->first()->total_minor)->toBe(39600);
@@ -582,4 +591,86 @@ it('switches self-serve from the plans screen, audited', function () {
         ->callAction('selfServe', data: ['on' => false])->assertHasNoActionErrors();
     expect(BillingSettings::current()->self_serve_enrol)->toBeFalse()
         ->and(DB::table('audit_logs')->where('action', 'billing.self_serve_off')->value('actor_id'))->toBe($accountant->id);
+});
+
+/** A region naming these countries, with the plan priced in it. */
+function j3Region(string $name, string $currency, array $countries, int $amount): PriceRegion
+{
+    $region = PriceRegion::query()->create(['name_ar' => $name, 'name_en' => $name, 'currency' => $currency, 'is_default' => false, 'countries' => $countries]);
+    test()->plan->prices()->create(['price_region_id' => $region->id, 'amount_minor' => $amount, 'currency' => $currency]);
+
+    return $region;
+}
+
+it('prices a family from a lead in Egypt in Egypt\'s region on the report, the start flow and the first invoice alike', function () {
+    $egypt = j3Region('Egypt', 'EGP', ['EG'], 220000);
+    $trial = j3Trial(['contact_name' => 'Umm Omar', 'phone_e164' => '+201001234567', 'email' => 'umm.omar@example.test', 'country' => 'EG',
+        'timezone' => 'Africa/Cairo', 'learner_name' => 'Omar Adel'], $this->other->id, '2026-10-10 19:00');
+    $omar = (string) $trial->lead->learner_id;
+    $mother = User::query()->findOrFail($trial->lead->contact_id);
+    $token = $mother->createToken('phone')->plainTextToken;
+    // PrepareLearner put the lead's country on the child's details and on the mother.
+    expect(app(PeopleApi::class)->studentDetails($omar)->country)->toBe('EG')
+        ->and(app(PeopleApi::class)->countryOf($mother->id))->toBe('EG');
+
+    $report = j3Api('GET', "family/trials/{$trial->session_id}?learner_id={$omar}", token: $token)->assertOk()->json('data');
+    expect($report['recommendation']['price'])->toMatchArray(['amount_minor' => 220000, 'currency' => 'EGP'])
+        ->and($report['recommendation']['region']['id'])->toBe($egypt->id);
+
+    $options = j3Api('GET', 'family/start/options?'.http_build_query(['learner_id' => $omar, 'subject_id' => $this->quran]), token: $token)->assertOk()->json('data');
+    expect($options['region']['currency'])->toBe('EGP')
+        ->and($options['plans'][0]['price'])->toMatchArray(['amount_minor' => 220000, 'currency' => 'EGP']);
+
+    app(GrantConsent::class)->handle($omar, $mother->id, 'family');
+    $slots = j3Api('GET', 'family/start/slots?'.http_build_query(['learner_id' => $omar, 'subject_id' => $this->quran, 'plan_id' => $this->plan->id,
+        'teacher_id' => $this->other->id, 'timezone' => 'Africa/Cairo']), token: $token)->assertOk()->json('data');
+    $answer = j3Start(['learner_id' => $omar, 'teacher_id' => $this->other->id, 'times' => $slots['suggested'], 'price_minor' => 220000, 'currency' => 'EGP',
+        'timezone' => 'Africa/Cairo'], $token)->assertCreated()->json('data');
+    expect($answer['invoice']['currency'])->toBe('EGP')
+        ->and($answer['offer']['state'])->toBe('applied')
+        ->and($answer['invoice']['total']['amount_minor'])->toBe(198000)
+        // From now on she pays in Egypt's region.
+        ->and(DB::table('billing_accounts')->where('payer_id', $mother->id)->value('price_region_id'))->toBe($egypt->id);
+});
+
+it('keeps a country the family already has, and the region a payer already pays in', function () {
+    $emirates = j3Region('Emirates', 'AED', ['AE'], 41000);
+    j3Region('Egypt', 'EGP', ['EG'], 220000);
+    $people = app(PeopleApi::class);
+    // Her mother put Yara's country right: the Emirates. A country from a lead never replaces it.
+    $people->correctStudentDetails($this->yara, new StudentDetails(country: 'AE'));
+    expect($people->fillCountry($this->yara, 'EG'))->toBe(0)
+        ->and($people->countryOf($this->yara))->toBe('AE')
+        ->and($people->countryOf($this->mother->id))->toBe('SA');
+    // Her mother's Saudi Arabia names no region here, so Yara's country prices them, on the report and in the start flow.
+    $report = j3Api('GET', "family/trials/{$this->trial->session_id}?learner_id={$this->yara}")->assertOk()->json('data.recommendation');
+    $options = j3Api('GET', 'family/start/options?'.http_build_query(['learner_id' => $this->yara]))->assertOk()->json('data');
+    expect($report['region']['id'])->toBe($emirates->id)
+        ->and($report['price']['currency'])->toBe('AED')
+        ->and($options['region']['id'])->toBe($emirates->id)
+        ->and($options['plans'][0]['price']['amount_minor'])->toBe(41000);
+
+    // A payer who already pays in the Gulf stays there, whatever their or the learner's country says.
+    $guardian = (string) DB::table('guardian_student')->where('student_id', $this->student->id)->value('guardian_id');
+    $people->fillCountry($guardian, 'EG');
+    $people->fillCountry($this->student->id, 'EG');
+    expect(app(BillingApi::class)->priceRegionFor($guardian, $this->student->id)?->id)->toBe($this->region->id);
+});
+
+it('catches up the learners and parents the CRM made before, from their lead, once and only where they have none', function () {
+    // As before PrepareLearner gave them the lead's country.
+    DB::table('student_profiles')->where('user_id', $this->yara)->update(['country' => null]);
+    DB::table('guardian_profiles')->where('user_id', $this->mother->id)->delete();
+    $people = app(PeopleApi::class);
+    expect([$people->countryOf($this->yara), $people->countryOf($this->mother->id)])->toBe([null, null]);
+
+    $this->artisan('crm:learner-countries')->assertSuccessful();
+    $this->actAsTenant($this->academy);
+    expect([$people->countryOf($this->yara), $people->countryOf($this->mother->id)])->toBe(['SA', 'SA']);
+
+    // Put right since, the family's own country stays when it runs again.
+    $people->correctStudentDetails($this->yara, new StudentDetails(country: 'AE'));
+    $this->artisan('crm:learner-countries')->assertSuccessful();
+    $this->actAsTenant($this->academy);
+    expect($people->countryOf($this->yara))->toBe('AE');
 });

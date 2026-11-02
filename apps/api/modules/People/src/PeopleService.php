@@ -7,6 +7,7 @@ use Modules\People\Actions\Cards\HideTeacherCard;
 use Modules\People\Actions\Checks\PauseTeacherForMinors;
 use Modules\People\Actions\Checks\ResumeTeacherForMinors;
 use Modules\People\Actions\Consent\RequestConsent;
+use Modules\People\Actions\FillCountry;
 use Modules\People\Actions\LinkGuardian;
 use Modules\People\Actions\SaveStudentDetails;
 use Modules\People\Actions\SaveStudentProfile;
@@ -21,6 +22,7 @@ use Modules\People\Contracts\DTOs\StudentProfileData;
 use Modules\People\Contracts\DTOs\TeacherProfileData;
 use Modules\People\Contracts\LearnerStage;
 use Modules\People\Contracts\PeopleApi;
+use Modules\People\Models\GuardianProfile;
 use Modules\People\Models\GuardianStudent;
 use Modules\People\Models\StudentProfile;
 use Modules\People\Models\TeacherProfile;
@@ -103,6 +105,18 @@ final class PeopleService implements PeopleApi
         $profile = StudentProfile::query()->find($studentId);
 
         return new StudentDetails($profile?->gender, $profile?->country, $profile?->school_grade, $profile?->teacher_gender);
+    }
+
+    public function countryOf(string $userId): ?string
+    {
+        $country = StudentProfile::query()->whereKey($userId)->value('country') ?? GuardianProfile::query()->whereKey($userId)->value('country');
+
+        return $country === null ? null : (string) $country;
+    }
+
+    public function fillCountry(string $userId, ?string $country): int
+    {
+        return app(FillCountry::class)->handle($userId, $country);
     }
 
     public function studentDetailChoices(): array

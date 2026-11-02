@@ -77,6 +77,22 @@ interface PeopleApi
     public function correctStudentDetails(string $studentId, StudentDetails $details): void;
 
     /**
+     * The country a person lives in, as the academy knows it: a student's
+     * own (their details), else the one they have as a guardian; null when
+     * neither says (ISO 3166-1 alpha-2).
+     */
+    public function countryOf(string $userId): ?string;
+
+    /**
+     * Gives a person a country known elsewhere (a lead's), only where they
+     * have none: on their student details when they study here, and as a
+     * guardian when they are one. Never changes a country already there.
+     *
+     * @return int how many profiles took it (0: nothing to fill)
+     */
+    public function fillCountry(string $userId, ?string $country): int;
+
+    /**
      * What each of those may be, named in the current language (for a form):
      * gender, country (ISO codes), school_grade and teacher_gender ("" is either).
      *

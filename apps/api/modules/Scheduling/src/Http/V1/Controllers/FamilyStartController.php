@@ -112,7 +112,7 @@ final class FamilyStartController
             ];
         }
 
-        $region = $on ? $this->billing->priceRegionFor($me, $this->rules->learnerFacts($learner->id)['country']) : null;
+        $region = $on ? $this->billing->priceRegionFor($me, $learner->id) : null;
         $subjectId = $on ? ($valid['subject_id'] ?? null) : null;
         $offer = null;
         $offerCode = null;
@@ -363,7 +363,7 @@ final class FamilyStartController
         $invoice = $done->invoiceId === null ? null : $this->billing->invoiceSummary($done->invoiceId, $me);
         $plan = collect($this->billing->planOptions())->first(fn (PlanOption $p) => $p->id === $valid['plan_id']);
         $unpaid = StartSlots::unpaidHours();
-        $payBy = $done->firstLesson !== null && $unpaid > 0 && $invoice !== null ? $done->firstLesson->subHours($unpaid) : null;
+        $payBy = $invoice !== null ? $done->payBy : null;     // the first invoice's due date too
         $group = $done->groupId === null ? null : LessonGroup::query()->find($done->groupId);
         $times = [];
         foreach ($done->weeklyTimes as $at) {
@@ -417,7 +417,7 @@ final class FamilyStartController
                 'message' => $done->offer === 'none' ? null : (string) __('scheduling::start.offer.'.$done->offer, ['percent' => ($done->offerPercentBp ?? 0) / 100]),
             ],
             'payment' => [
-                /** Pay before this to keep the first lesson (rule 16); null when nothing is due or no lesson is booked yet. */
+                /** Pay before this to keep the first lesson (rule 16), the first invoice's due date too; null when nothing is due or no lesson is booked yet. */
                 'pay_by' => $this->time->present($payBy, $zone),
                 'unpaid_cancel_hours' => $unpaid,
                 'text' => (string) $payText,

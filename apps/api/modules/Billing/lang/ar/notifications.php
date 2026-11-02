@@ -16,7 +16,7 @@ return [
     ],
     'proof_approved' => [
         'title' => 'تأكدت دفعتك',
-        'body' => 'وصلنا :amount على الفاتورة :number. المتبقي: :left.',
+        'body' => 'وصلنا :amount على الفاتورة :number (المتبقي: :left).',
     ],
     'proof_rejected' => [
         'title' => 'لم نتمكن من تأكيد دفعتك',

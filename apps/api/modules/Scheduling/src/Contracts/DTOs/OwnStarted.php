@@ -9,7 +9,8 @@ use Carbon\CarbonImmutable;
  * joined a shared package), the teacher, its weekly times (each as its first
  * lesson's instant), the first lesson, and what became of the trial's offer:
  * applied, ended (its time passed: the plain price), family_discount_bigger,
- * not_for_plan, package (a shared package has no invoice of its own) or none.
+ * not_for_plan, package (a shared package has no invoice of its own) or none;
+ * and the pay-by moment, which is also the first invoice's due date.
  */
 final readonly class OwnStarted
 {
@@ -32,5 +33,6 @@ final readonly class OwnStarted
         public ?int $seat = null,
         public ?int $capacity = null,
         public bool $groupStarted = false,
+        public ?CarbonImmutable $payBy = null,   // pay before this to keep the lessons from the first payable one (the invoice's due date)
     ) {}
 }

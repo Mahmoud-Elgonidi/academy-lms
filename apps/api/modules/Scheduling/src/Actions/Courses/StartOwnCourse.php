@@ -39,8 +39,9 @@ use Modules\SharedKernel\Plans\PlanLimitReached;
  * (StartRefused):
  *
  *  - the academy lets families start, and the viewer is in the classic look;
- *  - the plan is still offered, priced in the payer's region (Billing's: the
- *    region they pay in, else their learner's country's, else the default),
+ *  - the plan is still offered, priced in the payer's region (Billing's one
+ *    rule, as the trial's report: the region they pay in, else the payer's
+ *    or the learner's country's, else the default),
  *    at the price they saw (else price_changed, with the new price);
  *  - a child waiting for a guardian's consent has it first (consent: the
  *    client shows the wording and agrees through POST family/consents/{id});
@@ -56,6 +57,13 @@ use Modules\SharedKernel\Plans\PlanLimitReached;
  * The trial's offer (J2, StartOffers) goes on the first invoice by itself
  * while it is open and bigger than the family discount (never both); ended
  * meanwhile, the course starts at the plain price and the answer says so.
+ *
+ * The first invoice is due by the pay-by moment (BillingApi::setInvoiceDue):
+ * the first lesson still payable before rule 16 cancels it unpaid, less
+ * unpaid_cancel_hours; the answer's pay_by is the same moment. With no such
+ * lesson (a forming group, rule 16 off, a shared package) the academy's
+ * due_days stand. The offer's end only bounds when the course may start with
+ * it: once on the invoice, the discount stays until it is paid or voided.
  */
 final class StartOwnCourse
 {
@@ -78,7 +86,7 @@ final class StartOwnCourse
         if ($plan === null) {
             throw StartRefused::because('no_plan');
         }
-        $region = $this->billing->priceRegionFor($payerId, $this->rules->learnerFacts($learnerId)['country']);
+        $region = $this->billing->priceRegionFor($payerId, $learnerId);
         $price = $region === null ? null : ($plan->prices[$region->id] ?? null);
         if ($price === null) {
             throw StartRefused::because('no_price');
@@ -138,6 +146,14 @@ final class StartOwnCourse
             ], fn ($v) => $v !== null));
 
             $first = $this->times->firstLesson($enrollmentId, $now);
+            // The first invoice is due by the pay-by moment, the one the answer gives: the first lesson that can still be paid
+            // for before rule 16 cancels it, less its hours (a running group's next lesson may already be too close to save).
+            $unpaid = StartSlots::unpaidHours();
+            $payable = $invoiceId !== null && $unpaid > 0 ? $this->times->firstLesson($enrollmentId, $now->addHours($unpaid)) : null;
+            $payBy = $payable === null ? null : $payable['at']->subHours($unpaid);
+            if ($payBy !== null) {
+                $this->billing->setInvoiceDue((string) $invoiceId, $payBy);
+            }
 
             return new OwnStarted(
                 enrollmentId: $enrollmentId,
@@ -154,6 +170,7 @@ final class StartOwnCourse
                 seat: $extra['seat'] ?? null,
                 capacity: $extra['capacity'] ?? null,
                 groupStarted: (bool) ($extra['started'] ?? false),
+                payBy: $payBy,
             );
         });
     }

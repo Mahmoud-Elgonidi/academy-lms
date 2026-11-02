@@ -12,6 +12,7 @@ use Modules\Billing\Actions\Discounts\RemoveCoupon;
 use Modules\Billing\Actions\Discounts\SaveCoupon;
 use Modules\Billing\Actions\RecordPayment;
 use Modules\Billing\Actions\SavePlan;
+use Modules\Billing\Actions\SetInvoiceDue;
 use Modules\Billing\Actions\SubscribeEnrollment;
 use Modules\Billing\Contracts\BillingApi;
 use Modules\Billing\Contracts\DTOs\CourseBilling;
@@ -39,6 +40,7 @@ use Modules\Billing\Models\Subscription;
 use Modules\Billing\Queries\CourseBillingQuery;
 use Modules\Billing\Queries\InvoiceSummaries;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\People\Contracts\PeopleApi;
 use Modules\SharedKernel\Money\Money;
 
 final class BillingService implements BillingApi
@@ -48,6 +50,7 @@ final class BillingService implements BillingApi
         private readonly RecordPayment $payments,
         private readonly CourseBillingQuery $courses,
         private readonly EnrollmentApi $enrollments,
+        private readonly PeopleApi $people,
     ) {}
 
     public function subscribe(NewSubscription $new): IssuedInvoice
@@ -133,16 +136,26 @@ final class BillingService implements BillingApi
             ->all();
     }
 
-    public function priceRegionFor(?string $payerId, ?string $country): ?RegionOption
+    public function priceRegionFor(?string $payerId, ?string $learnerId): ?RegionOption
     {
         $regions = collect($this->regions());
         $paying = $payerId === null ? null : BillingAccount::query()->where('payer_id', $payerId)->orderBy('created_at')->value('price_region_id');
-        $country = $country === null ? null : strtoupper($country);
+        $named = function (?string $userId) use ($regions): ?RegionOption {
+            $country = $userId === null ? null : $this->people->countryOf($userId);
+
+            return $country === null ? null : $regions->first(fn (RegionOption $r) => in_array(strtoupper($country), $r->countries, true));
+        };
 
         return $regions->first(fn (RegionOption $r) => $r->id === $paying)
-            ?? ($country !== null ? $regions->first(fn (RegionOption $r) => in_array($country, $r->countries, true)) : null)
+            ?? $named($payerId)
+            ?? ($learnerId !== $payerId ? $named($learnerId) : null)
             ?? $regions->first(fn (RegionOption $r) => $r->isDefault)
             ?? $regions->first();
+    }
+
+    public function setInvoiceDue(string $invoiceId, CarbonImmutable $dueAt): bool
+    {
+        return app(SetInvoiceDue::class)->handle($invoiceId, $dueAt);
     }
 
     public function issuePersonalCoupon(PersonalCoupon $coupon): PersonalCouponState

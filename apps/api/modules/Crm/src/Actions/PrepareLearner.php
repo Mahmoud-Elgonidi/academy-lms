@@ -20,7 +20,8 @@ use Modules\People\Contracts\PeopleApi;
  * the parent, who keeps the phone. A number already in the academy is
  * reused when it fits (a parent with another child here, and that child
  * when the name is the same: no second account for one child), refused
- * when not.
+ * when not. The lead's country goes on the learner's details and on the
+ * parent, where they have none, so the family is priced where it lives.
  * The parent is not asked for the child's consent yet: they bring the child
  * to the trial by their own link, and the consent is asked when the child
  * first needs a way in of their own (their sign-in, their seat, a course).
@@ -78,6 +79,11 @@ final class PrepareLearner
                     default => $taken(),
                 };
                 $contactId = $learnerId;
+            }
+            // The lead's country is where the family's prices are (Billing's priceRegionFor reads People): the learner's and the
+            // guardian's, only where they have none (a family already here keeps its own).
+            foreach (array_unique([$learnerId, $contactId]) as $person) {
+                $this->people->fillCountry($person, $lead->country);
             }
             $lead->forceFill(['learner_id' => $learnerId, 'contact_id' => $contactId])->save();
 

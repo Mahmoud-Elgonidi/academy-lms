@@ -119,6 +119,8 @@ function pdsSeedEverySource(object $t): void
     $t->checkScan = $file('teacher-checks', 'record.jpg');
     DB::table('teacher_checks')->insert(['id' => $id(), 'teacher_id' => $tr->id, 'kind' => 'criminal_record', 'reference' => 'CR-778899', 'uploaded_by' => $tr->id,
         'file_path' => $t->checkScan, 'file_name' => 'record.jpg', 'created_at' => $now, 'updated_at' => $now]);
+    // ...the guardian's country (a family's price region when the learner has none)...
+    DB::table('guardian_profiles')->insert(['user_id' => $g->id, 'country' => 'EG', 'created_at' => $now, 'updated_at' => $now]);
     // ...and the teacher's card on the academy's page, in her own words.
     DB::table('teacher_public_cards')->insert(['id' => $id(), 'teacher_id' => $tr->id, 'display_name' => 'Fadwa Lutfi', 'bio' => 'Twenty years teaching, reach me on +201011122255',
         'shown' => true, 'created_at' => $now, 'updated_at' => $now]);
@@ -250,7 +252,9 @@ it('shows each source in the copy of whoever it is about, with the files they ga
     }
 
     // The teacher's card on the academy's page is in her copy.
-    expect(pdsSources()['profile']->export($this->teacher->id)->data['public_card']['display_name'])->toBe('Fadwa Lutfi');
+    expect(pdsSources()['profile']->export($this->teacher->id)->data['public_card']['display_name'])->toBe('Fadwa Lutfi')
+        // ...and the guardian's country in hers.
+        ->and(pdsSources()['profile']->export($this->guardian->id)->data['guardian'])->toBe(['country' => 'EG']);
     // The Quran lessons' grades are in the student's copy; the teacher's note is not.
     $quran = pdsSources()['quran']->export($this->student->id)->data;
     expect($quran['quran_lessons'][0]['parts']['new']['grade'])->toBe('good')
@@ -330,7 +334,7 @@ it('holds an erasure back for each source\'s own reasons, and erases once they a
     // What each source said it removes or blanks is gone; what it keeps is still there.
     $after = pdsSnapshot($this->people);
     expect($after['account'])->toBe(['erased', 'erased', 'erased', 0, 0])
-        ->and($after['profile'])->toBe([null, null, 0, 0, null, false, 0])
+        ->and($after['profile'])->toBe([null, null, 0, 0, null, false, 0, null])
         ->and($after['messages'])->toBe([0, 0, 0])
         ->and($after['enquiries'])->toBe([null, null, null, null, null])
         ->and($after['ratings'])->toBe([null, '[]', 4])
@@ -373,7 +377,7 @@ function pdsSnapshot(array $people): array
             DB::table('guardian_student')->whereIn('guardian_id', $ids)->orWhereIn('student_id', $ids)->count(),
             DB::table('teacher_checks')->where('teacher_id', $t)->whereNotNull('file_path')->count(),
             DB::table('teacher_checks')->where('teacher_id', $t)->value('reference'), (bool) DB::table('teacher_profiles')->where('user_id', $t)->value('accepts_new'),
-            DB::table('teacher_public_cards')->where('teacher_id', $t)->count()],
+            DB::table('teacher_public_cards')->where('teacher_id', $t)->count(), DB::table('guardian_profiles')->where('user_id', $g)->value('country')],
         'billing' => [DB::table('invoices')->count(), DB::table('manual_payment_proofs')->where('payer_id', $g)->count()],
         'recordings' => DB::table('recording_consents')->where('person_id', $s)->count(),
         'messages' => [DB::table('notifications')->whereIn('user_id', $ids)->count(), DB::table('notification_deliveries')->where('address', 'zubaida.qasr@noor.example')->count(),

@@ -11,7 +11,7 @@ use Modules\SharedKernel\Privacy\PersonalDataSource;
 
 /**
  * A person's profile (a student's birth date, stage and details; a
- * teacher's languages and preferences), who they follow or who follows them
+ * guardian's country; a teacher's languages and preferences), who they follow or who follows them
  * as guardian, and the consents given for a child. Erasing blanks the
  * profile and undoes the guardian links; the consents stay as given (what a
  * guardian agreed to, and when, is the academy's evidence), and a guardian
@@ -40,6 +40,7 @@ final class ProfileData implements PersonalDataSource
 
         return new PersonalDataPart([
             'student' => $student === null ? null : (array) $student,
+            'guardian' => ($guardian = DB::table('guardian_profiles')->where('user_id', $userId)->first(['country'])) === null ? null : (array) $guardian,
             'teacher' => $teacher === null ? null : ['languages' => json_decode((string) $teacher->languages, true), 'age_groups' => json_decode((string) $teacher->age_groups, true)]
                 + array_diff_key((array) $teacher, ['languages' => 1, 'age_groups' => 1]),
             'children' => $people('guardian_id', 'student_id'),
@@ -74,6 +75,7 @@ final class ProfileData implements PersonalDataSource
             ->update(['birth_date' => null, 'gender' => null, 'country' => null, 'school_grade' => null, 'teacher_gender' => null, 'updated_at' => now()]);
         $profiles += DB::table('teacher_profiles')->where('user_id', $userId)
             ->update(['gender' => null, 'languages' => '[]', 'dialect' => null, 'accepts_new' => false, 'accepts_trials' => false, 'accepts_groups' => false, 'max_group_size' => null, 'updated_at' => now()]);
+        $profiles += DB::table('guardian_profiles')->where('user_id', $userId)->update(['country' => null, 'updated_at' => now()]);
         $links = DB::table('guardian_student')->where(fn ($q) => $q->where('guardian_id', $userId)->orWhere('student_id', $userId))->delete();
         // A teacher's vetting record stays (who was checked, and when); the scans and certificate numbers go.
         $scans = DB::table('teacher_checks')->where('teacher_id', $userId)->whereNotNull('file_path')->pluck('file_path')->all();

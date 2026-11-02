@@ -18,6 +18,19 @@ use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
  */
 final class DemoShiftsSeeder extends Seeder
 {
+    /**
+     * Each teacher's first week on their own clock: [ISO weekday, from, to]. DemoOpenHoursSeeder adds days to it
+     * through the shift actions, and leaves a teacher whose week in force is no longer this one as they are.
+     */
+    public const WEEKS = [
+        'mahmoud' => [[6, '16:00', '22:00'], [1, '16:00', '22:00'], [3, '16:00', '22:00']],
+        'nour' => [[6, '17:00', '22:00'], [2, '17:00', '22:00'], [4, '18:00', '21:00']],
+        'sara' => [[6, '17:00', '21:00'], [7, '18:00', '22:00'], [2, '16:00', '21:00']],
+        'khaled' => [[7, '15:00', '21:00'], [1, '15:00', '21:00'], [2, '15:00', '21:00'], [3, '15:00', '21:00'], [4, '15:00', '21:00']],
+        'ahmed' => [[1, '17:00', '23:00'], [2, '17:00', '23:00'], [3, '17:00', '23:00'], [4, '17:00', '23:00']],
+        'mona' => [[7, '17:00', '22:00'], [4, '17:00', '22:00'], [6, '20:00', '23:00']],
+    ];
+
     public function run(PeopleApi $people): void
     {
         $user = fn (string $key) => DB::table('users')->where('email', "{$key}@demo.test")->value('id');
@@ -37,16 +50,8 @@ final class DemoShiftsSeeder extends Seeder
         }
 
         // Schedules in force since half a year ago (history, so written directly).
-        $weeks = [
-            'mahmoud' => [[6, '16:00', '22:00'], [1, '16:00', '22:00'], [3, '16:00', '22:00']],
-            'nour' => [[6, '17:00', '22:00'], [2, '17:00', '22:00'], [4, '18:00', '21:00']],
-            'sara' => [[6, '17:00', '21:00'], [7, '18:00', '22:00'], [2, '16:00', '21:00']],
-            'khaled' => [[7, '15:00', '21:00'], [1, '15:00', '21:00'], [2, '15:00', '21:00'], [3, '15:00', '21:00'], [4, '15:00', '21:00']],
-            'ahmed' => [[1, '17:00', '23:00'], [2, '17:00', '23:00'], [3, '17:00', '23:00'], [4, '17:00', '23:00']],
-            'mona' => [[7, '17:00', '22:00'], [4, '17:00', '22:00'], [6, '20:00', '23:00']],
-        ];
         $since = CarbonImmutable::now()->subMonths(6)->toDateString();
-        foreach ($weeks as $key => $blocks) {
+        foreach (self::WEEKS as $key => $blocks) {
             $teacherId = $user($key);
             $tz = DB::table('users')->where('id', $teacherId)->value('timezone');
             $version = ShiftSchedule::query()->create([
@@ -60,7 +65,7 @@ final class DemoShiftsSeeder extends Seeder
     }
 
     /** @param  list<array{0: int, 1: string, 2: string}>  $blocks */
-    private static function week(array $blocks, string $tz): WeeklyShifts
+    public static function week(array $blocks, string $tz): WeeklyShifts
     {
         return WeeklyShifts::fromArray(array_map(fn ($b) => ['weekday' => $b[0], 'start' => $b[1], 'end' => $b[2]], $blocks), $tz);
     }

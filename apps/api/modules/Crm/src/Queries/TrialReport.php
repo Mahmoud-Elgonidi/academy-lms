@@ -23,7 +23,8 @@ use Modules\SharedKernel\Time\LocalTimePresenter;
  * name (and their card, when it is on the academy's page), and what the
  * teacher wrote for the family (level, strengths, what to work on, their
  * words); the plan and lessons a week they recommend with its price in the
- * family's price region (Billing's: the region they pay in, else their
+ * family's price region (Billing's one rule, as the start flow and its
+ * invoice: the region the payer pays in, else the payer's or the learner's
  * country's, else the default); the academy's offer while it is open, with
  * its end and the price after it (the bigger of the offer and the family
  * discount applies, as on the invoice); a course the learner already has in
@@ -72,8 +73,10 @@ final class TrialReport
         $course = $lead->learner_id !== null && $subjectId !== '' ? $this->facts->course($lead->learner_id, $subjectId) : null;
         $plans = $trial->recommended_plan_id !== null ? collect($this->billing->planOptions())->keyBy('id') : collect();
         $plan = $trial->recommended_plan_id !== null ? $plans->get($trial->recommended_plan_id) : null;
-        $payer = (string) ($lead->contact_id ?? $lead->learner_id);
-        $region = $classic ? $this->billing->priceRegionFor($lead->contact_id, $lead->country) : null;
+        // Who would pay is who starts the course from here (the start flow's payer is the viewer), else the family's contact;
+        // their region is Billing's one rule, so the report, the start flow and the invoice agree.
+        $payer = (string) ($viewerId ?? $lead->contact_id ?? $lead->learner_id);
+        $region = $classic ? $this->billing->priceRegionFor($payer, $lead->learner_id) : null;
         $price = $plan !== null && $region !== null && isset($plan->prices[$region->id]) ? $plan->prices[$region->id] : null;
 
         $offerState = $classic ? $this->offerState($trial, $course !== null, $now) : 'none';
@@ -122,7 +125,7 @@ final class TrialReport
              * the start flow with (GET family/start/options, then slots and POST family/courses): the recommended plan while it is
              * offered, the trial's teacher while they still take the learner, the subject and the learner.
              */
-            'start' => $classic && $lead->learner_id !== null && $subjectId !== '' ? $this->start($trial, $lead->learner_id, $subjectId, $plan, $viewerId ?? $lead->contact_id ?? $lead->learner_id) : null,
+            'start' => $classic && $lead->learner_id !== null && $subjectId !== '' ? $this->start($trial, $lead->learner_id, $subjectId, $plan, $payer) : null,
         ];
     }
 

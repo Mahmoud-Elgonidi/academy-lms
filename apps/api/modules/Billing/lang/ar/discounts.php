@@ -148,7 +148,7 @@ return [
         'extra_waiting' => 'فاتورة الحصص الإضافية :number بانتظار الدفع.',
         'lessons' => 'عدد الحصص',
         'extra_submit' => 'أصدر الفاتورة',
-        'extra_done' => 'صدرت الفاتورة :number: :total.',
+        'extra_done' => 'صدرت الفاتورة :number (:total).',
         'open_invoice' => 'افتح الفاتورة',
     ],
     'family' => [
@@ -157,7 +157,7 @@ return [
         'extra_title' => 'حصص إضافية في :subject',
         'extra_body' => 'الحصة بـ :price، وبعد أن تدفع تحجز الأكاديمية الحصص معك.',
         'extra_submit' => 'أصدر الفاتورة',
-        'extra_done' => 'الفاتورة :number جاهزة: :total. يمكنك دفعها الآن.',
+        'extra_done' => 'الفاتورة :number جاهزة (:total)، ويمكنك دفعها الآن.',
         'extra_waiting' => 'فاتورة الحصص الإضافية :number بانتظار الدفع.',
         'total' => 'الإجمالي: :total',
     ],

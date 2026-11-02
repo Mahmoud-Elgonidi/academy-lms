@@ -5,6 +5,7 @@ namespace Modules\Billing\Discounts;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Actions\IssueBlockInvoice;
+use Modules\Billing\Actions\SetInvoiceDue;
 use Modules\Billing\Actions\VoidInvoice;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentCheckout;
@@ -50,7 +51,12 @@ final class ReissueBlock
                 return [$course, (int) $line->meta['block_no'], $ar, $en];
             })->values()->all();
         $this->void->handle($waiting->id, $reason, $actorId);
+        $again = $this->issue->together($blocks, $actorId);
+        // A coupon changed is not more time to pay: the invoice is due when the one it replaces was (a family's start: its pay-by).
+        if ($waiting->due_at !== null && app(SetInvoiceDue::class)->handle($again->id, $waiting->due_at)) {
+            $again->refresh();
+        }
 
-        return $this->issue->together($blocks, $actorId);
+        return $again;
     }
 }

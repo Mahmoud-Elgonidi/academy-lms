@@ -36,6 +36,7 @@ use Modules\Crm\Models\LeadTrial;
 use Modules\Crm\Privacy\LeadsData;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
+use Modules\People\Contracts\PeopleApi;
 use Modules\Platform\Actions\Plans\ChangeAcademyPlan;
 use Modules\Platform\Models\SaasPlan;
 use Modules\Scheduling\Actions\ConfirmBooking;
@@ -290,7 +291,7 @@ it('applies the bigger of the offer and the family discount, never both', functi
     expect([$offer['price']['amount_minor'], $offer['saving']['amount_minor'], $offer['family_discount_bigger']])->toBe([32000, 0, true]);
 });
 
-it('prices the report in the region the family pays in, else their country\'s, else the default', function () {
+it('prices the report in the region the family pays in, else the payer\'s or the learner\'s country\'s, else the default', function () {
     $levant = PriceRegion::query()->create(['name_ar' => 'الشام', 'name_en' => 'Levant', 'currency' => 'USD', 'is_default' => false, 'countries' => ['JO']]);
     $this->plan->prices()->create(['price_region_id' => $levant->id, 'amount_minor' => 9000, 'currency' => 'USD']);
 
@@ -299,13 +300,21 @@ it('prices the report in the region the family pays in, else their country\'s, e
     expect([$report['recommendation']['price']['amount_minor'], $report['recommendation']['region']['currency'], $report['offer']['price']['amount_minor']])
         ->toBe([9000, 'USD', 8100]);
 
-    // A country no region names: the default one; a payer who pays here already: their account's.
+    // The lead's country went on the learner and the parent (PrepareLearner), which is what prices them.
+    $people = app(PeopleApi::class);
+    expect([$people->countryOf((string) $jordan->lead->learner_id), $people->countryOf((string) $jordan->lead->contact_id)])->toBe(['JO', 'JO']);
+
+    // A country no region names: the default one; the learner's when the payer has none; a payer who pays here
+    // already: their account's, whatever their country.
     $billing = app(BillingApi::class);
     $gulf = PriceRegion::query()->where('is_default', true)->value('id');
     $guardian = DB::table('guardian_student')->where('student_id', $this->student->id)->value('guardian_id');
-    expect($billing->priceRegionFor(null, 'FR')?->id)->toBe($gulf)
-        ->and($billing->priceRegionFor(null, 'jo')?->id)->toBe($levant->id)
-        ->and($billing->priceRegionFor($guardian, 'JO')?->id)->toBe($gulf);
+    $people->fillCountry($this->student->id, 'FR');
+    expect($billing->priceRegionFor(null, $this->student->id)?->id)->toBe($gulf)
+        ->and($billing->priceRegionFor(null, (string) $jordan->lead->learner_id)?->id)->toBe($levant->id)
+        ->and($billing->priceRegionFor((string) $jordan->lead->contact_id, null)?->id)->toBe($levant->id);
+    $people->fillCountry($guardian, 'JO');
+    expect($billing->priceRegionFor($guardian, (string) $jordan->lead->learner_id)?->id)->toBe($gulf);
 });
 
 it('reminds the family of its offer once in its last day, and never once it was used or the learner started', function () {

@@ -15955,7 +15955,7 @@ export interface operations {
                                 message: string | null;
                             };
                             payment: {
-                                /** @description Pay before this to keep the first lesson (rule 16); null when nothing is due or no lesson is booked yet. */
+                                /** @description Pay before this to keep the first lesson (rule 16), the first invoice's due date too; null when nothing is due or no lesson is booked yet. */
                                 pay_by: {
                                     utc: string;
                                     local: string;

@@ -47,11 +47,14 @@ interface BillingApi
     public function regions(): array;
 
     /**
-     * The price region a family's prices are in: the one the payer already
-     * pays in (their billing account), else the one naming their country,
-     * else the default one. Null when the academy has no region.
+     * The price region a family's prices are in, the one rule for every
+     * place that prices for a family (the trial's report, the start flow,
+     * its invoice): the region the payer already pays in (their billing
+     * account), else the one naming the payer's country, else the learner's
+     * (People's: a student's details, a guardian's profile), else the
+     * default one. Null when the academy has no region.
      */
-    public function priceRegionFor(?string $payerId, ?string $country): ?RegionOption;
+    public function priceRegionFor(?string $payerId, ?string $learnerId): ?RegionOption;
 
     /**
      * Makes a personal coupon (a trial offer) through SaveCoupon: a
@@ -60,6 +63,13 @@ interface BillingApi
      * applies). Its code is random and never needs typing.
      */
     public function issuePersonalCoupon(PersonalCoupon $coupon): PersonalCouponState;
+
+    /**
+     * Sets when an issued invoice with nothing paid on it is due (SetInvoiceDue):
+     * a course a family started on its own is due by its pay-by moment, not
+     * the academy's general number of days. Returns whether it changed.
+     */
+    public function setInvoiceDue(string $invoiceId, CarbonImmutable $dueAt): bool;
 
     /** A personal coupon as it stands now; null when there is none (another academy's, or a staff code). */
     public function personalCoupon(string $couponId): ?PersonalCouponState;

@@ -33,7 +33,7 @@ final class DemoPeopleSeeder extends Seeder
         $profiles = [
             'mahmoud' => [['kids', 'middle'], 6, [$teaches('Quran memorisation', 'Noorani Qaida', '10 juz', ['New memorisation', 'Revision']), $teaches('Tajweed', 'Beginner', 'Intermediate')]],
             'nour' => [[], 8, [$teaches('Quran memorisation', null, null), $teaches('Tajweed', null, null)]],
-            'sara' => [['teen', 'adults'], 6, [$teaches('Tajweed', 'Intermediate', null, ['Hafs', 'Al-Jazariyya']), $teaches('Quran memorisation', '5 juz', null, ['Revision', 'Ijazah'])]],
+            'sara' => [['middle', 'teen', 'adults'], 6, [$teaches('Tajweed', 'Intermediate', null, ['Hafs', 'Al-Jazariyya']), $teaches('Quran memorisation', '5 juz', null, ['Revision', 'Ijazah'])]],
             'khaled' => [['middle', 'teen', 'adults'], 7, [$teaches('Arabic', 'Foundations', 'Level 3', ['Egyptian curriculum', 'Saudi curriculum']), $teaches('Arabic grammar', 'Al-Ajurrumiyya', 'Qatr al-Nada')]],
             'ahmed' => [['kids', 'middle', 'teen'], 8, [$teaches('English', 'A1', 'B2', ['Conversation', 'British curriculum', 'American curriculum']), $teaches('Arabic', 'Foundations', 'Level 1', ['For non-native speakers'])]],
             'mona' => [['kids'], 5, [$teaches('Arabic', 'Level 1', 'Level 3', ['Saudi curriculum']), $teaches('Quran memorisation', 'Noorani Qaida', 'Juz Tabarak', ['New memorisation'])]],
