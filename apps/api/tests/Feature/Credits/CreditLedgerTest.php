@@ -146,6 +146,45 @@ it('lets minutes lapse once, and pushes back the dates of lots not yet lapsed', 
         ->and(CreditEntry::query()->where('type', 'expire')->sole()->minutes)->toBe(60);
 });
 
+it('reads a balance as of now: minutes past their date count for nothing and never give the next expiry, swept or not', function () {
+    $makeup = $this->credits->grantMakeup($this->account, 30, 3, null, 'makeup-1');                        // Thursday 8 October, end of day
+    ledgerGrant(60, 'soon');                                                                                   // 16 November
+    $this->credits->grant($this->account, LotSource::Purchase, null, 120, CarbonImmutable::parse('2026-12-20 12:00', 'UTC'), 'later');
+
+    $now = $this->credits->balance($this->account);
+    expect($now->nextExpiry?->toDateString())->toBe('2026-10-08')
+        ->and($now->makeupMin)->toBe(30)->and($now->renewableMin())->toBe(180)->and($now->lapsedMin)->toBe(0);
+
+    // The makeup lot's day has passed, and credits:expire has not run: it is gone all the same.
+    CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-09 07:00', 'UTC'));
+    $later = $this->credits->balance($this->account);
+    expect($later->nextExpiry?->toDateString())->toBe('2026-11-16')
+        ->and($later->nextExpiry->isFuture())->toBeTrue()
+        ->and($later->expiringMin)->toBe(60)
+        ->and($later->makeupMin)->toBe(0)
+        ->and($later->availableMin)->toBe(180)
+        ->and($later->lapsedMin)->toBe(30);
+
+    // A purchased lot past its day: out of the paid minutes left, and the next date is the one still to come.
+    CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-11-17 07:00', 'UTC'));
+    $unswept = $this->credits->balance($this->account);
+    expect($unswept->nextExpiry?->toDateString())->toBe('2026-12-20')
+        ->and($unswept->expiringMin)->toBe(120)
+        ->and($unswept->renewableMin())->toBe(120);
+
+    // The sweep changes nothing the balance already said.
+    expect(app(ExpireCredits::class)->handle())->toBe(2);
+    $swept = $this->credits->balance($this->account);
+    expect([$swept->availableMin, $swept->makeupMin, $swept->renewableMin(), $swept->nextExpiry?->toDateString(), $swept->lapsedMin])
+        ->toBe([$unswept->availableMin, $unswept->makeupMin, $unswept->renewableMin(), '2026-12-20', 0])
+        ->and(CreditLot::query()->whereKey($makeup)->value('remaining_min'))->toBe(0);
+    ledgerHolds($this->account);
+
+    // Once nothing can lapse, there is no expiry at all.
+    CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-12-21 07:00', 'UTC'));
+    expect($this->credits->balance($this->account))->nextExpiry->toBeNull()->expiringMin->toBe(0)->availableMin->toBe(0);
+});
+
 it('raises the renewal mark when a lesson turned into makeup credit brings the paid minutes down to it', function () {
     Event::fake([CreditBalanceLow::class]);
     ledgerGrant();

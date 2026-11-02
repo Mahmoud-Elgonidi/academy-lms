@@ -181,7 +181,7 @@ final class FamilyBillingController
                 /** Within 7 days: show it as a warning. */
                 'soon' => $b['expiry_soon'],
                 'text' => $b['expiry_soon']
-                    ? __('billing::collections.balance.expiry_soon', ['lessons' => (string) $expiring, 'on' => $day($expiryOn)])
+                    ? trans_choice('billing::collections.balance.expiry_soon', $expiring, ['on' => $day($expiryOn)])
                     : __('billing::collections.balance.expiry', ['on' => $day($expiryOn)]),
             ],
             /** The pause's last day, on the academy's calendar. Not in the kids' look. */
@@ -217,7 +217,7 @@ final class FamilyBillingController
                 'on' => $this->time->academyDay($next->on),
                 'text' => $next->days === 0
                     ? __('billing::collections.balance.next_invoice_now', ['amount' => $next->amount->format()])
-                    : __('billing::collections.balance.next_invoice', ['mark' => (string) $next->pace->markLessons(), 'amount' => $next->amount->format(), 'on' => $day($next->on)]),
+                    : trans_choice('billing::collections.balance.next_invoice', $next->pace->markLessons(), ['amount' => $next->amount->format(), 'on' => $day($next->on)]),
             ],
             /** A sentence for a course that does not renew now (paused, ending; the classic look); null otherwise. */
             'renewal_note' => ! $money ? null : match (true) {

@@ -21,12 +21,15 @@ final class StartRefused extends ValidationException
     public int $httpStatus = 422;
 
     /**
+     * A sentence with a count (times_count) is a plural choice by it (trans_choice: Arabic's one, two, few and many).
+     *
      * @param  array<string, string|int>  $replace
      * @param  array<string, mixed>  $extra
      */
     public static function because(string $reason, array $replace = [], array $extra = [], int $status = 422): self
     {
-        $e = self::withMessages(['start' => (string) __('scheduling::start.why.'.$reason, $replace)]);
+        $key = 'scheduling::start.why.'.$reason;
+        $e = self::withMessages(['start' => isset($replace['count']) ? trans_choice($key, (int) $replace['count'], $replace) : (string) __($key, $replace)]);
         $e->reason = $reason;
         $e->extra = $extra;
         $e->httpStatus = $status;

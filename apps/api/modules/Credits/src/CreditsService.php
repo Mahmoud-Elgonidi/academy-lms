@@ -133,23 +133,32 @@ final class CreditsService implements CreditsApi
             return [];
         }
         $ids = $accounts->modelKeys();
-        // Each account's lot that lapses first, and its makeup minutes (booked or not).
-        $next = CreditLot::query()->whereIn('account_id', $ids)->where('remaining_min', '>', 0)->whereNotNull('expires_at')
+        $now = CarbonImmutable::now();
+        // Each account's lot that lapses first from now on (never one whose date has passed), and its makeup minutes (booked or not).
+        $next = CreditLot::query()->whereIn('account_id', $ids)->where('remaining_min', '>', 0)->where('expires_at', '>', $now)
             ->orderBy('account_id')->orderBy('expires_at')->get(['account_id', 'expires_at', 'remaining_min'])
             ->unique('account_id')->keyBy('account_id');
         $makeup = CreditLot::makeupOwed($ids);
+        // Free minutes in lots past their date that credits:expire has not swept yet: already lost (nothing can book them), so
+        // the balance never counts them, whether the hourly sweep ran or not.
+        $lapsed = CreditLot::query()->whereIn('account_id', $ids)->where('remaining_min', '>', 0)->where('expires_at', '<=', $now)
+            ->groupBy('account_id')
+            ->selectRaw('account_id, sum(remaining_min) as minutes, sum(case when source = ? then remaining_min else 0 end) as makeup', [LotSource::Makeup->value])
+            ->get()->keyBy('account_id');
 
         $balances = [];
         foreach ($accounts as $account) {
             $lot = $next->get($account->id);
+            $gone = $lapsed->get($account->id);
             $balances[$account->id] = new CreditBalance(
                 accountId: $account->id,
-                availableMin: $account->available_min,
+                availableMin: max(0, $account->available_min - (int) ($gone->minutes ?? 0)),
                 reservedMin: $account->reserved_min,
                 consumedMin: $account->consumed_min,
                 nextExpiry: $lot?->expires_at,
                 expiringMin: $lot?->remaining_min ?? 0,
-                makeupMin: (int) ($makeup[$account->id] ?? 0),
+                makeupMin: max(0, (int) ($makeup[$account->id] ?? 0) - (int) ($gone->makeup ?? 0)),
+                lapsedMin: (int) ($gone->minutes ?? 0),
             );
         }
 

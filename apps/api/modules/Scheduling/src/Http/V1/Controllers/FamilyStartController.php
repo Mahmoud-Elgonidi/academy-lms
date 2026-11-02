@@ -376,7 +376,7 @@ final class FamilyStartController
         $payText = match (true) {
             $invoice === null && $done->joinedPackage => __('scheduling::start.pay.'.($this->billing->courseBilling($done->enrollmentId)?->active ? 'package' : 'package_unpaid')),
             $group !== null && $group->status === LessonGroup::FORMING => __('scheduling::start.pay.group_forming'),
-            $payBy !== null => __('scheduling::start.pay.by', ['when' => $this->time->present($payBy, $zone)['label'] ?? '', 'hours' => $unpaid]),
+            $payBy !== null => trans_choice('scheduling::start.pay.by', (int) $unpaid, ['when' => $this->time->present($payBy, $zone)['label'] ?? '']),
             default => __('scheduling::start.pay.any_time'),
         };
         $own = CourseStart::query()->where('enrollment_id', $done->enrollmentId)->first();
@@ -427,7 +427,7 @@ final class FamilyStartController
                 'unpaid_cancel_hours' => $unpaid,
                 'text' => (string) $payText,
                 /** When the next block's invoice comes, and that the family can stop any time. */
-                'renews' => $plan === null ? null : (string) __('scheduling::start.renews', ['count' => $plan->renewAtSessions]),
+                'renews' => $plan === null ? null : trans_choice('scheduling::start.renews', (int) $plan->renewAtSessions),
             ],
             /** The family may call it off before paying (POST family/courses/{enrollment}/cancel). */
             'can_cancel' => $own !== null && app(CancelOwnStart::class)->whyNot($own) === null,

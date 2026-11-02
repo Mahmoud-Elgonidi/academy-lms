@@ -217,7 +217,7 @@ it('starts the course: its lessons waiting to be paid, the invoice with the offe
         ->and($invoice['coupon'])->toMatchArray(['personal' => true])
         ->and($answer['pay_url'])->toContain('/pay/invoice/'.$invoice['id'])->toContain('signature=')
         ->and($answer['payment']['unpaid_cancel_hours'])->toBe(24)
-        ->and($answer['payment']['renews'])->toContain('2')
+        ->and($answer['payment']['renews'])->toContain('حين تبقى حصتان،')
         ->and($answer['can_cancel'])->toBeTrue();
     // Pay before the first lesson's unpaid deadline: 24 hours before it. The invoice is due at that same moment,
     // not the academy's general days (nor the offer's end): one deadline on every screen.

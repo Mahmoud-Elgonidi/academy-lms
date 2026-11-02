@@ -16,6 +16,7 @@ use Modules\Billing\Queries\Renewals\NextRenewals;
 use Modules\Communication\Contracts\DTOs\Day;
 use Modules\Communication\Contracts\DTOs\Localized;
 use Modules\Communication\Contracts\DTOs\Message;
+use Modules\Communication\Contracts\DTOs\Translatable;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\SharedKernel\Authorization\Ability;
@@ -110,7 +111,7 @@ final class FollowUpCollections
                         'number' => $data['number'],
                         'student' => $data['student'],
                         'left' => $data['left'],
-                        'days' => (string) CollectionRules::OVERDUE_DAYS,
+                        'days' => Translatable::count('billing::collections.count.days_late', CollectionRules::OVERDUE_DAYS),
                     ], ['screen' => 'invoice', 'id' => $invoice->id], "collection-staff:{$invoice->id}"));
                 }
                 CollectionStep::query()->where('key', "{$invoice->id}:{$step}")->update(['recipients' => $heard]);
@@ -180,7 +181,7 @@ final class FollowUpCollections
                     'student' => $student,
                     'subject' => new Localized($subjectAr, $subjectEn),
                     'plan' => new Localized((string) $subscription->plan->name_ar, (string) $subscription->plan->name_en),
-                    'lessons' => (string) $renewal->pace->markLessons(),
+                    'lessons' => Translatable::count('billing::collections.count.lessons_after', $renewal->pace->markLessons()),
                     'amount' => $renewal->amount,
                     'on' => new Day($renewal->on->toDateString()),
                 ], ['screen' => 'course_balance', 'id' => $subscription->enrollment_id], "renewal-preview:{$subscription->id}:{$block}"));

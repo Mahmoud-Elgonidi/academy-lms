@@ -24,7 +24,7 @@ return [
     ],
     'renewal_preview' => [
         'title' => ':student\'s package renews soon',
-        'body' => 'A few lessons are left in :student\'s package (:subject). When :lessons lessons are left, the invoice for the next package ":plan" goes out, about :amount, around :on. Nothing to do yet.',
+        'body' => 'A few lessons are left in :student\'s package (:subject). When the balance comes down to :lessons, the invoice for the next package ":plan" goes out, about :amount, around :on. Nothing to do yet.',
     ],
     'due_tomorrow' => [
         'title' => 'Reminder: invoice :number is due tomorrow',
@@ -39,7 +39,7 @@ return [
         'body' => ':student\'s invoice was due on :due, with :left left to pay. Pay it when you can, or message the academy if you need help: :link',
     ],
     'overdue_staff' => [
-        'title' => 'Invoice :days days late',
+        'title' => 'Invoice :days late',
         'body' => ':payer has not paid invoice :number (:student) two days after it was due; :left is left. They were reminded; follow up if needed.',
     ],
     'lesson_at_risk' => [
@@ -52,6 +52,6 @@ return [
     ],
     'credits_expiring' => [
         'title' => ':student\'s lessons expire soon',
-        'body' => ':lessons of :student\'s lessons (:subject) expire on :on. Book them with the academy before then so they are not lost.',
+        'body' => ':student has :lessons in :subject with no time booked yet, expiring on :on. Book their times with the academy before then so nothing is lost.',
     ],
 ];

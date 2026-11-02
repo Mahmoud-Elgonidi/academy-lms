@@ -60,9 +60,8 @@ final class SendPayLink
             }
             $last = CollectionStep::query()->where('invoice_id', $invoice->id)->where('step', CollectionRules::PAY_LINK)->max('sent_at');
             if ($last !== null && CarbonImmutable::parse($last)->addMinutes(CollectionRules::PAY_LINK_MINUTES)->greaterThan($now)) {
-                throw ValidationException::withMessages(['invoice' => __('billing::collections.errors.just_sent', [
-                    'minutes' => (string) max(1, (int) ceil($now->diffInMinutes(CarbonImmutable::parse($last)->addMinutes(CollectionRules::PAY_LINK_MINUTES)))),
-                ])]);
+                throw ValidationException::withMessages(['invoice' => trans_choice('billing::collections.errors.just_sent',
+                    max(1, (int) ceil($now->diffInMinutes(CarbonImmutable::parse($last)->addMinutes(CollectionRules::PAY_LINK_MINUTES)))))]);
             }
             $payerId = (string) $invoice->billingAccount?->payer_id;
             $key = "{$invoice->id}:pay_link:".$now->format('YmdHi');

@@ -69,7 +69,7 @@ final class AddOwnChild
                 ->leftJoin('student_profiles as sp', 'sp.user_id', '=', 'gs.student_id')
                 ->where('gs.guardian_id', $guardianId)->get(['u.id', 'u.name', 'sp.birth_date']);
             if ($children->count() >= self::MAX_CHILDREN) {
-                throw ValidationException::withMessages(['name' => __('people::family.add_child.errors.too_many', ['max' => self::MAX_CHILDREN])]);
+                throw ValidationException::withMessages(['name' => trans_choice('people::family.add_child.errors.too_many', self::MAX_CHILDREN)]);
             }
             $same = $children->first(fn (object $c) => ArabicText::normalize(mb_strtolower((string) $c->name)) === ArabicText::normalize(mb_strtolower($name))
                 && $c->birth_date !== null && substr((string) $c->birth_date, 0, 4) === $born->format('Y'));

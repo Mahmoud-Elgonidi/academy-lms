@@ -9,6 +9,7 @@ use Modules\Communication\Contracts\DTOs\Day;
 use Modules\Communication\Contracts\DTOs\Localized;
 use Modules\Communication\Contracts\DTOs\Message;
 use Modules\Communication\Contracts\DTOs\TemplateDefinition;
+use Modules\Communication\Contracts\DTOs\Translatable;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Credits\Contracts\Events\CreditsExpiringSoon;
 
@@ -30,13 +31,13 @@ final class SendCollectionNotifications
     {
         $invoice = ['number' => 'NR-000002', 'student' => 'زياد', 'left' => '560 ر.س.', 'due' => 'الخميس 8 أكتوبر', 'link' => 'https://noor.example.com/pay/invoice/…'];
         foreach ([
-            ['renewal_preview', ['email', 'whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'القرآن', 'plan' => '8 حصص', 'lessons' => '2', 'amount' => '400 ر.س.', 'on' => 'الأحد 18 أكتوبر']],
+            ['renewal_preview', ['email', 'whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'القرآن', 'plan' => '8 حصص', 'lessons' => 'حصتين', 'amount' => '400 ر.س.', 'on' => 'الأحد 18 أكتوبر']],
             ['due_tomorrow', ['email', 'whatsapp', 'push'], $invoice],
             ['due_today', ['email', 'whatsapp', 'push'], ['due' => 'الخميس 8 أكتوبر 2:00 م'] + $invoice],
             ['overdue', ['email', 'whatsapp', 'push'], $invoice],
             ['lesson_at_risk', ['email', 'whatsapp', 'push'], ['lesson' => 'الثلاثاء 6 أكتوبر 6:00 م', 'until' => 'الاثنين 5 أكتوبر 6:00 م'] + $invoice],
             ['pay_link', ['email', 'whatsapp', 'push'], array_diff_key($invoice, ['due' => 1])],
-            ['credits_expiring', ['email', 'whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'القرآن', 'lessons' => '3', 'on' => 'الخميس 22 أكتوبر']],
+            ['credits_expiring', ['email', 'whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'القرآن', 'lessons' => '3 حصص', 'on' => 'الخميس 22 أكتوبر']],
         ] as [$name, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
                 key: "billing.{$name}", category: 'billing',
@@ -48,7 +49,7 @@ final class SendCollectionNotifications
             key: 'billing.overdue_staff', category: 'staff',
             title: 'billing::notifications.overdue_staff.title', body: 'billing::notifications.overdue_staff.body',
             audience: 'billing::notifications.audience.collections', channels: ['push', 'email'],
-            sample: ['payer' => 'أ. منى', 'number' => 'NR-000002', 'student' => 'زياد', 'left' => '560 ر.س.', 'days' => '2'],
+            sample: ['payer' => 'أ. منى', 'number' => 'NR-000002', 'student' => 'زياد', 'left' => '560 ر.س.', 'days' => 'يومين'],
         ));
     }
 
@@ -68,7 +69,7 @@ final class SendCollectionNotifications
         $this->notifications->send(new Message('billing.credits_expiring', $this->reach->recipients($payerId), [
             'student' => $student,
             'subject' => new Localized($subjectAr, $subjectEn),
-            'lessons' => (string) max(1, intdiv($event->minutes, $per)),
+            'lessons' => Translatable::count('billing::collections.count.lessons', max(1, intdiv($event->minutes, $per))),
             'on' => new Day($event->expiresAt->setTimezone($this->reach->timezone($payerId))->toDateString()),
         ], ['screen' => 'course_balance', 'id' => $subscription->enrollment_id], "credits-expiring:{$event->lotId}:".$event->expiresAt->getTimestamp()));
     }

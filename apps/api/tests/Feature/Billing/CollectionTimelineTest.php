@@ -133,7 +133,9 @@ it('walks the timeline once each: the lesson at risk, the day before, the day, t
         ->toBe(collect([$this->admin->id, $this->accountant->id])->sort()->values()->all())
         // Never the learner's own account: the payer hears it.
         ->and(Notification::query()->where('user_id', $this->student->id)->where('template_key', 'like', 'billing.%')->count())->toBe(0)
-        ->and(CollectionStep::query()->where('invoice_id', $this->invoice->id)->count())->toBe(5);
+        ->and(CollectionStep::query()->where('invoice_id', $this->invoice->id)->count())->toBe(5)
+        // The office's copy says how late in words that agree with the number.
+        ->and(Notification::query()->where('template_key', 'billing.overdue_staff')->pluck('title')->unique()->all())->toBe(['فاتورة متأخرة يومين']);
 });
 
 it('stops at once when the office records the payment by hand mid-timeline', function () {
@@ -184,7 +186,7 @@ it('previews a renewal a few days ahead, once per block, with the plan, its pric
     expect(j5Follow())->toBe(1)->and(j5Follow())->toBe(0);
     $preview = Notification::query()->where('template_key', 'billing.renewal_preview')->sole();
     expect($preview->user_id)->toBe($this->payer->id)
-        ->and($preview->body)->toContain('8 حصص')->toContain('400')->toContain('الخميس 8 أكتوبر')
+        ->and($preview->body)->toContain('8 حصص')->toContain('يصل الرصيد إلى 7 حصص تصدر')->toContain('400')->toContain('الخميس 8 أكتوبر')
         ->and($preview->action)->toMatchArray(['screen' => 'course_balance', 'id' => $this->booked->enrollmentId]);
 });
 
@@ -199,7 +201,7 @@ it('tells the payer once a week before paid-for lessons lapse, again only for a 
     expect(app(ExpireCredits::class)->notice())->toBe(1)->and(app(ExpireCredits::class)->notice())->toBe(0);
     $told = Notification::query()->where('template_key', 'billing.credits_expiring')->sole();
     expect($told->user_id)->toBe($this->payer->id)
-        ->and($told->body)->toContain('2')->toContain('الاثنين 2 نوفمبر')
+        ->and($told->body)->toContain('حصتان دون موعد')->toContain('الاثنين 2 نوفمبر')
         ->and($told->action)->toMatchArray(['screen' => 'course_balance', 'id' => $this->booked->enrollmentId]);
 
     // A date moved later (a pause, a holiday given back) is told again when it comes near.
@@ -234,8 +236,10 @@ it('gives each family course its balance: lessons left, expiry, the next invoice
     j5Spare('2026-10-11 12:00');
     $late = j5Api('GET', "family/courses/{$this->booked->enrollmentId}/balance", $this->payer)->assertOk()->json('data');
     expect($late['lessons_left'])->toBe(10)
+        ->and($late['lessons_text'])->toBe('بقيت 10 حصص')
         ->and($late['expiry'])->toMatchArray(['lessons' => 2, 'soon' => true])
-        ->and($late['expiry']['text'])->toContain('احجزوا');
+        ->and($late['expiry']['text'])->toBe('تنتهي صلاحية حصتين في الأحد 11 أكتوبر. احجزوا موعديهما قبل ذلك حتى لا تضيعا.')
+        ->and($late['next_invoice']['text'])->toContain('عندما تبقى حصتان،');
 
     // The learner in the kids' look reads lessons left only: no plan, no money.
     app(PeopleApi::class)->saveStudentProfile($this->student->id, CarbonImmutable::parse('2017-03-01'), null);
@@ -247,6 +251,48 @@ it('gives each family course its balance: lessons left, expiry, the next invoice
     // Another family: not found.
     $stranger = User::factory()->withRole(Role::Guardian)->create();
     j5Api('GET', "family/courses/{$this->booked->enrollmentId}/balance", $stranger)->assertNotFound();
+});
+
+it('never shows a passed day as the coming expiry: lapsed minutes are out of the balance before credits:expire sweeps them', function () {
+    j5Pay();
+    $account = DB::table('enrollments')->where('id', $this->booked->enrollmentId)->value('credit_account_id');
+    $credits = app(CreditsApi::class);
+    // A makeup lesson given back, lapsing Thursday 8 October; two bought lessons lapsing Sunday 11 October (before the lessons
+    // still unpaid, so none draws on them); one more lasting to late November, which funds the next lesson waiting (booked: safe).
+    $credits->grantMakeup($account, 30, 3, null, 'makeup-j5');
+    j5Spare('2026-10-11 12:00');
+    $credits->grant($account, LotSource::Purchase, null, 30, CarbonImmutable::parse('2026-11-20 12:00', 'UTC'), 'later-j5');
+    $read = fn () => j5Api('GET', "family/courses/{$this->booked->enrollmentId}/balance", $this->payer)->assertOk()->json('data');
+
+    $now = $read();
+    expect($now)->toMatchArray(['lessons_left' => 11, 'lessons_text' => 'بقيت 11 حصة', 'makeup_lessons' => 1])
+        ->and($now['expiry'])->toMatchArray(['lessons' => 1, 'soon' => true])
+        ->and($now['expiry']['at']['local'])->toStartWith('2026-10-09')            // 23:59:59 UTC on the 8th: early on the 9th in Riyadh
+        ->and($now['expiry']['text'])->toStartWith('تنتهي صلاحية حصة واحدة في');
+
+    // The makeup lot's day has passed, nothing swept it: the makeup lesson is gone, and the next date is Sunday's.
+    j5At('2026-10-09 07:00');
+    $after = $read();
+    expect($after)->toMatchArray(['lessons_left' => 11, 'makeup_lessons' => 0])
+        ->and($after['expiry'])->toMatchArray(['lessons' => 2, 'soon' => true])
+        ->and($after['expiry']['at']['local'])->toStartWith('2026-10-11');
+
+    // Sunday's lessons lapsed too, still unswept: they are not counted, and with every minute left booked nothing can lapse:
+    // no expiry at all, never Sunday's.
+    j5At('2026-10-12 07:00');
+    $unswept = $read();
+    expect($unswept)->toMatchArray(['lessons_left' => 9, 'lessons_text' => 'بقيت 9 حصص', 'minutes_left' => 270, 'makeup_lessons' => 0, 'expiry' => null]);
+
+    // The hourly sweep then agrees with what the family already read.
+    expect(app(ExpireCredits::class)->handle())->toBe(2);
+    expect($read())->toMatchArray(['lessons_left' => 9, 'makeup_lessons' => 0, 'minutes_left' => 270, 'expiry' => null]);
+
+    // Two more bought, lapsing tomorrow before the next lesson (so none draws on them): the expiry is theirs, still to come.
+    j5Spare('2026-10-13 06:00');
+    $later = $read();
+    expect($later['expiry'])->toMatchArray(['lessons' => 2, 'soon' => true])
+        ->and($later['expiry']['at']['local'])->toStartWith('2026-10-13')
+        ->and($later['expiry']['text'])->toStartWith('تنتهي صلاحية حصتين في الثلاثاء 13 أكتوبر.');
 });
 
 it('sends the payment link from the live board and the invoice, audited, once an hour, and says why not', function () {

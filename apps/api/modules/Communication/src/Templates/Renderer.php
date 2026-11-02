@@ -66,7 +66,9 @@ final class Renderer
             $value instanceof Day => CarbonImmutable::parse($value->date, $timezone)->locale($locale)->translatedFormat('l j F'),
             $value instanceof Money => $value->format($locale),
             $value instanceof Localized => $value->in($locale),
-            $value instanceof Translatable => (string) trans()->get($value->key, $value->replace, $locale),
+            $value instanceof Translatable => $value->count === null
+                ? (string) trans()->get($value->key, $value->replace, $locale)
+                : trans()->choice($value->key, $value->count, $value->replace + ['count' => $value->count], $locale),
             $value === null => '',
             default => (string) $value,
         };
