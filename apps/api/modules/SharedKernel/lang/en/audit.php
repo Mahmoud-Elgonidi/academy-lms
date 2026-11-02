@@ -4,6 +4,7 @@ return [
     // By the action's two parts: 'billing.gateway_saved' is actions.billing.gateway_saved.
     'actions' => [
         'billing' => [
+            'pay_link_sent' => 'Payment link for invoice :number sent to the payer',
             'gateway_saved' => 'Payment account ":label" saved (:gateway · :mode)',
             'payment_recorded' => 'Payment of :amount (:method) recorded on invoice :number',
             'invoice_voided' => 'Invoice :number voided: :reason',
@@ -42,6 +43,7 @@ return [
             'settings' => 'Group lesson settings (default makeup: :late_join, mixed ages: :mixed, starts at: :min)',
         ],
         'enrollment' => [
+            'own_start_lapsed' => 'A course the family started closed unpaid past its time (lessons cancelled: :lessons, invoice: :invoice)',
             'started_own' => 'The family started a course on its own (:plan, :price, offer: :offer)',
             'own_start_cancelled' => 'The family called off a course it started before paying (:lessons lessons cancelled, invoice :invoice)',
             'teacher_changed' => 'A student\'s teacher changed from :starting',
@@ -107,6 +109,7 @@ return [
             'settings_saved' => 'Messages between teachers and families are now :state',
         ],
         'people' => [
+            'child_added' => 'A guardian added a child to their account',
             'consent_granted' => ':guardian agreed to :student\'s account (:via)',
             'consent_recorded' => 'A guardian\'s consent for :student recorded by the office: :note',
             'consent_withdrawn' => ':guardian withdrew their consent to :student\'s account',

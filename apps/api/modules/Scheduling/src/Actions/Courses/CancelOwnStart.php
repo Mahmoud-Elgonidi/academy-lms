@@ -59,7 +59,7 @@ final class CancelOwnStart
                 throw StartRefused::because($why, status: 409);
             }
             $done = $this->end->handle($enrollmentId, $this->days->today()->toDateString(), (string) __('scheduling::start.cancel_reason'), $viewerId);
-            $start->forceFill(['cancelled_at' => CarbonImmutable::now()])->save();
+            $start->forceFill(['cancelled_at' => CarbonImmutable::now(), 'cancel_reason' => 'family'])->save();
             app(AuditTrail::class)->record('enrollment.own_start_cancelled', 'enrollment', $enrollmentId, array_filter([
                 'lessons' => $done['cancelled'], 'invoice' => $done['billing']?->invoiceNumber,
             ], fn ($v) => $v !== null));

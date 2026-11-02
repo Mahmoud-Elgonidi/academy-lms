@@ -39,6 +39,7 @@ return [
     'substitute_teacher' => ['title' => 'أُضيفت لك حصة مع :student', 'body' => 'حصة :subject يوم :when.'],
     'holiday_family' => ['title' => 'إجازة الأكاديمية: :name', 'body' => 'الأكاديمية في إجازة من :from إلى :to. أُلغيت حصص :student في هذه الأيام (:count)، وعادت الدقائق إلى رصيده ومُدّدت صلاحيته بعدد أيام الإجازة.'],
     'holiday_teacher' => ['title' => 'إجازة الأكاديمية: :name', 'body' => 'الأكاديمية في إجازة من :from إلى :to، وأُلغيت :count من حصصك في هذه الأيام.'],
+    'own_start_closed' => ['title' => 'لم يبدأ كورس :student في :subject', 'body' => 'لم تُدفع فاتورة كورس :student في :subject قبل موعدها، فأُلغيت حصته الأولى وأغلقنا الكورس دون أي رسوم، وأُلغيت فاتورته. يسعدنا أن تبدأوا من جديد متى شئتم، باختيار مواعيد تناسبكم: :start'],
     'course_started' => ['title' => 'أهلًا بـ:student في :subject', 'body' => 'بدأ كورس :subject لـ:student مع :teacher. المواعيد الأسبوعية: :times. أول حصة: :first. :join :link :app'],
     'course_paused_family' => ['title' => 'حصص :subject لـ :student موقوفة', 'body' => 'كورس :subject موقوف من :from حتى :until. أُلغيت حصص هذه الأيام، وعادت دقائقها إلى الرصيد، ومُدّدت صلاحيته بعدد أيام الإيقاف. تعود الحصص في اليوم التالي.'],
     'course_paused_teacher' => ['title' => 'أُوقف كورس: :student', 'body' => 'كورس :subject الخاص بـ :student موقوف من :from حتى :until، وأُلغيت حصصه معك في هذه الأيام. تبقى مواعيده الأسبوعية محجوزة له.'],

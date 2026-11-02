@@ -18,6 +18,9 @@ use Modules\Credits\Contracts\DTOs\CreditBalance;
  */
 interface CreditsApi
 {
+    /** Paid-for minutes about to lapse are told this many days before their date (ExpireCredits::notice), and a balance warns as much. */
+    public const EXPIRY_NOTICE_DAYS = 7;
+
     /** The account for this scope, opened if it does not exist yet. */
     public function openAccount(string $studentId, string $scopeType, ?string $scopeId, ?int $lowBalanceMin = null): string;
 

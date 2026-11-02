@@ -18,6 +18,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property int $remaining_min
  * @property ?CarbonImmutable $expires_at
  * @property CarbonImmutable $created_at
+ * @property ?CarbonImmutable $expiry_noticed_for the date its coming lapse was told about (ExpireCredits::notice)
  * @property ?string $use_for a makeup lot kept for private or group makeup lessons; null: either
  */
 final class CreditLot extends Model
@@ -36,6 +37,7 @@ final class CreditLot extends Model
             'granted_min' => 'integer',
             'remaining_min' => 'integer',
             'expires_at' => 'immutable_datetime',
+            'expiry_noticed_for' => 'immutable_datetime',
             'created_at' => 'immutable_datetime',
         ];
     }

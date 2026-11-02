@@ -26,6 +26,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property bool $offer_applied
  * @property int $extra_validity_days days the first block lasts longer for the weeks it skipped (given at the first payment)
  * @property ?CarbonImmutable $cancelled_at
+ * @property ?string $cancel_reason family (CancelOwnStart) | unpaid (CloseUnpaidStarts)
  * @property CarbonImmutable $created_at
  */
 final class CourseStart extends Model
@@ -34,7 +35,7 @@ final class CourseStart extends Model
 
     protected $table = 'course_starts';
 
-    protected $fillable = ['enrollment_id', 'learner_id', 'started_by', 'payer_id', 'plan_id', 'teacher_id', 'group_id', 'price_minor', 'currency', 'offer_applied', 'cancelled_at', 'extra_validity_days'];
+    protected $fillable = ['enrollment_id', 'learner_id', 'started_by', 'payer_id', 'plan_id', 'teacher_id', 'group_id', 'price_minor', 'currency', 'offer_applied', 'cancelled_at', 'cancel_reason', 'extra_validity_days'];
 
     protected function casts(): array
     {

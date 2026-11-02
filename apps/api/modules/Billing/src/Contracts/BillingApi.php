@@ -135,4 +135,11 @@ interface BillingApi
      * receipt the academy has not decided) or checkout_open (an online payment page still open); null when none.
      */
     public function paymentUnderway(string $invoiceId): ?string;
+
+    /**
+     * Sends the payment link of this course's invoice waiting to be paid (its block first) to the payer's channels
+     * (SendPayLink: audited, at most once an hour per invoice; refused in the office's words when paid, a transfer
+     * receipt waits, or nothing waits). Returns the invoice's number.
+     */
+    public function sendPayLink(string $enrollmentId, string $actorId): string;
 }

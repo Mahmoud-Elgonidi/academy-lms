@@ -49,6 +49,7 @@ return [
     ],
     'renews' => 'The next block\'s invoice comes when :count lessons are left, and you can stop any time.',
     'cancelled' => 'The course is called off and nothing was charged. You can start again any time.',
+    'lapsed_reason' => 'Not paid by its time, so it closed itself',
     'cancel_reason' => 'Called off by the family before paying',
     'welcome' => [
         'join' => 'Join a few minutes before it from the app, or from this link:',

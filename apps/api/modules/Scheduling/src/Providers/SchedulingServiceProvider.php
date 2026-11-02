@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Modules\Billing\Contracts\UnpaidLessons;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Credits\Contracts\Events\CreditsGranted;
@@ -19,6 +20,7 @@ use Modules\Enrollment\Contracts\Events\EnrollmentResumed;
 use Modules\Identity\Contracts\Preferences\PreferenceDefinition;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Scheduling\Actions\BringExistingSchedule;
+use Modules\Scheduling\Actions\Courses\CloseUnpaidStarts;
 use Modules\Scheduling\AssessmentService;
 use Modules\Scheduling\AttendanceService;
 use Modules\Scheduling\Console\FollowCourseDaysCommand;
@@ -73,6 +75,7 @@ use Modules\Scheduling\Live\LessonsChanged;
 use Modules\Scheduling\Privacy\LessonsData;
 use Modules\Scheduling\Queries\Groups\CourseGroupsQuery;
 use Modules\Scheduling\Queries\Start\StartRules;
+use Modules\Scheduling\Queries\UnpaidLessonsQuery;
 use Modules\Scheduling\Setup\PolicyStep;
 use Modules\Scheduling\Setup\TeacherHoursStep;
 use Modules\Scheduling\TrialBookingService;
@@ -97,6 +100,8 @@ final class SchedulingServiceProvider extends ServiceProvider
         // Trial conversion is the CRM's to know; without it no teacher gets ahead in a trial search.
         // The family's own start (J3): its rules for the trial's report, and the trial's offer (the CRM's; none without it).
         $this->app->bind(OwnCourseStart::class, StartRules::class);
+        // Billing's collection timeline asks which unpaid lesson rule 16 would cancel next (J5a).
+        $this->app->bind(UnpaidLessons::class, UnpaidLessonsQuery::class);
         $this->app->bindIf(StartOffers::class, fn () => new class implements StartOffers
         {
             public function forLearner(string $learnerId, string $subjectId, string $payerId): ?StartOffer
@@ -150,6 +155,7 @@ final class SchedulingServiceProvider extends ServiceProvider
         SendSchedulingNotifications::templates($this->app->make(NotificationsApi::class));
         TellGroupStarted::templates($this->app->make(NotificationsApi::class));
         WelcomeToCourse::templates($this->app->make(NotificationsApi::class));
+        CloseUnpaidStarts::templates($this->app->make(NotificationsApi::class));
         $links = $this->app->make(NotificationLinks::class);
         $links->register('shift_proposal', fn (array $a, string $panel) => $panel === 'academy' ? ReviewShiftProposal::getUrl(['proposal' => $a['id']], panel: 'academy') : null);
         $links->register('dispute', fn (array $a, string $panel) => $panel === 'academy' ? LessonDisputes::getUrl(['dispute' => $a['id']], panel: 'academy') : null);

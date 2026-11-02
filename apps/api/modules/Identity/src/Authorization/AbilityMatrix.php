@@ -26,6 +26,8 @@ final class AbilityMatrix
             Ability::ViewBilling, Ability::RecordPayments => [Role::Owner, Role::Admin, Role::Accountant],
             // Prices, tax, regions and voiding invoices: the owner and the accountant (Admin is "◐" for billing).
             Ability::ManageBilling => [Role::Owner, Role::Accountant],
+            // Who hears that a family's invoice is two days late (J5a's collection timeline): whoever answers for the money.
+            Ability::CollectPayments => [Role::Owner, Role::Admin, Role::Accountant],
             Ability::ManagePayroll => [Role::Owner, Role::Accountant],
             Ability::ImportData => [Role::Owner, Role::Admin],
             // The academy's own audit log, the platform team's sign-ins included.

@@ -5,15 +5,12 @@ namespace Modules\Billing\Queries;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
-use Modules\Billing\Discounts\InvoiceDiscounts;
 use Modules\Billing\Domain\Revenue\Split;
-use Modules\Billing\Domain\TaxCalculator;
-use Modules\Billing\Models\BillingSettings;
 use Modules\Billing\Models\Payment;
 use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\Subscription;
+use Modules\Billing\Queries\Renewals\NextRenewals;
 use Modules\Billing\Support\RevenuePeriod;
-use Modules\Credits\Contracts\CreditsApi;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
@@ -30,8 +27,7 @@ final class RevenueBoard
 {
     public function __construct(
         private readonly TenantContext $tenant,
-        private readonly CreditsApi $credits,
-        private readonly InvoiceDiscounts $discounts,
+        private readonly NextRenewals $renewals,
     ) {}
 
     public function timezone(): string
@@ -245,7 +241,8 @@ final class RevenueBoard
      * Renewals not invoiced yet that should fall due within $days: a course's
      * paid-for minutes left, less its renewal mark, at its plan's pace (the
      * same reckoning IssueRenewal uses), priced as its next invoice would be
-     * (its discounts and VAT). An estimate: lessons cancelled or moved shift it.
+     * (its discounts and VAT): Renewals\NextRenewals, which the family's balance
+     * and the renewal preview read too. An estimate: lessons cancelled or moved shift it.
      *
      * @return array{total: Money, count: int, days: int, items: list<array{subscription_id: string, enrollment_id: string, student: string, subject: string, payer: string, on: CarbonImmutable, minor: int}>}
      */
@@ -258,34 +255,23 @@ final class RevenueBoard
                 ->whereColumn('l.academy_id', 'subscriptions.academy_id')->whereColumn('l.subscription_id', 'subscriptions.id')
                 ->where('l.kind', 'block')->where('i.status', 'issued'))
             ->get();
-        $balances = $this->credits->balances($subscriptions->pluck('credit_account_id')->map(fn ($id) => (string) $id)->all());
-        $today = CarbonImmutable::parse(CarbonImmutable::now()->setTimezone($this->timezone())->toDateString());
-        $settings = BillingSettings::current();
+        $next = $this->renewals->of($subscriptions);
 
         $due = [];
         foreach ($subscriptions as $subscription) {
-            $balance = $balances[$subscription->credit_account_id] ?? null;
-            $plan = $subscription->plan;
-            if ($balance === null || $plan === null) {
-                continue;
-            }
-            $above = $balance->renewableMin() - $plan->terms()->lowBalanceMinutes();
-            $perWeek = max(1, $plan->sessions_per_week * $plan->session_minutes);
-            $in = $above <= 0 ? 0 : (int) ceil($above * 7 / $perWeek);
-            if ($in <= $days) {
-                $due[] = [$subscription, $today->addDays($in)];
+            $renewal = $next[$subscription->id] ?? null;
+            if ($renewal !== null && $renewal->days <= $days) {
+                $due[] = [$subscription, $renewal];
             }
         }
 
         $names = $this->courseNames(array_map(fn (array $d) => $d[0], $due));
-        $discounts = $this->discounts->blockLines(array_map(fn (array $d) => $d[0], $due));
         $items = [];
-        foreach ($due as [$subscription, $on]) {
-            $lines = $subscription->amount_minor + array_sum(array_column($discounts[$subscription->id], 'amount_minor'));
+        foreach ($due as [$subscription, $renewal]) {
             $items[] = $names[$subscription->id] + [
                 'subscription_id' => $subscription->id,
-                'on' => $on,
-                'minor' => TaxCalculator::compute(max(0, $lines), $settings->tax_rate_bp, $settings->prices_include_tax)['total'],
+                'on' => $renewal->on,
+                'minor' => $renewal->amount->minor,
             ];
         }
         usort($items, fn (array $a, array $b) => [$a['on'], $a['student']] <=> [$b['on'], $b['student']]);

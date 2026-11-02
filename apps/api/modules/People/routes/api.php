@@ -8,6 +8,8 @@ use Modules\People\Http\V1\Controllers\TeacherChecksController;
 
 // The family app: whose account the person signed in can open (themselves as a student, their children).
 Route::middleware('auth:sanctum')->get('family/learners', [FamilyController::class, 'learners'])->name('family.learners');
+// «إضافة طفل»: a guardian adds their own child, then starts a course for them (J5a).
+Route::middleware(['auth:sanctum', 'idempotent', 'throttle:10,60'])->post('family/children', [FamilyController::class, 'addChild'])->name('family.children.add');
 
 // A guardian's consent to their children's accounts.
 Route::middleware('auth:sanctum')->prefix('family/consents')->group(function () {

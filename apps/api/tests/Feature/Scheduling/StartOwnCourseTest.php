@@ -15,6 +15,7 @@ use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PriceRegion;
 use Modules\Catalog\Contracts\CatalogApi;
 use Modules\Communication\Contracts\NotificationLinks;
+use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Communication\Models\CommunicationSettings;
 use Modules\Communication\Models\Notification;
 use Modules\Crm\Actions\AssessTrial;
@@ -35,6 +36,7 @@ use Modules\Platform\Actions\Plans\ChangeAcademyPlan;
 use Modules\Platform\Models\SaasPlan;
 use Modules\Scheduling\Actions\CancelUnpaidSessions;
 use Modules\Scheduling\Actions\ConfirmBooking;
+use Modules\Scheduling\Actions\Courses\CloseUnpaidStarts;
 use Modules\Scheduling\Actions\Courses\PauseEnrollment;
 use Modules\Scheduling\Actions\EnrollStudent;
 use Modules\Scheduling\Actions\Groups\CreateGroup;
@@ -536,6 +538,51 @@ it('keeps the window to pay: a lesson still unpaid when it closes is cancelled a
         ->and(DB::table('session_events')->where('session_id', $first->id)->whereRaw("data->>'reason' = 'unpaid'")->exists())->toBeTrue()
         // The rest wait for payment as before.
         ->and(DB::table('sessions')->where('enrollment_id', $answer['enrollment_id'])->where('status', 'scheduled')->count())->toBe($answer['lessons'] - 1);
+});
+
+it('closes an unpaid start by itself once its pay-by passed and rule 16 cancelled its first lesson, and tells the family once (J5a)', function () {
+    j3Consent();
+    $answer = j3Start()->assertCreated()->json('data');
+    $enrollment = $answer['enrollment_id'];
+
+    // Before its pay-by nothing closes, even with the first lesson about to go.
+    expect(app(CloseUnpaidStarts::class)->handle())->toBe(0);
+    CarbonImmutable::setTestNow(CarbonImmutable::parse($answer['payment']['pay_by']['utc'])->addMinute());
+    // Past its pay-by but its first lesson not cancelled yet (rule 16 runs every minute): it waits.
+    expect(app(CloseUnpaidStarts::class)->handle())->toBe(0);
+    app(CancelUnpaidSessions::class)->handle();
+    expect(app(CloseUnpaidStarts::class)->handle())->toBe(1)
+        ->and(app(CloseUnpaidStarts::class)->handle())->toBe(0);
+
+    $start = CourseStart::query()->where('enrollment_id', $enrollment)->sole();
+    expect($start->cancel_reason)->toBe('unpaid')
+        ->and($start->cancelled_at)->not->toBeNull()
+        ->and(app(EnrollmentApi::class)->find($enrollment)->status->value)->toBe('ended')
+        ->and(Invoice::query()->findOrFail($answer['invoice']['id'])->status)->toBe('void')
+        ->and(DB::table('sessions')->where('enrollment_id', $enrollment)->where('status', 'scheduled')->count())->toBe(0)
+        ->and(DB::table('audit_logs')->where('action', 'enrollment.own_start_lapsed')->count())->toBe(1);
+    // Once, kindly, with a link to start again; not the course-ended message as well.
+    $told = Notification::query()->where('template_key', 'scheduling.own_start_closed')->get();
+    expect($told)->toHaveCount(1)
+        ->and($told[0]->user_id)->toBe($this->mother->id)
+        ->and(Notification::query()->where('template_key', 'scheduling.course_ended_family')->where('user_id', $this->mother->id)->count())->toBe(0);
+    $this->actAsTenant($this->academy);
+    $body = app(NotificationsApi::class)->templates()['scheduling.own_start_closed']->body;
+    expect(__($body, [], 'ar'))->toContain(':start');
+    // The learner may start again at once.
+    expect(j3Api('GET', 'family/start/options?'.http_build_query(['learner_id' => $this->yara, 'subject_id' => $this->quran]))->assertOk()
+        ->json('data.subjects'))->toBeArray();
+});
+
+it('never closes a start the family paid something towards', function () {
+    j3Consent();
+    $answer = j3Start()->assertCreated()->json('data');
+    app(BillingApi::class)->recordPayment($answer['invoice']['id'], 'bank_transfer', Money::of(10000, 'SAR'), 'T-1', CarbonImmutable::now(), $this->admin->id);
+    CarbonImmutable::setTestNow(CarbonImmutable::parse($answer['payment']['pay_by']['utc'])->addMinute());
+    app(CancelUnpaidSessions::class)->handle();
+
+    expect(app(CloseUnpaidStarts::class)->handle())->toBe(0)
+        ->and(CourseStart::query()->where('enrollment_id', $answer['enrollment_id'])->sole()->cancelled_at)->toBeNull();
 });
 
 it('opens the start flow from the trial\'s report with the recommended plan and the trial\'s teacher', function () {

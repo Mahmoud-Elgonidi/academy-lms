@@ -18,6 +18,7 @@
     .bf-inv { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1rem; align-items: center; background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-xl, .75rem); padding: .75rem 1rem; }
     .bf-inv strong { font-variant-numeric: tabular-nums; }
     .bf-inv small { color: var(--gray-500); font-size: .8rem; }
+    .bf-inv[data-picked] { border-color: var(--primary-500); box-shadow: 0 0 0 2px var(--primary-100); scroll-margin-top: 5rem; }
     .bf-doc { font-size: .8rem; font-weight: 600; color: var(--primary-600); justify-self: end; grid-column: 2; }
     .bf-status { font-size: .78rem; padding: .12rem .6rem; border-radius: 999px; background: var(--gray-100); color: var(--gray-700); justify-self: end; white-space: nowrap; }
     .bf-status[data-s="paid"] { background: var(--success-50); color: var(--success-700); }

@@ -23,6 +23,7 @@ enum Ability: string
     case ViewBilling = 'billing.view';
     case RecordPayments = 'billing.record-payments';
     case ManageBilling = 'billing.manage';
+    case CollectPayments = 'billing.collect';
     case ManagePolicies = 'policies.manage';
     case ManageCurriculum = 'curriculum.manage';
     case WriteReports = 'reports.write';

@@ -2,6 +2,7 @@
 
 namespace Modules\Billing\Providers;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Broadcast;
@@ -11,12 +12,15 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Billing\BillingService;
+use Modules\Billing\Console\FollowUpCollectionsCommand;
 use Modules\Billing\Console\SweepBillingCommand;
 use Modules\Billing\Contracts\BillingApi;
+use Modules\Billing\Contracts\DTOs\LessonAtRisk;
 use Modules\Billing\Contracts\Events\InvoiceIssued;
 use Modules\Billing\Contracts\Events\InvoicePaid;
 use Modules\Billing\Contracts\Events\PaymentProofDecided;
 use Modules\Billing\Contracts\Events\PaymentProofSubmitted;
+use Modules\Billing\Contracts\UnpaidLessons;
 use Modules\Billing\Filament\Family\FamilyBilling;
 use Modules\Billing\Filament\Resources\Invoices\InvoiceResource;
 use Modules\Billing\Http\Controllers\GatewayWebhookController;
@@ -24,6 +28,7 @@ use Modules\Billing\Http\Controllers\ProofFileController;
 use Modules\Billing\Http\Controllers\StripeConnectController;
 use Modules\Billing\Listeners\IssueRenewalInvoice;
 use Modules\Billing\Listeners\SendBillingNotifications;
+use Modules\Billing\Listeners\SendCollectionNotifications;
 use Modules\Billing\Live\PaymentsChanged;
 use Modules\Billing\Live\RevenueChanged;
 use Modules\Billing\Models\Invoice;
@@ -34,6 +39,7 @@ use Modules\Billing\Setup\PricesStep;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Credits\Contracts\Events\CreditBalanceLow;
+use Modules\Credits\Contracts\Events\CreditsExpiringSoon;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
@@ -48,6 +54,14 @@ final class BillingServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../../config/billing.php', 'billing');
         $this->app->singleton(BillingApi::class, BillingService::class);
+        // Lessons rule 16 would cancel unpaid are Scheduling's to know (it binds this); without it, none.
+        $this->app->bindIf(UnpaidLessons::class, fn () => new class implements UnpaidLessons
+        {
+            public function firstAtRisk(array $enrollmentIds, CarbonImmutable $now): ?LessonAtRisk
+            {
+                return null;
+            }
+        });
     }
 
     public function boot(): void
@@ -85,21 +99,28 @@ final class BillingServiceProvider extends ServiceProvider
         Broadcast::channel(RevenueChanged::CHANNEL, fn (Authenticatable $user, string $academyId) => $academyId === $this->app->make(TenantContext::class)->id()
             && Gate::forUser($user)->allows(Ability::ViewBilling->value));
         if ($this->app->runningInConsole()) {
-            $this->commands([SweepBillingCommand::class]);
+            $this->commands([SweepBillingCommand::class, FollowUpCollectionsCommand::class]);
         }
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('billing:sweep')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
+            // The collection timeline (J5a): hourly, so each step goes within the hour it comes due on the payer's clock.
+            $schedule->command('billing:follow-up')->hourlyAt(23)->withoutOverlapping()->onOneServer();
         });
 
         Event::listen(CreditBalanceLow::class, IssueRenewalInvoice::class);
 
         SendBillingNotifications::templates($this->app->make(NotificationsApi::class));
+        SendCollectionNotifications::templates($this->app->make(NotificationsApi::class));
+        Event::listen(CreditsExpiringSoon::class, [SendCollectionNotifications::class, 'creditsExpiring']);
         $links = $this->app->make(NotificationLinks::class);
         $links->register('invoice', fn (array $a, string $panel) => match ($panel) {
             'academy' => InvoiceResource::getUrl('view', ['record' => $a['id']], panel: 'academy'),
-            'family' => FamilyBilling::getUrl(panel: 'family'),
+            // The family's account page, opened at that invoice.
+            'family' => FamilyBilling::getUrl(['invoice' => $a['id'] ?? null], panel: 'family').'#invoice-'.($a['id'] ?? ''),
             default => null,
         });
+        // A course's lessons left, its expiry and its next invoice (the renewal preview, lessons about to lapse).
+        $links->register('course_balance', fn (array $a, string $panel) => $panel === 'family' ? FamilyBilling::getUrl(panel: 'family') : null);
         // The invoice message carries each payer's own link to the invoice and its ways to pay (no sign-in).
         $links->registerPersonal('invoice', function (array $action, string $userId) {
             $invoice = Invoice::query()->find($action['id'] ?? null);

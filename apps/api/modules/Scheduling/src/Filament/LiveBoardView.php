@@ -306,7 +306,7 @@ final class LiveBoardView
             $item->issue === BoardIssue::Unfunded => [
                 $a('allowUnfunded', [], 'allow_unfunded', 'allow_unfunded'),
                 $a('cancel', ['by' => 'academy', 'reason' => 'unpaid'], 'cancel', 'cancel_unpaid', true),
-                $a('soon', ['what' => 'payment_link'], 'payment_link', 'soon_billing', soon: true),
+                $a('payLink', [], 'payment_link', 'payment_link'),
             ],
             $item->issue === BoardIssue::NeedsReview => [
                 $a('decide', [], 'resolve', 'resolve'),
@@ -320,7 +320,7 @@ final class LiveBoardView
             $item->group === BoardGroup::Upcoming => array_values(array_filter([
                 $a('contact', ['target' => 'teacher'], 'call_teacher', 'call_teacher_any'),
                 $a('contact', ['target' => 'guardian'], 'call_guardian', 'call_guardian_any'),
-                $s->funding === FundingStatus::Unfunded ? $a('soon', ['what' => 'payment_link'], 'payment_link', 'soon_billing', soon: true) : null,
+                $s->funding === FundingStatus::Unfunded ? $a('payLink', [], 'payment_link', 'payment_link') : null,
                 $a('cancel', ['by' => 'student', 'reason' => 'other'], 'cancel', 'cancel_any', true),
             ])),
             in_array($s->status, [SessionStatus::Completed, SessionStatus::StudentAbsent, SessionStatus::TeacherAbsent], true) => [

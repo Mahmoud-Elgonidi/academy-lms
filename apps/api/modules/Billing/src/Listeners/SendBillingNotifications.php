@@ -7,8 +7,11 @@ use Modules\Billing\Contracts\Events\InvoiceIssued;
 use Modules\Billing\Contracts\Events\InvoicePaid;
 use Modules\Billing\Contracts\Events\PaymentProofDecided;
 use Modules\Billing\Contracts\Events\PaymentProofSubmitted;
+use Modules\Billing\Domain\Collections\CollectionRules;
+use Modules\Billing\Models\CollectionStep;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentProof;
+use Modules\Billing\Queries\Collections\PayerReach;
 use Modules\Billing\Queries\InvoiceCourses;
 use Modules\Communication\Contracts\DTOs\Day;
 use Modules\Communication\Contracts\DTOs\Message;
@@ -62,8 +65,10 @@ final class SendBillingNotifications
             return;
         }
         $student = $this->studentOf($invoice);
+        // The timeline's first step: the reminders after it count from here (CollectionRules), and never repeat it.
+        CollectionStep::claim("{$invoice->id}:issued", ['invoice_id' => $invoice->id, 'payer_id' => $invoice->billingAccount->payer_id, 'step' => CollectionRules::ISSUED]);
 
-        $this->notifications->send(new Message('billing.invoice_issued', [$invoice->billingAccount->payer_id], [
+        $this->notifications->send(new Message('billing.invoice_issued', app(PayerReach::class)->recipients($invoice->billingAccount->payer_id), [
             'number' => $invoice->number,
             'student' => $student ?? '',
             'total' => $invoice->total(),

@@ -39,7 +39,7 @@
     @endif
     <div class="bf-list lms-stagger">
         @forelse ($a['invoices'] as $inv)
-            <div class="bf-inv" wire:key="inv-{{ $inv['id'] }}">
+            <div class="bf-inv" id="invoice-{{ $inv['id'] }}" @if ($this->invoice === $inv['id']) data-picked @endif wire:key="inv-{{ $inv['id'] }}">
                 <div>
                     <strong>{{ $inv['total'] }}</strong>
                     <small>· {{ $inv['number'] }}@if ($inv['family']) · {{ __('billing::family.family_invoice') }}@endif @if ($inv['for']) · {{ $inv['for'] }}@endif</small>

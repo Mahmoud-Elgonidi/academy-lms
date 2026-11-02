@@ -334,6 +334,439 @@
                 }
             }
         },
+        "/v1/family/courses/{enrollment}/balance": {
+            "get": {
+                "operationId": "family.courses.balance",
+                "description": "One course of a learner I follow: lessons left, and, by the look of the person signed in (viewer_stage), more;\nwhat a look does not show is null. The classic look (a guardian, an adult learner): the plan and its shape, the\nlessons left, when they expire (expiry.soon within 7 days, with a sentence), and the next invoice: the one waiting\nto be paid (to its payer, with its id to open), or when the next goes out and about how much. The middle-school and\nteen looks: the plan's shape, lessons left and expiry, no money. The kids' look: lessons left only. auto_renew is\nnull until saved cards come (J5b).",
+                "summary": "A course's balance",
+                "tags": [
+                    "Billing"
+                ],
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "enrollment_id": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "description": "pending_payment, active, paused or ended"
+                                                },
+                                                "viewer_stage": {
+                                                    "type": "string",
+                                                    "description": "The look these fields follow (kids, middle, teen or classic): a field the look does not show is null."
+                                                },
+                                                "lessons_left": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Paid-for lessons left (makeup lessons aside); null when the plan has no lesson length."
+                                                },
+                                                "lessons_text": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "In words (\"5 lessons left\")."
+                                                },
+                                                "makeup_lessons": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Makeup lessons owed besides (cancelled lessons given back). Not in the kids' look."
+                                                },
+                                                "minutes_left": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Not in the kids' look."
+                                                },
+                                                "plan": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The plan and its shape; null without a subscription, and in the kids' look.",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        },
+                                                        "format": {
+                                                            "type": "string",
+                                                            "description": "private or group"
+                                                        },
+                                                        "shared": {
+                                                            "type": "boolean",
+                                                            "description": "A shared package: one balance for several subjects."
+                                                        },
+                                                        "session_minutes": {
+                                                            "type": "integer"
+                                                        },
+                                                        "sessions_per_week": {
+                                                            "type": "integer"
+                                                        },
+                                                        "sessions_per_block": {
+                                                            "type": "integer"
+                                                        },
+                                                        "renews_at_lessons_left": {
+                                                            "type": "integer",
+                                                            "description": "The next invoice goes out when this many lessons are left."
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name",
+                                                        "format",
+                                                        "shared",
+                                                        "session_minutes",
+                                                        "sessions_per_week",
+                                                        "sessions_per_block",
+                                                        "renews_at_lessons_left"
+                                                    ]
+                                                },
+                                                "expiry": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "When the soonest lessons not booked yet expire (booked ones are safe); null when none can lapse, and in the kids' look.",
+                                                    "properties": {
+                                                        "at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "null"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "lessons": {},
+                                                        "soon": {
+                                                            "type": "string",
+                                                            "description": "Within 7 days: show it as a warning."
+                                                        },
+                                                        "text": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "at",
+                                                        "lessons",
+                                                        "soon",
+                                                        "text"
+                                                    ]
+                                                },
+                                                "paused_until": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The pause's last day, on the academy's calendar. Not in the kids' look.",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "ends_on": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The first day without lessons of a course ending. Not in the kids' look.",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "is_payer": {
+                                                    "type": [
+                                                        "boolean",
+                                                        "null"
+                                                    ],
+                                                    "description": "Whether the person signed in pays for this course (the classic look)."
+                                                },
+                                                "renews": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Whether the course renews (on, not ending; the classic look)."
+                                                },
+                                                "waiting_invoice": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The next package's invoice waiting to be paid (the classic look); its id only to the payer (GET family/invoices/{id}).",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "number": {
+                                                            "type": "string"
+                                                        },
+                                                        "outstanding": {
+                                                            "type": "string"
+                                                        },
+                                                        "outstanding_minor": {
+                                                            "type": "integer"
+                                                        },
+                                                        "currency": {
+                                                            "type": "string"
+                                                        },
+                                                        "due_at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "null"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "text": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "number",
+                                                        "outstanding",
+                                                        "outstanding_minor",
+                                                        "currency",
+                                                        "due_at",
+                                                        "text"
+                                                    ]
+                                                },
+                                                "next_invoice": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The next invoice still to come (the classic look): at how many lessons left, about how much and when (an estimate at\nthe plan's pace: a lesson cancelled or moved shifts it); null when none comes now (paused, ending, one waiting).",
+                                                    "properties": {
+                                                        "at_lessons_left": {
+                                                            "type": "integer"
+                                                        },
+                                                        "lessons_until": {
+                                                            "type": "integer",
+                                                            "description": "Lessons to take before it goes out (0: it goes out now)."
+                                                        },
+                                                        "amount": {
+                                                            "type": "string"
+                                                        },
+                                                        "amount_minor": {
+                                                            "type": "integer"
+                                                        },
+                                                        "currency": {
+                                                            "type": "string"
+                                                        },
+                                                        "on": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The day it should go out, on the academy's calendar.",
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "string"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "text": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "at_lessons_left",
+                                                        "lessons_until",
+                                                        "amount",
+                                                        "amount_minor",
+                                                        "currency",
+                                                        "on",
+                                                        "text"
+                                                    ]
+                                                },
+                                                "renewal_note": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "A sentence for a course that does not renew now (paused, ending; the classic look); null otherwise."
+                                                },
+                                                "auto_renew": {
+                                                    "type": "null",
+                                                    "description": "Saved card and automatic renewal come later (J5b): null for now."
+                                                }
+                                            },
+                                            "required": [
+                                                "enrollment_id",
+                                                "status",
+                                                "viewer_stage",
+                                                "lessons_left",
+                                                "lessons_text",
+                                                "makeup_lessons",
+                                                "minutes_left",
+                                                "plan",
+                                                "expiry",
+                                                "paused_until",
+                                                "ends_on",
+                                                "is_payer",
+                                                "renews",
+                                                "waiting_invoice",
+                                                "next_invoice",
+                                                "renewal_note",
+                                                "auto_renew"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/family/enrollments/{enrollment}/extra-lessons": {
             "post": {
                 "operationId": "family.extra-lessons",
@@ -18543,6 +18976,185 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/family/children": {
+            "post": {
+                "operationId": "family.children.add",
+                "description": "A guardian adds their own child (a managed minor under them, with no sign-in of their own) and goes straight into\nthe start flow (GET family/start/options?learner_id={id}). birth_date (Y-m-d), else birth_year; gender optional.\nagree with the consent wording's version (GET family/consents gives the text; age is when it is needed): the\nguardian's consent is recorded at once. 403 for an account that is not a guardian; 422 with why, in plain words\n(the same name and year of birth as one of their children, too many children). Send an Idempotency-Key.",
+                "summary": "Add a child",
+                "tags": [
+                    "People"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "minLength": 2,
+                                        "maxLength": 80
+                                    },
+                                    "birth_date": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date"
+                                    },
+                                    "birth_year": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 1990,
+                                        "maximum": 2100
+                                    },
+                                    "gender": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "female | male",
+                                        "enum": [
+                                            "female",
+                                            "male",
+                                            null
+                                        ]
+                                    },
+                                    "agree": {
+                                        "enum": [
+                                            "yes",
+                                            "on",
+                                            "1",
+                                            1,
+                                            "true",
+                                            true
+                                        ]
+                                    },
+                                    "version": {
+                                        "type": "integer",
+                                        "description": "The consent wording's version the guardian read (GET family/consents)."
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "version"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "stage": {
+                                                    "type": "string",
+                                                    "description": "The look of the child's own area: kids, middle, teen or classic."
+                                                },
+                                                "consent": {
+                                                    "type": "string",
+                                                    "description": "granted (the guardian agreed now) or not_needed (old enough).",
+                                                    "enum": [
+                                                        "granted",
+                                                        "not_needed"
+                                                    ]
+                                                },
+                                                "start": {
+                                                    "type": "object",
+                                                    "description": "Where to go next: the start flow for this child.",
+                                                    "properties": {
+                                                        "learner_id": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "learner_id"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "stage",
+                                                "consent",
+                                                "start"
+                                            ]
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"

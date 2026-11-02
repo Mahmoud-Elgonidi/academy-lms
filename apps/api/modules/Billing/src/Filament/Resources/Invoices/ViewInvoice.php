@@ -15,6 +15,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Modules\Billing\Actions\Collections\SendPayLink;
 use Modules\Billing\Actions\Proofs\ApprovePaymentProof;
 use Modules\Billing\Actions\Proofs\RejectPaymentProof;
 use Modules\Billing\Filament\InvoiceActions;
@@ -60,6 +61,14 @@ final class ViewInvoice extends ViewRecord
                 ->modalHeading(__('billing::payments.invoice.copy_link'))->modalDescription(__('billing::payments.invoice.copy_link_hint'))
                 ->modalSubmitAction(false)
                 ->modalContent(fn () => view('billing::filament.pay-link', ['url' => app(PayLinks::class)->invoice($this->record, $this->record->billingAccount?->payer_id)])),
+            // The same message the live board sends: to the payer's channels, once an hour (SendPayLink, audited).
+            Action::make('sendPayLink')->label(__('billing::payments.invoice.send_link'))->icon(Heroicon::OutlinedPaperAirplane)->color('gray')
+                ->visible(fn () => $this->record->status === 'issued' && $this->record->outstanding()->minor > 0 && Gate::allows(Ability::RecordPayments->value))
+                ->requiresConfirmation()
+                ->action(function () {
+                    app(SendPayLink::class)->handle($this->record->id, (string) auth()->id());
+                    Notification::make()->success()->title(__('billing::collections.sent', ['number' => $this->record->number]))->send();
+                }),
             Action::make('print')->label(__('billing::invoices.print'))->icon(Heroicon::OutlinedPrinter)->color('gray')
                 ->alpineClickHandler('window.print()'),
         ];

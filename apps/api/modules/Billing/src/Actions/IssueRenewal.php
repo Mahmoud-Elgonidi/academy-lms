@@ -2,6 +2,7 @@
 
 namespace Modules\Billing\Actions;
 
+use Modules\Billing\Domain\Renewals\RenewalPace;
 use Modules\Billing\Models\BillingSettings;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\Subscription;
@@ -58,9 +59,9 @@ final class IssueRenewal
     private function comesDueWithin(Subscription $subscription, int $days): bool
     {
         $plan = $subscription->plan;
-        $ahead = (int) ceil($plan->sessions_per_week * $days / 7) * $plan->session_minutes;
 
-        return $this->credits->balance($subscription->credit_account_id)->renewableMin() <= $plan->terms()->lowBalanceMinutes() + $ahead;
+        return (new RenewalPace($this->credits->balance($subscription->credit_account_id)->renewableMin(), $plan->terms()->lowBalanceMinutes(), (int) $plan->session_minutes, (int) $plan->sessions_per_week))
+            ->reachesMarkWithin($days);
     }
 
     /** @return array{0: Subscription, 1: int, 2: string, 3: string} */

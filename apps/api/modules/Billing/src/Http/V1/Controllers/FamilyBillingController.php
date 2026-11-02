@@ -2,6 +2,7 @@
 
 namespace Modules\Billing\Http\V1\Controllers;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,11 +22,14 @@ use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
+use Modules\Billing\Queries\Collections\CourseBalance;
 use Modules\Billing\Queries\CourseBillingQuery;
 use Modules\Billing\Queries\InvoiceCourses;
 use Modules\Billing\Queries\InvoiceSummaries;
 use Modules\Billing\Queries\TransferDetails;
+use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\People\Contracts\FamilyView;
+use Modules\People\Contracts\LearnerStage;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 use Modules\SharedKernel\Time\ViewerTimezone;
@@ -105,6 +109,125 @@ final class FamilyBillingController
             'learner' => ['id' => $learner->id, 'name' => $learner->name],
             'data' => $courses,
         ]);
+    }
+
+    /**
+     * A course's balance.
+     *
+     * One course of a learner I follow: lessons left, and, by the look of the person signed in (viewer_stage), more;
+     * what a look does not show is null. The classic look (a guardian, an adult learner): the plan and its shape, the
+     * lessons left, when they expire (expiry.soon within 7 days, with a sentence), and the next invoice: the one waiting
+     * to be paid (to its payer, with its id to open), or when the next goes out and about how much. The middle-school and
+     * teen looks: the plan's shape, lessons left and expiry, no money. The kids' look: lessons left only. auto_renew is
+     * null until saved cards come (J5b).
+     *
+     * @throws NotFoundHttpException not a course of a learner I follow
+     */
+    public function courseBalance(Request $request, string $enrollment, FamilyView $family, EnrollmentApi $enrollments, CourseBalance $balances): JsonResponse
+    {
+        $me = (string) $request->user()?->getAuthIdentifier();
+        $course = Str::isUuid($enrollment) ? $enrollments->find($enrollment) : null;
+        if ($course === null || ! $family->follows($me, $course->studentId)) {
+            throw new NotFoundHttpException;
+        }
+        $stage = $family->stage($me);
+        // What each look reads: the kids' lessons left only; middle school and teens no money; the classic look all.
+        $shape = $stage !== LearnerStage::Kids;
+        $money = $stage === LearnerStage::Classic;
+        $b = $balances->of($course);
+        $plan = $b['plan'];
+        $per = $plan !== null ? max(1, (int) $plan->session_minutes) : null;
+        $balance = $b['balance'];
+        $lessons = $balance === null || $per === null ? null : intdiv(max(0, $balance->renewableMin()), $per);
+        $day = fn (?CarbonImmutable $at) => $at === null ? null : $at->setTimezone(app(ViewerTimezone::class)->effective())->locale(app()->getLocale())->translatedFormat('l j F');
+        $expiryOn = $balance?->nextExpiry;
+        $expiring = $expiryOn !== null && $balance->expiringMin > 0 && $per !== null ? max(1, intdiv($balance->expiringMin, $per)) : null;
+        $payer = $b['subscription']?->billingAccount?->payer_id === $me;
+        $next = $money ? $b['next'] : null;
+        $waiting = $money ? $b['waiting'] : null;
+
+        return response()->json(['data' => [
+            'enrollment_id' => $course->id,
+            /** pending_payment, active, paused or ended */
+            'status' => $course->status->value,
+            /** The look these fields follow (kids, middle, teen or classic): a field the look does not show is null. */
+            'viewer_stage' => $stage->value,
+            /** Paid-for lessons left (makeup lessons aside); null when the plan has no lesson length. */
+            'lessons_left' => $lessons,
+            /** In words ("5 lessons left"). */
+            'lessons_text' => $lessons === null ? null : trans_choice('billing::collections.balance.lessons_left', $lessons, ['count' => $lessons]),
+            /** Makeup lessons owed besides (cancelled lessons given back). Not in the kids' look. */
+            'makeup_lessons' => $shape && $balance !== null && $per !== null ? intdiv(max(0, $balance->makeupMin), $per) : null,
+            /** Not in the kids' look. */
+            'minutes_left' => $shape ? $balance?->renewableMin() : null,
+            /** The plan and its shape; null without a subscription, and in the kids' look. */
+            'plan' => ! $shape || $plan === null ? null : [
+                'id' => $plan->id,
+                'name' => app()->getLocale() === 'ar' ? $plan->name_ar : $plan->name_en,
+                /** private or group */
+                'format' => $plan->lesson_format,
+                /** A shared package: one balance for several subjects. */
+                'shared' => $plan->isShared(),
+                'session_minutes' => (int) $plan->session_minutes,
+                'sessions_per_week' => (int) $plan->sessions_per_week,
+                'sessions_per_block' => (int) $plan->sessions_per_block,
+                /** The next invoice goes out when this many lessons are left. */
+                'renews_at_lessons_left' => (int) $plan->renew_at_sessions,
+            ],
+            /** When the soonest lessons not booked yet expire (booked ones are safe); null when none can lapse, and in the kids' look. */
+            'expiry' => ! $shape || $expiring === null ? null : [
+                'at' => $this->time->present($expiryOn),
+                'lessons' => $expiring,
+                /** Within 7 days: show it as a warning. */
+                'soon' => $b['expiry_soon'],
+                'text' => $b['expiry_soon']
+                    ? __('billing::collections.balance.expiry_soon', ['lessons' => (string) $expiring, 'on' => $day($expiryOn)])
+                    : __('billing::collections.balance.expiry', ['on' => $day($expiryOn)]),
+            ],
+            /** The pause's last day, on the academy's calendar. Not in the kids' look. */
+            'paused_until' => $shape ? $this->time->academyDay($course->pausedUntil) : null,
+            /** The first day without lessons of a course ending. Not in the kids' look. */
+            'ends_on' => $shape ? $this->time->academyDay($course->endsOn) : null,
+            /** Whether the person signed in pays for this course (the classic look). */
+            'is_payer' => $money ? $payer : null,
+            /** Whether the course renews (on, not ending; the classic look). */
+            'renews' => $money ? $b['renews'] : null,
+            /** The next package's invoice waiting to be paid (the classic look); its id only to the payer (GET family/invoices/{id}). */
+            'waiting_invoice' => $waiting === null ? null : [
+                'id' => $payer ? $waiting->id : null,
+                'number' => (string) $waiting->number,
+                'outstanding' => $waiting->outstanding()->format(),
+                'outstanding_minor' => $waiting->outstanding()->minor,
+                'currency' => $waiting->currency,
+                'due_at' => $this->time->present($waiting->due_at),
+                'text' => __('billing::collections.balance.waiting', ['number' => $waiting->number, 'left' => $waiting->outstanding()->format()]),
+            ],
+            /**
+             * The next invoice still to come (the classic look): at how many lessons left, about how much and when (an estimate at
+             * the plan's pace: a lesson cancelled or moved shifts it); null when none comes now (paused, ending, one waiting).
+             */
+            'next_invoice' => $next === null ? null : [
+                'at_lessons_left' => $next->pace->markLessons(),
+                /** Lessons to take before it goes out (0: it goes out now). */
+                'lessons_until' => $next->pace->lessonsUntilMark(),
+                'amount' => $next->amount->format(),
+                'amount_minor' => $next->amount->minor,
+                'currency' => $next->amount->currency,
+                /** The day it should go out, on the academy's calendar. */
+                'on' => $this->time->academyDay($next->on),
+                'text' => $next->days === 0
+                    ? __('billing::collections.balance.next_invoice_now', ['amount' => $next->amount->format()])
+                    : __('billing::collections.balance.next_invoice', ['mark' => (string) $next->pace->markLessons(), 'amount' => $next->amount->format(), 'on' => $day($next->on)]),
+            ],
+            /** A sentence for a course that does not renew now (paused, ending; the classic look); null otherwise. */
+            'renewal_note' => ! $money ? null : match (true) {
+                $course->status->value === 'paused' => __('billing::collections.balance.paused', ['until' => $day($course->pausedUntil)]),
+                $course->endsOn !== null || $course->status->value === 'ended' => __('billing::collections.balance.no_renewal'),
+                default => null,
+            },
+            /** Saved card and automatic renewal come later (J5b): null for now. */
+            'auto_renew' => null,
+        ]]);
     }
 
     /**

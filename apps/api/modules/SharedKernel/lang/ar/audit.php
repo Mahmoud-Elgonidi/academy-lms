@@ -4,6 +4,7 @@ return [
     // By the action's two parts: 'billing.gateway_saved' is actions.billing.gateway_saved.
     'actions' => [
         'billing' => [
+            'pay_link_sent' => 'إرسال رابط دفع الفاتورة :number إلى الدافع',
             'gateway_saved' => 'حفظ حساب الدفع ":label" (:gateway · :mode)',
             'payment_recorded' => 'تسجيل دفعة :amount (:method) على الفاتورة :number',
             'invoice_voided' => 'إلغاء الفاتورة :number: :reason',
@@ -42,6 +43,7 @@ return [
             'settings' => 'إعدادات الحصص الجماعية (التعويض الافتراضي: :late_join، الأعمار المختلطة: :mixed، البدء عند: :min)',
         ],
         'enrollment' => [
+            'own_start_lapsed' => 'أُغلق كورس بدأته الأسرة ولم يُدفع قبل موعده (الحصص الملغاة: :lessons، الفاتورة: :invoice)',
             'started_own' => 'بدأت الأسرة كورسًا بنفسها (:plan، :price، العرض: :offer)',
             'own_start_cancelled' => 'ألغت الأسرة كورسًا بدأته قبل الدفع (الحصص الملغاة: :lessons، الفاتورة: :invoice)',
             'teacher_changed' => 'تغيير معلّم طالب بدءًا من :starting',
@@ -107,6 +109,7 @@ return [
             'settings_saved' => 'أصبحت الرسائل بين المعلّمين والأسر :state',
         ],
         'people' => [
+            'child_added' => 'أضاف وليّ الأمر طفلًا إلى حسابه',
             'consent_granted' => 'وافق :guardian على حساب :student (:via)',
             'consent_recorded' => 'تسجيل موافقة ولي أمر :student من الإدارة: :note',
             'consent_withdrawn' => 'سحب :guardian موافقته على حساب :student',

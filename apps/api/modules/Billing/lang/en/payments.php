@@ -134,6 +134,7 @@ return [
     ],
     'invoice' => [
         'section' => 'Online payment',
+        'send_link' => 'Send payment link',
         'copy_link' => 'Pay link',
         'copy_link_hint' => 'Send it to the payer by WhatsApp or email: it opens the invoice and the ways to pay without signing in.',
         'open' => 'Open it',

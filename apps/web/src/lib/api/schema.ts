@@ -26,6 +26,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/family/courses/{enrollment}/balance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A course's balance
+         * @description One course of a learner I follow: lessons left, and, by the look of the person signed in (viewer_stage), more;
+         *     what a look does not show is null. The classic look (a guardian, an adult learner): the plan and its shape, the
+         *     lessons left, when they expire (expiry.soon within 7 days, with a sentence), and the next invoice: the one waiting
+         *     to be paid (to its payer, with its id to open), or when the next goes out and about how much. The middle-school and
+         *     teen looks: the plan's shape, lessons left and expiry, no money. The kids' look: lessons left only. auto_renew is
+         *     null until saved cards come (J5b).
+         */
+        get: operations["family.courses.balance"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/family/enrollments/{enrollment}/extra-lessons": {
         parameters: {
             query?: never;
@@ -1942,6 +1967,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/family/children": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a child
+         * @description A guardian adds their own child (a managed minor under them, with no sign-in of their own) and goes straight into
+         *     the start flow (GET family/start/options?learner_id={id}). birth_date (Y-m-d), else birth_year; gender optional.
+         *     agree with the consent wording's version (GET family/consents gives the text; age is when it is needed): the
+         *     guardian's consent is recorded at once. 403 for an account that is not a guardian; 422 with why, in plain words
+         *     (the same name and year of birth as one of their children, too many children). Send an Idempotency-Key.
+         */
+        post: operations["family.children.add"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/family/consents": {
         parameters: {
             query?: never;
@@ -3813,6 +3862,144 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.courses.balance": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                enrollment: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            enrollment_id: string;
+                            /** @description pending_payment, active, paused or ended */
+                            status: string;
+                            /** @description The look these fields follow (kids, middle, teen or classic): a field the look does not show is null. */
+                            viewer_stage: string;
+                            /** @description Paid-for lessons left (makeup lessons aside); null when the plan has no lesson length. */
+                            lessons_left: number | null;
+                            /** @description In words ("5 lessons left"). */
+                            lessons_text: string | null;
+                            /** @description Makeup lessons owed besides (cancelled lessons given back). Not in the kids' look. */
+                            makeup_lessons: number | null;
+                            /** @description Not in the kids' look. */
+                            minutes_left: number | null;
+                            /** @description The plan and its shape; null without a subscription, and in the kids' look. */
+                            plan: {
+                                id: string;
+                                name: string;
+                                /** @description private or group */
+                                format: string;
+                                /** @description A shared package: one balance for several subjects. */
+                                shared: boolean;
+                                session_minutes: number;
+                                sessions_per_week: number;
+                                sessions_per_block: number;
+                                /** @description The next invoice goes out when this many lessons are left. */
+                                renews_at_lessons_left: number;
+                            } | null;
+                            /** @description When the soonest lessons not booked yet expire (booked ones are safe); null when none can lapse, and in the kids' look. */
+                            expiry: {
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                lessons: unknown;
+                                /** @description Within 7 days: show it as a warning. */
+                                soon: string;
+                                text: string;
+                            } | null;
+                            /** @description The pause's last day, on the academy's calendar. Not in the kids' look. */
+                            paused_until: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            /** @description The first day without lessons of a course ending. Not in the kids' look. */
+                            ends_on: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            /** @description Whether the person signed in pays for this course (the classic look). */
+                            is_payer: boolean | null;
+                            /** @description Whether the course renews (on, not ending; the classic look). */
+                            renews: string | null;
+                            /** @description The next package's invoice waiting to be paid (the classic look); its id only to the payer (GET family/invoices/{id}). */
+                            waiting_invoice: {
+                                id: string | null;
+                                number: string;
+                                outstanding: string;
+                                outstanding_minor: number;
+                                currency: string;
+                                due_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                text: string;
+                            } | null;
+                            /**
+                             * @description The next invoice still to come (the classic look): at how many lessons left, about how much and when (an estimate at
+                             *     the plan's pace: a lesson cancelled or moved shifts it); null when none comes now (paused, ending, one waiting).
+                             */
+                            next_invoice: {
+                                at_lessons_left: number;
+                                /** @description Lessons to take before it goes out (0: it goes out now). */
+                                lessons_until: number;
+                                amount: string;
+                                amount_minor: number;
+                                currency: string;
+                                /** @description The day it should go out, on the academy's calendar. */
+                                on: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: string;
+                                    label: string;
+                                } | null;
+                                text: string;
+                            } | null;
+                            /** @description A sentence for a course that does not renew now (paused, ending; the classic look); null otherwise. */
+                            renewal_note: string | null;
+                            /** @description Saved card and automatic renewal come later (J5b): null for now. */
+                            auto_renew: null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
         };
     };
     "family.extra-lessons": {
@@ -10493,6 +10680,83 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "family.children.add": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    /** Format: date */
+                    birth_date?: string | null;
+                    birth_year?: number | null;
+                    /**
+                     * @description female | male
+                     * @enum {string|null}
+                     */
+                    gender?: "female" | "male" | null;
+                    /** @enum {unknown} */
+                    agree?: "yes" | "on" | "1" | 1 | "true" | true;
+                    /** @description The consent wording's version the guardian read (GET family/consents). */
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            name: string;
+                            /** @description The look of the child's own area: kids, middle, teen or classic. */
+                            stage: string;
+                            /**
+                             * @description granted (the guardian agreed now) or not_needed (old enough).
+                             * @enum {string}
+                             */
+                            consent: "granted" | "not_needed";
+                            /** @description Where to go next: the start flow for this child. */
+                            start: {
+                                learner_id: string;
+                            };
+                        };
+                        message: string;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
         };
     };
     "family.consents": {

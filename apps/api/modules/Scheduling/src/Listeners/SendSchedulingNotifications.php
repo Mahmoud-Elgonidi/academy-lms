@@ -38,6 +38,7 @@ use Modules\Scheduling\Contracts\Events\TimeOffRequested;
 use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
 use Modules\Scheduling\Contracts\TrialBooking;
 use Modules\Scheduling\Domain\Models\AcademyHoliday;
+use Modules\Scheduling\Domain\Models\CourseStart;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionDispute;
 use Modules\Scheduling\Domain\Models\ShiftNotice;
@@ -441,8 +442,10 @@ final class SendSchedulingNotifications
         }
         $data = $course['data'] + ['on' => new Day($event->on)];
         $key = "course:{$event->enrollmentId}:ended";
+        // A course the family started that closed itself unpaid: they hear it once, in its own kind words (CloseUnpaidStarts).
+        $lapsed = CourseStart::query()->where('enrollment_id', $event->enrollmentId)->where('cancel_reason', 'unpaid')->exists();
 
-        $this->notifications->send(new Message('scheduling.course_ended_family', $this->without($course['family'], $event->actorId), $data, ['screen' => 'session', 'id' => null], $key));
+        $this->notifications->send(new Message('scheduling.course_ended_family', $lapsed ? [] : $this->without($course['family'], $event->actorId), $data, ['screen' => 'session', 'id' => null], $key));
         $this->notifications->send(new Message('scheduling.course_ended_teacher', $this->without([$course['teacher_id']], $event->actorId), $data, ['screen' => 'session', 'id' => null], $key));
     }
 

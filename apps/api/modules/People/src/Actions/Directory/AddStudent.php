@@ -34,14 +34,15 @@ final class AddStudent
         private readonly SendWelcome $welcome,
     ) {}
 
-    public function handle(UserDetails $who, ?NewGuardian $guardian, ?CarbonImmutable $birthDate, ?LearnerStage $stage, StudentDetails $details, bool $welcome): string
+    /** @param  bool  $askConsent  false when the guardian agrees in the same step (a guardian adding their own child) */
+    public function handle(UserDetails $who, ?NewGuardian $guardian, ?CarbonImmutable $birthDate, ?LearnerStage $stage, StudentDetails $details, bool $welcome, bool $askConsent = true): string
     {
         $own = $who->email !== null || $who->phoneE164 !== null;
         if (! $own && ($guardian === null || ($guardian->existingId === null && $guardian->details === null))) {
             throw ValidationException::withMessages(['guardian' => __('people::directory.errors.child_needs_guardian')]);
         }
 
-        return DB::transaction(function () use ($who, $guardian, $birthDate, $stage, $details, $welcome, $own) {
+        return DB::transaction(function () use ($who, $guardian, $birthDate, $stage, $details, $welcome, $own, $askConsent) {
             $new = [];
             $guardianId = $guardian?->existingId;
             if ($guardian !== null && $guardianId === null && $guardian->details !== null) {
@@ -68,7 +69,7 @@ final class AddStudent
             $this->profile->handle($studentId, $birthDate, $stage);
             $this->details->handle($studentId, $details);
             if ($guardianId !== null) {
-                $this->link->handle($guardianId, $studentId, $guardian->relationship, true);
+                $this->link->handle($guardianId, $studentId, $guardian->relationship, true, $askConsent);
             }
             if ($welcome) {
                 $this->welcome->handle($new);

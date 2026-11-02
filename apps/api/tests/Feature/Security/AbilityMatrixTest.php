@@ -32,6 +32,7 @@ function expectedAbilities(): array
         'enrollments.view' => [$o, $a, $su, $sc, $ac],
         'billing.view' => [$o, $a, $ac],
         'billing.record-payments' => [$o, $a, $ac],
+        'billing.collect' => [$o, $a, $ac],
         'billing.manage' => [$o, $ac],
         'policies.manage' => [$o, $a],
         'curriculum.manage' => [$o, $a, $su],

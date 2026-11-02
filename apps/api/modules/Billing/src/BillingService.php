@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Actions\BuyExtraLessons;
 use Modules\Billing\Actions\CloseEndedCourse;
+use Modules\Billing\Actions\Collections\SendPayLink;
 use Modules\Billing\Actions\Discounts\ApplyCoupon;
 use Modules\Billing\Actions\Discounts\RemoveCoupon;
 use Modules\Billing\Actions\Discounts\SaveCoupon;
@@ -256,6 +257,15 @@ final class BillingService implements BillingApi
             PaymentCheckout::query()->where('invoice_id', $invoiceId)->where('status', 'open')->where('expires_at', '>', CarbonImmutable::now())->exists() => 'checkout_open',
             default => null,
         };
+    }
+
+    public function sendPayLink(string $enrollmentId, string $actorId): string
+    {
+        $invoice = SendPayLink::invoiceFor($enrollmentId)
+            ?? throw ValidationException::withMessages(['enrollment' => __('billing::collections.errors.nothing_waiting')]);
+        app(SendPayLink::class)->handle($invoice->id, $actorId);
+
+        return (string) $invoice->number;
     }
 
     private function subscriptionId(string $enrollmentId): string

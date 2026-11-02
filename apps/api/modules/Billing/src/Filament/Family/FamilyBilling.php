@@ -58,6 +58,10 @@ final class FamilyBilling extends Page
     #[Url]
     public ?string $checkout = null;
 
+    /** The invoice a message opened (an invoice notification's link): marked in the list. */
+    #[Url]
+    public ?string $invoice = null;
+
     public static function shouldRegisterNavigation(): bool
     {
         return FamilyAccount::shown();

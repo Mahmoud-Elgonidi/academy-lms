@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use Modules\Billing\Contracts\BillingApi;
 use Modules\Communication\Contracts\DTOs\Message;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
@@ -28,6 +29,7 @@ use Modules\Scheduling\Actions\LogContactAttempt;
 use Modules\Scheduling\Actions\MarkStudentAbsent;
 use Modules\Scheduling\Actions\ResolveReview;
 use Modules\Scheduling\Domain\AttendancePolicy;
+use Modules\Scheduling\Domain\Enums\FundingStatus;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\LiveBoard\BoardClassifier;
 use Modules\Scheduling\Domain\LiveBoard\BoardItem;
@@ -360,7 +362,28 @@ final class LiveBoard extends Page
             });
     }
 
-    /** Placeholder for actions whose module is not built yet (billing, substitutes). */
+    /**
+     * "Send payment link" on a lesson waiting to be paid: the course's invoice waiting (its block first) goes to the
+     * payer's channels with their own pay page (Billing's SendPayLink: audited, once an hour per invoice; a refusal
+     * says why in the office's words).
+     */
+    public function payLinkAction(): Action
+    {
+        return $this->sessionAction('payLink')
+            ->label(__('scheduling::board.actions.payment_link'))
+            ->action(function (array $arguments) {
+                $session = $this->session($arguments);
+                $enrollmentId = $session->enrollment_id
+                    ?? $session->participants->first(fn ($p) => $p->enrollment_id !== null && ($p->funding_status instanceof FundingStatus ? $p->funding_status->value : $p->funding_status) === FundingStatus::Unfunded->value)?->enrollment_id;
+                if ($enrollmentId === null) {
+                    throw ValidationException::withMessages(['session' => __('billing::collections.errors.nothing_waiting')]);
+                }
+                $number = app(BillingApi::class)->sendPayLink((string) $enrollmentId, (string) auth()->id());
+                $this->done(__('billing::collections.sent', ['number' => $number]));
+            });
+    }
+
+    /** Placeholder for actions whose module is not built yet (substitutes). */
     public function soonAction(): Action
     {
         return Action::make('soon')

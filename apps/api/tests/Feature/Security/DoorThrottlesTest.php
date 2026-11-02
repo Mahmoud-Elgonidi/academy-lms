@@ -25,6 +25,8 @@ const TIGHT_DOORS = [
     // The family starts a course and pays on its own (J3), and types a coupon before paying.
     'family.start.options', 'family.start.slots', 'family.courses.start', 'family.courses.cancel',
     'family.invoices.coupon', 'family.invoices.coupon.remove', 'billing.pay.coupon', 'billing.pay.coupon.remove',
+    // A course's balance, and a guardian adding a child (J5a).
+    'family.courses.balance', 'family.children.add',
 ];
 
 it('gives each newer door a limit of its own', function () {

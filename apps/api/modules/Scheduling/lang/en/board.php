@@ -230,6 +230,7 @@ return [
         'resolve' => 'Completed, absent, or cancelled with makeup',
         'dispute' => 'The lesson goes back under review; credit and pay follow the decision',
         'soon_messages' => 'Arrives with WhatsApp messages and notifications',
+        'payment_link' => 'Send the payer the payment link for :student\'s invoice (at most once an hour)',
         'soon_billing' => 'Arrives with invoices and payments',
         'observe' => 'Opens the lesson in a new tab; nobody sees or hears you.',
         'resend_link' => 'Sends :student and their guardians the join link again, even in quiet hours.',
