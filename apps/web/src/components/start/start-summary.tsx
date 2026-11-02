@@ -6,7 +6,7 @@ import { Icon } from '@/components/icons';
 import { FormatBadge } from '@/components/lesson-format';
 import { Button } from '@/components/ui';
 import { priceOf, type Step } from '@/lib/start/flow';
-import type { StartLearner, StartOffer, StartPlan } from '@/lib/start/types';
+import type { SkippedWeek, StartLearner, StartOffer, StartPlan } from '@/lib/start/types';
 import type { LocalTime } from '@/lib/time';
 
 /** What the family chose so far, as the summary shows it. */
@@ -17,6 +17,8 @@ export type SummaryFacts = {
   teacher: string | null;
   times: string[];
   first: LocalTime | null;
+  /** The weeks the chosen times start without (a holiday, the teacher's leave), in date order. */
+  skips: SkippedWeek[];
   offer: StartOffer | null;
 };
 
@@ -122,6 +124,9 @@ function Facts({ facts, isDone }: { facts: SummaryFacts; isDone: (step: Step) =>
         <ul className="space-y-0.5">{facts.times.map((x) => <li key={x}>{x}</li>)}</ul>
       ), isDone('times'), 'clock')}
       {facts.first ? row(t('first'), facts.first.label, true, 'star') : null}
+      {facts.skips.length > 0 && isDone('times') ? row(t('skipped'), (
+        <ul className="space-y-0.5 text-sm font-normal" data-summary-skips>{facts.skips.map((x) => <li key={x.text}>{x.text}</li>)}</ul>
+      ), true, 'calendar') : null}
     </dl>
   );
 }

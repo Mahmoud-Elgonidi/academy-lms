@@ -1615,6 +1615,8 @@
   "startTimesCount": "Chosen {picked} of {total}",
   "startTimesDayFull": "You have chosen them all. Let one go to choose another day.",
   "startTimesFirst": "First lesson {day}",
+  "startSkippedTitle": "Days with no lesson",
+  "startSkippedNote": "No lesson is booked on these days; the times carry on as usual after them.",
   "startTimesFrom": "The earliest start is {day}, leaving you time to pay.",
   "startTimesNone": "This teacher has no times free over the next four weeks.",
   "startOtherTeacher": "Choose another teacher",

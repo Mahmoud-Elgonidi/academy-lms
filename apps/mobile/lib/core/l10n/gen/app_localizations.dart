@@ -9782,6 +9782,18 @@ abstract class AppLocalizations {
   /// **'أول حصة {day}'**
   String startTimesFirst(String day);
 
+  /// No description provided for @startSkippedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أيام بلا حصة'**
+  String get startSkippedTitle;
+
+  /// No description provided for @startSkippedNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا تُحجز حصة في هذه الأيام، وتستمر المواعيد بعدها كالمعتاد.'**
+  String get startSkippedNote;
+
   /// No description provided for @startTimesFrom.
   ///
   /// In ar, this message translates to:

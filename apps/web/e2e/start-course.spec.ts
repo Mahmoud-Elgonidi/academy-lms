@@ -1,5 +1,5 @@
 import type { BrowserContext, Page } from '@playwright/test';
-import { API, coupon, endTestStarts, endTrialOffer, freeTestTrials, planPrice, takeTrialSlot, trialAfter, type TrialAfter } from './backend';
+import { API, coupon, endTestStarts, endTrialOffer, freeTestTrials, planPrice, removeTestHolidays, takeTrialSlot, testHoliday, trialAfter, type TrialAfter } from './backend';
 import { expect, fitsTheScreen, noRawKeys, test } from './helpers';
 
 /*
@@ -13,7 +13,9 @@ import { expect, fitsTheScreen, noRawKeys, test } from './helpers';
  * before paying; and a child's own look refused calmly. Each family is new
  * to the run (E2eResetSeeder::trialAfter): a 9-year-old's Tajweed trial two
  * days ago, assessed, with an open 10% offer, the child's account waiting
- * for the guardian's consent.
+ * for the guardian's consent. A week a time starts without (an academy
+ * holiday two to three weeks ahead, E2eResetSeeder::testHoliday) is marked on the time,
+ * listed in the review and in the welcome, in the API's words.
  */
 
 test.describe.configure({ mode: 'serial' });
@@ -32,6 +34,7 @@ test.beforeAll(() => {
 
 test.afterAll(() => {
   endTestStarts();
+  removeTestHolidays();
 });
 
 test.beforeEach(async ({ page }) => {
@@ -240,7 +243,7 @@ test('the price changed meanwhile: the new price shows, confirmed again, and the
   await toReview(page);
   await expect(page.getByText('انتهى عرض الحصة التجريبية، فالسعر هنا هو السعر المعتاد.')).toBeVisible();
   const plan = new URL(page.url()).searchParams.get('plan')!;
-  const old = planPrice(plan, 'SAR', 23500);
+  const old = planPrice(plan, 'EGP', 23500);
   try {
     await confirm(page);
     const refusal = page.locator('[data-refusal="price"]');
@@ -253,7 +256,7 @@ test('the price changed meanwhile: the new price shows, confirmed again, and the
     await expect(page.locator('[data-total]')).toContainText('235');
     secondInvoice = new URL(page.url()).pathname + new URL(page.url()).search;
   } finally {
-    planPrice(plan, 'SAR', old);
+    planPrice(plan, 'EGP', old);
   }
 });
 
@@ -325,4 +328,56 @@ test('a child\'s own look is told calmly that a guardian starts the course', asy
   await expect(closed).toContainText('وليّ الأمر');
   await expect(page.locator('[data-plan], [data-teacher]')).toHaveCount(0);
   await noRawKeys(page);
+});
+
+test('a holiday in the first weeks: the time is marked and says which day has no lesson, the review and the welcome list it', async ({ page, context, baseURL }) => {
+  const family = trialAfter();
+  // Two to three weeks ahead falls in every weekly time's first four weeks: that weekday's times skip that week, and stay offered.
+  const day = testHoliday(15);
+  expect(day).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  try {
+    await signedIn(context, family.guardian_token, baseURL);
+    await fromReport(page, family);
+    await oneLessonAWeek(page);
+    // The first teacher with a time on the holiday's weekday.
+    const ids = await page.locator('[data-teacher]').evaluateAll((all) => all.map((el) => el.getAttribute('data-teacher') ?? ''));
+    const note = page.locator('.st-day [data-skip]').filter({ hasText: 'إجازة الأكاديمية' }).first();
+    for (const id of ids) {
+      await page.locator(`[data-teacher="${id}"]`).click();
+      await onStep(page, 'اختر المواعيد الأسبوعية');
+      await expect(page.locator('.st-day, [data-empty="times"]').first()).toBeVisible();
+      if ((await note.count()) > 0) break;
+      await page.getByRole('button', { name: 'ارجع إلى خطوة المعلّم' }).click();
+      await onStep(page, 'اختر المعلّم');
+    }
+    // The sentence sits under the day's times, and the time it belongs to carries a marker and is described by it.
+    const sentence = /^لا حصة يوم .+: إجازة الأكاديمية$/;
+    await expect(note).toHaveText(sentence);
+    const marked = page.locator(`.st-time[data-skips="true"][aria-describedby~="${await note.getAttribute('id')}"]`).first();
+    await expect(marked).toBeVisible();
+    await expect(marked).toHaveAccessibleDescription(sentence);
+    // Chosen (the suggested time let go first: one lesson a week): its first lesson is a real one, never the holiday's.
+    if ((await marked.getAttribute('aria-pressed')) !== 'true') {
+      const chosen = page.locator('.st-time[aria-pressed="true"]');
+      if ((await chosen.count()) > 0) await chosen.first().click();
+      await expect(page.getByText('اخترت 0 من 1')).toBeVisible();
+      await marked.click();
+    }
+    await expect(marked).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByText('اخترت 1 من 1')).toBeVisible();
+    expect((await marked.getAttribute('data-first'))?.slice(0, 10)).not.toBe(day);
+    await fitsTheScreen(page);
+
+    await toReview(page);
+    await expect(page.locator('[data-review-skips] [data-skip="holiday"]')).toHaveText(sentence);
+    await confirm(page);
+    await agree(page);
+    await expect(page).toHaveURL(/\/ar\/family\/invoices\/[0-9a-f-]{36}\?course=/);
+    const welcome = page.locator('[data-welcome="waiting"]');
+    await expect(welcome.locator('[data-welcome-skips] [data-skip="holiday"]')).toHaveText(sentence);
+    await fitsTheScreen(page);
+    await noRawKeys(page);
+  } finally {
+    removeTestHolidays();
+  }
 });

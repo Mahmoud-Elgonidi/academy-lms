@@ -203,6 +203,38 @@
   border-color: var(--color-brand-line);
 }
 
+/* A week a time starts without (a holiday, the teacher's leave): a small calm marker on the time, the API's sentence under the day. */
+.st-time {
+  position: relative;
+}
+.st-skip-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--color-info-soft);
+  color: var(--color-info);
+}
+.st-time .st-skip-mark {
+  position: absolute;
+  top: -0.4rem;
+  inset-inline-end: -0.4rem;
+  box-shadow: 0 0 0 2px white;
+}
+.st-skip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-ink);
+}
+.st-skip .st-skip-mark {
+  margin-top: 0.1rem;
+}
+
 .st-day[data-picked='true'] .st-day-name {
   color: var(--color-brand-strong);
 }

@@ -147,13 +147,25 @@ class _Day extends StatelessWidget {
                   key: Key('time-${t.key}'),
                   label: wallClock(t.start, context.locale),
                   sub: t.first == null ? null : _date(t.first!, context.locale),
-                  semantics: joinSpoken(context, [t.label, if (t.first != null) context.l10n.startTimesFirst(t.first!.label)]),
+                  // A week off is heard with the time, as the line under the day says it.
+                  semantics: joinSpoken(context, [
+                    t.label,
+                    if (t.first != null) context.l10n.startTimesFirst(t.first!.label),
+                    for (final skip in t.skips) skip.text,
+                  ]),
                   selected: picked.contains(t.key),
                   wide: true,
+                  mark: t.skips.isEmpty ? null : Icons.event_busy_rounded,
                   onTap: () => context.read<StartCubit>().toggleTime(t.key),
                 ),
             ],
           ),
+          // The weeks this day's times start without, each sentence once, under the times.
+          for (final skip in SkippedWeek.inOrder(day.times.expand((t) => t.skips)))
+            Padding(
+              padding: const EdgeInsets.only(top: Space.s),
+              child: SkipLine(skip, key: Key('skip-${day.weekday}-${skip.date}')),
+            ),
         ],
       ),
     );
@@ -208,6 +220,36 @@ class _Counter extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// A week a time starts without, in the API's words, with the same calm marker the time carries.
+class SkipLine extends StatelessWidget {
+  const SkipLine(this.skip, {super.key});
+
+  final SkippedWeek skip;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ExcludeSemantics(
+          child: Container(
+            width: 20,
+            height: 20,
+            margin: const EdgeInsets.only(top: 1),
+            decoration: BoxDecoration(color: c.infoSoft, shape: BoxShape.circle),
+            child: Icon(Icons.event_busy_rounded, size: 12, color: c.infoInk),
+          ),
+        ),
+        const Gap(Space.s),
+        Expanded(
+          child: Text(skip.text, style: context.type.caption.copyWith(color: c.ink, height: 1.5)),
+        ),
+      ],
     );
   }
 }

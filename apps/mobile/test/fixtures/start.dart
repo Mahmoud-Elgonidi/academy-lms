@@ -111,16 +111,35 @@ Map<String, Object?> fxStartOptions({
   },
 };
 
-Map<String, Object?> fxTime(String key, int weekday, String start, {String day = 'السبت', String date = '2099-11-07'}) => {
+Map<String, Object?> fxTime(
+  String key,
+  int weekday,
+  String start, {
+  String day = 'السبت',
+  String date = '2099-11-07',
+  List<Map<String, Object?>> skips = const [],
+}) => {
   'key': key,
   'start': start,
   'end': '${(int.parse(start.substring(0, 2)) + 1).toString().padLeft(2, '0')}:00',
   'label': '$day $start',
   'first': time('${date}T$start:00Z', '${date}T$start:00+03:00', label: '$day ${date.substring(8)} نوفمبر · $start'),
+  'skips': skips,
+};
+
+/// A week a weekly time starts without, as the API writes it (`skips` on the slots, `skipped` on the start's answer).
+Map<String, Object?> fxSkip({String date = '2099-11-14', String reason = 'holiday', String day = 'السبت', String start = '17:00'}) => {
+  'date': date,
+  'reason': reason,
+  'at': time('${date}T$start:00Z', '${date}T$start:00+03:00', label: '$day ${date.substring(8)} نوفمبر · $start'),
+  'text': 'لا حصة يوم $day ${int.parse(date.substring(8))} نوفمبر: ${reason == 'holiday' ? 'إجازة الأكاديمية' : 'إجازة المعلّم'}',
 };
 
 /// Mona's weekly times: Saturday (two), Monday and Wednesday; Saturday and Monday suggested.
-Map<String, Object?> fxStartSlots({List<String>? suggested, bool empty = false, int perWeek = 2}) => {
+///
+/// With [skips], Saturday 17:00 starts without its second week (an academy holiday on 14 November), and Monday
+/// without its third (the teacher's leave on 23 November).
+Map<String, Object?> fxStartSlots({List<String>? suggested, bool empty = false, int perWeek = 2, bool skips = false}) => {
   'data': {
     'format': 'private',
     'timezone': 'Asia/Riyadh',
@@ -131,12 +150,24 @@ Map<String, Object?> fxStartSlots({List<String>? suggested, bool empty = false, 
             {
               'weekday': 6,
               'name': 'السبت',
-              'times': [fxTime('6-17:00', 6, '17:00'), fxTime('6-18:00', 6, '18:00')],
+              'times': [
+                fxTime('6-17:00', 6, '17:00', skips: [if (skips) fxSkip()]),
+                fxTime('6-18:00', 6, '18:00'),
+              ],
             },
             {
               'weekday': 1,
               'name': 'الاثنين',
-              'times': [fxTime('1-17:00', 1, '17:00', day: 'الاثنين', date: '2099-11-09')],
+              'times': [
+                fxTime(
+                  '1-17:00',
+                  1,
+                  '17:00',
+                  day: 'الاثنين',
+                  date: '2099-11-09',
+                  skips: [if (skips) fxSkip(date: '2099-11-23', reason: 'teacher_leave', day: 'الاثنين')],
+                ),
+              ],
             },
             {
               'weekday': 3,
@@ -240,7 +271,7 @@ Map<String, Object?> fxInvoiceView({
 };
 
 /// The course just started, as `POST family/courses` answers it.
-Map<String, Object?> fxStarted({bool canCancel = true, String offer = 'applied', bool package = false}) => {
+Map<String, Object?> fxStarted({bool canCancel = true, String offer = 'applied', bool package = false, bool skips = false}) => {
   'data': {
     'enrollment_id': 'e1',
     'status': package ? 'active' : 'pending_payment',
@@ -261,7 +292,8 @@ Map<String, Object?> fxStarted({bool canCancel = true, String offer = 'applied',
     ],
     'first_lesson': time('2099-11-07T14:00:00Z', '2099-11-07T17:00:00+03:00', label: 'السبت 7 نوفمبر · 5:00 م'),
     'lessons': 8,
-    'skipped_dates': <String>[],
+    'skipped_dates': skips ? ['2099-11-14', '2099-11-23'] : <String>[],
+    'skipped': skips ? [fxSkip(), fxSkip(date: '2099-11-23', reason: 'teacher_leave', day: 'الاثنين')] : <Object>[],
     'joined_package': package,
     'group': null,
     'invoice': package ? null : fxInvoice(),

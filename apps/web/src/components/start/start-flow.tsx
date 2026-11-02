@@ -21,6 +21,7 @@ import {
   previousStep,
   queryOf,
   refusalOf,
+  skippedOf,
   stepsFor,
   timesByKey,
   timesReady,
@@ -215,6 +216,7 @@ export function StartFlow({ options, choice, step, slots, slotsProblem, zoneLabe
     teacher: plan?.format === 'group' ? (group ? `${group.name} · ${group.teacher.name}` : null) : teacher?.name ?? null,
     times: plan?.format === 'group' ? (group?.times.map((x) => x.label) ?? []) : inWeekOrder(picks, slots).map((x) => x.label),
     first: first?.first ?? (plan?.format === 'group' && group?.status === 'running' ? group.next : null),
+    skips: plan?.format === 'group' ? [] : skippedOf(picks, slots),
     offer: options.offer,
   };
 
@@ -436,6 +438,15 @@ function Review({ plan, facts, options, learnerName, isSelf, consentWaiting, gro
         <p className="mt-3 text-[15px]">
           {forming ? t('formingFirst') : facts.first ? t.rich('first', { when: facts.first.label, b: (c) => <b>{c}</b> }) : null}
         </p>
+        {facts.skips.length > 0 ? (
+          <div className="mt-3 rounded-control bg-info-soft p-3" data-review-skips>
+            <h4 className="flex items-center gap-1.5 text-sm font-semibold text-ink"><Icon name="calendar" size={15} className="text-info" />{t('skipped')}</h4>
+            <ul className="mt-1.5 space-y-1 text-sm">
+              {facts.skips.map((skip) => <li key={skip.text} data-skip={skip.reason}>{skip.text}</li>)}
+            </ul>
+            <p className="mt-1.5 text-xs text-ink/75">{t('skippedNote')}</p>
+          </div>
+        ) : null}
         <p className="mt-1 text-xs text-muted">{t('zone')}</p>
       </section>
 

@@ -6113,6 +6113,12 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get startSkippedTitle => 'أيام بلا حصة';
+
+  @override
+  String get startSkippedNote => 'لا تُحجز حصة في هذه الأيام، وتستمر المواعيد بعدها كالمعتاد.';
+
+  @override
   String startTimesFrom(String day) {
     return 'أقرب بداية $day، ليبقى لكم وقت للدفع.';
   }

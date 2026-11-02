@@ -5760,6 +5760,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get startSkippedTitle => 'Days with no lesson';
+
+  @override
+  String get startSkippedNote => 'No lesson is booked on these days; the times carry on as usual after them.';
+
+  @override
   String startTimesFrom(String day) {
     return 'The earliest start is $day, leaving you time to pay.';
   }

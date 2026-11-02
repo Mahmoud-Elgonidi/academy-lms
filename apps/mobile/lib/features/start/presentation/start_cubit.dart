@@ -112,6 +112,9 @@ class StartState extends Equatable {
   bool get timesDone => plan?.shared ?? false ? picked.isNotEmpty && picked.length <= perWeek : picked.length == perWeek;
   List<WeeklyTime> get pickedTimes => [for (final k in picked) ?slots?.time(k)];
 
+  /// The weeks the chosen times start without, in date order (the review lists them).
+  List<SkippedWeek> get pickedSkips => SkippedWeek.inOrder(pickedTimes.expand((t) => t.skips));
+
   /// The earliest first lesson among the chosen times.
   WeeklyTime? get firstPicked {
     final times = pickedTimes.where((t) => t.first != null).toList()..sort((a, b) => a.first!.utc.compareTo(b.first!.utc));

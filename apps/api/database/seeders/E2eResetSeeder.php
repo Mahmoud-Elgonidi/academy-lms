@@ -52,6 +52,7 @@ use Modules\Scheduling\Contracts\DTOs\NewSession;
 use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
 use Modules\Scheduling\Domain\Enums\SessionEventKind;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
+use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionEvent;
@@ -384,6 +385,52 @@ final class E2eResetSeeder extends Seeder
 
             return $ended;
         });
+    }
+
+    /** The name the end-to-end tests' own holiday goes by (found and removed by it). */
+    public const TEST_HOLIDAY = 'E2E: a skipped week';
+
+    /**
+     * An academy holiday inside a start's first four weeks (J3: a weekly time on its weekday skips that week, `skips`
+     * on GET family/start/slots and `skipped` on POST family/courses): the academy's own, when one falls 7 to 24 days
+     * ahead on its clock (the demo's mid-term break, DemoTimeOffSeeder), else one day this many days ahead, written as
+     * a bare row rather than through DeclareHoliday, so the demo's lessons that day stay as they are (nothing
+     * cancelled, nobody told); an earlier run's is removed first. Returns the holiday's first day (Y-m-d).
+     */
+    public static function testHoliday(int $days = 15): string
+    {
+        $academy = self::demo(app(TenantDirectory::class));
+
+        return app(TenantContext::class)->run($academy, function () use ($days): string {
+            self::dropTestHolidays();
+            $tz = (string) (DB::table('academies')->value('default_timezone') ?: 'UTC');
+            $today = CarbonImmutable::now($tz)->startOfDay();
+            $own = DB::table('academy_holidays')->where('first_day', '>=', $today->addDays(7)->toDateString())
+                ->where('first_day', '<=', $today->addDays(24)->toDateString())->orderBy('first_day')->value('first_day');
+            if ($own !== null) {
+                return CarbonImmutable::parse((string) $own)->toDateString();
+            }
+            $day = $today->addDays($days);
+            AcademyHoliday::query()->create([
+                'name' => self::TEST_HOLIDAY, 'timezone' => $tz, 'first_day' => $day->toDateString(), 'last_day' => $day->toDateString(),
+                'starts_at' => $day->utc(), 'ends_at' => $day->addDay()->utc(),
+            ]);
+
+            return $day->toDateString();
+        });
+    }
+
+    /** The end-to-end tests' holiday goes again (the academy's own stay). Returns how many went. */
+    public static function removeTestHolidays(): int
+    {
+        $academy = self::demo(app(TenantDirectory::class));
+
+        return app(TenantContext::class)->run($academy, fn (): int => self::dropTestHolidays());
+    }
+
+    private static function dropTestHolidays(): int
+    {
+        return DB::table('academy_holidays')->where('name', self::TEST_HOLIDAY)->delete();
     }
 
     /**

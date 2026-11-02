@@ -1,4 +1,4 @@
-import type { StartOptions, StartPlan, StartSlots, WeeklyTime } from './types';
+import type { SkippedWeek, StartOptions, StartPlan, StartSlots, StartedCourse, WeeklyTime } from './types';
 
 /**
  * The start flow's own reckoning (docs/architecture/02, section 27, J3),
@@ -203,6 +203,53 @@ export function inWeekOrder(picks: readonly string[], slots: Pick<StartSlots, 'd
   const order: WeeklyTime[] = [];
   for (const day of slots?.days ?? []) for (const time of day.times) if (picks.includes(time.key)) order.push(time);
   return order;
+}
+
+/**
+ * The weeks a weekly time starts without, as the API wrote them (`skips`,
+ * untyped in the OpenAPI document): only entries with a day and a sentence,
+ * in date order; anything else is left out.
+ */
+export function skipsOf(time: Pick<WeeklyTime, 'skips'> | null | undefined): SkippedWeek[] {
+  return cleanSkips(time?.skips);
+}
+
+function cleanSkips(raw: unknown): SkippedWeek[] {
+  if (!Array.isArray(raw)) return [];
+  const found: SkippedWeek[] = [];
+  for (const item of raw as Record<string, unknown>[]) {
+    if (!item || typeof item !== 'object') continue;
+    const { date, reason, at, text } = item;
+    if (typeof date !== 'string' || typeof text !== 'string' || text.trim() === '') continue;
+    const when = at && typeof at === 'object' && typeof (at as { utc?: unknown }).utc === 'string' ? (at as SkippedWeek['at']) : null;
+    found.push({ date, reason: typeof reason === 'string' ? reason : '', at: when, text: text.trim() });
+  }
+  return byDate(found);
+}
+
+/** In date order, each sentence once (two times on one day share a holiday's). */
+function byDate(weeks: SkippedWeek[]): SkippedWeek[] {
+  const seen = new Set<string>();
+  return [...weeks]
+    .sort((a, b) => (a.at && b.at ? Date.parse(a.at.utc) - Date.parse(b.at.utc) : a.date.localeCompare(b.date)))
+    .filter((w) => (seen.has(w.text) ? false : (seen.add(w.text), true)));
+}
+
+/** The weeks the chosen times start without, in date order (the review and the summary list them). */
+export function skippedOf(picks: readonly string[], slots: Pick<StartSlots, 'days'> | null | undefined): SkippedWeek[] {
+  const free = timesByKey(slots);
+  return byDate(picks.flatMap((key) => skipsOf(free.get(key))));
+}
+
+/**
+ * What the welcome says of the days a course started without: the skipped
+ * weeks in the API's words, and how many other days were left out because the
+ * teacher or the learner was already booked (`skipped_dates` counts both).
+ */
+export function startedSkips(course: Pick<StartedCourse, 'skipped' | 'skipped_dates'>): { weeks: SkippedWeek[]; busy: number } {
+  const weeks = cleanSkips(course.skipped);
+  const dates = Array.isArray(course.skipped_dates) ? course.skipped_dates.length : 0;
+  return { weeks, busy: Math.max(0, dates - weeks.length) };
 }
 
 /** Plans the way the family reads them: private lessons first, then groups. */

@@ -7,6 +7,7 @@ import 'package:academy_app/features/start/data/start_repository.dart';
 import 'package:academy_app/features/start/domain/start.dart';
 import 'package:academy_app/features/start/presentation/pay/pay_cubit.dart';
 import 'package:academy_app/features/start/presentation/start_cubit.dart';
+import 'package:academy_app/features/start/presentation/steps/times_step.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -116,6 +117,39 @@ void main() {
       expect(o.offerOpen, isTrue);
       expect(o.offerPercentText, '10');
       expect(o.unpaidCancelHours, 24);
+    });
+
+    test('weeks a time starts without: read as they come, malformed ones left out, in date order', () {
+      final slots = StartSlots.fromJson(fxStartSlots(skips: true));
+      final saturday = slots.time('6-17:00')!;
+      expect(saturday.skips.single.text, 'لا حصة يوم السبت 14 نوفمبر: إجازة الأكاديمية');
+      expect(saturday.skips.single.holiday, isTrue);
+      expect(saturday.skips.single.at?.label, 'السبت 14 نوفمبر · 17:00');
+      expect(slots.time('6-18:00')!.skips, isEmpty);
+      expect(slots.time('1-17:00')!.skips.single.reason, 'teacher_leave');
+      // Untyped in the OpenAPI document: anything without a day and a sentence is left out.
+      final odd = WeeklyTime.fromJson({
+        'key': '6-17:00',
+        'start': '17:00',
+        'skips': [
+          null,
+          3,
+          {'date': '2099-11-14'},
+          {'text': 'بلا يوم'},
+          {'date': '2099-11-14', 'text': '  '},
+          fxSkip(date: '2099-11-21'),
+          fxSkip(),
+          fxSkip(),
+        ],
+      });
+      expect(odd.skips.map((w) => w.date), ['2099-11-14', '2099-11-21']);
+      expect(WeeklyTime.fromJson({'key': 'k', 'start': '17:00', 'skips': 'nope'}).skips, isEmpty);
+      expect(StartSlots.fromJson(fxStartSlots()).time('6-17:00')!.skips, isEmpty);
+
+      final started = StartedCourse.fromJson(fxStarted(skips: true));
+      expect(started.skipped.map((w) => w.reason), ['holiday', 'teacher_leave']);
+      expect(started.skippedDates, ['2099-11-14', '2099-11-23']);
+      expect(StartedCourse.fromJson(fxStarted()).skipped, isEmpty);
     });
 
     test('a refusal reads as what the screen does about it', () {
@@ -589,6 +623,77 @@ void main() {
       expect(find.text('السبت 7 نوفمبر · 5:00 م'), findsOneWidget);
       await _tap(tester, find.byKey(const Key('paid-lessons')), 15);
       expect(_where(tester), '/family/lessons');
+      await _close(tester);
+    });
+
+    testWidgets('a week off: marked on the time and said under it, listed in the review and in the paid welcome', (tester) async {
+      final app = await _open(
+        tester,
+        '/family/start?learner=c1&subject=sub1&plan=p1&teacher=t1',
+        more: (api) => api
+          ..on('GET', 'family/start/slots', fxStartSlots(skips: true))
+          ..on('POST', 'family/courses', fxStarted(skips: true), status: 201),
+      );
+      await _tap(tester, find.byKey(const Key('plan-next')), 15);
+      await _tap(tester, find.byKey(const Key('teacher-next')), 15);
+
+      // The times: the API's sentence under each day with a week off, the time it belongs to marked and heard with it.
+      expect(find.byKey(const Key('skip-6-2099-11-14')), findsOneWidget);
+      expect(find.text('لا حصة يوم السبت 14 نوفمبر: إجازة الأكاديمية'), findsOneWidget);
+      expect(find.text('لا حصة يوم الاثنين 23 نوفمبر: إجازة المعلّم'), findsOneWidget);
+      expect(find.descendant(of: find.byKey(const Key('time-6-17:00')), matching: find.byIcon(Icons.event_busy_rounded)), findsOneWidget);
+      expect(find.descendant(of: find.byKey(const Key('time-6-18:00')), matching: find.byIcon(Icons.event_busy_rounded)), findsNothing);
+      expect(
+        tester.getSemantics(find.byKey(const Key('time-6-17:00'))).label,
+        allOf(contains('السبت 17:00'), contains('لا حصة يوم السبت 14 نوفمبر: إجازة الأكاديمية')),
+      );
+      await _tap(tester, find.byKey(const Key('times-next')), 15);
+
+      // The review: the chosen times' weeks off, in date order, and that the times carry on after them.
+      final review = find.byKey(const Key('review-skips'));
+      expect(review, findsOneWidget);
+      expect(
+        find.descendant(
+          of: review,
+          matching: find.text('لا حصة يوم السبت 14 نوفمبر: إجازة الأكاديمية\nلا حصة يوم الاثنين 23 نوفمبر: إجازة المعلّم'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.descendant(of: review, matching: find.text('أيام بلا حصة')), findsOneWidget);
+      expect(find.descendant(of: review, matching: find.textContaining('وتستمر المواعيد بعدها كالمعتاد')), findsOneWidget);
+      await _tap(tester, find.byKey(const Key('start-confirm')), 25);
+
+      // Paid: the welcome lists them as the start's answer said.
+      expect(_where(tester), '/family/pay/i1');
+      app.api.on('GET', 'family/invoices/i1', fxInvoiceView(paid: true, checkout: 'paid'));
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await frames(tester, 20);
+      expect(find.byKey(const Key('pay-paid')), findsOneWidget);
+      final paid = find.byKey(const Key('paid-skips'));
+      await tester.ensureVisible(paid);
+      expect(
+        find.descendant(
+          of: paid,
+          matching: find.text('لا حصة يوم السبت 14 نوفمبر: إجازة الأكاديمية\nلا حصة يوم الاثنين 23 نوفمبر: إجازة المعلّم'),
+        ),
+        findsOneWidget,
+      );
+      await _close(tester);
+    });
+
+    testWidgets('no week off: nothing about it on the times, the review or the welcome', (tester) async {
+      await _open(tester, '/family/start?learner=c1&subject=sub1&plan=p1&teacher=t1');
+      await _tap(tester, find.byKey(const Key('plan-next')), 15);
+      await _tap(tester, find.byKey(const Key('teacher-next')), 15);
+      expect(find.byIcon(Icons.event_busy_rounded), findsNothing);
+      expect(find.byType(SkipLine), findsNothing);
+      await _tap(tester, find.byKey(const Key('times-next')), 15);
+      expect(find.byKey(const Key('review-skips')), findsNothing);
       await _close(tester);
     });
 

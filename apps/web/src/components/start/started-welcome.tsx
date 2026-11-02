@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useSyncExternalStore, type ReactNode } from 'react';
 import { Icon } from '@/components/icons';
 import { FormatBadge } from '@/components/lesson-format';
-import { INVOICE_COURSE_KEY, STARTED_KEY } from '@/lib/start/flow';
+import { INVOICE_COURSE_KEY, STARTED_KEY, startedSkips } from '@/lib/start/flow';
 import type { StartedCourse } from '@/lib/start/types';
 
 const nothing = () => () => undefined;
@@ -50,6 +50,7 @@ export function StartedWelcome({ course, invoice, mode, fallback, after }: {
   const started = useStarted(course, invoice);
   if (!started) return <>{fallback}</>;
   const group = started.plan?.format === 'group';
+  const skips = startedSkips(started);
   return (
     <section className="rounded-card border border-brand-line bg-white p-5" aria-labelledby="st-welcome" data-welcome={mode}>
       <div className="flex items-start gap-3">
@@ -79,8 +80,17 @@ export function StartedWelcome({ course, invoice, mode, fallback, after }: {
           </dd>
         </div>
       </dl>
+      {skips.weeks.length > 0 ? (
+        <div className="mt-3 rounded-control bg-info-soft p-3" data-welcome-skips>
+          <h3 className="flex items-center gap-1.5 text-sm font-semibold"><Icon name="calendar" size={15} className="text-info" />{t('skippedWeeks')}</h3>
+          <ul className="mt-1.5 space-y-1 text-sm">
+            {skips.weeks.map((skip) => <li key={skip.text} data-skip={skip.reason}>{skip.text}</li>)}
+          </ul>
+          <p className="mt-1.5 text-xs text-ink/75">{t('skippedNote')}</p>
+        </div>
+      ) : null}
       {started.lessons > 0 ? <p className="mt-3 text-sm text-ink/80">{t('booked', { count: started.lessons })}</p> : null}
-      {started.skipped_dates.length > 0 ? <p className="mt-1 text-sm text-ink/80">{t('skipped', { count: started.skipped_dates.length })}</p> : null}
+      {skips.busy > 0 ? <p className="mt-1 text-sm text-ink/80">{t('skipped', { count: skips.busy })}</p> : null}
       {started.offer.message ? <p className="mt-2 flex items-start gap-2 text-sm font-semibold text-brand-strong" data-offer-state={started.offer.state}><Icon name="spark" size={16} className="mt-0.5 shrink-0" />{started.offer.message}</p> : null}
       {mode === 'waiting' ? (
         <div className="mt-3 rounded-control border border-attention/40 bg-attention-soft p-3 text-sm" data-pay-by>

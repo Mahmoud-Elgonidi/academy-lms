@@ -184,6 +184,17 @@ export function coupon(code: string, percent: number): string {
   return artisan(['tinker', `--execute=echo Database\\Seeders\\E2eResetSeeder::coupon('${code}', ${percent});`]).trim().split('\n').pop() ?? '';
 }
 
+/** An academy holiday in a start's first four weeks (E2eResetSeeder::testHoliday: the demo's own, else one this many days ahead), so a weekly time skips that week; its first day. */
+export function testHoliday(days = 15): string {
+  if (!Number.isInteger(days)) throw new Error(`Not a number of days: ${days}`);
+  return artisan(['tinker', `--execute=echo Database\\Seeders\\E2eResetSeeder::testHoliday(${days});`]).trim().split('\n').pop() ?? '';
+}
+
+/** The end-to-end tests' holiday goes again (E2eResetSeeder::removeTestHolidays). */
+export function removeTestHolidays(): number {
+  return Number(artisan(['tinker', '--execute=echo Database\\Seeders\\E2eResetSeeder::removeTestHolidays();']).trim().split('\n').pop());
+}
+
 /** The courses the end-to-end families started end today (E2eResetSeeder::endTestStarts), so the demo's teachers keep their weekly room. */
 export function endTestStarts(): number {
   return Number(artisan(['tinker', '--execute=echo Database\\Seeders\\E2eResetSeeder::endTestStarts();']).trim().split('\n').pop());

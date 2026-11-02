@@ -1742,6 +1742,8 @@ s('startTimesSuggested', 'اخترنا لكم مواعيد مقترحة، ويم
 s('startTimesCount', 'اخترتم {picked} من {total}', 'Chosen {picked} of {total}', picked='int', total='int')
 s('startTimesDayFull', 'اخترتم كل المواعيد. ألغوا موعدًا أولًا لتختاروا يومًا آخر.', 'You have chosen them all. Let one go to choose another day.')
 s('startTimesFirst', 'أول حصة {day}', 'First lesson {day}', day='String')
+s('startSkippedTitle', 'أيام بلا حصة', 'Days with no lesson')
+s('startSkippedNote', 'لا تُحجز حصة في هذه الأيام، وتستمر المواعيد بعدها كالمعتاد.', 'No lesson is booked on these days; the times carry on as usual after them.')
 s('startTimesFrom', 'أقرب بداية {day}، ليبقى لكم وقت للدفع.', 'The earliest start is {day}, leaving you time to pay.', day='String')
 s('startTimesNone', 'لا مواعيد متاحة مع هذا المعلّم في الأسابيع الأربعة القادمة.', 'This teacher has no times free over the next four weeks.')
 s('startOtherTeacher', 'اختاروا معلّمًا آخر', 'Choose another teacher')

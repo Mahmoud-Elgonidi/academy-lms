@@ -637,6 +637,14 @@ class _CourseCard extends StatelessWidget {
           if (s.teacher.isNotEmpty) SummaryRow(label: l.paidTeacher, value: s.teacher, icon: Icons.school_outlined),
           if (s.weeklyTimes.isNotEmpty) SummaryRow(label: l.paidTimes, value: s.weeklyTimes.join('\n'), icon: Icons.event_repeat_rounded),
           SummaryRow(label: l.paidFirst, value: s.firstLesson?.label ?? l.paidFirstLater, icon: Icons.flag_outlined),
+          if (s.skipped.isNotEmpty)
+            SummaryRow(
+              key: const Key('paid-skips'),
+              label: l.startSkippedTitle,
+              value: s.skipped.map((w) => w.text).join('\n'),
+              detail: l.startSkippedNote,
+              icon: Icons.event_busy_rounded,
+            ),
           SummaryRow(label: l.paidJoin, value: l.paidJoinHow, icon: Icons.videocam_outlined),
         ],
       ),

@@ -14,6 +14,9 @@ import {
   priceOf,
   queryOf,
   refusalOf,
+  skippedOf,
+  skipsOf,
+  startedSkips,
   startProblemOf,
   stepToShow,
   stepsFor,
@@ -190,6 +193,40 @@ describe('refusals', () => {
     expect(refusalOf(problem('something_new'), '')).toEqual({ kind: 'say', message: 'words for something_new' });
     expect(refusalOf({ status: 409, type: 'guardian-consent-needed', detail: 'agree', reason: 'consent', student_id: L }, '')).toEqual({ kind: 'consent', message: 'agree', studentId: L });
     expect(refusalOf({ status: 422, detail: '' }, 'fallback')).toEqual({ kind: 'say', message: 'fallback' });
+  });
+});
+
+describe('weeks a time starts without', () => {
+  const at = (utc: string) => ({ utc, local: utc, timezone: 'Africa/Cairo', label: utc });
+  const holiday = { date: '2026-11-17', reason: 'holiday', at: at('2026-11-17T15:00:00Z'), text: 'لا حصة يوم الثلاثاء 17 نوفمبر: إجازة الأكاديمية' };
+  const leave = { date: '2026-11-14', reason: 'teacher_leave', at: at('2026-11-14T18:00:00Z'), text: 'لا حصة يوم السبت 14 نوفمبر: إجازة المعلّم' };
+  const withSkips: StartSlots = {
+    ...slots,
+    days: [
+      { weekday: 6, name: 'السبت', times: [time('6|19:30', '2026-11-07T17:30:00Z'), { ...time('6|20:00', '2026-11-07T18:00:00Z'), skips: [leave] }] },
+      { weekday: 2, name: 'الثلاثاء', times: [{ ...time('2|17:00', '2026-11-10T15:00:00Z'), skips: [holiday] }, { ...time('2|20:00', '2026-11-10T18:00:00Z'), skips: [] }] },
+    ],
+  };
+
+  it('reads a time\'s skips from the JSON as it comes, leaving out what is malformed', () => {
+    expect(skipsOf(withSkips.days[1]!.times[0])).toEqual([holiday]);
+    expect(skipsOf(withSkips.days[0]!.times[0])).toEqual([]);
+    expect(skipsOf({ skips: 'nope' })).toEqual([]);
+    expect(skipsOf({ skips: [null, 3, { date: '2026-11-17' }, { text: 'no day' }, { date: '2026-11-17', text: '  ' }] })).toEqual([]);
+    expect(skipsOf({ skips: [{ date: '2026-11-17', text: ' كلمات ', at: 'bad' }] })).toEqual([{ date: '2026-11-17', reason: '', at: null, text: 'كلمات' }]);
+  });
+
+  it('lists the chosen times\' skipped weeks in date order, each once', () => {
+    expect(skippedOf(['2|17:00', '6|20:00'], withSkips)).toEqual([leave, holiday]);
+    expect(skippedOf(['2|20:00', '6|19:30'], withSkips)).toEqual([]);
+    expect(skippedOf(['2|17:00'], null)).toEqual([]);
+  });
+
+  it('tells the welcome the skipped weeks apart from the days the teacher or the learner was busy', () => {
+    expect(startedSkips({ skipped: [holiday, leave], skipped_dates: ['2026-11-14', '2026-11-17', '2026-11-21'] })).toEqual({ weeks: [leave, holiday], busy: 1 });
+    expect(startedSkips({ skipped: [holiday], skipped_dates: ['2026-11-17'] })).toEqual({ weeks: [holiday], busy: 0 });
+    // A start saved by an older page has no `skipped`: every day counts as busy, as before.
+    expect(startedSkips({ skipped_dates: ['2026-11-21'] })).toEqual({ weeks: [], busy: 1 });
   });
 });
 

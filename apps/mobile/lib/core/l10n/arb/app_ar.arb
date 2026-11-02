@@ -4381,6 +4381,8 @@
       }
     }
   },
+  "startSkippedTitle": "أيام بلا حصة",
+  "startSkippedNote": "لا تُحجز حصة في هذه الأيام، وتستمر المواعيد بعدها كالمعتاد.",
   "startTimesFrom": "أقرب بداية {day}، ليبقى لكم وقت للدفع.",
   "@startTimesFrom": {
     "placeholders": {

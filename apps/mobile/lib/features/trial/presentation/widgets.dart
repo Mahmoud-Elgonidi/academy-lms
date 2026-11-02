@@ -203,6 +203,7 @@ class TrialPill extends StatelessWidget {
     this.sub,
     this.semantics,
     this.wide = false,
+    this.mark,
     super.key,
   });
 
@@ -210,6 +211,9 @@ class TrialPill extends StatelessWidget {
   final String? sub;
   final bool selected;
   final VoidCallback onTap;
+
+  /// A small calm marker in the corner (a time with a week off); what it means is said beside the pill and in [semantics].
+  final IconData? mark;
 
   /// What a screen reader says instead of [label] (a time's whole day and hour).
   final String? semantics;
@@ -227,41 +231,63 @@ class TrialPill extends StatelessWidget {
       excludeSemantics: true,
       child: PressScale(
         onTap: onTap,
-        child: AnimatedContainer(
-          duration: context.calm ? Duration.zero : const Duration(milliseconds: 180),
-          constraints: BoxConstraints(minHeight: 48, minWidth: wide ? 96 : 48),
-          padding: EdgeInsets.symmetric(horizontal: wide ? 18 : 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: selected ? c.brand : c.card,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: selected ? c.brand : c.line, width: 1.5),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: wide ? 16 : 15,
-                  fontWeight: FontWeight.w700,
-                  color: selected ? Colors.white : c.ink,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            _pill(context, c),
+            if (mark != null)
+              PositionedDirectional(
+                top: -5,
+                end: -5,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: c.infoSoft,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: c.card, width: 2),
+                  ),
+                  child: Icon(mark, size: 12, color: c.infoInk),
                 ),
               ),
-              if (sub != null)
-                Text(
-                  sub!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: selected ? Colors.white.withValues(alpha: 0.9) : c.muted),
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );
   }
+
+  Widget _pill(BuildContext context, LmsColors c) => AnimatedContainer(
+    duration: context.calm ? Duration.zero : const Duration(milliseconds: 180),
+    constraints: BoxConstraints(minHeight: 48, minWidth: wide ? 96 : 48),
+    padding: EdgeInsets.symmetric(horizontal: wide ? 18 : 14, vertical: 10),
+    decoration: BoxDecoration(
+      color: selected ? c.brand : c.card,
+      borderRadius: BorderRadius.circular(999),
+      border: Border.all(color: selected ? c.brand : c.line, width: 1.5),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: wide ? 16 : 15,
+            fontWeight: FontWeight.w700,
+            color: selected ? Colors.white : c.ink,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+        if (sub != null)
+          Text(
+            sub!,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: selected ? Colors.white.withValues(alpha: 0.9) : c.muted),
+          ),
+      ],
+    ),
+  );
 }
 
 /// A heading over a group of pills.

@@ -9,7 +9,7 @@ import { Badge, Notice, buttonLook, join } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import { dayLabel } from '@/lib/format';
 import { initialOf } from '@/lib/site/initial';
-import { plansByFormat, priceOf, teachersFor, timesReady, weekdayOf } from '@/lib/start/flow';
+import { plansByFormat, priceOf, skipsOf, teachersFor, timesReady, weekdayOf } from '@/lib/start/flow';
 import type { StartGroup, StartLearner, StartOffer, StartOptions, StartPlan, StartSlots, StartSubject, StartTeacher } from '@/lib/start/types';
 import { CancelStart } from './invoice-actions';
 
@@ -342,6 +342,17 @@ export function TimesStep({ slots, problem, plan, picks, full, zoneLabel, teache
       <div className="grid gap-3">
         {days.map((day) => {
           const on = pickedDays.has(day.weekday);
+          // The weeks this day's times start without, each sentence once, under the times; a time with one carries a marker and is described by it.
+          const skips = new Map<string, { id: string; text: string; times: string[] }>();
+          for (const time of day.times) {
+            for (const skip of skipsOf(time)) {
+              const found = skips.get(skip.text) ?? { id: `st-skip-${day.weekday}-${skips.size}`, text: skip.text, times: [] };
+              found.times.push(time.key);
+              skips.set(skip.text, found);
+            }
+          }
+          const notes = [...skips.values()];
+          const describedBy = (key: string) => notes.filter((n) => n.times.includes(key)).map((n) => n.id).join(' ') || undefined;
           return (
             <section key={day.weekday} className="st-day rounded-card border border-line bg-white p-4" data-picked={on} aria-labelledby={`st-day-${day.weekday}`}>
               <h3 id={`st-day-${day.weekday}`} className="st-day-name mb-2.5 flex items-center gap-2 font-bold">
@@ -351,6 +362,7 @@ export function TimesStep({ slots, problem, plan, picks, full, zoneLabel, teache
               <div className="flex flex-wrap gap-2">
                 {day.times.map((time) => {
                   const pressed = picks.includes(time.key);
+                  const skipped = describedBy(time.key);
                   return (
                     <button
                       key={time.key}
@@ -360,15 +372,28 @@ export function TimesStep({ slots, problem, plan, picks, full, zoneLabel, teache
                       data-suggested={suggested.has(time.key)}
                       data-time={time.key}
                       data-first={time.first.utc}
+                      data-skips={skipped ? 'true' : undefined}
                       aria-label={t('timeLabel', { time: time.label, first: time.first.label })}
+                      aria-describedby={skipped}
                       onClick={() => onPress(time.key)}
                     >
+                      {skipped ? <span className="st-skip-mark" aria-hidden="true"><Icon name="calendar" size={11} /></span> : null}
                       <span>{wall(time.start)}</span>
                       <small>{t('firstOn', { day: dayLabel(time.first.local.slice(0, 10), locale, { day: 'numeric', month: 'short' }) })}</small>
                     </button>
                   );
                 })}
               </div>
+              {notes.length > 0 ? (
+                <ul className="mt-2.5 space-y-1">
+                  {notes.map((note) => (
+                    <li key={note.id} id={note.id} className="st-skip" data-skip>
+                      <span className="st-skip-mark" aria-hidden="true"><Icon name="calendar" size={11} /></span>
+                      <span>{note.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </section>
           );
         })}

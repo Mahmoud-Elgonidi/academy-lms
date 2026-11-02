@@ -118,6 +118,14 @@ class ReviewStep extends StatelessWidget {
                   onChange: () => cubit.edit(StartStep.times),
                 ),
                 if (first != null) SummaryRow(label: l.startReviewFirst, value: first.label, icon: Icons.flag_outlined),
+                if (state.pickedSkips case final skips when skips.isNotEmpty)
+                  SummaryRow(
+                    key: const Key('review-skips'),
+                    label: l.startSkippedTitle,
+                    value: skips.map((s) => s.text).join('\n'),
+                    detail: l.startSkippedNote,
+                    icon: Icons.event_busy_rounded,
+                  ),
               ],
             ],
           ),

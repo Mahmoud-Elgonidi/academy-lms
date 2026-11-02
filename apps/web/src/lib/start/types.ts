@@ -79,8 +79,20 @@ export type StartOptions = {
   payment: { unpaid_cancel_hours: number; notice_hours: number } | null;
 };
 
-/** A teacher's weekly time on the family's clock, free in all of the first four weeks. */
-export type WeeklyTime = { key: string; start: string; end: string; label: string; first: LocalTime };
+/**
+ * A week among the first four with no lesson at a weekly time (an academy
+ * holiday or the teacher's leave): never booked. `date` is the day on the
+ * family's clock, `text` the API's own sentence to show as written.
+ */
+export type SkippedWeek = { date: string; reason: 'holiday' | 'teacher_leave' | string; at: LocalTime | null; text: string };
+
+/**
+ * A teacher's weekly time on the family's clock, free in the first four weeks
+ * but at most one skipped (`skips`); `first` is its first real lesson.
+ * `skips` is read from the JSON as it comes (the OpenAPI document leaves it
+ * untyped): through `skipsOf`, never directly.
+ */
+export type WeeklyTime = { key: string; start: string; end: string; label: string; first: LocalTime; skips?: unknown };
 
 export type StartGroup = {
   id: string;
@@ -141,7 +153,10 @@ export type StartedCourse = {
   weekly_times: { weekday: number; start: string; label: string }[];
   first_lesson: LocalTime | null;
   lessons: number;
+  /** Days with no lesson (the teacher's clock): the skipped weeks below, and any the teacher or the learner was already booked on. */
   skipped_dates: string[];
+  /** The first weeks the course starts without (a holiday, the teacher's leave); missing in a start saved by an older page. */
+  skipped?: SkippedWeek[];
   joined_package: boolean;
   group: { id: string; status: string; seat: number | null; capacity: number | null; started: boolean; min_to_start: number | null } | null;
   invoice: InvoiceSummary | null;

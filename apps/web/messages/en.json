@@ -2513,6 +2513,8 @@
       "times": "Weekly times",
       "first": "First lesson: <b>{when}</b>",
       "formingFirst": "The group starts once it has enough students; we will tell you the first lesson.",
+      "skipped": "Days with no lesson",
+      "skippedNote": "No lesson is booked on these days; the times carry on as usual after them.",
       "zone": "Times are on your clock, and messages come on the same clock.",
       "money": "The first invoice",
       "total": "Total",
@@ -2547,7 +2549,8 @@
       "noCharge": "Nothing is charged before you check the invoice and choose to pay.",
       "notYet": "Not chosen yet",
       "firstInvoice": "The first invoice",
-      "perLesson": "That is {price} a lesson"
+      "perLesson": "That is {price} a lesson",
+      "skipped": "Days with no lesson"
     },
     "shape": {
       "line": "{perWeek, plural, one {One lesson} other {# lessons}} a week · {minutes} minutes",
@@ -2716,6 +2719,8 @@
       "first": "First lesson",
       "firstLater": "When the group has enough students",
       "weekly": "Weekly times",
+      "skippedWeeks": "Days with no lesson",
+      "skippedNote": "No lesson is booked on these days; the times carry on as usual after them.",
       "booked": "{count, plural, one {One lesson is booked so far; the rest are booked week by week.} other {# lessons are booked so far; the rest are booked week by week.}}",
       "skipped": "{count, plural, one {One day was skipped because the teacher or the learner was busy.} other {# days were skipped because the teacher or the learner was busy.}}"
     }

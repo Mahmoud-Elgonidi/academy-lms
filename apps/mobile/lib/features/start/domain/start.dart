@@ -328,9 +328,60 @@ class StartOptions extends Equatable {
   ];
 }
 
-/// A weekly time free in all of the first four weeks, on the family's clock.
+/// A week among the first four with no lesson at a weekly time (an academy
+/// holiday or the teacher's leave): never booked. [text] is the API's own
+/// sentence ("لا حصة يوم الثلاثاء 17 نوفمبر: إجازة الأكاديمية"), shown as written.
+class SkippedWeek extends Equatable {
+  const SkippedWeek({required this.date, required this.text, this.reason = '', this.at});
+
+  /// Null for anything without a day and a sentence.
+  static SkippedWeek? fromJson(Object? json) {
+    if (json is! Map<String, dynamic>) return null;
+    final date = _text(json['date']);
+    final text = _text(json['text']);
+    if (date == null || text == null) return null;
+    return SkippedWeek(date: date, text: text, reason: json['reason'] as String? ?? '', at: LocalTime.fromJson(json['at']));
+  }
+
+  /// Read as it comes (untyped in the OpenAPI document): malformed entries left out, in date order, each sentence once.
+  static List<SkippedWeek> listOf(Object? json) =>
+      inOrder([for (final x in json is List<dynamic> ? json : const []) ?SkippedWeek.fromJson(x)]);
+
+  /// In date order, each sentence once (two times on one day share a holiday's).
+  static List<SkippedWeek> inOrder(Iterable<SkippedWeek> weeks) {
+    final seen = <String>{};
+    final sorted = weeks.toList()..sort((a, b) => a.at != null && b.at != null ? a.at!.utc.compareTo(b.at!.utc) : a.date.compareTo(b.date));
+    return [
+      for (final w in sorted)
+        if (seen.add(w.text)) w,
+    ];
+  }
+
+  /// Y-m-d on the family's clock.
+  final String date;
+
+  /// holiday or teacher_leave.
+  final String reason;
+  final LocalTime? at;
+  final String text;
+
+  bool get holiday => reason == 'holiday';
+
+  @override
+  List<Object?> get props => [date, reason, at, text];
+}
+
+/// A weekly time free in the first four weeks (at most one skipped: [skips]), on the family's clock.
 class WeeklyTime extends Equatable {
-  const WeeklyTime({required this.key, required this.weekday, required this.start, this.end = '', this.label = '', this.first});
+  const WeeklyTime({
+    required this.key,
+    required this.weekday,
+    required this.start,
+    this.end = '',
+    this.label = '',
+    this.first,
+    this.skips = const [],
+  });
 
   factory WeeklyTime.fromJson(Map<String, dynamic> j, {int weekday = 0}) => WeeklyTime(
     key: j['key'] as String? ?? '',
@@ -339,6 +390,7 @@ class WeeklyTime extends Equatable {
     end: j['end'] as String? ?? '',
     label: j['label'] as String? ?? '',
     first: LocalTime.fromJson(j['first']),
+    skips: SkippedWeek.listOf(j['skips']),
   );
 
   /// Sent back in times[] to start.
@@ -354,11 +406,14 @@ class WeeklyTime extends Equatable {
   /// "الثلاثاء 6:00 م", as the API wrote it.
   final String label;
 
-  /// This weekly time's first lesson.
+  /// This weekly time's first lesson (the first week not skipped).
   final LocalTime? first;
 
+  /// The weeks among the first four it starts without.
+  final List<SkippedWeek> skips;
+
   @override
-  List<Object?> get props => [key, weekday, start, end, label, first];
+  List<Object?> get props => [key, weekday, start, end, label, first, skips];
 }
 
 class SlotDay extends Equatable {
@@ -669,6 +724,8 @@ class StartedCourse extends Equatable {
     this.group = false,
     this.weeklyTimes = const [],
     this.firstLesson,
+    this.skipped = const [],
+    this.skippedDates = const [],
     this.joinedPackage = false,
     this.groupForming = false,
     this.groupStarted = false,
@@ -700,6 +757,8 @@ class StartedCourse extends Equatable {
       group: plan?['format'] == 'group' || group != null,
       weeklyTimes: [for (final t in _list(d['weekly_times'])) t['label'] as String? ?? ''],
       firstLesson: LocalTime.fromJson(d['first_lesson']),
+      skipped: SkippedWeek.listOf(d['skipped']),
+      skippedDates: [for (final x in d['skipped_dates'] as List<dynamic>? ?? const []) '$x'],
       joinedPackage: d['joined_package'] == true,
       groupForming: group?['status'] == 'forming',
       groupStarted: group?['started'] == true,
@@ -727,6 +786,12 @@ class StartedCourse extends Equatable {
   /// The weekly times as the API wrote them ("الثلاثاء 6:00 م").
   final List<String> weeklyTimes;
   final LocalTime? firstLesson;
+
+  /// The first weeks the course starts without (a holiday, the teacher's leave), in the API's words.
+  final List<SkippedWeek> skipped;
+
+  /// Days with no lesson (the teacher's clock): the weeks above, and any the teacher or the learner was already booked on.
+  final List<String> skippedDates;
   final bool joinedPackage;
   final bool groupForming;
   final bool groupStarted;
