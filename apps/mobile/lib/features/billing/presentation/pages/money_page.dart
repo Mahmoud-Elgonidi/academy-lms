@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/theme/app_theme.dart';
@@ -33,9 +34,10 @@ class _Money {
 
 /// What is owed and paying it on the academy's own gateway page, or by hand
 /// (where the academy's transfer details say, to copy) with the receipt for
-/// the academy to confirm; the lessons left, and every
-/// invoice (each opens its printable document with the tax QR). Coming back
-/// to the app reloads it.
+/// the academy to confirm; the lessons left (each course opens its own
+/// balance), and every invoice (each opens to be read line by line and paid,
+/// with its printable document and tax QR beside it). Coming back to the app
+/// reloads it.
 class MoneyPage extends StatefulWidget {
   const MoneyPage({super.key});
 
@@ -211,7 +213,7 @@ class _BalanceRow extends StatelessWidget {
     final c = context.colors;
     final b = balance;
     final low = b.days.isOn && b.sessions <= 1;
-    return Padding(
+    final body = Padding(
       padding: const EdgeInsets.fromLTRB(Space.l, Space.m, Space.l, Space.m),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,6 +222,7 @@ class _BalanceRow extends StatelessWidget {
             children: [
               Expanded(child: Text(b.shared ? l.sharedPackage(b.subject) : b.subject, style: context.type.cardTitle)),
               StatusChip(l.lessonsCount(b.sessions), tone: low ? Tone.attention : Tone.brand),
+              if (b.enrollmentId.isNotEmpty) ...[const Gap(Space.xs), Icon(Icons.chevron_right_rounded, color: c.faint, size: 20)],
             ],
           ),
           // A group plan: the group's seats and the learner's own.
@@ -250,6 +253,13 @@ class _BalanceRow extends StatelessWidget {
                   ),
         ],
       ),
+    );
+    if (b.enrollmentId.isEmpty) return body;
+    // The course's own balance: the bar, the plan, the expiry and the next invoice.
+    return InkWell(
+      key: Key('balance-row-${b.enrollmentId}'),
+      onTap: () => context.go('/family/money/courses/${b.enrollmentId}'),
+      child: body,
     );
   }
 }
@@ -376,6 +386,19 @@ class _InvoiceRow extends StatelessWidget {
                   const Gap(Space.s),
                   _ProofLine(proof: proof),
                 ],
+                // Its printable copy with the tax QR, beside opening it.
+                if (url != null)
+                  TextButton.icon(
+                    key: Key('invoice-document-${invoice.id}'),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                      foregroundColor: context.colors.brandDeep,
+                    ),
+                    onPressed: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+                    icon: const Icon(Icons.description_outlined, size: 16),
+                    label: Text(context.l10n.payReadInvoice),
+                  ),
               ],
             ),
           ),
@@ -388,15 +411,16 @@ class _InvoiceRow extends StatelessWidget {
               StatusChip(invoice.statusLabel, tone: tone),
             ],
           ),
-          if (url != null) ...[const Gap(Space.xs), Icon(Icons.chevron_right_rounded, color: context.colors.faint)],
+          // That it opens; on a narrow phone with large text the room goes to the words instead.
+          if (MediaQuery.sizeOf(context).width / MediaQuery.textScalerOf(context).scale(1) >= 280) ...[
+            const Gap(Space.xs),
+            Icon(Icons.chevron_right_rounded, color: context.colors.faint),
+          ],
         ],
       ),
     );
-    if (url == null) return row;
-    return InkWell(
-      onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
-      child: row,
-    );
+    // Every invoice opens to be read line by line and paid (or read once paid).
+    return InkWell(key: Key('invoice-${invoice.id}'), onTap: () => context.push('/family/pay/${invoice.id}'), child: row);
   }
 }
 

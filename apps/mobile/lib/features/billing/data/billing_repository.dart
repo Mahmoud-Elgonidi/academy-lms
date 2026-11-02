@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/network/api_client.dart';
 import '../domain/billing.dart';
+import '../domain/course_balance.dart';
 
 /// A receipt picked on the phone: a photo, a screenshot or the bank's PDF.
 class Receipt {
@@ -26,6 +27,10 @@ class BillingRepository {
     for (final b in (await _api.get('family/balance', query: {'learner_id': ?learnerId}))['data'] as List<dynamic>)
       Balance.fromJson(b as Map<String, dynamic>),
   ];
+
+  /// One course's balance in the viewer's look: lessons left, the plan, the expiry and (the classic look) the invoices.
+  Future<CourseBalance> courseBalance(String enrollmentId) async =>
+      CourseBalance.fromJson(await _api.get('family/courses/$enrollmentId/balance'));
 
   Future<Invoices> invoices() async => Invoices.fromJson(await _api.get('family/invoices'));
 

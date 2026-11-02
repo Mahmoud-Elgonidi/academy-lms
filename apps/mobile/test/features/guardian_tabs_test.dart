@@ -280,6 +280,6 @@ void main() {
     expect(targetOf('conversation', 'k1', Area.family), '/family/me/messages/k1');
     expect(targetOf('guardian_consent', null, Area.family), '/family/me/privacy');
     expect(targetOf('my_data', 'r1', Area.family), '/family/me/my-data');
-    expect(targetOf('invoice', 'i1', Area.family), '/family/money');
+    expect(targetOf('invoice', 'i1', Area.family), '/family/pay/i1');
   });
 }

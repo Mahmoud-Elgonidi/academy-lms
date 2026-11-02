@@ -22,12 +22,15 @@ import 'steps/times_step.dart';
 /// steps again). Only the classic look comes here: the router keeps a
 /// child's own look away, and the API refuses it too.
 class StartPage extends StatelessWidget {
-  const StartPage({this.learnerId, this.subjectId, this.planId, this.teacherId, super.key});
+  const StartPage({this.learnerId, this.subjectId, this.planId, this.teacherId, this.note, super.key});
 
   final String? learnerId;
   final String? subjectId;
   final String? planId;
   final String? teacherId;
+
+  /// A word to open with (a child just added: "اختاروا له الآن الكورس").
+  final String? note;
 
   /// The flow's address with what is known already.
   static String location({String? learner, String? subject, String? plan, String? teacher}) => Uri(
@@ -44,6 +47,7 @@ class StartPage extends StatelessWidget {
       initialSubject: subjectId,
       initialPlan: planId,
       initialTeacher: teacherId,
+      note: note,
     )..load(),
     child: const _StartFrame(),
   );

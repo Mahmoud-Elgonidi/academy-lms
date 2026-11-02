@@ -11,6 +11,7 @@ import '../../../../core/time/formats.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
+import '../../../billing/presentation/widgets/course_balance_card.dart';
 import '../../../consent/presentation/privacy_page.dart';
 import '../../../homework/domain/homework.dart';
 import '../../../journey/presentation/widgets/home_card.dart';
@@ -24,8 +25,9 @@ import '../widgets/next_lesson_card.dart';
 
 /// The guardian's (and an adult student's) home, in the order that matters:
 /// the next lesson (the one surface in the academy's colour, with its join
-/// button), what is left and what is owed, the learner's journey, the
-/// latest report, and the homework.
+/// button), what is left and what is owed, each course's balance (the bar,
+/// the plan, the expiry, the invoice waiting or the next one), the learner's
+/// journey, the latest report, and the homework.
 class FamilyHomePage extends StatelessWidget {
   const FamilyHomePage({super.key});
 
@@ -94,6 +96,11 @@ class _Home extends StatelessWidget {
         _Numbers(home: home, name: name, self: self),
         if (home.trial != null && home.next != null) ...[const Gap(Space.m), TrialHomeCard(trial: home.trial!)],
         for (final n in home.lessons.notices) ...[const Gap(Space.m), Note(n, icon: Icons.event_note_rounded)],
+        // Each course's balance: the lessons left, the plan, the expiry, and the invoice waiting or the next one to come.
+        if (home.balance.isNotEmpty) ...[
+          SectionHeader(l.lessonsLeftTitle, action: l.navMoney, onAction: () => context.go('/family/money')),
+          CourseBalances(courses: home.balance),
+        ],
         SectionHeader(self ? l.navJourney : l.journeyTitle(name), action: l.openJourney, onAction: () => context.go('/family/journey')),
         JourneyHomeCard(name: name, to: '/family/journey', map: home.journey, self: self),
         if (report != null) ...[

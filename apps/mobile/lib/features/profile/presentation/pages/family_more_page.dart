@@ -9,6 +9,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../auth/presentation/pages/accounts_page.dart';
 import '../../../consent/presentation/privacy_page.dart';
 import '../../../dashboard/presentation/bloc/learner_cubit.dart';
+import '../../../dashboard/presentation/pages/add_child_page.dart';
 import '../../../dashboard/presentation/widgets/family_header.dart';
 import '../../../trial/presentation/reports/trials_page.dart';
 import '../widgets/more_rows.dart';
@@ -53,6 +54,14 @@ class FamilyMorePage extends StatelessWidget {
                           label: l.startNewCourse,
                           subtitle: l.startNewCourseHint,
                           onTap: () => context.push('/family/start'),
+                        ),
+                        MenuRow(
+                          key: const Key('open-add-child'),
+                          icon: Icons.person_add_alt_1_rounded,
+                          tone: Tone.info,
+                          label: l.addChildTitle,
+                          subtitle: l.addChildHint,
+                          onTap: () => context.push(AddChildPage.location),
                         ),
                         MenuRow(
                           key: const Key('open-trials'),

@@ -36,7 +36,14 @@ String targetOf(String? screen, String? id, Area area) {
     (_, 'announcement') => '/inbox',
     // The journey: games, the old challenges and the journey itself (a lesson's stars, an egg).
     (Area.kids || Area.middle || Area.teen || Area.family, 'journey' || 'games' || 'challenges') => '$base/journey',
+    // An invoice opens to be paid (or read once paid); a course's balance (the next invoice coming, lessons expiring)
+    // on its own page under Payments; an unpaid start closed by itself, the start flow again for the same learner.
+    (Area.family, 'invoice') when id != null => '/family/pay/$id',
     (Area.family, 'invoice') => '/family/money',
+    (Area.family, 'course_balance') when id != null => '/family/money/courses/$id',
+    (Area.family, 'course_balance') => '/family/money',
+    (Area.family, 'start') when id != null => '/family/start?learner=${Uri.encodeQueryComponent(id)}',
+    (Area.family, 'start') => '/family/start',
     (Area.family, 'guardian_consent') => '/family/me/privacy',
     (Area.family, 'my_data') => '/family/me/my-data',
     (Area.family, 'account') => '/family/me',
@@ -67,11 +74,18 @@ String targetOf(String? screen, String? id, Area area) {
   };
 }
 
-/// The teacher's tasks (a report to write, marking, hours) and the inbox open
-/// over the tabs (pushed, with a way back); any other place is a tab of the
+/// The teacher's tasks (a report to write, marking, hours), the inbox, and a
+/// family's invoice to pay or a course to start open over the tabs (pushed, with a way back); any other place is a tab of the
 /// look, which is switched to (the list of reports is one).
-bool opensOverTabs(String location) =>
-    const ['/teach/reports/', '/teach/marking', '/teach/hours', '/inbox', '/account'].any(location.startsWith);
+bool opensOverTabs(String location) => const [
+  '/teach/reports/',
+  '/teach/marking',
+  '/teach/hours',
+  '/inbox',
+  '/account',
+  '/family/pay/',
+  '/family/start',
+].any(location.startsWith);
 
 /// A message read where it is, in full, in the inbox: it opens nowhere else.
 bool readsInPlace(String? screen) => screen == 'announcement';

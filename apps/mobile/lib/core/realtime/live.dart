@@ -63,6 +63,9 @@ class Live {
   /// A lesson's shared mushaf: its teacher turned the page or marked a word (the teacher, the student, the guardians).
   static const mushaf = 'mushaf.changed';
 
+  /// Who the family follows changed on this phone (a child added): heard here only, never from the socket.
+  static const learners = 'learners.changed';
+
   /// Everything may have changed: after the app comes back, the socket comes back, or the relay restarts.
   static const resync = 'resync';
 
@@ -134,6 +137,9 @@ class Live {
   /// Every open screen reloads now, as when the app comes back: what the API
   /// writes for this person changed (how they read a clock).
   void catchUp() => _emit(resync);
+
+  /// Something this app changed itself (a child added): the screens that show it reload, as on a signal.
+  void changed(String signal) => _emit(signal);
 
   /// Whether nothing is telling the screens about changes, and the last catch-up is a while ago.
   static bool needsFallback({required bool connected, required DateTime lastHeard, required DateTime lastRefresh, required DateTime now}) {

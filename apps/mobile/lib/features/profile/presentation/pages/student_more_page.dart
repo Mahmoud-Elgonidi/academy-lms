@@ -10,6 +10,7 @@ import '../../../../core/realtime/live.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
+import '../../../billing/presentation/widgets/course_balance_card.dart';
 import '../../../journey/data/journey_repository.dart';
 import '../../../journey/domain/journey.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
@@ -72,6 +73,7 @@ class StudentMorePage extends StatelessWidget {
     return [
       _MiddleWho(map: map),
       const Gap(Space.m),
+      StudentBalances(title: l.lessonsLeftTitle),
       // Two by two, each row as tall as its tallest tile, so large text grows them.
       for (final row in [
         [
@@ -145,6 +147,7 @@ class StudentMorePage extends StatelessWidget {
     final games = map?.games;
     return [
       MoreWho(line: l.yourAccount, onTap: () => context.push('/account')),
+      StudentBalances(title: l.lessonsLeftTitle),
       MenuGroup(
         title: l.moreStudy,
         children: [
@@ -345,6 +348,8 @@ class _KidsMore extends StatelessWidget {
       body: ListView(
         padding: pagePadding,
         children: [
+          // The kids' own words: how many lessons are left, as stars.
+          const StudentBalances(),
           LmsCard(
             padding: EdgeInsets.zero,
             child: Column(

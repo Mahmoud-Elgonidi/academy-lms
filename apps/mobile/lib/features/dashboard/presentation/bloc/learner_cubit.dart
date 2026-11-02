@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -24,10 +26,19 @@ class LearnerState extends Equatable {
 
 /// The learner every tab of the family look is about.
 class LearnerCubit extends Cubit<LearnerState> {
-  LearnerCubit(this._repo, this.scope) : super(const LearnerState());
+  LearnerCubit(this._repo, this.scope, {Stream<void>? refreshOn}) : super(const LearnerState()) {
+    _live = refreshOn?.listen((_) => load());
+  }
 
   final FamilyRepository _repo;
   final LearnerScope scope;
+  StreamSubscription<void>? _live;
+
+  @override
+  Future<void> close() async {
+    await _live?.cancel();
+    return super.close();
+  }
 
   Future<void> load() async {
     try {

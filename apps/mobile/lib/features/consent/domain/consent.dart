@@ -23,6 +23,18 @@ class ConsentText extends Equatable {
   final List<({String title, String body})> sections;
   final String agree;
 
+  /// The wording with [name] where `{child}` stands (a child about to be added).
+  ConsentText named(String name) {
+    String fill(String text) => text.replaceAll('{child}', name);
+    return ConsentText(
+      version: version,
+      title: fill(title),
+      intro: fill(intro),
+      sections: [for (final s in sections) (title: fill(s.title), body: fill(s.body))],
+      agree: fill(agree),
+    );
+  }
+
   @override
   List<Object?> get props => [version, title, intro, agree];
 }
@@ -70,12 +82,16 @@ class ChildConsent extends Equatable {
 }
 
 class Consents extends Equatable {
-  const Consents({required this.age, required this.children});
+  const Consents({required this.age, required this.children, this.newChild});
 
   factory Consents.fromJson(Map<String, dynamic> json) => Consents(
     age: (json['age'] as num).toInt(),
     children: [for (final c in json['children'] as List<dynamic>) ChildConsent.fromJson(c as Map<String, dynamic>)],
+    newChild: json['new_child'] is Map<String, dynamic> ? ConsentText.fromJson(json['new_child'] as Map<String, dynamic>) : null,
   );
+
+  /// The wording for a child about to be added («إضافة طفل»), with `{child}` where the name goes ([ConsentText.named]).
+  final ConsentText? newChild;
 
   /// The academy asks guardians for children under this age.
   final int age;
@@ -84,5 +100,5 @@ class Consents extends Equatable {
   List<ChildConsent> get waiting => children.where((c) => c.waiting).toList();
 
   @override
-  List<Object?> get props => [age, children];
+  List<Object?> get props => [age, children, newChild];
 }

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/auth/session_cubit.dart';
 import '../../core/l10n/l10n.dart';
+import '../../core/realtime/live.dart';
 import '../../core/state/load_cubit.dart';
 import '../../features/auth/presentation/pages/accounts_page.dart';
 import '../../features/auth/presentation/pages/code_page.dart';
@@ -16,9 +17,11 @@ import '../../features/privacy/presentation/my_data_page.dart';
 import '../../features/recordings/presentation/recordings_page.dart';
 import '../../features/auth/presentation/pages/welcome_page.dart';
 import '../../features/auth/presentation/pages/web_only_page.dart';
+import '../../features/billing/presentation/pages/course_balance_page.dart';
 import '../../features/billing/presentation/pages/money_page.dart';
 import '../../features/classroom/presentation/pages/classroom_page.dart';
 import '../../features/dashboard/presentation/bloc/learner_cubit.dart';
+import '../../features/dashboard/presentation/pages/add_child_page.dart';
 import '../../features/dashboard/presentation/pages/family_home_page.dart';
 import '../../features/challenges/data/challenges_repository.dart';
 import '../../features/challenges/domain/challenges.dart';
@@ -261,8 +264,11 @@ GoRouter buildRouter(SessionCubit session) {
           subjectId: s.uri.queryParameters['subject'],
           planId: s.uri.queryParameters['plan'],
           teacherId: s.uri.queryParameters['teacher'],
+          note: s.extra is String ? s.extra! as String : null,
         ),
       ),
+      // «إضافة طفل»: a guardian adds a child of their own, then starts a course for them.
+      page('/family/children/new', (s) => AddChildPage(fromStart: s.uri.queryParameters['from'] == 'start')),
       page(
         '/family/pay/:invoice',
         (s) => PayPage(invoiceId: s.pathParameters['invoice']!, started: s.extra is StartedCourse ? s.extra! as StartedCourse : null),
@@ -273,7 +279,8 @@ GoRouter buildRouter(SessionCubit session) {
       StatefulShellRoute(
         navigatorContainerBuilder: _branches,
         builder: (context, state, shell) => BlocProvider(
-          create: (c) => LearnerCubit(c.read(), LearnerScope.family)..load(),
+          // A child added on this phone (or one whose consent changed) joins the switcher at once.
+          create: (c) => LearnerCubit(c.read(), LearnerScope.family, refreshOn: c.read<Live>().on({Live.learners, Live.consents}))..load(),
           child: Builder(
             builder: (context) => AppShell(
               shell: shell,
@@ -313,7 +320,11 @@ GoRouter buildRouter(SessionCubit session) {
               ),
             ],
           ),
-          branch('/family/money', (_) => const MoneyPage()),
+          branch(
+            '/family/money',
+            (_) => const MoneyPage(),
+            routes: [page('courses/:enrollment', (s) => CourseBalancePage(enrollmentId: s.pathParameters['enrollment']!))],
+          ),
           branch(
             '/family/me',
             (_) => const FamilyMorePage(),

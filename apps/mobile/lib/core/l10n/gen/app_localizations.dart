@@ -2453,7 +2453,7 @@ abstract class AppLocalizations {
   /// No description provided for @invoiceNote.
   ///
   /// In ar, this message translates to:
-  /// **'افتح أي فاتورة لتعرضها وتطبعها، وفيها رمز QR الخاص بالفاتورة الضريبية.'**
+  /// **'افتح أي فاتورة لترى تفاصيلها وتدفعها، وزر المستند يعرض نسختها للطباعة مع رمز QR الخاص بالفاتورة الضريبية.'**
   String get invoiceNote;
 
   /// No description provided for @cantPayOnline.
@@ -10177,6 +10177,360 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'انضمت الدورة إلى باقتكم المشتركة'**
   String get packageTitle;
+
+  /// No description provided for @paidPlainTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'دُفعت هذه الفاتورة'**
+  String get paidPlainTitle;
+
+  /// No description provided for @paidJustTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'وصل الدفع، شكرًا لكم!'**
+  String get paidJustTitle;
+
+  /// No description provided for @paidPlainLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا شيء عليكم فيها. تجدون نسختها للطباعة أدناه، والحصص في «الحصص».'**
+  String get paidPlainLead;
+
+  /// No description provided for @payDueOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادفعوا قبل {day}'**
+  String payDueOn(String day);
+
+  /// No description provided for @payOpenPayments.
+  ///
+  /// In ar, this message translates to:
+  /// **'المدفوعات'**
+  String get payOpenPayments;
+
+  /// No description provided for @balanceTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'رصيد الدورة'**
+  String get balanceTitle;
+
+  /// No description provided for @balanceNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم تبقَ حصص'**
+  String get balanceNone;
+
+  /// No description provided for @balanceLeftOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'متبقية من باقة {total}'**
+  String balanceLeftOf(String total);
+
+  /// No description provided for @balanceLeftPlain.
+  ///
+  /// In ar, this message translates to:
+  /// **'متبقية في الرصيد'**
+  String get balanceLeftPlain;
+
+  /// No description provided for @balanceMakeup.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{وحصة تعويضية واحدة أيضًا} =2{وحصتان تعويضيتان أيضًا} few{و{n} حصص تعويضية أيضًا} other{و{n} حصة تعويضية أيضًا}}'**
+  String balanceMakeup(int n);
+
+  /// No description provided for @balancePerWeek.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{حصة واحدة في الأسبوع} =2{حصتان في الأسبوع} few{{n} حصص في الأسبوع} other{{n} حصة في الأسبوع}}'**
+  String balancePerWeek(int n);
+
+  /// No description provided for @balancePerLesson.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحصة {minutes}'**
+  String balancePerLesson(String minutes);
+
+  /// No description provided for @balanceGroup.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصص جماعية'**
+  String get balanceGroup;
+
+  /// No description provided for @balanceShared.
+  ///
+  /// In ar, this message translates to:
+  /// **'باقة مشتركة بين المواد'**
+  String get balanceShared;
+
+  /// No description provided for @balanceMarkHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'العلامة على الشريط: هنا تصدر الفاتورة التالية'**
+  String get balanceMarkHint;
+
+  /// No description provided for @balanceBarLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'{left} من {total}، والفاتورة التالية عند العلامة'**
+  String balanceBarLabel(String left, String total);
+
+  /// No description provided for @balanceWaitingTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'فاتورة الباقة التالية تنتظر الدفع'**
+  String get balanceWaitingTitle;
+
+  /// No description provided for @balanceWaitingLine.
+  ///
+  /// In ar, this message translates to:
+  /// **'فاتورة {number} · المتبقي {amount}'**
+  String balanceWaitingLine(String number, String amount);
+
+  /// No description provided for @balanceNotPayer.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصل هذه الفاتورة إلى من يدفع للدورة في أسرتكم، ويدفعها من حسابه.'**
+  String get balanceNotPayer;
+
+  /// No description provided for @balanceNextTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفاتورة التالية'**
+  String get balanceNextTitle;
+
+  /// No description provided for @balanceNextAbout.
+  ///
+  /// In ar, this message translates to:
+  /// **'نحو {amount}'**
+  String balanceNextAbout(String amount);
+
+  /// No description provided for @balanceNextWhen.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{تصدر عندما تنتهي الحصص المدفوعة، في {day} تقريبًا.} =1{تصدر عندما تبقى حصة واحدة، في {day} تقريبًا.} =2{تصدر عندما تبقى حصتان، في {day} تقريبًا.} few{تصدر عندما تبقى {n} حصص، في {day} تقريبًا.} other{تصدر عندما تبقى {n} حصة، في {day} تقريبًا.}}'**
+  String balanceNextWhen(int n, String day);
+
+  /// No description provided for @balanceNextAfter.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{بعد حصة واحدة} =2{بعد حصتين} few{بعد {n} حصص} other{بعد {n} حصة}}'**
+  String balanceNextAfter(int n);
+
+  /// No description provided for @balanceNextNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'بلغ الرصيد حدّ التجديد، وتصدر فاتورة الباقة التالية قريبًا.'**
+  String get balanceNextNow;
+
+  /// No description provided for @balanceEstimate.
+  ///
+  /// In ar, this message translates to:
+  /// **'تقدير بحسب مواعيدكم؛ إلغاء حصة أو نقلها يغيّره.'**
+  String get balanceEstimate;
+
+  /// No description provided for @balanceOpen.
+  ///
+  /// In ar, this message translates to:
+  /// **'التفاصيل'**
+  String get balanceOpen;
+
+  /// No description provided for @balanceHowTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'كيف يعمل الرصيد؟'**
+  String get balanceHowTitle;
+
+  /// No description provided for @balanceHowTaken.
+  ///
+  /// In ar, this message translates to:
+  /// **'تُخصم كل حصة من الرصيد حين تتم، والحصص التعويضية تُحسب وحدها.'**
+  String get balanceHowTaken;
+
+  /// No description provided for @balanceHowMark.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{تصدر فاتورة الباقة التالية حين تنتهي الحصص المدفوعة، لتستمر الحصص دون انقطاع.} =1{عندما تبقى حصة واحدة تصدر فاتورة الباقة التالية، لتستمر الحصص دون انقطاع.} =2{عندما تبقى حصتان تصدر فاتورة الباقة التالية، لتستمر الحصص دون انقطاع.} few{عندما تبقى {n} حصص تصدر فاتورة الباقة التالية، لتستمر الحصص دون انقطاع.} other{عندما تبقى {n} حصة تصدر فاتورة الباقة التالية، لتستمر الحصص دون انقطاع.}}'**
+  String balanceHowMark(int n);
+
+  /// No description provided for @balanceHowExpiry.
+  ///
+  /// In ar, this message translates to:
+  /// **'للحصص غير المحجوزة صلاحية تنتهي في موعدها، أما الحصص المحجوزة فلا تضيع.'**
+  String get balanceHowExpiry;
+
+  /// No description provided for @balanceKidsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصصي الباقية'**
+  String get balanceKidsTitle;
+
+  /// No description provided for @balanceKidsLeft.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{لا توجد حصص الآن} =1{بقيت لك حصة واحدة} =2{بقيت لك حصتان} few{بقيت لك {n} حصص} other{بقيت لك {n} حصة}}'**
+  String balanceKidsLeft(int n);
+
+  /// No description provided for @balanceFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل رصيد هذه الدورة الآن.'**
+  String get balanceFailed;
+
+  /// No description provided for @addChildTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'إضافة طفل'**
+  String get addChildTitle;
+
+  /// No description provided for @addChildHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضيفوا ابنًا أو ابنة إلى حسابكم، ثم اختاروا الدورة.'**
+  String get addChildHint;
+
+  /// No description provided for @addChildAboutTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'عن طفلكم'**
+  String get addChildAboutTitle;
+
+  /// No description provided for @addChildAboutLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'نحتاج إلى الاسم والعمر لنعرض الدورات والمعلّمين المناسبين لسنّه.'**
+  String get addChildAboutLead;
+
+  /// No description provided for @addChildName.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم الطفل'**
+  String get addChildName;
+
+  /// No description provided for @addChildNameHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاسم الأول واسم العائلة'**
+  String get addChildNameHint;
+
+  /// No description provided for @addChildNameShort.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتبوا الاسم بحرفين على الأقل.'**
+  String get addChildNameShort;
+
+  /// No description provided for @addChildBirth.
+  ///
+  /// In ar, this message translates to:
+  /// **'تاريخ الميلاد'**
+  String get addChildBirth;
+
+  /// No description provided for @addChildBirthExact.
+  ///
+  /// In ar, this message translates to:
+  /// **'التاريخ'**
+  String get addChildBirthExact;
+
+  /// No description provided for @addChildBirthYearOnly.
+  ///
+  /// In ar, this message translates to:
+  /// **'السنة فقط'**
+  String get addChildBirthYearOnly;
+
+  /// No description provided for @addChildPickDate.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختاروا تاريخ الميلاد'**
+  String get addChildPickDate;
+
+  /// No description provided for @addChildPickYear.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختاروا سنة الميلاد'**
+  String get addChildPickYear;
+
+  /// No description provided for @addChildBirthNeeded.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختاروا تاريخ الميلاد أو سنته.'**
+  String get addChildBirthNeeded;
+
+  /// No description provided for @addChildYearNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'إن اخترتم السنة وحدها، نعدّ الميلاد في آخر يوم منها، حرصًا على حماية الصغار.'**
+  String get addChildYearNote;
+
+  /// No description provided for @addChildGender.
+  ///
+  /// In ar, this message translates to:
+  /// **'النوع'**
+  String get addChildGender;
+
+  /// No description provided for @addChildGirl.
+  ///
+  /// In ar, this message translates to:
+  /// **'بنت'**
+  String get addChildGirl;
+
+  /// No description provided for @addChildBoy.
+  ///
+  /// In ar, this message translates to:
+  /// **'ولد'**
+  String get addChildBoy;
+
+  /// No description provided for @addChildNext.
+  ///
+  /// In ar, this message translates to:
+  /// **'التالي: الموافقة'**
+  String get addChildNext;
+
+  /// No description provided for @addChildConsentTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'موافقتكم بصفتكم وليّ الأمر'**
+  String get addChildConsentTitle;
+
+  /// No description provided for @addChildConsentLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'اقرؤوا ما نحتفظ به ومن يطّلع عليه، ثم ضعوا علامة الموافقة.'**
+  String get addChildConsentLead;
+
+  /// No description provided for @addChildAgreeNeeded.
+  ///
+  /// In ar, this message translates to:
+  /// **'ضعوا علامة الموافقة أولًا.'**
+  String get addChildAgreeNeeded;
+
+  /// No description provided for @addChildSubmit.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضيفوا {name} وتابعوا'**
+  String addChildSubmit(String name);
+
+  /// No description provided for @addChildSomeone.
+  ///
+  /// In ar, this message translates to:
+  /// **'طفلكم'**
+  String get addChildSomeone;
+
+  /// No description provided for @addChildEdit.
+  ///
+  /// In ar, this message translates to:
+  /// **'عدّلوا البيانات'**
+  String get addChildEdit;
+
+  /// No description provided for @startAddChild.
+  ///
+  /// In ar, this message translates to:
+  /// **'طفل آخر؟ أضيفوه'**
+  String get startAddChild;
+
+  /// No description provided for @startAddChildHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'يُضاف إلى حسابكم، ثم تختارون له الدورة مباشرة.'**
+  String get startAddChildHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -53,7 +53,17 @@ void main() {
     expect(opensOverTabs('/teach/reports/r9'), isTrue);
     expect(opensOverTabs('/teach/reports'), isFalse);
     expect(opensOverTabs('/teach/more/earnings'), isFalse);
-    expect(targetOf('invoice', 'i1', Area.family), '/family/money');
+    // An invoice opens to be paid, over the tabs; a course's balance under Payments; a closed start, the start flow again.
+    expect(targetOf('invoice', 'i1', Area.family), '/family/pay/i1');
+    expect(targetOf('invoice', null, Area.family), '/family/money');
+    expect(opensOverTabs('/family/pay/i1'), isTrue);
+    expect(targetOf('course_balance', 'e1', Area.family), '/family/money/courses/e1');
+    expect(opensOverTabs('/family/money/courses/e1'), isFalse);
+    expect(targetOf('start', 'c1', Area.family), '/family/start?learner=c1');
+    expect(targetOf('start', null, Area.family), '/family/start');
+    expect(opensOverTabs('/family/start?learner=c1'), isTrue);
+    expect(targetOf('course_balance', 'e1', Area.kids), '/kids/journey');
+    expect(targetOf('start', 'c1', Area.middle), '/middle/journey');
     expect(targetOf('session', 's1', Area.kids), '/kids/lessons');
     expect(targetOf('challenges', null, Area.middle), '/middle/journey');
     expect(targetOf('homework', 'h1', Area.teen), '/teen/homework');
@@ -128,7 +138,9 @@ void main() {
     GoRouter.of(tester.element(find.byType(NotificationBell).first)).go('/open/invoice/i1');
     await frames(tester, 12);
     expect(app.api.sent('GET', 'family/invoices').length, greaterThan(before));
-    expect(GoRouter.of(tester.element(find.byType(Scaffold).last)).state.matchedLocation, '/family/money');
+    expect(GoRouter.of(tester.element(find.byType(Scaffold).last)).state.matchedLocation, '/family/pay/i1');
+    // Nothing under it: its way out goes to Payments.
+    expect(find.byKey(const Key('pay-to-money')), findsOneWidget);
 
     await _close(tester);
   });
@@ -150,7 +162,7 @@ void main() {
     await openMessage(app.session, router, {'academy': 'demo', 'user': 'u-guardian', 'screen': 'invoice', 'id': 'i1'});
     await frames(tester, 12);
     expect(app.session.state.current?.id, guardian.id);
-    expect(router.state.matchedLocation, '/family/money');
+    expect(router.state.matchedLocation, '/family/pay/i1');
 
     await _close(tester);
   });

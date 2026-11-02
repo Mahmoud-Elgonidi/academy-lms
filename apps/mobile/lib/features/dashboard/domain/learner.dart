@@ -16,3 +16,27 @@ class Learner {
 
   String get firstName => name.split(' ').first;
 }
+
+/// A child the guardian just added: who, their look, and the learner to start a course for.
+class AddedChild {
+  const AddedChild({required this.id, required this.name, this.stage = 'kids', this.message = ''});
+
+  factory AddedChild.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] as Map<String, dynamic>? ?? const {};
+    final start = data['start'] as Map<String, dynamic>? ?? const {};
+    return AddedChild(
+      id: start['learner_id'] as String? ?? data['id'] as String? ?? '',
+      name: data['name'] as String? ?? '',
+      stage: data['stage'] as String? ?? 'kids',
+      message: json['message'] as String? ?? '',
+    );
+  }
+
+  /// The learner's id (the start flow's `learner`).
+  final String id;
+  final String name;
+  final String stage;
+
+  /// The API's sentence ("أُضيف … اختاروا له الآن الكورس").
+  final String message;
+}

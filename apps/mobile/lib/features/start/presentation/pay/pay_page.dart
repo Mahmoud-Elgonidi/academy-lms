@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/time/formats.dart';
 import '../../../../core/realtime/live.dart';
 import '../../../../shared/motion/celebration.dart';
 import '../../../../shared/motion/done_moment.dart';
@@ -43,6 +44,9 @@ class _PayPageState extends State<PayPage> {
   late final AppLifecycleListener _resume;
   PayCubit? _cubit;
 
+  /// Paid while this screen was open: thanks, rather than a plain "paid".
+  bool _paidHere = false;
+
   @override
   void initState() {
     super.initState();
@@ -68,10 +72,22 @@ class _PayPageState extends State<PayPage> {
         refreshOn: c.read<Live>().on({Live.payments}),
       )..load(),
       child: Scaffold(
-        appBar: AppBar(title: Text(l.payTitle)),
+        appBar: AppBar(
+          title: Text(l.payTitle),
+          // Opened from a notification or a link, with nothing under it: back to Payments.
+          leading: context.canPop()
+              ? null
+              : IconButton(
+                  key: const Key('pay-to-money'),
+                  tooltip: l.payOpenPayments,
+                  onPressed: () => context.go('/family/money'),
+                  icon: const Icon(Icons.close_rounded),
+                ),
+        ),
         body: BlocConsumer<PayCubit, PayState>(
           listenWhen: (a, b) => !a.justPaid && b.justPaid,
           listener: (context, state) {
+            _paidHere = true;
             Juice.done();
             Celebration.show(context, from: MediaQuery.sizeOf(context).center(const Offset(0, -120)));
             context.read<PayCubit>().celebrated();
@@ -84,6 +100,7 @@ class _PayPageState extends State<PayPage> {
               PayPhase.nothing when widget.invoiceId == 'none' && started != null => _Package(started: started),
               PayPhase.nothing => EmptyState(key: const Key('pay-void'), icon: Icons.block_rounded, title: l.payVoid),
               PayPhase.cancelled => _Cancelled(message: state.cancelled!, started: started),
+              PayPhase.paid when started == null => _Settled(invoice: state.invoice!, fresh: _paidHere || state.justPaid),
               PayPhase.paid => _Welcome(started: started),
               PayPhase.waiting => _Waiting(checkout: state.checkout),
               PayPhase.pay => _Pay(state: state, started: started),
@@ -287,6 +304,15 @@ class _Hero extends StatelessWidget {
             key: const Key('pay-amount'),
             style: context.type.number.copyWith(color: ink, fontSize: 34),
           ),
+          // An invoice opened on its own (a renewal, extra lessons): by when to pay it.
+          if (s == null && invoice.dueAt != null) ...[
+            const Gap(Space.xs),
+            Text(
+              l.payDueOn('${invoice.dueAt!.day(context.locale)} · ${invoice.dueAt!.clock(context.locale)}'),
+              key: const Key('pay-due'),
+              style: TextStyle(color: ink.withValues(alpha: 0.9), fontSize: 14),
+            ),
+          ],
           if (s?.payText case final text?) ...[
             const Gap(Space.m),
             Container(
@@ -614,6 +640,67 @@ class _Welcome extends StatelessWidget {
             onPressed: () => context.go('/family/lessons'),
           ),
         ),
+      ]),
+    );
+  }
+}
+
+/// An invoice paid (just now, or opened again once paid): said plainly, its printable copy, and the lessons.
+class _Settled extends StatelessWidget {
+  const _Settled({required this.invoice, required this.fresh});
+
+  final PayerInvoice invoice;
+
+  /// Paid while this screen was open: thanks rather than a plain "paid".
+  final bool fresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final url = invoice.documentUrl;
+    return ListView(
+      key: const Key('pay-settled'),
+      padding: pagePadding.copyWith(top: Space.xl, bottom: Space.xxl),
+      children: staggered(context, [
+        Center(
+          child: Container(
+            width: 88,
+            height: 88,
+            decoration: BoxDecoration(color: c.brandSoft, shape: BoxShape.circle),
+            child: Icon(fresh ? Icons.celebration_rounded : Icons.check_rounded, size: 44, color: c.brandDeep),
+          ),
+        ),
+        const Gap(Space.l),
+        Text(fresh ? l.paidJustTitle : l.paidPlainTitle, textAlign: TextAlign.center, style: context.type.display),
+        const Gap(Space.s),
+        Text(
+          '${l.payInvoiceNumber(invoice.number)} · ${invoice.total.text}',
+          textAlign: TextAlign.center,
+          style: context.type.cardTitle.copyWith(color: c.muted),
+        ),
+        const Gap(Space.s),
+        Text(
+          fresh ? l.paidLeadPlain : l.paidPlainLead,
+          textAlign: TextAlign.center,
+          style: context.type.body.copyWith(color: c.muted, height: 1.6),
+        ),
+        const Gap(Space.l),
+        _Lines(invoice: invoice),
+        const Gap(Space.xl),
+        if (url != null) ...[
+          SizedBox(
+            height: 54,
+            child: PrimaryAction(
+              l.payReadInvoice,
+              key: const Key('pay-document'),
+              icon: Icons.description_outlined,
+              onPressed: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+            ),
+          ),
+          const Gap(Space.s),
+        ],
+        SecondaryAction(l.startOpenLessons, icon: Icons.calendar_month_rounded, onPressed: () => context.go('/family/lessons')),
       ]),
     );
   }

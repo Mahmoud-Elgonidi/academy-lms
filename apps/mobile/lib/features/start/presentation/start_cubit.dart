@@ -214,8 +214,8 @@ class StartState extends Equatable {
 /// refusal comes back to the step it is about (a time taken meanwhile: the
 /// times again with the others kept), or to a calm screen of its own.
 class StartCubit extends Cubit<StartState> {
-  StartCubit(this._repo, this._consents, {this.initialLearner, this.initialSubject, this.initialPlan, this.initialTeacher})
-    : super(StartState(recommendedPlanId: initialPlan));
+  StartCubit(this._repo, this._consents, {this.initialLearner, this.initialSubject, this.initialPlan, this.initialTeacher, String? note})
+    : super(StartState(recommendedPlanId: initialPlan, note: note == null || note.isEmpty ? null : StartNote(note, warning: false)));
 
   final StartRepository _repo;
   final ConsentRepository _consents;
@@ -306,6 +306,26 @@ class StartCubit extends Cubit<StartState> {
     }
     emit(state.copyWith(busy: false));
     _go(StartStep.subject);
+  }
+
+  /// A child just added from the learner step («إضافة طفل»): the options read again with them, and on to the subject.
+  Future<void> childAdded(String id, {String? message}) async {
+    if (state.busy) return;
+    emit(state.copyWith(busy: true, learnerId: () => id));
+    final ok = await _reload(learner: id, subject: '');
+    if (isClosed) return;
+    emit(
+      state.copyWith(
+        busy: false,
+        subjectId: () => null,
+        planId: () => null,
+        teacherId: () => null,
+        groupId: () => null,
+        picked: const [],
+        note: () => message == null || message.isEmpty ? null : StartNote(message, warning: false),
+      ),
+    );
+    if (ok) _go(StartStep.subject);
   }
 
   Future<void> pickSubject(String id) async {

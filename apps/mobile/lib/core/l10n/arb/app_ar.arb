@@ -1112,7 +1112,7 @@
       }
     }
   },
-  "invoiceNote": "افتح أي فاتورة لتعرضها وتطبعها، وفيها رمز QR الخاص بالفاتورة الضريبية.",
+  "invoiceNote": "افتح أي فاتورة لترى تفاصيلها وتدفعها، وزر المستند يعرض نسختها للطباعة مع رمز QR الخاص بالفاتورة الضريبية.",
   "cantPayOnline": "الدفع الإلكتروني غير متاح لهذه الفاتورة. تواصل مع الأكاديمية.",
   "pickGateway": "بماذا تدفع؟",
   "paidByTransfer": "دفعت بالتحويل",
@@ -4515,5 +4515,164 @@
   "paidFirstLater": "حين تكتمل المجموعة، ونرسل إليكم موعدها ورابطها.",
   "paidJoin": "كيف تنضمون",
   "paidJoinHow": "افتحوا الحصة من «الحصص» قبل موعدها ببضع دقائق، واضغطوا «انضم».",
-  "packageTitle": "انضمت الدورة إلى باقتكم المشتركة"
+  "packageTitle": "انضمت الدورة إلى باقتكم المشتركة",
+  "paidPlainTitle": "دُفعت هذه الفاتورة",
+  "paidJustTitle": "وصل الدفع، شكرًا لكم!",
+  "paidPlainLead": "لا شيء عليكم فيها. تجدون نسختها للطباعة أدناه، والحصص في «الحصص».",
+  "payDueOn": "ادفعوا قبل {day}",
+  "@payDueOn": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "payOpenPayments": "المدفوعات",
+  "balanceTitle": "رصيد الدورة",
+  "balanceNone": "لم تبقَ حصص",
+  "balanceLeftOf": "متبقية من باقة {total}",
+  "@balanceLeftOf": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceLeftPlain": "متبقية في الرصيد",
+  "balanceMakeup": "{n, plural, =1{وحصة تعويضية واحدة أيضًا} =2{وحصتان تعويضيتان أيضًا} few{و{n} حصص تعويضية أيضًا} other{و{n} حصة تعويضية أيضًا}}",
+  "@balanceMakeup": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "balancePerWeek": "{n, plural, =1{حصة واحدة في الأسبوع} =2{حصتان في الأسبوع} few{{n} حصص في الأسبوع} other{{n} حصة في الأسبوع}}",
+  "@balancePerWeek": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "balancePerLesson": "الحصة {minutes}",
+  "@balancePerLesson": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceGroup": "حصص جماعية",
+  "balanceShared": "باقة مشتركة بين المواد",
+  "balanceMarkHint": "العلامة على الشريط: هنا تصدر الفاتورة التالية",
+  "balanceBarLabel": "{left} من {total}، والفاتورة التالية عند العلامة",
+  "@balanceBarLabel": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceWaitingTitle": "فاتورة الباقة التالية تنتظر الدفع",
+  "balanceWaitingLine": "فاتورة {number} · المتبقي {amount}",
+  "@balanceWaitingLine": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceNotPayer": "تصل هذه الفاتورة إلى من يدفع للدورة في أسرتكم، ويدفعها من حسابه.",
+  "balanceNextTitle": "الفاتورة التالية",
+  "balanceNextAbout": "نحو {amount}",
+  "@balanceNextAbout": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceNextWhen": "{n, plural, =0{تصدر عندما تنتهي الحصص المدفوعة، في {day} تقريبًا.} =1{تصدر عندما تبقى حصة واحدة، في {day} تقريبًا.} =2{تصدر عندما تبقى حصتان، في {day} تقريبًا.} few{تصدر عندما تبقى {n} حصص، في {day} تقريبًا.} other{تصدر عندما تبقى {n} حصة، في {day} تقريبًا.}}",
+  "@balanceNextWhen": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceNextAfter": "{n, plural, =1{بعد حصة واحدة} =2{بعد حصتين} few{بعد {n} حصص} other{بعد {n} حصة}}",
+  "@balanceNextAfter": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "balanceNextNow": "بلغ الرصيد حدّ التجديد، وتصدر فاتورة الباقة التالية قريبًا.",
+  "balanceEstimate": "تقدير بحسب مواعيدكم؛ إلغاء حصة أو نقلها يغيّره.",
+  "balanceOpen": "التفاصيل",
+  "balanceHowTitle": "كيف يعمل الرصيد؟",
+  "balanceHowTaken": "تُخصم كل حصة من الرصيد حين تتم، والحصص التعويضية تُحسب وحدها.",
+  "balanceHowMark": "{n, plural, =0{تصدر فاتورة الباقة التالية حين تنتهي الحصص المدفوعة، لتستمر الحصص دون انقطاع.} =1{عندما تبقى حصة واحدة تصدر فاتورة الباقة التالية، لتستمر الحصص دون انقطاع.} =2{عندما تبقى حصتان تصدر فاتورة الباقة التالية، لتستمر الحصص دون انقطاع.} few{عندما تبقى {n} حصص تصدر فاتورة الباقة التالية، لتستمر الحصص دون انقطاع.} other{عندما تبقى {n} حصة تصدر فاتورة الباقة التالية، لتستمر الحصص دون انقطاع.}}",
+  "@balanceHowMark": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "balanceHowExpiry": "للحصص غير المحجوزة صلاحية تنتهي في موعدها، أما الحصص المحجوزة فلا تضيع.",
+  "balanceKidsTitle": "حصصي الباقية",
+  "balanceKidsLeft": "{n, plural, =0{لا توجد حصص الآن} =1{بقيت لك حصة واحدة} =2{بقيت لك حصتان} few{بقيت لك {n} حصص} other{بقيت لك {n} حصة}}",
+  "@balanceKidsLeft": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "balanceFailed": "تعذّر تحميل رصيد هذه الدورة الآن.",
+  "addChildTitle": "إضافة طفل",
+  "addChildHint": "أضيفوا ابنًا أو ابنة إلى حسابكم، ثم اختاروا الدورة.",
+  "addChildAboutTitle": "عن طفلكم",
+  "addChildAboutLead": "نحتاج إلى الاسم والعمر لنعرض الدورات والمعلّمين المناسبين لسنّه.",
+  "addChildName": "اسم الطفل",
+  "addChildNameHint": "الاسم الأول واسم العائلة",
+  "addChildNameShort": "اكتبوا الاسم بحرفين على الأقل.",
+  "addChildBirth": "تاريخ الميلاد",
+  "addChildBirthExact": "التاريخ",
+  "addChildBirthYearOnly": "السنة فقط",
+  "addChildPickDate": "اختاروا تاريخ الميلاد",
+  "addChildPickYear": "اختاروا سنة الميلاد",
+  "addChildBirthNeeded": "اختاروا تاريخ الميلاد أو سنته.",
+  "addChildYearNote": "إن اخترتم السنة وحدها، نعدّ الميلاد في آخر يوم منها، حرصًا على حماية الصغار.",
+  "addChildGender": "النوع",
+  "addChildGirl": "بنت",
+  "addChildBoy": "ولد",
+  "addChildNext": "التالي: الموافقة",
+  "addChildConsentTitle": "موافقتكم بصفتكم وليّ الأمر",
+  "addChildConsentLead": "اقرؤوا ما نحتفظ به ومن يطّلع عليه، ثم ضعوا علامة الموافقة.",
+  "addChildAgreeNeeded": "ضعوا علامة الموافقة أولًا.",
+  "addChildSubmit": "أضيفوا {name} وتابعوا",
+  "@addChildSubmit": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addChildSomeone": "طفلكم",
+  "addChildEdit": "عدّلوا البيانات",
+  "startAddChild": "طفل آخر؟ أضيفوه",
+  "startAddChildHint": "يُضاف إلى حسابكم، ثم تختارون له الدورة مباشرة."
 }

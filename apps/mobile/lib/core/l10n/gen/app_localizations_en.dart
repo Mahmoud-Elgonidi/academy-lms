@@ -1428,7 +1428,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get invoiceNote => 'Open any invoice to see and print it, with its tax invoice QR code.';
+  String get invoiceNote =>
+      'Open any invoice to see it line by line and pay it; the document button shows its printable copy with the tax invoice QR code.';
 
   @override
   String get cantPayOnline => 'Online payment isn\'t available for this invoice. Contact the academy.';
@@ -5977,4 +5978,236 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get packageTitle => 'The course joined your shared package';
+
+  @override
+  String get paidPlainTitle => 'This invoice is paid';
+
+  @override
+  String get paidJustTitle => 'Payment received: thank you!';
+
+  @override
+  String get paidPlainLead => 'Nothing is left to pay on it. Its printable copy is below, and the lessons are under Lessons.';
+
+  @override
+  String payDueOn(String day) {
+    return 'Pay by $day';
+  }
+
+  @override
+  String get payOpenPayments => 'Payments';
+
+  @override
+  String get balanceTitle => 'Course balance';
+
+  @override
+  String get balanceNone => 'No lessons left';
+
+  @override
+  String balanceLeftOf(String total) {
+    return 'left of a $total package';
+  }
+
+  @override
+  String get balanceLeftPlain => 'left in the balance';
+
+  @override
+  String balanceMakeup(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'and $n makeup lessons besides',
+      one: 'and 1 makeup lesson besides',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String balancePerWeek(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n lessons a week', one: '1 lesson a week');
+    return '$_temp0';
+  }
+
+  @override
+  String balancePerLesson(String minutes) {
+    return '$minutes a lesson';
+  }
+
+  @override
+  String get balanceGroup => 'Group lessons';
+
+  @override
+  String get balanceShared => 'Shared across subjects';
+
+  @override
+  String get balanceMarkHint => 'The mark on the bar: the next invoice goes out here';
+
+  @override
+  String balanceBarLabel(String left, String total) {
+    return '$left of $total; the next invoice at the mark';
+  }
+
+  @override
+  String get balanceWaitingTitle => 'The next package\'s invoice is waiting';
+
+  @override
+  String balanceWaitingLine(String number, String amount) {
+    return 'Invoice $number · $amount left';
+  }
+
+  @override
+  String get balanceNotPayer => 'This invoice goes to whoever pays for the course in your family, from their account.';
+
+  @override
+  String get balanceNextTitle => 'The next invoice';
+
+  @override
+  String balanceNextAbout(String amount) {
+    return 'about $amount';
+  }
+
+  @override
+  String balanceNextWhen(int n, String day) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Goes out when $n lessons are left, around $day.',
+      one: 'Goes out when 1 lesson is left, around $day.',
+      zero: 'Goes out when the paid lessons run out, around $day.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String balanceNextAfter(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'after $n lessons', one: 'after 1 lesson');
+    return '$_temp0';
+  }
+
+  @override
+  String get balanceNextNow => 'The balance reached the mark: the next package\'s invoice goes out soon.';
+
+  @override
+  String get balanceEstimate => 'An estimate from your times; a lesson cancelled or moved shifts it.';
+
+  @override
+  String get balanceOpen => 'Details';
+
+  @override
+  String get balanceHowTitle => 'How the balance works';
+
+  @override
+  String get balanceHowTaken => 'Each lesson comes off the balance once it takes place; makeup lessons are counted on their own.';
+
+  @override
+  String balanceHowMark(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'When $n lessons are left, the next package\'s invoice goes out, so the lessons go on without a break.',
+      one: 'When 1 lesson is left, the next package\'s invoice goes out, so the lessons go on without a break.',
+      zero: 'The next package\'s invoice goes out when the paid lessons run out, so the lessons go on without a break.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get balanceHowExpiry => 'Lessons not booked yet expire on their day; booked lessons are never lost.';
+
+  @override
+  String get balanceKidsTitle => 'My lessons left';
+
+  @override
+  String balanceKidsLeft(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'You have $n lessons left',
+      one: 'You have 1 lesson left',
+      zero: 'No lessons right now',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get balanceFailed => 'Couldn\'t load this course\'s balance just now.';
+
+  @override
+  String get addChildTitle => 'Add a child';
+
+  @override
+  String get addChildHint => 'Add a son or daughter to your account, then choose their course.';
+
+  @override
+  String get addChildAboutTitle => 'About your child';
+
+  @override
+  String get addChildAboutLead => 'We need the name and age to offer the courses and teachers that suit them.';
+
+  @override
+  String get addChildName => 'Child\'s name';
+
+  @override
+  String get addChildNameHint => 'First and last name';
+
+  @override
+  String get addChildNameShort => 'Write a name of at least two letters.';
+
+  @override
+  String get addChildBirth => 'Date of birth';
+
+  @override
+  String get addChildBirthExact => 'The date';
+
+  @override
+  String get addChildBirthYearOnly => 'The year only';
+
+  @override
+  String get addChildPickDate => 'Choose the date of birth';
+
+  @override
+  String get addChildPickYear => 'Choose the year of birth';
+
+  @override
+  String get addChildBirthNeeded => 'Choose the date or the year of birth.';
+
+  @override
+  String get addChildYearNote => 'With the year alone, we count the birthday as its last day, to keep young children protected.';
+
+  @override
+  String get addChildGender => 'Gender';
+
+  @override
+  String get addChildGirl => 'Girl';
+
+  @override
+  String get addChildBoy => 'Boy';
+
+  @override
+  String get addChildNext => 'Next: your consent';
+
+  @override
+  String get addChildConsentTitle => 'Your consent as the guardian';
+
+  @override
+  String get addChildConsentLead => 'Read what we keep and who sees it, then tick to agree.';
+
+  @override
+  String get addChildAgreeNeeded => 'Tick to agree first.';
+
+  @override
+  String addChildSubmit(String name) {
+    return 'Add $name and continue';
+  }
+
+  @override
+  String get addChildSomeone => 'your child';
+
+  @override
+  String get addChildEdit => 'Change the details';
+
+  @override
+  String get startAddChild => 'Another child? Add them';
+
+  @override
+  String get startAddChildHint => 'They join your account, then you choose their course straight away.';
 }

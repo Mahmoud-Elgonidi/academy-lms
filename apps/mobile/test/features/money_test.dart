@@ -180,10 +180,14 @@ void main() {
     expect(find.text('مدفوعة'), findsOneWidget);
     expect(find.text('خصم الإخوات  -40 ر.س.'), findsOneWidget);
 
-    // The row opens the invoice's printable document (with the tax QR).
-    await tester.tap(find.text('مدفوعة'));
+    // The document button beside it opens the printable copy (with the tax QR)...
+    await tester.tap(find.byKey(const Key('invoice-document-i2')));
     await frames(tester, 3);
     expect(launcher.urls, contains('https://demo.example/billing/i2?signature=x'));
+    // ...and the row itself opens the invoice, over the tabs, to read or pay.
+    await tester.tap(find.text('مدفوعة'));
+    await frames(tester, 12);
+    expect(GoRouter.of(tester.element(find.byType(Scaffold).last)).state.matchedLocation, '/family/pay/i2');
     await _close(tester);
   });
 

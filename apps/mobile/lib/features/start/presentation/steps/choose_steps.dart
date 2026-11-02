@@ -3,10 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_theme.dart';
+import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/time/formats.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
+import '../../../dashboard/domain/learner.dart';
+import '../../../dashboard/presentation/pages/add_child_page.dart';
 import '../../../trial/presentation/widgets.dart';
 import '../../domain/start.dart';
 import '../start_cubit.dart';
@@ -79,9 +82,27 @@ class LearnerStep extends StatelessWidget {
           ),
           const Gap(Space.m),
         ],
+        // A guardian's child not on the account yet: added here, then chosen.
+        if (context.read<SessionCubit>().state.current?.isGuardian ?? false)
+          ChoiceCard(
+            key: const Key('learner-add'),
+            title: l.startAddChild,
+            subtitle: l.startAddChildHint,
+            icon: Icons.person_add_alt_1_rounded,
+            tone: Tone.info,
+            onTap: () => addChildFromStart(context),
+          ),
+        if (state.busy) ...[const Gap(Space.m), const Center(child: CircularProgressIndicator.adaptive())],
       ],
     );
   }
+}
+
+/// «إضافة طفل» over the start flow; the child added comes back chosen, on to the subject.
+Future<void> addChildFromStart(BuildContext context) async {
+  final cubit = context.read<StartCubit>();
+  final child = await context.push<AddedChild>('${AddChildPage.location}?from=start');
+  if (child != null && child.id.isNotEmpty) await cubit.childAdded(child.id, message: child.message);
 }
 
 /// The subject: those with a teacher taking new students; one the learner
@@ -117,6 +138,17 @@ class SubjectStep extends StatelessWidget {
           const Gap(Space.m),
         ],
         if (state.busy) const Center(child: CircularProgressIndicator.adaptive()),
+        // One child on the account (no learner step): another one is added from here.
+        if (!self && (state.options?.learners.length ?? 0) == 1 && (context.read<SessionCubit>().state.current?.isGuardian ?? false))
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              key: const Key('subject-add-child'),
+              onPressed: state.busy ? null : () => addChildFromStart(context),
+              icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+              label: Text(l.startAddChild),
+            ),
+          ),
       ],
     );
   }

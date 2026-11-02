@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../fixtures/hifz.dart';
 import '../fixtures/journey.dart';
+import '../fixtures/balance.dart';
 import '../helpers.dart';
 import 'sign_in_flow_test.dart' show frames;
 
@@ -112,6 +113,8 @@ void _familyData(FakeApi api) {
         },
       ],
     })
+    // The course's own balance on the home: the bar, the plan, the expiry and the invoice waiting with Pay.
+    ..on('GET', 'family/courses/e1/balance', fxCourseBalance(waiting: true))
     ..on('GET', 'family/invoices', {
       'owed': '1,250.50 ر.س.',
       'manual': {

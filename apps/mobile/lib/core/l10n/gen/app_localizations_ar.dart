@@ -1496,7 +1496,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get invoiceNote => 'افتح أي فاتورة لتعرضها وتطبعها، وفيها رمز QR الخاص بالفاتورة الضريبية.';
+  String get invoiceNote => 'افتح أي فاتورة لترى تفاصيلها وتدفعها، وزر المستند يعرض نسختها للطباعة مع رمز QR الخاص بالفاتورة الضريبية.';
 
   @override
   String get cantPayOnline => 'الدفع الإلكتروني غير متاح لهذه الفاتورة. تواصل مع الأكاديمية.';
@@ -6329,4 +6329,258 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get packageTitle => 'انضمت الدورة إلى باقتكم المشتركة';
+
+  @override
+  String get paidPlainTitle => 'دُفعت هذه الفاتورة';
+
+  @override
+  String get paidJustTitle => 'وصل الدفع، شكرًا لكم!';
+
+  @override
+  String get paidPlainLead => 'لا شيء عليكم فيها. تجدون نسختها للطباعة أدناه، والحصص في «الحصص».';
+
+  @override
+  String payDueOn(String day) {
+    return 'ادفعوا قبل $day';
+  }
+
+  @override
+  String get payOpenPayments => 'المدفوعات';
+
+  @override
+  String get balanceTitle => 'رصيد الدورة';
+
+  @override
+  String get balanceNone => 'لم تبقَ حصص';
+
+  @override
+  String balanceLeftOf(String total) {
+    return 'متبقية من باقة $total';
+  }
+
+  @override
+  String get balanceLeftPlain => 'متبقية في الرصيد';
+
+  @override
+  String balanceMakeup(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'و$n حصة تعويضية أيضًا',
+      few: 'و$n حصص تعويضية أيضًا',
+      two: 'وحصتان تعويضيتان أيضًا',
+      one: 'وحصة تعويضية واحدة أيضًا',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String balancePerWeek(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n حصة في الأسبوع',
+      few: '$n حصص في الأسبوع',
+      two: 'حصتان في الأسبوع',
+      one: 'حصة واحدة في الأسبوع',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String balancePerLesson(String minutes) {
+    return 'الحصة $minutes';
+  }
+
+  @override
+  String get balanceGroup => 'حصص جماعية';
+
+  @override
+  String get balanceShared => 'باقة مشتركة بين المواد';
+
+  @override
+  String get balanceMarkHint => 'العلامة على الشريط: هنا تصدر الفاتورة التالية';
+
+  @override
+  String balanceBarLabel(String left, String total) {
+    return '$left من $total، والفاتورة التالية عند العلامة';
+  }
+
+  @override
+  String get balanceWaitingTitle => 'فاتورة الباقة التالية تنتظر الدفع';
+
+  @override
+  String balanceWaitingLine(String number, String amount) {
+    return 'فاتورة $number · المتبقي $amount';
+  }
+
+  @override
+  String get balanceNotPayer => 'تصل هذه الفاتورة إلى من يدفع للدورة في أسرتكم، ويدفعها من حسابه.';
+
+  @override
+  String get balanceNextTitle => 'الفاتورة التالية';
+
+  @override
+  String balanceNextAbout(String amount) {
+    return 'نحو $amount';
+  }
+
+  @override
+  String balanceNextWhen(int n, String day) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'تصدر عندما تبقى $n حصة، في $day تقريبًا.',
+      few: 'تصدر عندما تبقى $n حصص، في $day تقريبًا.',
+      two: 'تصدر عندما تبقى حصتان، في $day تقريبًا.',
+      one: 'تصدر عندما تبقى حصة واحدة، في $day تقريبًا.',
+      zero: 'تصدر عندما تنتهي الحصص المدفوعة، في $day تقريبًا.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String balanceNextAfter(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'بعد $n حصة',
+      few: 'بعد $n حصص',
+      two: 'بعد حصتين',
+      one: 'بعد حصة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get balanceNextNow => 'بلغ الرصيد حدّ التجديد، وتصدر فاتورة الباقة التالية قريبًا.';
+
+  @override
+  String get balanceEstimate => 'تقدير بحسب مواعيدكم؛ إلغاء حصة أو نقلها يغيّره.';
+
+  @override
+  String get balanceOpen => 'التفاصيل';
+
+  @override
+  String get balanceHowTitle => 'كيف يعمل الرصيد؟';
+
+  @override
+  String get balanceHowTaken => 'تُخصم كل حصة من الرصيد حين تتم، والحصص التعويضية تُحسب وحدها.';
+
+  @override
+  String balanceHowMark(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'عندما تبقى $n حصة تصدر فاتورة الباقة التالية، لتستمر الحصص دون انقطاع.',
+      few: 'عندما تبقى $n حصص تصدر فاتورة الباقة التالية، لتستمر الحصص دون انقطاع.',
+      two: 'عندما تبقى حصتان تصدر فاتورة الباقة التالية، لتستمر الحصص دون انقطاع.',
+      one: 'عندما تبقى حصة واحدة تصدر فاتورة الباقة التالية، لتستمر الحصص دون انقطاع.',
+      zero: 'تصدر فاتورة الباقة التالية حين تنتهي الحصص المدفوعة، لتستمر الحصص دون انقطاع.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get balanceHowExpiry => 'للحصص غير المحجوزة صلاحية تنتهي في موعدها، أما الحصص المحجوزة فلا تضيع.';
+
+  @override
+  String get balanceKidsTitle => 'حصصي الباقية';
+
+  @override
+  String balanceKidsLeft(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'بقيت لك $n حصة',
+      few: 'بقيت لك $n حصص',
+      two: 'بقيت لك حصتان',
+      one: 'بقيت لك حصة واحدة',
+      zero: 'لا توجد حصص الآن',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get balanceFailed => 'تعذّر تحميل رصيد هذه الدورة الآن.';
+
+  @override
+  String get addChildTitle => 'إضافة طفل';
+
+  @override
+  String get addChildHint => 'أضيفوا ابنًا أو ابنة إلى حسابكم، ثم اختاروا الدورة.';
+
+  @override
+  String get addChildAboutTitle => 'عن طفلكم';
+
+  @override
+  String get addChildAboutLead => 'نحتاج إلى الاسم والعمر لنعرض الدورات والمعلّمين المناسبين لسنّه.';
+
+  @override
+  String get addChildName => 'اسم الطفل';
+
+  @override
+  String get addChildNameHint => 'الاسم الأول واسم العائلة';
+
+  @override
+  String get addChildNameShort => 'اكتبوا الاسم بحرفين على الأقل.';
+
+  @override
+  String get addChildBirth => 'تاريخ الميلاد';
+
+  @override
+  String get addChildBirthExact => 'التاريخ';
+
+  @override
+  String get addChildBirthYearOnly => 'السنة فقط';
+
+  @override
+  String get addChildPickDate => 'اختاروا تاريخ الميلاد';
+
+  @override
+  String get addChildPickYear => 'اختاروا سنة الميلاد';
+
+  @override
+  String get addChildBirthNeeded => 'اختاروا تاريخ الميلاد أو سنته.';
+
+  @override
+  String get addChildYearNote => 'إن اخترتم السنة وحدها، نعدّ الميلاد في آخر يوم منها، حرصًا على حماية الصغار.';
+
+  @override
+  String get addChildGender => 'النوع';
+
+  @override
+  String get addChildGirl => 'بنت';
+
+  @override
+  String get addChildBoy => 'ولد';
+
+  @override
+  String get addChildNext => 'التالي: الموافقة';
+
+  @override
+  String get addChildConsentTitle => 'موافقتكم بصفتكم وليّ الأمر';
+
+  @override
+  String get addChildConsentLead => 'اقرؤوا ما نحتفظ به ومن يطّلع عليه، ثم ضعوا علامة الموافقة.';
+
+  @override
+  String get addChildAgreeNeeded => 'ضعوا علامة الموافقة أولًا.';
+
+  @override
+  String addChildSubmit(String name) {
+    return 'أضيفوا $name وتابعوا';
+  }
+
+  @override
+  String get addChildSomeone => 'طفلكم';
+
+  @override
+  String get addChildEdit => 'عدّلوا البيانات';
+
+  @override
+  String get startAddChild => 'طفل آخر؟ أضيفوه';
+
+  @override
+  String get startAddChildHint => 'يُضاف إلى حسابكم، ثم تختارون له الدورة مباشرة.';
 }
