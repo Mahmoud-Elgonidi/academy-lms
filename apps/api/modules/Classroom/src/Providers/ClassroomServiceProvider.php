@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Modules\Classroom\Authorization\ClassroomAccess;
 use Modules\Classroom\Console\ReconcileClassroomsCommand;
 use Modules\Classroom\Console\RecordingsCommand;
@@ -61,7 +62,9 @@ final class ClassroomServiceProvider extends ServiceProvider
 
         // "Join now" and reminders carry each person's own signed link to the class page.
         $this->app->make(NotificationLinks::class)->registerPersonal('session', function (array $action, string $userId) {
-            $lesson = $this->app->make(AttendanceApi::class)->lesson($action['id'] ?? '');
+            // No lesson named (a course with none yet): no class page to sign.
+            $id = (string) ($action['id'] ?? '');
+            $lesson = Str::isUuid($id) ? $this->app->make(AttendanceApi::class)->lesson($id) : null;
             if ($lesson === null) {
                 return null;
             }

@@ -4,6 +4,7 @@ namespace Modules\Scheduling;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Modules\Scheduling\Actions\RecordConnectionDrop;
 use Modules\Scheduling\Actions\RecordParticipantJoin;
 use Modules\Scheduling\Actions\RecordParticipantLeave;
@@ -22,6 +23,11 @@ final class AttendanceService implements AttendanceApi
 
     public function lesson(string $sessionId): ?LessonCard
     {
+        // An id that is no lesson's (empty, or not a uuid from a channel name or a link) is none, never a query error.
+        if (! Str::isUuid($sessionId)) {
+            return null;
+        }
+
         return $this->cards(fn ($q) => $q->where('s.id', $sessionId))[0] ?? null;
     }
 

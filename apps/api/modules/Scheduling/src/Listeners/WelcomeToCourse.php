@@ -22,7 +22,8 @@ use Modules\Scheduling\Queries\Start\StartRules;
  * adult learner; never a child's own) hear it on WhatsApp, email, the app and
  * the inbox: the teacher's name as families read it, the weekly times on each
  * reader's own clock, the first lesson with its own link to the class page
- * (or that a forming group starts when it is full), and where to get the app
+ * (or, with no lesson ahead yet, that a forming group starts when it is full
+ * or that its time and link follow: no link then), and where to get the app
  * (the platform's app links, when set). Whoever has no way to sign in yet (an
  * account the CRM or the office made) also gets People's welcome with their
  * link to choose a password. A course brought over by an import was under way
@@ -79,17 +80,23 @@ final class WelcomeToCourse
             default => '',
         };
 
+        // With no lesson ahead yet there is no class page to link to: the lessons' screen opens instead.
         $this->notifications->send(new Message('enrollment.course_started', $recipients, [
             'student' => $this->rules->firstName((string) DB::table('users')->where('id', $course->studentId)->value('name')),
             'subject' => new Localized((string) ($subject->name_ar ?? ''), (string) ($subject->name_en ?? '')),
             'teacher' => $this->rules->teacherName($course->teacherId),
             'times' => new WeeklyTimes($this->times->weekly($course->id)),
-            'first' => $first === null ? new Translatable('scheduling::start.welcome.first_later') : $first['at'],
+            'first' => $first === null ? new Translatable($this->inGroup($course->id) ? 'scheduling::start.welcome.first_later' : 'scheduling::start.welcome.first_soon') : $first['at'],
             'join' => $first === null ? '' : new Translatable('scheduling::start.welcome.join'),
             'app' => $app,
-        ], ['screen' => 'session', 'id' => $first['id'] ?? null], "course-started:{$course->id}"));
+        ], $first === null ? ['screen' => 'session'] : ['screen' => 'session', 'id' => $first['id']], "course-started:{$course->id}"));
 
         // An account made for the family (the CRM, the office) with no way in yet: its link to choose a password, once.
         $this->people->sendWelcome($recipients);
+    }
+
+    private function inGroup(string $enrollmentId): bool
+    {
+        return DB::table('group_members')->where('enrollment_id', $enrollmentId)->whereNull('left_on')->exists();
     }
 }

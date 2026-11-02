@@ -53,6 +53,7 @@ return [
     'welcome' => [
         'join' => 'Join a few minutes before it from the app, or from this link:',
         'first_later' => 'when the group has enough students; we will send you its time and link',
+        'first_soon' => 'we will send you its time and link soon',
         'app_both' => 'Get the app: Android :android · iPhone :ios',
         'app_android' => 'Get the app: :android',
         'app_ios' => 'Get the app: :ios',

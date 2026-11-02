@@ -87,7 +87,8 @@ export function onAcademyHost(path: string): [string, { headers: Record<string, 
 
 /**
  * The academy's own host in this page's browser, as the server's Caddy serves
- * it (its host has no DNS here): the portal's paths (/ar, /en, /_next, /bff)
+ * it (its name reaches this machine through /etc/hosts, as in CI, for the
+ * live socket on Reverb's port; this route stands in for Caddy on the API's port): the portal's paths (/ar, /en, /_next, /bff)
  * to the portal, everything else (the gateway's pretend page, the way back
  * from it) to the API with that Host. The request's own headers (cookies,
  * X-Forwarded-For, the portal's session) go along. A redirect within that

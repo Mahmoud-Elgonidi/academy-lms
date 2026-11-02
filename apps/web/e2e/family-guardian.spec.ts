@@ -1,4 +1,4 @@
-import { API, approveProof } from './backend';
+import { API, approveProof, serveAcademyHost } from './backend';
 import { expect, fitsTheScreen, noRawKeys, test } from './helpers';
 import { familyPages } from './pages';
 
@@ -87,12 +87,21 @@ test('a guardian rates a lesson that took place', async ({ page }) => {
   await expect(page.getByText('شكرًا! وصل تقييمك.')).toBeVisible();
 });
 
-test('what is owed is paid on the academy\'s payment page', async ({ page }) => {
+test('what is owed is paid on the academy\'s payment page', async ({ page, baseURL }) => {
+  // The gateway's page and the way back are on the academy's own host, served here as the server's Caddy would.
+  const host = await serveAcademyHost(page, baseURL ?? 'http://127.0.0.1:3000');
   await page.goto('/ar/family/money');
   await expect(page.getByText('الفواتير', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: /^ادفع / }).first().click();
   // The academy's own gateway page (the demo gateway here); the invoice is paid only when it says so.
-  await page.waitForURL(/\/pay\//);
+  await page.waitForURL(/\/pay\/demo\//, { waitUntil: 'commit' });
+  expect(new URL(page.url()).host).toBe(host);
+  await expect(page.getByRole('button', { name: 'ادفع', exact: true })).toBeVisible();
+  // Turned down there (the next test pays this invoice by transfer): back on the academy's pay page, still owed.
+  await page.getByRole('button', { name: 'ارفض الدفع' }).click();
+  await page.waitForURL(/\/pay\/invoice\//, { waitUntil: 'commit' });
+  expect(new URL(page.url()).host).toBe(host);
+  await expect(page.getByRole('button', { name: /ادفع/ }).first()).toBeVisible();
 });
 
 test('a guardian who paid by transfer sends the receipt; the academy approves it, and the invoice is paid', async ({ page }) => {

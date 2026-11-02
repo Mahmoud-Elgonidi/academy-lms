@@ -73,6 +73,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The demo academy's own host (its slug on .env.example's PLATFORM_DOMAIN: E2eResetSeeder's academy_host)
+      # reaches this machine, as its DNS does a server: the gateway's page and the way back (API on 8000, the
+      # portal's paths routed by the specs as Caddy does) and the live socket (Reverb on 8080).
+      - name: The academy's host on this machine
+        run: echo "127.0.0.1 demo.lms.test" | sudo tee -a /etc/hosts
+
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'

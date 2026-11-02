@@ -14,6 +14,7 @@ use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PriceRegion;
 use Modules\Catalog\Contracts\CatalogApi;
+use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Models\CommunicationSettings;
 use Modules\Communication\Models\Notification;
 use Modules\Crm\Actions\AssessTrial;
@@ -41,6 +42,7 @@ use Modules\Scheduling\Actions\Holidays\DeclareHoliday;
 use Modules\Scheduling\Actions\MaterializeSessions;
 use Modules\Scheduling\Actions\PlaceBookingHold;
 use Modules\Scheduling\Actions\TimeOff\RequestTimeOff;
+use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\DTOs\EnrollmentTerms;
 use Modules\Scheduling\Contracts\DTOs\NewGroup;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
@@ -560,6 +562,27 @@ it('sends no welcome for a course brought over from before the platform, and say
     // The fixture's adult learner and his guardian; his weekly times on each one's own clock.
     expect($sent->pluck('user_id')->sort()->values()->all())->toEqual(collect([$this->student->id, DB::table('guardian_student')->where('student_id', $this->student->id)->value('guardian_id')])->sort()->values()->all())
         ->and($sent->firstWhere('user_id', $this->student->id)->body)->toContain('/class/');
+});
+
+it('welcomes a course with no lesson ahead yet without a class link, and says its time and link follow', function () {
+    // Every lesson of the course is behind: nothing to link to (as a shared package or a course whose lessons are not made yet).
+    $this->travelTo(CarbonImmutable::now()->addYears(2));
+    Event::dispatch(new EnrollmentActivated($this->academy->id, $this->booked->enrollmentId, 'paid'));
+
+    $sent = Notification::query()->where('template_key', 'enrollment.course_started')->get();
+    expect($sent)->not->toBeEmpty();
+    foreach ($sent as $message) {
+        expect($message->body)->not->toContain('/class/')
+            ->and(str_contains($message->body, 'سنرسل لكم موعدها ورابطها قريبًا') || str_contains($message->body, 'we will send you its time and link soon'))->toBeTrue();
+    }
+});
+
+it('signs no class link for a lesson that is not named', function () {
+    $links = app(NotificationLinks::class);
+    expect($links->personal(['screen' => 'session'], $this->student->id))->toBeNull()
+        ->and($links->personal(['screen' => 'session', 'id' => ''], $this->student->id))->toBeNull()
+        ->and($links->personal(['screen' => 'session', 'id' => 'not-a-lesson'], $this->student->id))->toBeNull()
+        ->and(app(AttendanceApi::class)->lesson(''))->toBeNull();
 });
 
 it('lets the demo\'s Jana\'s mother sign in and start from the report, once', function () {
