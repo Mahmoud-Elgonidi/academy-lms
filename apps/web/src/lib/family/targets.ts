@@ -18,6 +18,9 @@ export function familyTargetOf(screen: string | null | undefined, money: boolean
     case 'course_balance':
       // A course's balance (the renewal coming, lessons about to expire): its page, at the card.
       return id ? `/family/progress/${encodeURIComponent(id)}#balance-${encodeURIComponent(id)}` : money ? '/family/money' : '/family';
+    case 'cards':
+      // The saved card and automatic renewal (a card expiring, a card the academy stopped): the payer's card page; the id is the payer.
+      return money ? '/family/money/cards' : '/family';
     case 'start':
       // Starting a course again (an unpaid start that closed itself): the start flow for that learner.
       if (!money) return '/family';

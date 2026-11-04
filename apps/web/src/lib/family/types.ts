@@ -1,3 +1,4 @@
+import type { AutomaticRenewal } from './cards';
 import type { LocalTime } from '../time';
 import type { CourseDays } from './course-state';
 import type { ReportAnswer } from '../report-answers';
@@ -65,7 +66,8 @@ export type Invoice = {
   due_at: LocalTime | null;
   paid_at: LocalTime | null;
   document_url: string | null;
-  pay_with: { account_id: string; label: string; methods: string[] }[];
+  /** Where it can be paid online; saves_cards: the gateway can keep the card for automatic renewal (J5b). */
+  pay_with: { account_id: string; label: string; methods: string[]; saves_cards?: boolean }[];
   /** What is left as a number to type ("400.00"). */
   outstanding_decimal: string;
   /** The latest proof of paying by hand: pending, approved, or rejected with the academy's reason. */
@@ -158,7 +160,10 @@ export type CourseBalance = {
     text: string;
   } | null;
   renewal_note: string | null;
+  /** Kept null for earlier app versions: read automatic_renewal. */
   auto_renew: null;
+  /** Automatic renewal (J5b): the payer in the classic look only, else null or missing. */
+  automatic_renewal?: AutomaticRenewal | null;
 };
 
 /** POST family/children's answer: the child, and the start flow to go to. */

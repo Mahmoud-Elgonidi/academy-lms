@@ -143,6 +143,9 @@ describe('where a notification opens', () => {
     expect(familyTargetOf('start', true, 'l1')).toBe('/family/start?learner=l1');
     expect(familyTargetOf('start', true)).toBe('/family/start');
     expect(familyTargetOf('start', false, 'l1')).toBe('/family');
+    // J5b: a card expiring or stopped opens the payer's card page (its id is the payer); never for a student's own look.
+    expect(familyTargetOf('cards', true, 'payer-1')).toBe('/family/money/cards');
+    expect(familyTargetOf('cards', false, 'payer-1')).toBe('/family');
     expect(familyTargetOf('write_report', true)).toBe('/family');
     expect(familyTargetOf(null, true)).toBe('/family');
     expect(familyTargetOf('guardian_consent', true)).toBe('/family/privacy');

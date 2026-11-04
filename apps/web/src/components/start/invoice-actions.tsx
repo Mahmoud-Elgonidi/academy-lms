@@ -10,6 +10,8 @@ import { Button, Input, Notice, buttonLook, join } from '@/components/ui';
 import { Link, useRouter } from '@/i18n/navigation';
 import { INVOICE_COURSE_KEY } from '@/lib/start/flow';
 import type { InvoiceSummary } from '@/lib/start/types';
+import { SaveCardOption } from '@/components/family/save-card';
+import { offersSaveCard, type SaveCardOffer } from '@/lib/family/cards';
 import { usePressKey } from './press-key';
 
 /*
@@ -21,9 +23,17 @@ import { usePressKey } from './press-key';
  */
 
 /** Pay online: the checkout opens at the academy's gateway, which brings the payer back to /pay/return. */
-export function PayNow({ invoice, amount, accounts }: { invoice: string; amount: string; accounts: { account_id: string; label: string; methods: string[] }[] }) {
+export function PayNow({ invoice, amount, accounts, saveCard }: {
+  invoice: string;
+  amount: string;
+  accounts: { account_id: string; label: string; methods: string[]; saves_cards?: boolean }[];
+  /** Saving the card while paying (J5b), when the payer's look allows it; offered only on a gateway that keeps cards. */
+  saveCard?: SaveCardOffer | null;
+}) {
   const t = useTranslations('invoice');
   const [account, setAccount] = useState(accounts[0]?.account_id ?? null);
+  const [save, setSave] = useState(false);
+  const saving = offersSaveCard(saveCard, accounts.find((a) => a.account_id === account));
   const [message, setMessage] = useState<string>();
   const [going, setGoing] = useState(false);
   const [pending, start] = useTransition();
@@ -32,7 +42,7 @@ export function PayNow({ invoice, amount, accounts }: { invoice: string; amount:
   const pay = () =>
     start(async () => {
       setMessage(undefined);
-      const opened = await payInvoice(invoice, account, key.take(), 'portal');
+      const opened = await payInvoice(invoice, account, key.take(), 'portal', saving && save && saveCard ? { version: saveCard.version } : null);
       key.answered();
       if (!opened.ok) {
         setMessage(opened.message ?? t('problem'));
@@ -60,6 +70,7 @@ export function PayNow({ invoice, amount, accounts }: { invoice: string; amount:
           </div>
         </fieldset>
       ) : null}
+      {saving && saveCard ? <SaveCardOption checked={save} onChange={setSave} text={saveCard.text} disabled={pending || going} /> : null}
       <Button type="button" onClick={pay} disabled={pending || going} wide className="min-h-12 text-base">
         <Icon name="lock" size={18} />
         {going ? t('going') : pending ? t('opening') : t('payAmount', { amount })}

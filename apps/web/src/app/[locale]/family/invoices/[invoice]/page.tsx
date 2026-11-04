@@ -97,7 +97,7 @@ export default async function InvoicePage({ params, searchParams }: Props) {
       {owed ? (
         <section className="rounded-card border border-brand-line bg-white p-5" aria-labelledby="inv-pay">
           <h2 id="inv-pay" className="mb-3 font-bold">{t('payTitle')}</h2>
-          {payWith.length > 0 ? <PayNow invoice={summary.id} amount={summary.outstanding.amount} accounts={payWith} /> : <p className="text-sm text-muted">{t('noOnline')}</p>}
+          {payWith.length > 0 ? <PayNow invoice={summary.id} amount={summary.outstanding.amount} accounts={payWith} saveCard={found.data.save_card} /> : <p className="text-sm text-muted">{t('noOnline')}</p>}
           <p className="mt-4 text-sm">
             <Link href="/family/money" className="font-semibold text-brand-strong underline-offset-4 hover:underline">{t('otherWays')}</Link>
           </p>

@@ -2771,7 +2771,12 @@
     },
     "invoice": "Invoice {number}",
     "otherWays": "Other ways to pay",
-    "confirmingNote": "Do not pay again: if you were charged, it is recorded as soon as the gateway confirms."
+    "confirmingNote": "Do not pay again: if you were charged, it is recorded as soon as the gateway confirms.",
+    "card": {
+      "title": "Your card is saved and automatic renewal is on",
+      "text": "We tell you the amount and the moment three days before each renewal is charged. You can turn automatic renewal off or remove the card any time.",
+      "manage": "Manage the card and automatic renewal"
+    }
   },
   "balance": {
     "title": "Lessons balance",
@@ -2810,7 +2815,30 @@
     "kidsNone": "No lessons right now",
     "kidsHint": "Each star is a lesson waiting for you.",
     "kidsEmpty": "Your family will sort out the next lessons with the academy.",
-    "details": "Balance and the next invoice"
+    "details": "Balance and the next invoice",
+    "auto": {
+      "on": "Automatic renewal on",
+      "off": "Automatic renewal off",
+      "next": {
+        "scheduled": "{amount} charged {when}",
+        "retry": "Second try to charge {amount} {when}",
+        "charging": "{amount} being charged now"
+      },
+      "nextNow": {
+        "scheduled": "{amount} charged soon",
+        "retry": "Second try to charge {amount} soon",
+        "charging": "{amount} being charged now"
+      },
+      "status": {
+        "scheduled": "Scheduled",
+        "retry": "Second try",
+        "charging": "Under way"
+      },
+      "expiring": "The card {card} expires soon. Save a new card at your next payment.",
+      "manage": "Manage the card and renewal",
+      "how": "How do I turn on automatic renewal?",
+      "cardPays": "It will be charged to your card automatically on time, so there is no need to pay it now."
+    }
   },
   "addChild": {
     "action": "Add a child",
@@ -2848,5 +2876,95 @@
     "fromStartAction": "Add a child",
     "nameMissing": "Write the child's name (two letters at least).",
     "birthMissing": "Choose the child's year or date of birth."
+  },
+  "cards": {
+    "title": "Cards and automatic renewal",
+    "hint": "Your card kept by the payment gateway, and your packages renewed from it automatically.",
+    "back": "Payments",
+    "problem": "That did not work just now. Please try again in a moment.",
+    "working": "One moment…",
+    "saved": "Your saved card",
+    "savedMany": "Your saved cards",
+    "empty": {
+      "title": "No saved card",
+      "text": "Save your card at your next online payment, and package renewals are charged to it automatically, after we tell you three days before each charge.",
+      "box": "When paying, tick “Save my card and renew automatically” before going to the payment page.",
+      "toMoney": "Go to payments"
+    },
+    "renewal": {
+      "title": "Automatic renewal",
+      "titleIn": "Automatic renewal ({currency})",
+      "on": "On",
+      "off": "Off",
+      "onText": "Each renewal invoice is charged to your card {card}, and we tell you the amount and the moment three days before.",
+      "offText": "Each renewal invoice comes with its pay link and you pay it yourself. Turn it on to have the next invoices charged to your card.",
+      "noCard": "Save a card first to turn it on: tick “Save my card and renew automatically” at your next online payment."
+    },
+    "off": {
+      "title": "Turn automatic renewal off?",
+      "byLink": "Each renewal invoice comes with its pay link, and you pay it yourself before it is due.",
+      "coming": "Every charge not yet due is cancelled.",
+      "underWay": "The charge under way now finishes; it can no longer be stopped.",
+      "cardStays": "Your card stays saved, and you can turn it on again any time.",
+      "keep": "Keep it on",
+      "confirm": "Yes, turn it off"
+    },
+    "tile": {
+      "number": "Card ending in {last4}",
+      "expires": "Expires",
+      "soonTitle": "This card expires soon",
+      "soonText": "Save a new card at your next online payment so automatic renewal does not stop.",
+      "savedAt": "Saved {when}"
+    },
+    "remove": {
+      "action": "Remove card",
+      "title": "Remove the card {card}?",
+      "nothing": "Nothing will be charged to it any more.",
+      "renewalOff": "Automatic renewal turns off, and every charge not yet due is cancelled.",
+      "byLink": "Invoices come with their pay link as usual.",
+      "again": "You can save a new card at any online payment.",
+      "keep": "Keep the card",
+      "confirm": "Yes, remove it"
+    },
+    "coming": {
+      "title": "Coming charges",
+      "invoice": "Invoice {number}",
+      "when": {
+        "scheduled": "Charged {when}",
+        "retry": "Second try {when}",
+        "charging": "Being charged now"
+      },
+      "now": {
+        "scheduled": "Charged soon",
+        "retry": "Tried again soon",
+        "charging": "Being charged now"
+      },
+      "status": {
+        "scheduled": "Scheduled",
+        "retry": "Second try",
+        "charging": "Under way"
+      },
+      "retryNote": "The first charge did not go through, so we will try once more at the time shown. You can also pay the invoice yourself now.",
+      "chargingNote": "The payment gateway is charging it now; we will tell you how it went.",
+      "payNow": "Pay the invoice now",
+      "open": "Open the invoice"
+    },
+    "how": {
+      "title": "How does automatic renewal work?",
+      "tell": "When the next package's invoice comes out, we tell you the amount, the moment and the card three days before the charge.",
+      "charge": "The invoice is charged to your card on time, and the lessons go on without a break.",
+      "stop": "Turn it off or remove the card any time, here or from the link in that message.",
+      "safe": "The payment gateway keeps the card; the academy never sees its number."
+    },
+    "save": {
+      "label": "Save my card and renew automatically",
+      "hint": "Coming renewal invoices are charged to this card, and we tell you three days before each charge. You can turn it off any time.",
+      "read": "Read what you agree to"
+    },
+    "entry": {
+      "on": "Automatic renewal on · {card}",
+      "off": "Automatic renewal off · {card}",
+      "none": "No saved card. Save it at your next payment."
+    }
   }
 }

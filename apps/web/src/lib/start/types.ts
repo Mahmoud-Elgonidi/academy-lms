@@ -1,3 +1,4 @@
+import type { SaveCardOffer } from '@/lib/family/cards';
 import type { LocalTime } from '../time';
 
 /**
@@ -137,10 +138,11 @@ export type InvoiceSummary = {
   document_url: string;
 };
 
-export type CheckoutState = { id: string; status: 'paid' | 'open' | 'failed' | 'expired' | 'refund_due' | string; text: string; hint: string };
+/** card_saved (J5b): the payer asked to keep the card and the gateway kept it; renewals are charged to it. */
+export type CheckoutState = { id: string; status: 'paid' | 'open' | 'failed' | 'expired' | 'refund_due' | string; text: string; hint: string; card_saved?: boolean | string | null };
 
 /** GET family/invoices/{id}: the invoice, and the latest online payment begun on it. */
-export type InvoiceRead = { data: InvoiceSummary; checkout: CheckoutState | null };
+export type InvoiceRead = { data: InvoiceSummary; checkout: CheckoutState | null; save_card?: SaveCardOffer };
 
 /** POST family/courses: the course just started. */
 export type StartedCourse = {

@@ -4,17 +4,21 @@ import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 import { payInvoice } from '@/app/[locale]/family/actions';
 import { Button, join } from '@/components/ui';
+import { offersSaveCard, type SaveCardOffer } from '@/lib/family/cards';
 import type { Invoice } from '@/lib/family/types';
+import { SaveCardOption } from './save-card';
 
 /**
  * Pays an invoice on the academy's own payment page: picks the gateway when
  * there are several, opens a checkout (one key per press, so a retry opens one)
  * and goes there. The invoice counts as paid only when the gateway says so.
  */
-export function PayInvoice({ invoice }: { invoice: Invoice }) {
+export function PayInvoice({ invoice, saveCard }: { invoice: Invoice; /** Saving the card while paying (J5b): offered on a gateway that keeps cards. */ saveCard?: SaveCardOffer | null }) {
   const t = useTranslations('family');
   const common = useTranslations('common');
   const [account, setAccount] = useState(invoice.pay_with[0]?.account_id ?? null);
+  const [save, setSave] = useState(false);
+  const saving = offersSaveCard(saveCard, invoice.pay_with.find((a) => a.account_id === account));
   const [message, setMessage] = useState<string>();
   const [going, setGoing] = useState(false);
   const [pending, start] = useTransition();
@@ -24,7 +28,8 @@ export function PayInvoice({ invoice }: { invoice: Invoice }) {
   const pay = () =>
     start(async () => {
       setMessage(undefined);
-      const opened = await payInvoice(invoice.id, account, crypto.randomUUID());
+      // Saving the card comes back to the portal, which says it was kept.
+      const opened = await payInvoice(invoice.id, account, crypto.randomUUID(), undefined, saving && save && saveCard ? { version: saveCard.version } : null);
       if (!opened.ok) {
         setMessage(opened.message ?? common('problem'));
         return;
@@ -57,6 +62,7 @@ export function PayInvoice({ invoice }: { invoice: Invoice }) {
           </div>
         </fieldset>
       ) : null}
+      {saving && saveCard ? <SaveCardOption checked={save} onChange={setSave} text={saveCard.text} disabled={pending || going} /> : null}
       <Button type="button" onClick={pay} disabled={pending || going} className="w-full sm:w-auto">
         {going ? t('going') : pending ? common('loading') : t('payAmount', { amount: invoice.outstanding })}
       </Button>

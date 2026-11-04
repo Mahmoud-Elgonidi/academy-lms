@@ -4,6 +4,7 @@ import { Icon, type IconName } from '@/components/icons';
 import { Badge, buttonLook, join } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import { STATE_TONE, balanceBar, balanceLook, balanceRows, balanceState, kidsDots, type BalanceRow, type Tone } from '@/lib/family/balance';
+import { CARDS_PATH, cardPays, chargeLook } from '@/lib/family/cards';
 import type { CourseBalance as Data } from '@/lib/family/types';
 
 /*
@@ -158,10 +159,12 @@ function FullBalance({ balance, subject, href, className }: { balance: Data; sub
       {rows.length > 0 ? (
         <ul className="mt-4 space-y-2">
           {rows.map((row) => (
-            <li key={row.kind}>{row.kind === 'waiting' ? <Waiting row={row} /> : <Line row={row} />}</li>
+            <li key={row.kind}>{row.kind === 'waiting' ? <Waiting row={row} card={cardPays(balance)} /> : <Line row={row} />}</li>
           ))}
         </ul>
       ) : null}
+
+      {balance.viewer_stage === 'classic' && balance.automatic_renewal ? <AutoRenewal renewal={balance.automatic_renewal} /> : null}
 
       {href ? (
         <Link href={href} className="mt-3 inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-brand-strong" data-balance-course>
@@ -170,6 +173,40 @@ function FullBalance({ balance, subject, href, className }: { balance: Data; sub
         </Link>
       ) : null}
     </section>
+  );
+}
+
+/** Automatic renewal (J5b, its payer): on or off in the API's sentence, the next charge with its moment and amount, the card's expiry warning, and the way to the cards page. */
+function AutoRenewal({ renewal }: { renewal: NonNullable<Data['automatic_renewal']> }) {
+  const t = useTranslations('balance.auto');
+  const next = renewal.next_charge;
+  const look = next ? chargeLook(next.status) : null;
+  return (
+    <div className={join('mt-2 rounded-control border p-3 text-sm leading-6', renewal.on ? 'border-brand-line bg-brand-soft/60' : 'border-line bg-paper')} data-row="auto-renew" data-on={renewal.on ? 'on' : 'off'}>
+      <p className="flex items-start gap-2.5">
+        <Icon name="renew" size={18} className={join('mt-0.5 shrink-0', renewal.on ? 'text-brand-strong' : 'text-muted')} />
+        <span className="min-w-0">
+          <strong className="block font-semibold text-ink">{renewal.on ? t('on') : t('off')}</strong>
+          <span className="text-ink/80" data-auto-text>{renewal.text}</span>
+        </span>
+      </p>
+      {next && look ? (
+        <p className="mt-2 flex flex-wrap items-center gap-2 ps-7" data-next-charge={look.key}>
+          <span className="font-semibold tabular-nums">{next.at ? t(`next.${look.key}`, { amount: next.amount, when: next.at.label }) : t(`nextNow.${look.key}`, { amount: next.amount })}</span>
+          {look.key !== 'scheduled' ? <Badge tone={look.tone}>{t(`status.${look.key}`)}</Badge> : null}
+        </p>
+      ) : null}
+      {renewal.card?.expires_soon ? (
+        <p className="mt-2 flex items-start gap-2 ps-7 text-attention" data-card-expiring>
+          <Icon name="alert" size={16} className="mt-1 shrink-0" />
+          {t('expiring', { card: renewal.card.label })}
+        </p>
+      ) : null}
+      <Link href={CARDS_PATH} className="mt-1 inline-flex min-h-10 items-center gap-1 ps-7 font-semibold text-brand-strong" data-manage-cards>
+        {renewal.card ? t('manage') : t('how')}
+        <Icon name="chevron" size={16} className="rtl:-scale-x-100" />
+      </Link>
+    </div>
   );
 }
 
@@ -194,7 +231,7 @@ function Line({ row }: { row: Exclude<BalanceRow, { kind: 'waiting' }> }) {
 }
 
 /** The package's invoice waiting to be paid: how much, until when, and the way to pay it (its payer only). */
-function Waiting({ row }: { row: Extract<BalanceRow, { kind: 'waiting' }> }) {
+function Waiting({ row, card }: { row: Extract<BalanceRow, { kind: 'waiting' }>; /** The saved card pays it (a charge scheduled or under way): paying by hand stays possible, quietly. */ card: boolean }) {
   const t = useTranslations('balance');
   return (
     <div className={join('rounded-control border p-3', row.tone === 'danger' ? 'border-danger/40 bg-danger-soft' : 'border-attention/40 bg-attention-soft')} data-row="waiting" data-due={row.due ?? undefined}>
@@ -209,8 +246,9 @@ function Waiting({ row }: { row: Extract<BalanceRow, { kind: 'waiting' }> }) {
         {row.due === 'overdue' ? <Badge tone="danger">{t('overdue')}</Badge> : row.due === 'soon' ? <Badge tone="attention">{t('dueSoon')}</Badge> : null}
       </div>
       {row.dueLabel ? <p className="mt-1 ps-7 text-sm font-semibold" data-due-label>{t('dueOn', { when: row.dueLabel })}</p> : null}
+      {card ? <p className="mt-2 flex items-start gap-2 ps-7 text-sm text-brand-strong" data-card-pays><Icon name="renew" size={16} className="mt-1 shrink-0" />{t('auto.cardPays')}</p> : null}
       {row.href ? (
-        <Link href={row.href} className={join(buttonLook('primary'), 'mt-3 min-h-11 w-full px-4 text-sm sm:w-auto')} data-pay-invoice>
+        <Link href={row.href} className={join(buttonLook(card ? 'quiet' : 'primary'), 'mt-3 min-h-11 w-full px-4 text-sm sm:w-auto')} data-pay-invoice>
           {t('pay', { amount: row.amount })}
           <Icon name="chevron" size={16} className="rtl:-scale-x-100" />
         </Link>

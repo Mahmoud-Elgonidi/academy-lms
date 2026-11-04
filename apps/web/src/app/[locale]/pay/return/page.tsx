@@ -10,6 +10,7 @@ import { StartedWelcome } from '@/components/start/started-welcome';
 import { buttonLook, join } from '@/components/ui';
 import { read } from '@/lib/api/server';
 import type { FamilyLessons, Invoices } from '@/lib/family/types';
+import { CARDS_PATH, cardSaved } from '@/lib/family/cards';
 import { liveOf } from '@/lib/live-server';
 import { momentNow } from '@/lib/site/report';
 import { SESSION_COOKIE } from '@/lib/session';
@@ -128,12 +129,28 @@ export default async function PayReturn({ searchParams }: Props) {
           </div>
           {state === 'failed' && summary.outstanding.amount_minor > 0 ? (
             <div className="mt-4 space-y-3" data-retry>
-              {row && row.pay_with.length > 0 ? <PayNow invoice={summary.id} amount={summary.outstanding.amount} accounts={row.pay_with} /> : null}
+              {row && row.pay_with.length > 0 ? <PayNow invoice={summary.id} amount={summary.outstanding.amount} accounts={row.pay_with} saveCard={found.data.save_card} /> : null}
               <a href={`/${locale}/family/invoices/${summary.id}`} className="block text-center text-sm font-semibold text-brand-strong">{t('otherWays')}</a>
             </div>
           ) : null}
           {state === 'confirming' ? <p className="mt-3 text-sm text-muted">{t('confirmingNote')}</p> : null}
         </section>
+
+        {state === 'paid' && cardSaved(payment) ? (
+          <section className="lt-card" aria-labelledby="pr-card" data-card-saved>
+            <div className="flex items-start gap-3">
+              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-brand-soft text-brand-strong" aria-hidden="true"><Icon name="card" size={24} /></span>
+              <div className="min-w-0">
+                <h2 id="pr-card" className="text-lg font-bold">{t('card.title')}</h2>
+                <p className="mt-1 text-ink/80">{t('card.text')}</p>
+                <a href={`/${locale}${CARDS_PATH}`} className={join(buttonLook('quiet'), 'mt-3 min-h-11 px-4 text-sm')} data-manage-cards>
+                  {t('card.manage')}
+                  <Icon name="chevron" size={16} className="rtl:-scale-x-100" />
+                </a>
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         {state === 'paid' ? (
           <StartedWelcome

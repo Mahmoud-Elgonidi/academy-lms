@@ -8,7 +8,8 @@ import { Icon } from '@/components/icons';
 import { FormatBadge } from '@/components/lesson-format';
 import { Badge, Empty, Heading, Notice, SectionTitle, join, type Tone } from '@/components/ui';
 import { Link, redirect } from '@/i18n/navigation';
-import { get } from '@/lib/api/server';
+import { get, read } from '@/lib/api/server';
+import { CARDS_PATH, cardsLine, type Cards } from '@/lib/family/cards';
 import { family } from '@/lib/family/context';
 import { seesMoney } from '@/lib/family/rules';
 import { transferGroups, transferText } from '@/lib/family/transfer';
@@ -51,12 +52,18 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
   if (!seesMoney(fam.stage)) redirect({ href: '/family', locale });
   const learner = fam.current;
 
-  const [invoices, balance, f, bt] = await Promise.all([
+  const [invoices, balance, f, bt, cardsRead, ct] = await Promise.all([
     get<Invoices>('/v1/family/invoices'),
     learner ? get<Balance>('/v1/family/balance', { query: { learner_id: learner.id } }) : Promise.resolve(null),
     getTranslations('format'),
     getTranslations('balance'),
+    read<{ data: Cards }>('/v1/family/cards'),
+    getTranslations('cards'),
   ]);
+  // The saved card and automatic renewal (J5b): the way to its page, and saving a card while paying online.
+  const cards = cardsRead.ok ? cardsRead.data.data : null;
+  const saveCard = cards ? { offered: true, version: cards.mandate.version, text: cards.mandate.text } : null;
+  const line = cards ? cardsLine(cards) : null;
   const owed = invoices.data.filter((i) => i.outstanding_minor > 0);
   // Where to transfer, once per text: named by invoice only when the payer's invoices go to different places.
   const transfers = transferGroups(owed, fam.stage);
@@ -97,7 +104,7 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
                   </div>
                   <div className="mt-4 space-y-3 border-t border-line pt-4">
                     {i.proof ? <ProofLine proof={i.proof} /> : null}
-                    {i.pay_with.length > 0 || !i.can_send_proof ? <PayInvoice invoice={i} /> : null}
+                    {i.pay_with.length > 0 || !i.can_send_proof ? <PayInvoice invoice={i} saveCard={saveCard} /> : null}
                     <SendProof invoice={i} manual={invoices.manual} transfer={transferText(i, fam.stage)} primary={i.pay_with.length === 0} canSend={i.can_send_proof} />
                   </div>
                 </article>
@@ -105,6 +112,19 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
             ))}
           </ul>
         </section>
+      ) : null}
+
+      {line ? (
+        <Link href={CARDS_PATH} className="lift mt-5 flex items-center gap-3 rounded-card border border-line bg-white p-4 hover:border-brand-line" data-cards-entry={line.state}>
+          <span className={join('grid size-11 shrink-0 place-items-center rounded-full', line.state === 'on' ? 'bg-brand text-white' : 'bg-brand-soft text-brand-strong')} aria-hidden="true">
+            <Icon name={line.state === 'on' ? 'renew' : 'card'} size={22} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold">{ct('title')}</span>
+            <span className="block text-sm text-muted">{line.card ? ct(`entry.${line.state}`, { card: line.card }) : ct('entry.none')}</span>
+          </span>
+          <Icon name="chevron" size={18} className="shrink-0 text-muted rtl:-scale-x-100" />
+        </Link>
       ) : null}
 
       {learner && balance ? (

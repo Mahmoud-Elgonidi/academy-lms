@@ -59,6 +59,8 @@ export default defineConfig({
     { name: 'start', testMatch: /start-course\.spec\.ts/, use: { ...devices['Pixel 7'] } },
     // A clear balance on each course and adding a child (J5a): the demo's Hala with an invoice due tomorrow, students in their looks, a new guardian adding a child (its own families).
     { name: 'balance', testMatch: /balance\.spec\.ts/, use: { ...devices['Pixel 7'] } },
+    // The saved card and automatic renewal (J5b): a new family pays with "save my card", the renewal charged to it, renewal off and on, the card removed (its own family).
+    { name: 'auto-renew', testMatch: /auto-renew\.spec\.ts/, use: { ...devices['Pixel 7'] } },
   ],
   webServer: process.env.E2E_SERVE
     ? { command: 'npm run start', url: `${base}/ar/sign-in`, reuseExistingServer: true, timeout: 120_000 }

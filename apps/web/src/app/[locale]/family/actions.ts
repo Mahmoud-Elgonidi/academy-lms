@@ -5,6 +5,7 @@ import { cookies, headers } from 'next/headers';
 import { call, send, type Outcome } from '@/lib/api/server';
 import { LEARNER_COOKIE } from '@/lib/family/context';
 import type { ChildBody } from '@/lib/family/add-child';
+import { checkoutBody, type Cards } from '@/lib/family/cards';
 import type { AddedChild, CancelPreview, Rating } from '@/lib/family/types';
 import type { OpenedChest } from '@/lib/journey/types';
 
@@ -126,14 +127,37 @@ export async function cheersSeen(): Promise<void> {
  * /{locale}/pay/return (the invoice and the payment as they stand), else to
  * the academy's pay page as before.
  */
-export async function payInvoice(id: string, accountId: string | null, key: string, back?: 'portal'): Promise<{ ok: true; url: string } | { ok: false; message?: string }> {
+export async function payInvoice(id: string, accountId: string | null, key: string, back?: 'portal', save?: { version: string } | null): Promise<{ ok: true; url: string } | { ok: false; message?: string }> {
   const opened = await send<{ url: string }>('post', '/v1/family/invoices/{invoice}/checkout', {
     params: { invoice: id },
-    body: { ...(accountId ? { account_id: accountId } : {}), ...(back ? { return: back } : {}) },
+    body: checkoutBody(accountId, back, save ?? null),
     idempotencyKey: key,
   });
   if (!opened.ok) return { ok: false, message: Object.values(opened.problem.errors)[0]?.[0] ?? (opened.problem.title || undefined) };
   return { ok: true, url: opened.data.url };
+}
+
+/**
+ * The payer turns automatic renewal on or off (J5b; every account of theirs,
+ * or one), one key per press; the answer is the cards and renewal as they
+ * now stand, and the API's sentence to show.
+ */
+export async function setAutoRenew(on: boolean, accountId: string | null, key: string): Promise<{ ok: true; cards: Cards; message: string } | { ok: false; message?: string }> {
+  const done = await send<{ data: Cards; message: string }>('put', '/v1/family/cards/auto-renew', {
+    body: { on, ...(accountId ? { billing_account_id: accountId } : {}) },
+    idempotencyKey: key,
+  });
+  if (!done.ok) return { ok: false, message: Object.values(done.problem.errors)[0]?.[0] ?? (done.problem.title || undefined) };
+  refresh();
+  return { ok: true, cards: done.data.data, message: done.data.message };
+}
+
+/** The payer removes a saved card (renewal goes off with the last one); one key per press. */
+export async function removeCard(card: string, key: string): Promise<{ ok: true; cards: Cards; message: string } | { ok: false; message?: string }> {
+  const done = await send<{ data: Cards; message: string }>('delete', '/v1/family/cards/{card}', { params: { card }, idempotencyKey: key });
+  if (!done.ok) return { ok: false, message: Object.values(done.problem.errors)[0]?.[0] ?? (done.problem.title || undefined) };
+  refresh();
+  return { ok: true, cards: done.data.data, message: done.data.message };
 }
 
 /**

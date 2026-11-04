@@ -246,3 +246,50 @@ export function endTestStarts(): number {
 export function freeTestTrials(): number {
   return Number(artisan(['tinker', '--execute=echo Database\\Seeders\\E2eResetSeeder::freeTestTrials();']).trim().split('\n').pop());
 }
+
+/* ── Automatic renewal (J5b) ── */
+
+/**
+ * Runs PHP inside the demo academy (as E2eResetSeeder's helpers do) and gives
+ * back the last line it echoed; the queue runs in place, as a worker would.
+ */
+function inDemo(php: string): string {
+  const code = [
+    "if (app()->isProduction()) { throw new RuntimeException('e2e only'); }",
+    "$academy = app(Modules\\Platform\\Contracts\\TenantDirectory::class)->bySlug('demo');",
+    "config(['queue.default' => 'sync']);",
+    `echo app(Modules\\SharedKernel\\Tenancy\\TenantContext::class)->run($academy, function () { ${php} });`,
+  ].join(' ');
+  return artisan(['tinker', `--execute=${code}`]).trim().split('\n').pop() ?? '';
+}
+
+/**
+ * The course's next package falls due now (IssueRenewal, as the hourly
+ * renewal would issue it), and billing:follow-up's automatic renewal tells
+ * the payer it is coming (FollowUpAutoRenewals, from 9 am on the payer's
+ * clock); the invoice and how its automatic charge stands.
+ */
+export function renewalComing(enrollment: string): { invoice: string; number: string; charge: string | null } {
+  if (!/^[0-9a-f-]{36}$/.test(enrollment)) throw new Error(`Not a course: ${enrollment}`);
+  const out = inDemo([
+    `$s = Modules\\Billing\\Models\\Subscription::ofEnrollment('${enrollment}');`,
+    "$invoice = app(Modules\\Billing\\Actions\\IssueRenewal::class)->handle($s);",
+    "if ($invoice === null) { return json_encode(['invoice' => '', 'number' => '', 'charge' => null]); }",
+    "$now = Carbon\\CarbonImmutable::now(); $there = $now->setTimezone(app(Modules\\Billing\\Queries\\Collections\\PayerReach::class)->timezone($s->billingAccount->payer_id));",
+    "$at = $there->hour < 9 ? $there->setTime(9, 5)->utc() : $now;",
+    "app(Modules\\Billing\\Actions\\AutoRenew\\FollowUpAutoRenewals::class)->handle($at);",
+    "return json_encode(['invoice' => $invoice->id, 'number' => $invoice->number, 'charge' => Illuminate\\Support\\Facades\\DB::table('auto_charges')->where('invoice_id', $invoice->id)->value('status')]);",
+  ].join(' '));
+  return JSON.parse(out) as { invoice: string; number: string; charge: string | null };
+}
+
+/** The automatic charge's moment comes now (three days early, for the test) and billing:follow-up charges the saved card; how it ends. */
+export function renewalChargedNow(invoice: string): string {
+  if (!/^[0-9a-f-]{36}$/.test(invoice)) throw new Error(`Not an invoice: ${invoice}`);
+  return inDemo([
+    "$now = Carbon\\CarbonImmutable::now();",
+    `Illuminate\\Support\\Facades\\DB::table('auto_charges')->where('invoice_id', '${invoice}')->where('status', 'scheduled')->update(['charge_at' => $now->subMinute()]);`,
+    "app(Modules\\Billing\\Actions\\AutoRenew\\FollowUpAutoRenewals::class)->handle($now);",
+    `return (string) Illuminate\\Support\\Facades\\DB::table('auto_charges')->where('invoice_id', '${invoice}')->value('status');`,
+  ].join(' '));
+}
