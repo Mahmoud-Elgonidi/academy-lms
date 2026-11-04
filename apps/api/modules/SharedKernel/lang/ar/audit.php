@@ -21,6 +21,11 @@ return [
             'transfer_details_saved' => 'تعديل بيانات التحويل',
             'self_serve_on' => 'السماح للأسر ببدء كورس والدفع بنفسها',
             'self_serve_off' => 'إيقاف بدء الأسر للكورسات بنفسها (التسجيل من المكتب فقط)',
+            'card_saved' => 'حفظ بطاقة :brand تنتهي بـ :last4 للتجديد التلقائي (الموافقة :mandate_version)',
+            'card_revoked' => 'حذف بطاقة :brand تنتهي بـ :last4 (:reason)',
+            'auto_renew_on' => 'تشغيل التجديد التلقائي',
+            'auto_renew_off' => 'إيقاف التجديد التلقائي',
+            'auto_charge_cancelled' => 'إلغاء خصم تلقائي لم يحن بعد (:reason)',
         ],
         'policy' => [
             'saved' => 'إصدار :version من سياسة الإلغاء والتعويض',

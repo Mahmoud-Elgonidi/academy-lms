@@ -41,7 +41,7 @@ final class ReceiveGatewayWebhook
 
         $checkout = $event->ref === null ? null
             : PaymentCheckout::query()->where('gateway_account_id', $account->id)->where('provider_ref', $event->ref)->first();
-        $checkout ??= ($id = $event->payload['data']['metadata']['checkout_id'] ?? null) && Str::isUuid($id)
+        $checkout ??= ($id = $event->payload['data']['metadata']['checkout_id'] ?? $event->payload['data']['object']['metadata']['checkout_id'] ?? null) && Str::isUuid($id)
             ? PaymentCheckout::query()->where('gateway_account_id', $account->id)->find($id) : null;
 
         try {

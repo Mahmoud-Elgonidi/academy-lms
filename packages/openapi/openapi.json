@@ -337,7 +337,7 @@
         "/v1/family/courses/{enrollment}/balance": {
             "get": {
                 "operationId": "family.courses.balance",
-                "description": "One course of a learner I follow: lessons left, and, by the look of the person signed in (viewer_stage), more;\nwhat a look does not show is null. The classic look (a guardian, an adult learner): the plan and its shape, the\nlessons left, when they expire (expiry.soon within 7 days, with a sentence), and the next invoice: the one waiting\nto be paid (to its payer, with its id to open), or when the next goes out and about how much. The middle-school and\nteen looks: the plan's shape, lessons left and expiry, no money. The kids' look: lessons left only. auto_renew is\nnull until saved cards come (J5b).",
+                "description": "One course of a learner I follow: lessons left, and, by the look of the person signed in (viewer_stage), more;\nwhat a look does not show is null. The classic look (a guardian, an adult learner): the plan and its shape, the\nlessons left, when they expire (expiry.soon within 7 days, with a sentence), and the next invoice: the one waiting\nto be paid (to its payer, with its id to open), or when the next goes out and about how much. The middle-school and\nteen looks: the plan's shape, lessons left and expiry, no money. The kids' look: lessons left only. automatic_renewal\n(the classic look, to the payer only): whether renewals are charged to the saved card, which card (brand, last\nfour, expiry), and the waiting invoice's automatic charge (when, how much).",
                 "summary": "A course's balance",
                 "tags": [
                     "Billing"
@@ -730,7 +730,119 @@
                                                 },
                                                 "auto_renew": {
                                                     "type": "null",
-                                                    "description": "Saved card and automatic renewal come later (J5b): null for now."
+                                                    "description": "Kept null for earlier app versions (its type is null in the published API): read automatic_renewal."
+                                                },
+                                                "automatic_renewal": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "Automatic renewal (J5b; the classic look, the payer only; else null): on (renewals charged to the saved card three days\nafter they are told), the card (brand, last four, expiry, expires_soon), the waiting invoice's charge, a sentence.\nTurn it on or off: PUT family/cards/auto-renew.",
+                                                    "properties": {
+                                                        "on": {
+                                                            "type": "boolean",
+                                                            "description": "Renewals of this course are charged to the saved card."
+                                                        },
+                                                        "card": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The card renewals in this currency are charged to: brand, last four, expiry only.",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "brand": {
+                                                                    "type": "string"
+                                                                },
+                                                                "last4": {
+                                                                    "type": "string"
+                                                                },
+                                                                "exp_month": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "exp_year": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                },
+                                                                "expires_soon": {
+                                                                    "type": "boolean"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "brand",
+                                                                "last4",
+                                                                "exp_month",
+                                                                "exp_year",
+                                                                "label",
+                                                                "expires_soon"
+                                                            ]
+                                                        },
+                                                        "next_charge": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The waiting invoice's automatic charge: when, and how much.",
+                                                            "properties": {
+                                                                "at": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "utc": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "local": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "timezone": {
+                                                                            "type": "null"
+                                                                        },
+                                                                        "label": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "utc",
+                                                                        "local",
+                                                                        "timezone",
+                                                                        "label"
+                                                                    ]
+                                                                },
+                                                                "amount": {
+                                                                    "type": "string"
+                                                                },
+                                                                "amount_minor": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "status": {
+                                                                    "type": "string",
+                                                                    "description": "scheduled, retry or charging"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "at",
+                                                                "amount",
+                                                                "amount_minor",
+                                                                "status"
+                                                            ]
+                                                        },
+                                                        "text": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "on",
+                                                        "card",
+                                                        "next_charge",
+                                                        "text"
+                                                    ]
                                                 }
                                             },
                                             "required": [
@@ -750,7 +862,8 @@
                                                 "waiting_invoice",
                                                 "next_invoice",
                                                 "renewal_note",
-                                                "auto_renew"
+                                                "auto_renew",
+                                                "automatic_renewal"
                                             ]
                                         }
                                     },
@@ -1593,19 +1706,46 @@
                                                 },
                                                 "hint": {
                                                     "type": "string"
+                                                },
+                                                "card_saved": {
+                                                    "type": "string",
+                                                    "description": "Whether the card was kept (the payer asked, and the gateway kept it): renewals are charged to it."
                                                 }
                                             },
                                             "required": [
                                                 "id",
                                                 "status",
                                                 "text",
-                                                "hint"
+                                                "hint",
+                                                "card_saved"
+                                            ]
+                                        },
+                                        "save_card": {
+                                            "type": "object",
+                                            "description": "Saving the card while paying (J5b): the words to tick, their version, and whether this payer's look allows it.",
+                                            "properties": {
+                                                "offered": {
+                                                    "type": "boolean"
+                                                },
+                                                "version": {
+                                                    "type": "string",
+                                                    "const": "2027-07-20"
+                                                },
+                                                "text": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "offered",
+                                                "version",
+                                                "text"
                                             ]
                                         }
                                     },
                                     "required": [
                                         "data",
-                                        "checkout"
+                                        "checkout",
+                                        "save_card"
                                     ]
                                 }
                             }
@@ -2248,7 +2388,7 @@
         "/v1/family/invoices/{invoice}/checkout": {
             "post": {
                 "operationId": "family.invoices.checkout",
-                "description": "Opens a checkout at the academy's gateway account (the first one when none is named) and answers its URL;\nopen it in a browser. The invoice is paid only when the gateway confirms it. Send an Idempotency-Key.",
+                "description": "Opens a checkout at the academy's gateway account (the first one when none is named) and answers its URL;\nopen it in a browser. The invoice is paid only when the gateway confirms it. With save_card (and the mandate's\nversion), the gateway keeps the card on its page and renewals are charged to it automatically, three days after\nthe payer is told (only on an account that saves_cards; 422 with why not). Send an Idempotency-Key.",
                 "summary": "Pay an invoice online",
                 "tags": [
                     "Billing"
@@ -2323,6 +2463,21 @@
                                             "app",
                                             null
                                         ]
+                                    },
+                                    "save_card": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ],
+                                        "description": "\"Save my card and renew automatically\", ticked by the payer (the gateway keeps it on its page; J5b)."
+                                    },
+                                    "mandate_version": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The mandate's version the payer read and ticked (GET family/cards: mandate.version); needed with save_card.",
+                                        "maxLength": 20
                                     }
                                 }
                             }
@@ -2384,6 +2539,868 @@
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/family/cards": {
+            "get": {
+                "operationId": "family.cards",
+                "description": "The cards kept for me (brand, last four, expiry), per account whether renewals are charged automatically and to\nwhich card, the automatic charges coming, and the mandate's words and version (to tick when paying). 403\ncards-refused (family_only) outside the classic look.",
+                "summary": "My saved cards and automatic renewal",
+                "tags": [
+                    "Billing"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "cards": {
+                                                    "type": "array",
+                                                    "description": "The cards kept for this payer: brand, last four and expiry only.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "brand": {
+                                                                "type": "string",
+                                                                "description": "visa, mastercard, mada, amex, \u2026 or card"
+                                                            },
+                                                            "brand_label": {
+                                                                "type": "string"
+                                                            },
+                                                            "last4": {
+                                                                "type": "string"
+                                                            },
+                                                            "exp_month": {
+                                                                "type": "integer"
+                                                            },
+                                                            "exp_year": {
+                                                                "type": "integer"
+                                                            },
+                                                            "label": {
+                                                                "type": "string",
+                                                                "description": "\"Visa ****4242\""
+                                                            },
+                                                            "account": {
+                                                                "type": "string",
+                                                                "description": "The gateway account it is kept at (its name as payers see it)."
+                                                            },
+                                                            "expires_soon": {
+                                                                "type": "boolean",
+                                                                "description": "It expires within a month, or has expired: ask for a new one."
+                                                            },
+                                                            "saved_at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "brand",
+                                                            "brand_label",
+                                                            "last4",
+                                                            "exp_month",
+                                                            "exp_year",
+                                                            "label",
+                                                            "account",
+                                                            "expires_soon",
+                                                            "saved_at"
+                                                        ]
+                                                    }
+                                                },
+                                                "accounts": {
+                                                    "type": "array",
+                                                    "description": "Per account of this payer (one per currency, usually one): automatic renewal and the card it uses.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "currency": {
+                                                                "type": "string"
+                                                            },
+                                                            "auto_renew": {
+                                                                "type": "boolean",
+                                                                "description": "Renewals are charged to the card three days after they are told."
+                                                            },
+                                                            "card_id": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "The card a renewal in this currency is charged to; null when none can be."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "currency",
+                                                            "auto_renew",
+                                                            "card_id"
+                                                        ]
+                                                    }
+                                                },
+                                                "auto_renew": {
+                                                    "type": "boolean",
+                                                    "description": "Whether any of this payer's renewals are charged automatically."
+                                                },
+                                                "coming": {
+                                                    "type": "array",
+                                                    "description": "Automatic charges coming (or under way): turn automatic renewal off to stop the ones still to come.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "invoice_id": {
+                                                                "type": "string"
+                                                            },
+                                                            "number": {
+                                                                "type": "string"
+                                                            },
+                                                            "amount": {
+                                                                "type": "string"
+                                                            },
+                                                            "amount_minor": {
+                                                                "type": "integer"
+                                                            },
+                                                            "currency": {
+                                                                "type": "string"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "description": "scheduled, retry (a soft decline, tried once more) or charging (under way: it can no longer be stopped)."
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "invoice_id",
+                                                            "number",
+                                                            "amount",
+                                                            "amount_minor",
+                                                            "currency",
+                                                            "status",
+                                                            "at"
+                                                        ]
+                                                    }
+                                                },
+                                                "mandate": {
+                                                    "type": "object",
+                                                    "description": "The words ticked to save a card and renew automatically, and their version (send it back with save_card).",
+                                                    "properties": {
+                                                        "version": {
+                                                            "type": "string",
+                                                            "const": "2027-07-20"
+                                                        },
+                                                        "text": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "version",
+                                                        "text"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "cards",
+                                                "accounts",
+                                                "auto_renew",
+                                                "coming",
+                                                "mandate"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/family/cards/auto-renew": {
+            "put": {
+                "operationId": "family.cards.auto-renew",
+                "description": "on: true needs a live card for the account's currency (422 with why not, in my words); off cancels the charges\nstill to come (one under way finishes). billing_account_id narrows it to one account of mine. Answers my cards\nand renewal as GET family/cards. Send an Idempotency-Key.",
+                "summary": "Turn automatic renewal on or off",
+                "tags": [
+                    "Billing"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "on": {
+                                        "type": "boolean"
+                                    },
+                                    "billing_account_id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "uuid"
+                                    }
+                                },
+                                "required": [
+                                    "on"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "cards": {
+                                                    "type": "array",
+                                                    "description": "The cards kept for this payer: brand, last four and expiry only.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "brand": {
+                                                                "type": "string",
+                                                                "description": "visa, mastercard, mada, amex, \u2026 or card"
+                                                            },
+                                                            "brand_label": {
+                                                                "type": "string"
+                                                            },
+                                                            "last4": {
+                                                                "type": "string"
+                                                            },
+                                                            "exp_month": {
+                                                                "type": "integer"
+                                                            },
+                                                            "exp_year": {
+                                                                "type": "integer"
+                                                            },
+                                                            "label": {
+                                                                "type": "string",
+                                                                "description": "\"Visa ****4242\""
+                                                            },
+                                                            "account": {
+                                                                "type": "string",
+                                                                "description": "The gateway account it is kept at (its name as payers see it)."
+                                                            },
+                                                            "expires_soon": {
+                                                                "type": "boolean",
+                                                                "description": "It expires within a month, or has expired: ask for a new one."
+                                                            },
+                                                            "saved_at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "brand",
+                                                            "brand_label",
+                                                            "last4",
+                                                            "exp_month",
+                                                            "exp_year",
+                                                            "label",
+                                                            "account",
+                                                            "expires_soon",
+                                                            "saved_at"
+                                                        ]
+                                                    }
+                                                },
+                                                "accounts": {
+                                                    "type": "array",
+                                                    "description": "Per account of this payer (one per currency, usually one): automatic renewal and the card it uses.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "currency": {
+                                                                "type": "string"
+                                                            },
+                                                            "auto_renew": {
+                                                                "type": "boolean",
+                                                                "description": "Renewals are charged to the card three days after they are told."
+                                                            },
+                                                            "card_id": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "The card a renewal in this currency is charged to; null when none can be."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "currency",
+                                                            "auto_renew",
+                                                            "card_id"
+                                                        ]
+                                                    }
+                                                },
+                                                "auto_renew": {
+                                                    "type": "boolean",
+                                                    "description": "Whether any of this payer's renewals are charged automatically."
+                                                },
+                                                "coming": {
+                                                    "type": "array",
+                                                    "description": "Automatic charges coming (or under way): turn automatic renewal off to stop the ones still to come.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "invoice_id": {
+                                                                "type": "string"
+                                                            },
+                                                            "number": {
+                                                                "type": "string"
+                                                            },
+                                                            "amount": {
+                                                                "type": "string"
+                                                            },
+                                                            "amount_minor": {
+                                                                "type": "integer"
+                                                            },
+                                                            "currency": {
+                                                                "type": "string"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "description": "scheduled, retry (a soft decline, tried once more) or charging (under way: it can no longer be stopped)."
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "invoice_id",
+                                                            "number",
+                                                            "amount",
+                                                            "amount_minor",
+                                                            "currency",
+                                                            "status",
+                                                            "at"
+                                                        ]
+                                                    }
+                                                },
+                                                "mandate": {
+                                                    "type": "object",
+                                                    "description": "The words ticked to save a card and renew automatically, and their version (send it back with save_card).",
+                                                    "properties": {
+                                                        "version": {
+                                                            "type": "string",
+                                                            "const": "2027-07-20"
+                                                        },
+                                                        "text": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "version",
+                                                        "text"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "cards",
+                                                "accounts",
+                                                "auto_renew",
+                                                "coming",
+                                                "mandate"
+                                            ]
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "billing::cards.done.on",
+                                                "billing::cards.done.off"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/family/cards/{card}": {
+            "delete": {
+                "operationId": "family.cards.revoke",
+                "description": "The card is let go at once (its reference at the gateway is dropped here); with no card left, automatic renewal\ngoes off and the charges still to come are cancelled. Answers my cards and renewal as GET family/cards. Send an\nIdempotency-Key.",
+                "summary": "Remove a saved card",
+                "tags": [
+                    "Billing"
+                ],
+                "parameters": [
+                    {
+                        "name": "card",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "cards": {
+                                                    "type": "array",
+                                                    "description": "The cards kept for this payer: brand, last four and expiry only.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "brand": {
+                                                                "type": "string",
+                                                                "description": "visa, mastercard, mada, amex, \u2026 or card"
+                                                            },
+                                                            "brand_label": {
+                                                                "type": "string"
+                                                            },
+                                                            "last4": {
+                                                                "type": "string"
+                                                            },
+                                                            "exp_month": {
+                                                                "type": "integer"
+                                                            },
+                                                            "exp_year": {
+                                                                "type": "integer"
+                                                            },
+                                                            "label": {
+                                                                "type": "string",
+                                                                "description": "\"Visa ****4242\""
+                                                            },
+                                                            "account": {
+                                                                "type": "string",
+                                                                "description": "The gateway account it is kept at (its name as payers see it)."
+                                                            },
+                                                            "expires_soon": {
+                                                                "type": "boolean",
+                                                                "description": "It expires within a month, or has expired: ask for a new one."
+                                                            },
+                                                            "saved_at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "brand",
+                                                            "brand_label",
+                                                            "last4",
+                                                            "exp_month",
+                                                            "exp_year",
+                                                            "label",
+                                                            "account",
+                                                            "expires_soon",
+                                                            "saved_at"
+                                                        ]
+                                                    }
+                                                },
+                                                "accounts": {
+                                                    "type": "array",
+                                                    "description": "Per account of this payer (one per currency, usually one): automatic renewal and the card it uses.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "currency": {
+                                                                "type": "string"
+                                                            },
+                                                            "auto_renew": {
+                                                                "type": "boolean",
+                                                                "description": "Renewals are charged to the card three days after they are told."
+                                                            },
+                                                            "card_id": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "The card a renewal in this currency is charged to; null when none can be."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "currency",
+                                                            "auto_renew",
+                                                            "card_id"
+                                                        ]
+                                                    }
+                                                },
+                                                "auto_renew": {
+                                                    "type": "boolean",
+                                                    "description": "Whether any of this payer's renewals are charged automatically."
+                                                },
+                                                "coming": {
+                                                    "type": "array",
+                                                    "description": "Automatic charges coming (or under way): turn automatic renewal off to stop the ones still to come.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "invoice_id": {
+                                                                "type": "string"
+                                                            },
+                                                            "number": {
+                                                                "type": "string"
+                                                            },
+                                                            "amount": {
+                                                                "type": "string"
+                                                            },
+                                                            "amount_minor": {
+                                                                "type": "integer"
+                                                            },
+                                                            "currency": {
+                                                                "type": "string"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "description": "scheduled, retry (a soft decline, tried once more) or charging (under way: it can no longer be stopped)."
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "invoice_id",
+                                                            "number",
+                                                            "amount",
+                                                            "amount_minor",
+                                                            "currency",
+                                                            "status",
+                                                            "at"
+                                                        ]
+                                                    }
+                                                },
+                                                "mandate": {
+                                                    "type": "object",
+                                                    "description": "The words ticked to save a card and renew automatically, and their version (send it back with save_card).",
+                                                    "properties": {
+                                                        "version": {
+                                                            "type": "string",
+                                                            "const": "2027-07-20"
+                                                        },
+                                                        "text": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "version",
+                                                        "text"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "cards",
+                                                "accounts",
+                                                "auto_renew",
+                                                "coming",
+                                                "mandate"
+                                            ]
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "The card was removed."
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"

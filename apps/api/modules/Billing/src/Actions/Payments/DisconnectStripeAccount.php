@@ -2,6 +2,7 @@
 
 namespace Modules\Billing\Actions\Payments;
 
+use Modules\Billing\Actions\Cards\StopGatewayCards;
 use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Payments\GatewayException;
 use Modules\Billing\Payments\StripeConnect;
@@ -30,6 +31,7 @@ final class DisconnectStripeAccount
             }
         }
         $account->update(['is_active' => false]);
+        app(StopGatewayCards::class)->handle($account);   // the cards saved on it can no longer be charged (J5b)
         app(AuditTrail::class)->record('billing.stripe_disconnected', 'gateway_account', $account->id, ['account' => $account->external_id]);
 
         return $account;

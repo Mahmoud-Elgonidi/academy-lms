@@ -9,7 +9,7 @@ return [
     ],
     'modes' => ['test' => 'تجربة', 'live' => 'حقيقي'],
     'statuses' => ['open' => 'مفتوحة', 'paid' => 'مدفوعة', 'failed' => 'لم تتم', 'expired' => 'انتهت', 'refund_due' => 'تحتاج إلى استرداد'],
-    'channels' => ['family' => 'من حسابه', 'link' => 'من رابط الفاتورة'],
+    'channels' => ['family' => 'من حسابه', 'link' => 'من رابط الفاتورة', 'auto' => 'تلقائيًا من البطاقة المحفوظة'],
     'fields' => [
         'gateway' => 'البوابة',
         'label' => 'الاسم الذي يظهر للدافع',
@@ -116,7 +116,7 @@ return [
         'copied' => 'نُسخ ✓',
         'webhook' => 'رابط الـ webhook',
         'webhook_hint' => [
-            'stripe' => 'في Stripe › Developers › Webhooks أضف هذا الرابط، واختر الأحداث: checkout.session.completed وcheckout.session.async_payment_succeeded وcheckout.session.async_payment_failed وcheckout.session.expired.',
+            'stripe' => 'في Stripe › Developers › Webhooks أضف هذا الرابط، واختر الأحداث: checkout.session.completed وcheckout.session.async_payment_succeeded وcheckout.session.async_payment_failed وcheckout.session.expired، وللبطاقات المحفوظة payment_intent.succeeded وpayment_intent.payment_failed.',
             'moyasar' => 'في Moyasar › Settings › Webhooks أضف هذا الرابط بالكلمة السرية نفسها، واختر أحداث الدفع (payment_paid وpayment_failed).',
             'tap' => 'يرسل Tap إلى هذا الرابط تلقائيًا مع كل عملية دفع، ولا يحتاج إلى إعداد.',
             'paymob' => 'يرسل Paymob إلى هذا الرابط تلقائيًا مع كل عملية دفع (موقّعًا بالـ HMAC)، ولا يحتاج إلى إعداد.',

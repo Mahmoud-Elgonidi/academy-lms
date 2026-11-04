@@ -31,6 +31,10 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property CarbonImmutable $expires_at
  * @property ?CarbonImmutable $paid_at
  * @property CarbonImmutable $created_at
+ * @property string $kind page (the gateway's hosted page) | saved (a charge on a saved card, J5b)
+ * @property bool $save_card the payer ticked "save my card and renew automatically"
+ * @property ?string $mandate_version the mandate's version they ticked
+ * @property ?string $payment_method_id the saved card a "saved" checkout charged
  */
 final class PaymentCheckout extends Model
 {
@@ -42,13 +46,14 @@ final class PaymentCheckout extends Model
     protected $fillable = [
         'invoice_id', 'gateway_account_id', 'payer_id', 'channel', 'amount_minor', 'currency', 'status',
         'provider_ref', 'provider_payment_ref', 'url', 'failure', 'expires_at', 'paid_at', 'return_to',
+        'kind', 'save_card', 'mandate_version', 'payment_method_id',
     ];
 
-    protected $attributes = ['status' => 'open'];
+    protected $attributes = ['status' => 'open', 'kind' => 'page', 'save_card' => false];
 
     protected function casts(): array
     {
-        return ['amount_minor' => 'integer', 'expires_at' => 'immutable_datetime', 'paid_at' => 'immutable_datetime', 'created_at' => 'immutable_datetime'];
+        return ['save_card' => 'boolean', 'amount_minor' => 'integer', 'expires_at' => 'immutable_datetime', 'paid_at' => 'immutable_datetime', 'created_at' => 'immutable_datetime'];
     }
 
     public static function lock(string $id): self

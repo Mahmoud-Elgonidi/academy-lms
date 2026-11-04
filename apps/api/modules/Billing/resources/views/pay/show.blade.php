@@ -110,6 +110,14 @@
                         </span>
                         <span aria-hidden="true">{{ str_starts_with(app()->getLocale(), 'ar') ? '←' : '→' }}</span>
                     </button>
+                    @if ($option['saves'])
+                        {{-- J5b: the payer may ask the gateway to keep the card for automatic renewal; the card is typed only on its page. --}}
+                        <label class="save-card">
+                            <input type="checkbox" name="save_card" value="1">
+                            <span><b>{{ __('billing::cards.mandate.label') }}</b> {{ \Modules\Billing\Payments\Cards\Mandate::text() }}</span>
+                        </label>
+                        <input type="hidden" name="mandate_version" value="{{ \Modules\Billing\Payments\Cards\Mandate::VERSION }}">
+                    @endif
                 </form>
             @endforeach
             <p class="secure"><span aria-hidden="true">🔒</span>{{ __($p.'secure') }}</p>

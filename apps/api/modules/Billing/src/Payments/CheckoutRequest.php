@@ -21,5 +21,7 @@ final readonly class CheckoutRequest
         public ?string $payerName = null,
         public ?string $payerEmail = null,
         public ?string $payerPhone = null,
+        /** The payer ticked "save my card and renew automatically": the gateway keeps the card on its page (J5b). */
+        public bool $saveCard = false,
     ) {}
 }

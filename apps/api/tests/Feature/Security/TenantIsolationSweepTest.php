@@ -26,7 +26,7 @@ use Modules\Platform\Models\SaasPlan;
 const REFUSED = [401, 403, 404, 410, 422];
 
 // Family routes about the person's own account, whichever learner is asked for.
-const OWN_FAMILY = ['api/v1/family/learners', 'api/v1/family/consents', 'api/v1/family/invoices'];
+const OWN_FAMILY = ['api/v1/family/learners', 'api/v1/family/consents', 'api/v1/family/invoices', 'api/v1/family/cards', 'api/v1/family/cards/auto-renew'];
 
 beforeEach(function () {
     SaasPlan::query()->create(['code' => 'pro', 'name_ar' => 'الاحتراف', 'name_en' => 'Pro', 'max_teachers' => 75, 'max_active_students' => 1000,
@@ -60,6 +60,8 @@ beforeEach(function () {
         'proof' => $one('manual_payment_proofs'),
         'resource' => $one('node_resources'),
         'checkout' => $one('payment_checkouts'),
+        // A saved card (J5b).
+        'card' => $one('payment_methods'),
         'user' => $user('yousef.guardian@demo.test'),
         'program' => $one('programs'),
         // The newer doors: conversations, the games, privacy requests, a teacher's vetting scans.

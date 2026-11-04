@@ -3,6 +3,9 @@
 namespace Modules\Billing\Payments;
 
 use Illuminate\Http\Request;
+use Modules\Billing\Payments\Cards\ChargeResult;
+use Modules\Billing\Payments\Cards\SavedCard;
+use Modules\Billing\Payments\Cards\SavedCharge;
 use Modules\SharedKernel\Money\Money;
 
 /**
@@ -11,6 +14,12 @@ use Modules\SharedKernel\Money\Money;
  * touches the platform (PCI SAQ A). The gateway's word is the truth: a
  * checkout counts as paid only when fetch() says so, whatever a webhook or
  * a return URL claims.
+ *
+ * Saved cards (docs/architecture/02, section 27, J5b): a gateway that keeps
+ * cards does it on its own page, when the checkout asked (CheckoutRequest
+ * saveCard); the card's references come from the gateway's own answer after
+ * the payment (savedCard), and a renewal is charged on them with no one at a
+ * page (chargeSaved), then asked like any checkout (fetchSaved).
  */
 interface PaymentGateway
 {
@@ -28,4 +37,28 @@ interface PaymentGateway
 
     /** Null when the keys work, else what the gateway said. */
     public function check(): ?string;
+
+    /** Whether this gateway keeps cards for later charges here (Paymob: not offered). */
+    public function savesCards(): bool;
+
+    /**
+     * The card kept with a paid checkout that asked to save it, from the gateway's own records; null when it kept none.
+     *
+     * @throws GatewayException
+     */
+    public function savedCard(string $providerRef): ?SavedCard;
+
+    /** Charges a saved card once, merchant-initiated (never retried here; a network error is "unknown"). */
+    public function chargeSaved(SavedCharge $charge): ChargeResult;
+
+    /** Where a charge on a saved card stands, asked of the gateway itself. @throws GatewayException */
+    public function fetchSaved(string $ref): CheckoutState;
+
+    /**
+     * The gateway's reference of a charge on a saved card we never heard back about (the network failed), found by
+     * our checkout's id; null when it has none (or this gateway cannot look it up).
+     *
+     * @throws GatewayException
+     */
+    public function findSaved(string $checkoutId): ?string;
 }

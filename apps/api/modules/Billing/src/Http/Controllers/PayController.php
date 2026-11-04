@@ -19,6 +19,7 @@ use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentCheckout;
 use Modules\Billing\Models\PaymentProof;
+use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Queries\InvoiceCourses;
@@ -65,6 +66,9 @@ final class PayController
             'checkout' => $checkout,
             'options' => $invoice->status === 'issued' ? array_map(fn (GatewayAccount $account) => [
                 'account' => $account,
+                // Keeping the card for automatic renewal (J5b): offered to the payer's own link on a gateway that keeps cards.
+                'saves' => $payerId !== null && $payerId === DB::table('billing_accounts')->where('id', $invoice->billing_account_id)->value('payer_id')
+                    && self::savesCards($account),
                 'url' => URL::temporarySignedRoute('billing.pay.start', now()->addHours(2), array_filter(['invoice' => $invoice->id, 'account' => $account->id, 'u' => $payerId]), absolute: false),
             ], $online->accountsFor($invoice)) : [],
             'manual' => $manual,
@@ -141,7 +145,7 @@ final class PayController
     public function start(Request $request, Invoice $invoice, GatewayAccount $account, StartCheckout $start, PayLinks $links): RedirectResponse
     {
         try {
-            $checkout = $start->handle($invoice, $account, $request->query('u'), 'link');
+            $checkout = $start->handle($invoice, $account, $request->query('u'), 'link', null, $request->boolean('save_card'), $request->input('mandate_version'));
         } catch (ValidationException $e) {
             return redirect()->to($links->invoice($invoice, $request->query('u')))->withErrors($e->errors());
         }
@@ -168,6 +172,15 @@ final class PayController
         }
 
         return redirect()->to($links->invoice($checkout->invoice()->firstOrFail(), $checkout->payer_id, ['checkout' => $checkout->id]));
+    }
+
+    private static function savesCards(GatewayAccount $account): bool
+    {
+        try {
+            return app(GatewayManager::class)->for($account)->savesCards();
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     /** The page in the payer's language and clock, else the academy's. */

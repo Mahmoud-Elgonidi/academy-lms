@@ -1,0 +1,86 @@
+<?php
+
+// Saved cards and automatic renewal (docs/architecture/02, section 27, J5b).
+return [
+    'mandate' => [
+        'label' => 'Save my card and renew automatically.',
+        'text' => 'The payment provider keeps my card (the academy never sees it). When a package\'s next invoice is issued, I am told the amount, the date and the card :days days before it is charged, and I can turn automatic renewal off or remove the card at any time from my account or the link in that message.',
+    ],
+    'brands' => [
+        'visa' => 'Visa', 'mastercard' => 'Mastercard', 'mada' => 'mada', 'amex' => 'American Express', 'discover' => 'Discover',
+        'jcb' => 'JCB', 'unionpay' => 'UnionPay', 'diners' => 'Diners Club', 'card' => 'Card',
+    ],
+    'failures' => [
+        'declined' => 'The bank declined the payment.',
+        'insufficient_funds' => 'There was not enough balance on the card.',
+        'expired_card' => 'The card has expired.',
+        'lost_card' => 'The bank no longer accepts this card.',
+        'invalid_card' => 'The card can no longer be charged.',
+        'authentication_required' => 'The bank asked for your confirmation, which cannot be given in an automatic payment.',
+        'processing_error' => 'The payment provider could not complete the payment just now.',
+        'unconfirmed' => 'We could not confirm the payment with the payment provider, so we will not try again.',
+    ],
+    'skipped' => [
+        'currency' => 'the saved card is not on a payment account that takes this invoice\'s currency',
+        'card_expires' => 'the saved card expires before the payment date',
+        'card_expired' => 'the saved card has expired',
+        'gateway_off' => 'the academy no longer takes card payments through the account the card is saved on',
+        'no_card' => 'there is no saved card',
+    ],
+    'balance' => [
+        'on' => 'Renews automatically with :card. You are told three days before every charge.',
+        'off_with_card' => 'Automatic renewal is off. Your saved card: :card.',
+        'off' => 'Automatic renewal is off. Tick "save my card" when you next pay to turn it on.',
+    ],
+    'done' => [
+        'on' => 'Automatic renewal is on.',
+        'off' => 'Automatic renewal is off. Invoices still come with their payment link.',
+        'removed' => 'The card was removed.',
+    ],
+    'errors' => [
+        'family_only' => 'Saved cards are managed by whoever pays, from their own account.',
+        'not_found' => 'This card is not saved for you.',
+        'no_account' => 'There are no invoices on your account yet.',
+        'no_card' => 'Save a card first: tick "save my card and renew automatically" when you next pay online.',
+        'impersonating' => 'Only the payer can turn automatic renewal on.',
+        'not_offered' => 'This way to pay cannot save the card. Pay without saving it, or choose another way.',
+        'mandate_changed' => 'The words about saving the card have changed. Read them again, then tick the box.',
+        'charge_under_way' => 'A payment with your saved card is under way for this invoice. Wait a few minutes before paying another way.',
+    ],
+    'page' => [
+        'title' => 'Saved card and automatic renewal',
+        'no_card' => 'No card is saved.',
+        'expires' => 'expires :month/:year',
+        'on' => 'Automatic renewal is on: a package\'s next invoice is charged to the card, and you are told three days before.',
+        'off' => 'Automatic renewal is off: every invoice comes with its payment link.',
+        'coming' => 'Invoice :number (:amount) is charged at :at.',
+        'under_way' => 'Invoice :number (:amount) is being charged now.',
+        'turn_off' => 'Turn automatic renewal off',
+        'turn_off_hint' => 'The charges still to come are cancelled. Your invoices then come with their payment link as usual.',
+        'turned_off' => 'Automatic renewal is off. Nothing will be charged to your card.',
+    ],
+    'admin' => [
+        'nav' => 'Saved cards',
+        'title' => 'Saved cards and automatic renewal',
+        'subtitle' => 'Cards families saved while paying, as the payment provider keeps them: only the brand, the last four digits and the expiry are shown here.',
+        'payer' => 'Payer',
+        'card' => 'Card',
+        'expiry' => 'Expires',
+        'account' => 'Payment account',
+        'auto_renew' => 'Automatic renewal',
+        'saved' => 'Saved',
+        'status' => 'Status',
+        'live' => 'Saved',
+        'revoked' => [
+            'payer' => 'Removed by the payer', 'replaced' => 'Replaced by a newer card', 'gateway_off' => 'Payment account turned off',
+            'erased' => 'Erased', 'bank' => 'No longer accepted by the bank',
+        ],
+        'on' => 'On', 'off' => 'Off',
+        'charges' => 'Automatic charges',
+        'charge_statuses' => [
+            'scheduled' => 'Scheduled', 'charging' => 'Under way', 'retry' => 'Retry tomorrow', 'paid' => 'Paid',
+            'failed' => 'Failed', 'cancelled' => 'Cancelled', 'skipped' => 'Not charged',
+        ],
+        'filters' => ['live' => 'Saved now'],
+    ],
+];

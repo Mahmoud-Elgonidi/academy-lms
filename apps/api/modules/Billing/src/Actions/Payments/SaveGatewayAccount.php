@@ -5,6 +5,7 @@ namespace Modules\Billing\Actions\Payments;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Modules\Billing\Actions\Cards\StopGatewayCards;
 use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\SharedKernel\Audit\AuditTrail;
@@ -14,7 +15,8 @@ use Modules\SharedKernel\Plans\Feature;
 /**
  * Connects one of the academy's gateway accounts, or changes it. The keys
  * are kept encrypted and never shown again: a key left blank keeps the one
- * saved. A test key on a live account (or the reverse) is refused.
+ * saved. A test key on a live account (or the reverse) is refused. Turning
+ * it off lets the cards saved on it go (StopGatewayCards).
  */
 final class SaveGatewayAccount
 {
@@ -72,6 +74,7 @@ final class SaveGatewayAccount
             throw ValidationException::withMessages($errors);
         }
 
+        $wasActive = $account !== null && $account->is_active;
         $account ??= new GatewayAccount(['gateway' => $gateway, 'created_by' => $actorId]);
         $account->fill([
             'label' => $data['label'],
@@ -85,6 +88,10 @@ final class SaveGatewayAccount
             'gateway' => $gateway, 'label' => $account->label, 'mode' => $mode, 'currencies' => $data['currencies'], 'is_active' => $account->is_active,
             'fields_changed' => array_values(array_filter(array_keys(GatewayManager::fields($gateway)), fn (string $f) => trim((string) ($data[$f] ?? '')) !== '' && trim((string) ($data[$f] ?? '')) !== ($saved[$f] ?? null))),
         ]);
+        // Turned off: the cards saved on it can no longer be charged; let go, and each payer told once (J5b).
+        if ($wasActive && ! $account->is_active) {
+            app(StopGatewayCards::class)->handle($account);
+        }
 
         return $account;
     }

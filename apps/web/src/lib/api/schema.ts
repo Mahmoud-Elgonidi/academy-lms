@@ -39,8 +39,9 @@ export interface paths {
          *     what a look does not show is null. The classic look (a guardian, an adult learner): the plan and its shape, the
          *     lessons left, when they expire (expiry.soon within 7 days, with a sentence), and the next invoice: the one waiting
          *     to be paid (to its payer, with its id to open), or when the next goes out and about how much. The middle-school and
-         *     teen looks: the plan's shape, lessons left and expiry, no money. The kids' look: lessons left only. auto_renew is
-         *     null until saved cards come (J5b).
+         *     teen looks: the plan's shape, lessons left and expiry, no money. The kids' look: lessons left only. automatic_renewal
+         *     (the classic look, to the payer only): whether renewals are charged to the saved card, which card (brand, last
+         *     four, expiry), and the waiting invoice's automatic charge (when, how much).
          */
         get: operations["family.courses.balance"];
         put?: never;
@@ -155,10 +156,78 @@ export interface paths {
         /**
          * Pay an invoice online
          * @description Opens a checkout at the academy's gateway account (the first one when none is named) and answers its URL;
-         *     open it in a browser. The invoice is paid only when the gateway confirms it. Send an Idempotency-Key.
+         *     open it in a browser. The invoice is paid only when the gateway confirms it. With save_card (and the mandate's
+         *     version), the gateway keeps the card on its page and renewals are charged to it automatically, three days after
+         *     the payer is told (only on an account that saves_cards; 422 with why not). Send an Idempotency-Key.
          */
         post: operations["family.invoices.checkout"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/cards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My saved cards and automatic renewal
+         * @description The cards kept for me (brand, last four, expiry), per account whether renewals are charged automatically and to
+         *     which card, the automatic charges coming, and the mandate's words and version (to tick when paying). 403
+         *     cards-refused (family_only) outside the classic look.
+         */
+        get: operations["family.cards"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/cards/auto-renew": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Turn automatic renewal on or off
+         * @description on: true needs a live card for the account's currency (422 with why not, in my words); off cancels the charges
+         *     still to come (one under way finishes). billing_account_id narrows it to one account of mine. Answers my cards
+         *     and renewal as GET family/cards. Send an Idempotency-Key.
+         */
+        put: operations["family.cards.auto-renew"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/cards/{card}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove a saved card
+         * @description The card is let go at once (its reference at the gateway is dropped here); with no card left, automatic renewal
+         *     goes off and the charges still to come are cancelled. Answers my cards and renewal as GET family/cards. Send an
+         *     Idempotency-Key.
+         */
+        delete: operations["family.cards.revoke"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3994,8 +4063,41 @@ export interface operations {
                             } | null;
                             /** @description A sentence for a course that does not renew now (paused, ending; the classic look); null otherwise. */
                             renewal_note: string | null;
-                            /** @description Saved card and automatic renewal come later (J5b): null for now. */
+                            /** @description Kept null for earlier app versions (its type is null in the published API): read automatic_renewal. */
                             auto_renew: null;
+                            /**
+                             * @description Automatic renewal (J5b; the classic look, the payer only; else null): on (renewals charged to the saved card three days
+                             *     after they are told), the card (brand, last four, expiry, expires_soon), the waiting invoice's charge, a sentence.
+                             *     Turn it on or off: PUT family/cards/auto-renew.
+                             */
+                            automatic_renewal: {
+                                /** @description Renewals of this course are charged to the saved card. */
+                                on: boolean;
+                                /** @description The card renewals in this currency are charged to: brand, last four, expiry only. */
+                                card: {
+                                    id: string;
+                                    brand: string;
+                                    last4: string;
+                                    exp_month: number;
+                                    exp_year: number;
+                                    label: string;
+                                    expires_soon: boolean;
+                                } | null;
+                                /** @description The waiting invoice's automatic charge: when, and how much. */
+                                next_charge: {
+                                    at: {
+                                        utc: string;
+                                        local: string;
+                                        timezone: null;
+                                        label: string;
+                                    } | null;
+                                    amount: string;
+                                    amount_minor: number;
+                                    /** @description scheduled, retry or charging */
+                                    status: string;
+                                } | null;
+                                text: string;
+                            } | null;
                         };
                     };
                 };
@@ -4291,7 +4393,16 @@ export interface operations {
                             /** @description Where it stands, in a sentence. */
                             text: string;
                             hint: string;
+                            /** @description Whether the card was kept (the payer asked, and the gateway kept it): renewals are charged to it. */
+                            card_saved: string;
                         } | null;
+                        /** @description Saving the card while paying (J5b): the words to tick, their version, and whether this payer's look allows it. */
+                        save_card: {
+                            offered: boolean;
+                            /** @constant */
+                            version: "2027-07-20";
+                            text: string;
+                        };
                     };
                 };
             };
@@ -4554,6 +4665,10 @@ export interface operations {
                      * @enum {string|null}
                      */
                     return?: "portal" | "app" | null;
+                    /** @description "Save my card and renew automatically", ticked by the payer (the gateway keeps it on its page; J5b). */
+                    save_card?: boolean | null;
+                    /** @description The mandate's version the payer read and ticked (GET family/cards: mandate.version); needed with save_card. */
+                    mandate_version?: string | null;
                 };
             };
         };
@@ -4577,6 +4692,313 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.cards": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The cards kept for this payer: brand, last four and expiry only. */
+                            cards: {
+                                id: string;
+                                /** @description visa, mastercard, mada, amex, … or card */
+                                brand: string;
+                                brand_label: string;
+                                last4: string;
+                                exp_month: number;
+                                exp_year: number;
+                                /** @description "Visa ****4242" */
+                                label: string;
+                                /** @description The gateway account it is kept at (its name as payers see it). */
+                                account: string;
+                                /** @description It expires within a month, or has expired: ask for a new one. */
+                                expires_soon: boolean;
+                                saved_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                            /** @description Per account of this payer (one per currency, usually one): automatic renewal and the card it uses. */
+                            accounts: {
+                                id: string;
+                                currency: string;
+                                /** @description Renewals are charged to the card three days after they are told. */
+                                auto_renew: boolean;
+                                /** @description The card a renewal in this currency is charged to; null when none can be. */
+                                card_id: string | null;
+                            }[];
+                            /** @description Whether any of this payer's renewals are charged automatically. */
+                            auto_renew: boolean;
+                            /** @description Automatic charges coming (or under way): turn automatic renewal off to stop the ones still to come. */
+                            coming: {
+                                invoice_id: string;
+                                number: string;
+                                amount: string;
+                                amount_minor: number;
+                                currency: string;
+                                /** @description scheduled, retry (a soft decline, tried once more) or charging (under way: it can no longer be stopped). */
+                                status: string;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                            /** @description The words ticked to save a card and renew automatically, and their version (send it back with save_card). */
+                            mandate: {
+                                /** @constant */
+                                version: "2027-07-20";
+                                text: string;
+                            };
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "family.cards.auto-renew": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    on: boolean;
+                    /** Format: uuid */
+                    billing_account_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The cards kept for this payer: brand, last four and expiry only. */
+                            cards: {
+                                id: string;
+                                /** @description visa, mastercard, mada, amex, … or card */
+                                brand: string;
+                                brand_label: string;
+                                last4: string;
+                                exp_month: number;
+                                exp_year: number;
+                                /** @description "Visa ****4242" */
+                                label: string;
+                                /** @description The gateway account it is kept at (its name as payers see it). */
+                                account: string;
+                                /** @description It expires within a month, or has expired: ask for a new one. */
+                                expires_soon: boolean;
+                                saved_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                            /** @description Per account of this payer (one per currency, usually one): automatic renewal and the card it uses. */
+                            accounts: {
+                                id: string;
+                                currency: string;
+                                /** @description Renewals are charged to the card three days after they are told. */
+                                auto_renew: boolean;
+                                /** @description The card a renewal in this currency is charged to; null when none can be. */
+                                card_id: string | null;
+                            }[];
+                            /** @description Whether any of this payer's renewals are charged automatically. */
+                            auto_renew: boolean;
+                            /** @description Automatic charges coming (or under way): turn automatic renewal off to stop the ones still to come. */
+                            coming: {
+                                invoice_id: string;
+                                number: string;
+                                amount: string;
+                                amount_minor: number;
+                                currency: string;
+                                /** @description scheduled, retry (a soft decline, tried once more) or charging (under way: it can no longer be stopped). */
+                                status: string;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                            /** @description The words ticked to save a card and renew automatically, and their version (send it back with save_card). */
+                            mandate: {
+                                /** @constant */
+                                version: "2027-07-20";
+                                text: string;
+                            };
+                        };
+                        /** @enum {string} */
+                        message: "billing::cards.done.on" | "billing::cards.done.off";
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.cards.revoke": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                card: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The cards kept for this payer: brand, last four and expiry only. */
+                            cards: {
+                                id: string;
+                                /** @description visa, mastercard, mada, amex, … or card */
+                                brand: string;
+                                brand_label: string;
+                                last4: string;
+                                exp_month: number;
+                                exp_year: number;
+                                /** @description "Visa ****4242" */
+                                label: string;
+                                /** @description The gateway account it is kept at (its name as payers see it). */
+                                account: string;
+                                /** @description It expires within a month, or has expired: ask for a new one. */
+                                expires_soon: boolean;
+                                saved_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                            /** @description Per account of this payer (one per currency, usually one): automatic renewal and the card it uses. */
+                            accounts: {
+                                id: string;
+                                currency: string;
+                                /** @description Renewals are charged to the card three days after they are told. */
+                                auto_renew: boolean;
+                                /** @description The card a renewal in this currency is charged to; null when none can be. */
+                                card_id: string | null;
+                            }[];
+                            /** @description Whether any of this payer's renewals are charged automatically. */
+                            auto_renew: boolean;
+                            /** @description Automatic charges coming (or under way): turn automatic renewal off to stop the ones still to come. */
+                            coming: {
+                                invoice_id: string;
+                                number: string;
+                                amount: string;
+                                amount_minor: number;
+                                currency: string;
+                                /** @description scheduled, retry (a soft decline, tried once more) or charging (under way: it can no longer be stopped). */
+                                status: string;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                            /** @description The words ticked to save a card and renew automatically, and their version (send it back with save_card). */
+                            mandate: {
+                                /** @constant */
+                                version: "2027-07-20";
+                                text: string;
+                            };
+                        };
+                        /** @constant */
+                        message: "The card was removed.";
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
         };
     };
     "family.invoices.proofs": {

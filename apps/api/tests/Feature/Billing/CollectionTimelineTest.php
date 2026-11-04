@@ -215,7 +215,8 @@ it('gives each family course its balance: lessons left, expiry, the next invoice
     $before = j5Api('GET', "family/courses/{$this->booked->enrollmentId}/balance", $this->payer)->assertOk()->json('data');
     expect($before['waiting_invoice'])->toMatchArray(['id' => $this->invoice->id, 'outstanding_minor' => 40000])
         ->and($before['next_invoice'])->toBeNull()
-        ->and($before['auto_renew'])->toBeNull();
+        ->and($before['auto_renew'])->toBeNull()
+        ->and($before['automatic_renewal'])->toMatchArray(['on' => false, 'card' => null, 'next_charge' => null]);   // no card saved (J5b)
 
     j5Pay();
     $data = j5Api('GET', "family/courses/{$this->booked->enrollmentId}/balance", $this->payer)->assertOk()->json('data');

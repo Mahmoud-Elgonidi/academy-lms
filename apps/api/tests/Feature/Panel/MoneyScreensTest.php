@@ -57,6 +57,8 @@ it('gives each role only its share of billing', function (string $role, string $
     'scheduler sees enrolled students' => ['scheduler', '/enrollments', 200],
     'scheduler does not see invoices' => ['scheduler', '/invoices', 403],
     'scheduler does not set prices' => ['scheduler', '/settings/plans', 403],
+    'accountant sees saved cards' => ['accountant', '/billing/saved-cards', 200],
+    'scheduler does not see saved cards' => ['scheduler', '/billing/saved-cards', 403],
 ]);
 
 it('records a payment from the invoice page', function () {

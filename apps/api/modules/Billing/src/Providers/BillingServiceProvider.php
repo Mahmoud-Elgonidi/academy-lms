@@ -119,6 +119,9 @@ final class BillingServiceProvider extends ServiceProvider
             'family' => FamilyBilling::getUrl(['invoice' => $a['id'] ?? null], panel: 'family').'#invoice-'.($a['id'] ?? ''),
             default => null,
         });
+        // The payer's saved cards and automatic renewal (J5b): their account page, or the signed page without signing in.
+        $links->register('cards', fn (array $a, string $panel) => $panel === 'family' ? FamilyBilling::getUrl(panel: 'family') : null);
+        $links->registerPersonal('cards', fn (array $action, string $userId) => $this->app->make(PayLinks::class)->autoRenew((string) ($action['id'] ?? $userId)));
         // A course's lessons left, its expiry and its next invoice (the renewal preview, lessons about to lapse).
         $links->register('course_balance', fn (array $a, string $panel) => $panel === 'family' ? FamilyBilling::getUrl(panel: 'family') : null);
         // The invoice message carries each payer's own link to the invoice and its ways to pay (no sign-in).

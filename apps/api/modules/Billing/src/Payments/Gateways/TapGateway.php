@@ -7,6 +7,10 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Modules\Billing\Payments\Cards\CardFailure;
+use Modules\Billing\Payments\Cards\ChargeResult;
+use Modules\Billing\Payments\Cards\SavedCard;
+use Modules\Billing\Payments\Cards\SavedCharge;
 use Modules\Billing\Payments\CheckoutRequest;
 use Modules\Billing\Payments\CheckoutSession;
 use Modules\Billing\Payments\CheckoutState;
@@ -36,21 +40,27 @@ final class TapGateway implements PaymentGateway
 
     public function createCheckout(CheckoutRequest $request): CheckoutSession
     {
+        $customer = array_filter([
+            'first_name' => $request->payerName ?: 'Customer',
+            'email' => $request->payerEmail,
+            'phone' => $request->payerEmail ? null : $this->phone($request->payerPhone),
+        ]);
+        // A card is kept for a customer of Tap's: the payer becomes one first.
+        if ($request->saveCard) {
+            $made = $this->send(fn (PendingRequest $http) => $http->post('/v2/customers', $customer + ['metadata' => ['udf1' => $request->checkoutId]]));
+            $customer = ['id' => (string) $made['id']];
+        }
         $charge = $this->send(fn (PendingRequest $http) => $http->post('/v2/charges', [
             'amount' => (float) $request->amount->decimal(),
             'currency' => $request->amount->currency,
             'customer_initiated' => true,
             'threeDSecure' => true,
-            'save_card' => false,
+            'save_card' => $request->saveCard,
             'description' => $request->description,
             'metadata' => ['udf1' => $request->checkoutId],
             'reference' => ['transaction' => $request->checkoutId, 'order' => $request->invoiceNumber],
             'receipt' => ['email' => false, 'sms' => false],
-            'customer' => array_filter([
-                'first_name' => $request->payerName ?: 'Customer',
-                'email' => $request->payerEmail,
-                'phone' => $request->payerEmail ? null : $this->phone($request->payerPhone),
-            ]),
+            'customer' => $customer,
             'source' => ['id' => 'src_all'],
             'post' => ['url' => $request->webhookUrl],
             'redirect' => ['url' => $request->returnUrl],
@@ -115,6 +125,98 @@ final class TapGateway implements PaymentGateway
         }
     }
 
+    public function savesCards(): bool
+    {
+        return true;
+    }
+
+    public function savedCard(string $providerRef): ?SavedCard
+    {
+        $charge = $this->send(fn (PendingRequest $http) => $http->get('/v2/charges/'.rawurlencode($providerRef)));
+        $cardId = (string) ($charge['card']['id'] ?? '');
+        $customerId = (string) ($charge['customer']['id'] ?? '');
+        $agreement = (string) ($charge['payment_agreement']['id'] ?? '');
+        if (! str_starts_with($cardId, 'card_') || $customerId === '' || $agreement === '') {
+            return null;
+        }
+        $card = $this->send(fn (PendingRequest $http) => $http->get('/v2/card/'.rawurlencode($customerId).'/'.rawurlencode($cardId)));
+        $year = (int) ($card['exp_year'] ?? 0);
+
+        return new SavedCard(['card' => $cardId, 'customer' => $customerId, 'agreement' => $agreement],
+            (string) ($card['brand'] ?? $card['scheme'] ?? $charge['card']['brand'] ?? 'card'),
+            (string) ($card['last_four'] ?? $charge['card']['last_four'] ?? ''),
+            (int) ($card['exp_month'] ?? 0), $year > 0 && $year < 100 ? 2000 + $year : $year);
+    }
+
+    public function chargeSaved(SavedCharge $charge): ChargeResult
+    {
+        try {
+            $token = $this->http()->post('/v2/tokens', ['saved_card' => ['card_id' => (string) ($charge->tokens['card'] ?? ''), 'customer_id' => (string) ($charge->tokens['customer'] ?? '')]]);
+        } catch (ConnectionException) {
+            return ChargeResult::failed(CardFailure::Processing);      // no charge was asked for yet: nothing to wait for
+        }
+        if ($token->serverError()) {
+            return ChargeResult::failed(CardFailure::Processing);
+        }
+        if ($token->failed() || ! str_starts_with((string) $token->json('id'), 'tok_')) {
+            return ChargeResult::failed(CardFailure::InvalidCard);
+        }
+
+        try {
+            $response = $this->http()->post('/v2/charges', [
+                'amount' => (float) $charge->amount->decimal(),
+                'currency' => $charge->amount->currency,
+                'customer_initiated' => false,
+                'threeDSecure' => false,
+                'save_card' => false,
+                'payment_agreement' => ['id' => (string) ($charge->tokens['agreement'] ?? '')],
+                'description' => $charge->description,
+                'metadata' => ['udf1' => $charge->checkoutId],
+                'reference' => ['transaction' => $charge->checkoutId, 'order' => $charge->invoiceNumber],
+                'receipt' => ['email' => false, 'sms' => false],
+                'customer' => ['id' => (string) ($charge->tokens['customer'] ?? '')],
+                'source' => ['id' => (string) $token->json('id')],
+                'post' => ['url' => $charge->webhookUrl],
+                'redirect' => ['url' => $charge->returnUrl],
+            ]);
+        } catch (ConnectionException) {
+            return ChargeResult::unknown();
+        }
+        if ($response->serverError()) {
+            return ChargeResult::unknown();
+        }
+        $body = (array) $response->json();
+        if ($response->failed()) {
+            return ChargeResult::failed(CardFailure::fromCode(null, (string) ($body['errors'][0]['description'] ?? '')));
+        }
+        $ref = isset($body['id']) ? (string) $body['id'] : null;
+
+        return match ($body['status'] ?? null) {
+            'CAPTURED' => new ChargeResult(ChargeResult::PAID, $ref),
+            'INITIATED' => ! empty($body['transaction']['url']) ? ChargeResult::failed(CardFailure::AuthenticationRequired, $ref) : new ChargeResult(ChargeResult::PENDING, $ref),
+            'IN_PROGRESS', 'AUTHORIZED' => new ChargeResult(ChargeResult::PENDING, $ref),
+            default => ChargeResult::failed(CardFailure::fromCode((string) ($body['response']['code'] ?? ''), (string) ($body['response']['message'] ?? '')), $ref),
+        };
+    }
+
+    public function fetchSaved(string $ref): CheckoutState
+    {
+        $state = $this->fetch($ref);
+        if ($state->status !== CheckoutState::FAILED) {
+            return $state;
+        }
+        $charge = $this->send(fn (PendingRequest $http) => $http->get('/v2/charges/'.rawurlencode($ref)));
+
+        return new CheckoutState(CheckoutState::FAILED, $state->amount,
+            failure: CardFailure::fromCode((string) ($charge['response']['code'] ?? ''), (string) ($charge['response']['message'] ?? ''))->value);
+    }
+
+    /** Tap has no look-up by our reference: a charge we never heard back about is settled by its webhook, else expires. */
+    public function findSaved(string $checkoutId): ?string
+    {
+        return null;
+    }
+
     /** @return ?array{country_code: string, number: string} */
     private function phone(?string $e164): ?array
     {
@@ -128,15 +230,20 @@ final class TapGateway implements PaymentGateway
         return null;
     }
 
+    private function http(): PendingRequest
+    {
+        return Http::baseUrl((string) config('billing.payments.tap.base'))
+            ->withToken((string) ($this->credentials['secret_key'] ?? ''))
+            ->asJson()->acceptJson()->timeout((int) config('billing.payments.timeout'));
+    }
+
     /**
      * @param  callable(PendingRequest): Response  $call
      * @return array<string, mixed>
      */
     private function send(callable $call): array
     {
-        $http = Http::baseUrl((string) config('billing.payments.tap.base'))
-            ->withToken((string) ($this->credentials['secret_key'] ?? ''))
-            ->asJson()->acceptJson()->timeout((int) config('billing.payments.timeout'));
+        $http = $this->http();
 
         try {
             $response = $call($http);

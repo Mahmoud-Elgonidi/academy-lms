@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Billing\Http\V1\Controllers\FamilyBillingController;
+use Modules\Billing\Http\V1\Controllers\FamilyCardsController;
 
 // The family app: lessons left (and extra lessons to buy), the invoices this person pays, paying one online or sending proof of paying by hand.
 Route::middleware('auth:sanctum')->prefix('family')->group(function () {
@@ -14,5 +15,9 @@ Route::middleware('auth:sanctum')->prefix('family')->group(function () {
     Route::post('invoices/{invoice}/coupon', [FamilyBillingController::class, 'applyCoupon'])->middleware(['idempotent', 'throttle:10,1'])->name('family.invoices.coupon');
     Route::delete('invoices/{invoice}/coupon', [FamilyBillingController::class, 'removeCoupon'])->middleware(['idempotent', 'throttle:10,1'])->name('family.invoices.coupon.remove');
     Route::post('invoices/{invoice}/checkout', [FamilyBillingController::class, 'checkout'])->middleware('idempotent')->name('family.invoices.checkout');
+    // The payer's saved cards and automatic renewal (J5b): the classic look only.
+    Route::get('cards', [FamilyCardsController::class, 'index'])->middleware('throttle:60,1')->name('family.cards');
+    Route::put('cards/auto-renew', [FamilyCardsController::class, 'autoRenew'])->middleware(['idempotent', 'throttle:10,1'])->name('family.cards.auto-renew');
+    Route::delete('cards/{card}', [FamilyCardsController::class, 'revoke'])->middleware(['idempotent', 'throttle:10,1'])->name('family.cards.revoke');
     Route::post('invoices/{invoice}/proofs', [FamilyBillingController::class, 'sendProof'])->middleware(['idempotent', 'throttle:10,1'])->name('family.invoices.proofs');
 });

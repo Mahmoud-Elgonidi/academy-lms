@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Modules\Billing\Actions\Payments\SaveGatewayAccount;
+use Modules\Billing\Models\PaymentMethod;
+use Modules\Billing\Payments\Cards\Mandate;
 use Modules\Billing\Payments\Gateways\MoyasarGateway;
 use Modules\Billing\Payments\Gateways\PaymobGateway;
 use Modules\Billing\Payments\Gateways\StripeGateway;
@@ -46,7 +48,7 @@ it('refuses every gateway\'s webhook that the gateway did not sign', function ()
 
 it('makes every write that moves money or lessons safe to retry (Idempotency-Key)', function () {
     // Paying, proofs, extra lessons, claiming a reward, cancelling or disputing a lesson, time off.
-    $moves = '#^api/v1/(family/(invoices|enrollments)/|lessons/\{session\}/(cancel|refuse-substitute|dispute)$|teacher/lessons/\{session\}/dispute$|teacher/time-off$|learning/challenges/claim$)#';
+    $moves = '#^api/v1/(family/(invoices|enrollments|cards)/|lessons/\{session\}/(cancel|refuse-substitute|dispute)$|teacher/lessons/\{session\}/dispute$|teacher/time-off$|learning/challenges/claim$)#';
     $found = 0;
     foreach (Route::getRoutes() as $route) {
         if (! preg_match($moves, $route->uri()) || ! array_intersect(['POST', 'PUT', 'PATCH', 'DELETE'], $route->methods())) {
@@ -82,4 +84,26 @@ it('keeps gateway keys encrypted at rest and out of every serialisation', functi
         ->and(json_encode($account->fresh()->toArray()))->not->toContain('sk_test_very_secret_tap_key')
         ->and($account->fresh()->credentials['secret_key'])->toBe('sk_test_very_secret_tap_key');
     expect($academy->id)->not->toBeEmpty();
+});
+
+it('keeps a saved card as the gateway\'s reference only: encrypted, never in an answer, and no field takes a card number', function () {
+    $this->actAsTenant($this->createAcademy(['slug' => 'noor']));
+    $payer = User::factory()->withRole(Role::Guardian)->create();
+    $admin = User::factory()->withRole(Role::Admin)->create();
+    $account = app(SaveGatewayAccount::class)->handle(null, ['gateway' => 'demo', 'label' => 'Demo', 'mode' => 'test'], $admin->id);
+    $card = PaymentMethod::query()->create(['payer_id' => $payer->id, 'gateway_account_id' => $account->id, 'gateway' => 'demo',
+        'tokens' => ['token' => 'demo_tok_secret_reference'], 'brand' => 'visa', 'last4' => '4242', 'exp_month' => 12, 'exp_year' => 2034,
+        'mandate_version' => Mandate::VERSION, 'mandate_hash' => str_repeat('a', 64)]);
+
+    expect((string) DB::table('payment_methods')->where('id', $card->id)->value('tokens'))->not->toContain('demo_tok_secret_reference')
+        ->and(json_encode($card->fresh()->toArray()))->not->toContain('demo_tok_secret_reference')
+        ->and(json_encode($card->fresh()->shown()))->not->toContain('demo_tok_secret_reference');
+
+    // Saving a card takes only a tick and the mandate's version: the card itself is typed on the gateway's page.
+    foreach (Route::getRoutes() as $route) {
+        if (str_starts_with($route->uri(), 'api/v1/family/') && (str_contains($route->uri(), 'checkout') || str_contains($route->uri(), 'cards'))) {
+            $source = (string) file_get_contents((new ReflectionMethod($route->getControllerClass(), $route->getActionMethod()))->getFileName());
+            expect($source)->not->toMatch('/[\'"](card_number|pan|cvc|cvv|number)[\'"]\s*=>\s*\[/');
+        }
+    }
 });

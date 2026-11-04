@@ -54,4 +54,32 @@ return [
         'title' => ':student\'s lessons expire soon',
         'body' => ':student has :lessons in :subject with no time booked yet, expiring on :on. Book their times with the academy before then so nothing is lost.',
     ],
+    'renewal_coming' => [
+        'title' => 'We will charge :student\'s invoice to your card',
+        'body' => ':student\'s next package invoice (:number) of :amount was issued, and is charged automatically to :card at :on. To turn automatic renewal off before then: :off',
+    ],
+    'charge_succeeded' => [
+        'title' => ':student\'s package renewed automatically',
+        'body' => ':amount was charged to :card for invoice :number, and the lessons are confirmed. The invoice: :link',
+    ],
+    'charge_retry' => [
+        'title' => ':student\'s invoice was not charged',
+        'body' => ':amount could not be charged to :card for invoice :number: :reason We will try once more at :retry_at, or you can pay now: :link',
+    ],
+    'charge_failed' => [
+        'title' => 'Pay :student\'s invoice through the link',
+        'body' => ':amount could not be charged to :card for invoice :number: :reason Pay it through the link so the lessons stay as booked: :link',
+    ],
+    'auto_charge_skipped' => [
+        'title' => ':student\'s invoice will not be charged automatically',
+        'body' => 'We will not charge invoice :number (:amount) automatically because :reason. Pay it through the link: :link',
+    ],
+    'card_expiring' => [
+        'title' => 'Your saved card expires soon',
+        'body' => 'The card :card expires on :on, after which packages no longer renew automatically. Tick "save my card" when you next pay with a new card: :link',
+    ],
+    'card_stopped' => [
+        'title' => 'Automatic renewal with your card has stopped',
+        'body' => 'The academy turned off the payment account your card :card was saved on, so it can no longer renew automatically. Invoices come with their payment link as usual: :link',
+    ],
 ];

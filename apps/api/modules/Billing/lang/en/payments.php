@@ -9,7 +9,7 @@ return [
     ],
     'modes' => ['test' => 'Test', 'live' => 'Live'],
     'statuses' => ['open' => 'Open', 'paid' => 'Paid', 'failed' => 'Failed', 'expired' => 'Expired', 'refund_due' => 'Refund due'],
-    'channels' => ['family' => 'From their account', 'link' => 'From the invoice link'],
+    'channels' => ['family' => 'From their account', 'link' => 'From the invoice link', 'auto' => 'Automatically, from the saved card'],
     'fields' => [
         'gateway' => 'Gateway',
         'label' => 'Name the payer sees',
@@ -116,7 +116,7 @@ return [
         'copied' => 'Copied ✓',
         'webhook' => 'Webhook address',
         'webhook_hint' => [
-            'stripe' => 'In Stripe › Developers › Webhooks add this address, with the events checkout.session.completed, checkout.session.async_payment_succeeded, checkout.session.async_payment_failed and checkout.session.expired.',
+            'stripe' => 'In Stripe › Developers › Webhooks add this address, with the events checkout.session.completed, checkout.session.async_payment_succeeded, checkout.session.async_payment_failed and checkout.session.expired, and for saved cards payment_intent.succeeded and payment_intent.payment_failed.',
             'moyasar' => 'In Moyasar › Settings › Webhooks add this address with the same shared secret, and the payment events (payment_paid, payment_failed).',
             'tap' => 'Tap posts to this address with every charge by itself; nothing to set up.',
             'paymob' => 'Paymob posts to this address with every transaction by itself (signed with the HMAC); nothing to set up.',

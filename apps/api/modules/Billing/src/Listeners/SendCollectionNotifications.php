@@ -45,6 +45,23 @@ final class SendCollectionNotifications
                 audience: 'billing::notifications.audience.payer', channels: $channels, sample: $sample,
             ));
         }
+        // Saved card and automatic renewal (J5b).
+        $card = ['number' => 'NR-000014', 'student' => 'زياد', 'amount' => '400 ر.س.', 'card' => 'Visa ****4242', 'link' => 'https://noor.example.com/pay/invoice/…'];
+        foreach ([
+            ['renewal_coming', ['email', 'whatsapp', 'push'], ['on' => 'الأحد 18 أكتوبر 10:00 ص', 'off' => 'https://noor.example.com/pay/auto-renew/…'] + $card],
+            ['charge_succeeded', ['email', 'push'], $card],
+            ['charge_retry', ['email', 'whatsapp', 'push'], ['reason' => 'الرصيد غير كافٍ في البطاقة.', 'retry_at' => 'الاثنين 19 أكتوبر 10:00 ص'] + $card],
+            ['charge_failed', ['email', 'whatsapp', 'push'], ['reason' => 'انتهت صلاحية البطاقة.'] + $card],
+            ['auto_charge_skipped', ['email', 'whatsapp', 'push'], ['reason' => 'تنتهي صلاحية البطاقة قبل موعد الخصم.'] + $card],
+            ['card_expiring', ['email', 'whatsapp', 'push'], ['card' => 'Visa ****4242', 'on' => 'الأحد 31 أكتوبر']],
+            ['card_stopped', ['email', 'whatsapp', 'push'], ['card' => 'Visa ****4242']],
+        ] as [$name, $channels, $sample]) {
+            $notifications->define(new TemplateDefinition(
+                key: "billing.{$name}", category: 'billing',
+                title: "billing::notifications.{$name}.title", body: "billing::notifications.{$name}.body",
+                audience: 'billing::notifications.audience.payer', channels: $channels, sample: $sample,
+            ));
+        }
         $notifications->define(new TemplateDefinition(
             key: 'billing.overdue_staff', category: 'staff',
             title: 'billing::notifications.overdue_staff.title', body: 'billing::notifications.overdue_staff.body',

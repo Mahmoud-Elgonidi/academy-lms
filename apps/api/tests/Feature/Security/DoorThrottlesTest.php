@@ -27,6 +27,8 @@ const TIGHT_DOORS = [
     'family.invoices.coupon', 'family.invoices.coupon.remove', 'billing.pay.coupon', 'billing.pay.coupon.remove',
     // A course's balance, and a guardian adding a child (J5a).
     'family.courses.balance', 'family.children.add',
+    // Saved cards and automatic renewal (J5b), and its signed page.
+    'family.cards', 'family.cards.auto-renew', 'family.cards.revoke', 'billing.auto-renew.off',
 ];
 
 it('gives each newer door a limit of its own', function () {

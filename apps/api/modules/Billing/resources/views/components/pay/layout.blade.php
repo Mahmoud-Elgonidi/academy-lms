@@ -34,6 +34,9 @@
         .brand span.mark { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: .7rem; background: var(--brand); color: #fff; font-weight: 700; }
         .brand strong { font-size: 1.05rem; }
         .card { background: var(--card); border: 1px solid var(--line); border-radius: 1rem; padding: 1.1rem 1.15rem; }
+        .save-card { display: flex; gap: .55rem; align-items: flex-start; margin: .55rem .1rem .9rem; font-size: .84rem; color: var(--muted); line-height: 1.5; }
+        .save-card input { margin-top: .25rem; accent-color: var(--brand); }
+        .save-card b { color: var(--ink); }
         h1, h2 { margin: 0; line-height: 1.35; }
         h2 { font-size: 1rem; }
         .muted { color: var(--muted); font-size: .88rem; }

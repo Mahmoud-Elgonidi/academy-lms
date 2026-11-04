@@ -18,10 +18,13 @@ use Modules\Billing\Filament\Resources\Invoices\InvoiceResource;
 use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentCheckout;
+use Modules\Billing\Models\PaymentMethod;
 use Modules\Billing\Models\PaymentProof;
+use Modules\Billing\Payments\Cards\Mandate;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
+use Modules\Billing\Queries\Cards\PayerCards;
 use Modules\Billing\Queries\Collections\CourseBalance;
 use Modules\Billing\Queries\CourseBillingQuery;
 use Modules\Billing\Queries\InvoiceCourses;
@@ -35,6 +38,7 @@ use Modules\SharedKernel\Time\LocalTimePresenter;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 /**
  * The family's money for the app: lessons left on each of a learner's
@@ -118,12 +122,13 @@ final class FamilyBillingController
      * what a look does not show is null. The classic look (a guardian, an adult learner): the plan and its shape, the
      * lessons left, when they expire (expiry.soon within 7 days, with a sentence), and the next invoice: the one waiting
      * to be paid (to its payer, with its id to open), or when the next goes out and about how much. The middle-school and
-     * teen looks: the plan's shape, lessons left and expiry, no money. The kids' look: lessons left only. auto_renew is
-     * null until saved cards come (J5b).
+     * teen looks: the plan's shape, lessons left and expiry, no money. The kids' look: lessons left only. automatic_renewal
+     * (the classic look, to the payer only): whether renewals are charged to the saved card, which card (brand, last
+     * four, expiry), and the waiting invoice's automatic charge (when, how much).
      *
      * @throws NotFoundHttpException not a course of a learner I follow
      */
-    public function courseBalance(Request $request, string $enrollment, FamilyView $family, EnrollmentApi $enrollments, CourseBalance $balances): JsonResponse
+    public function courseBalance(Request $request, string $enrollment, FamilyView $family, EnrollmentApi $enrollments, CourseBalance $balances, PayerCards $cards): JsonResponse
     {
         $me = (string) $request->user()?->getAuthIdentifier();
         $course = Str::isUuid($enrollment) ? $enrollments->find($enrollment) : null;
@@ -225,8 +230,16 @@ final class FamilyBillingController
                 $course->endsOn !== null || $course->status->value === 'ended' => __('billing::collections.balance.no_renewal'),
                 default => null,
             },
-            /** Saved card and automatic renewal come later (J5b): null for now. */
+            /** Kept null for earlier app versions (its type is null in the published API): read automatic_renewal. */
             'auto_renew' => null,
+            /**
+             * Automatic renewal (J5b; the classic look, the payer only; else null): on (renewals charged to the saved card three days
+             * after they are told), the card (brand, last four, expiry, expires_soon), the waiting invoice's charge, a sentence.
+             * Turn it on or off: PUT family/cards/auto-renew.
+             */
+            'automatic_renewal' => $money && $payer && $b['subscription'] !== null
+                ? $cards->forCourse($me, (string) $b['subscription']->currency, $b['waiting']?->id)
+                : null,
         ]]);
     }
 
@@ -351,6 +364,8 @@ final class FamilyBillingController
                     'pay_with' => array_map(fn (GatewayAccount $a) => [
                         'account_id' => $a->id,
                         'label' => $a->label,
+                        /** Whether it can keep the card for automatic renewal (save_card on the checkout). */
+                        'saves_cards' => self::savesCards($a),
                         'methods' => array_map(fn (string $m) => __('billing::payments.methods.'.$m), GatewayManager::methods($a->gateway)),
                     ], $online->accountsFor($i)),
                     /** The latest proof of paying by hand on it, if any: pending, approved or rejected (with the academy's reason). */
@@ -428,7 +443,9 @@ final class FamilyBillingController
      * Pay an invoice online.
      *
      * Opens a checkout at the academy's gateway account (the first one when none is named) and answers its URL;
-     * open it in a browser. The invoice is paid only when the gateway confirms it. Send an Idempotency-Key.
+     * open it in a browser. The invoice is paid only when the gateway confirms it. With save_card (and the mandate's
+     * version), the gateway keeps the card on its page and renewals are charged to it automatically, three days after
+     * the payer is told (only on an account that saves_cards; 422 with why not). Send an Idempotency-Key.
      *
      * @throws NotFoundHttpException not an invoice I pay
      */
@@ -438,6 +455,10 @@ final class FamilyBillingController
             'account_id' => ['nullable', 'string', 'max:64'],
             /** Where the payer comes back after the gateway: portal or app (the portal's /{locale}/pay/return, which opens the app); none: the academy's pay page. */
             'return' => ['nullable', 'string', 'in:portal,app'],
+            /** "Save my card and renew automatically", ticked by the payer (the gateway keeps it on its page; J5b). */
+            'save_card' => ['nullable', 'boolean'],
+            /** The mandate's version the payer read and ticked (GET family/cards: mandate.version); needed with save_card. */
+            'mandate_version' => ['nullable', 'string', 'max:20', 'required_if_accepted:save_card'],
         ]);
         $me = (string) $request->user()?->getAuthIdentifier();
         $own = Str::isUuid($invoice) ? Invoice::query()->find($invoice) : null;
@@ -450,7 +471,7 @@ final class FamilyBillingController
         if ($account === null) {
             throw ValidationException::withMessages(['account_id' => __('billing::payments.family.unavailable')]);
         }
-        $checkout = $start->handle($own, $account, $me, 'link', $request->input('return'));
+        $checkout = $start->handle($own, $account, $me, 'link', $request->input('return'), $request->boolean('save_card'), $request->input('mandate_version'));
 
         return response()->json([
             'checkout_id' => $checkout->id,
@@ -468,7 +489,7 @@ final class FamilyBillingController
      *
      * @throws NotFoundHttpException not an invoice I pay
      */
-    public function show(Request $request, string $invoice, InvoiceSummaries $summaries): JsonResponse
+    public function show(Request $request, string $invoice, InvoiceSummaries $summaries, FamilyView $family): JsonResponse
     {
         $me = (string) $request->user()?->getAuthIdentifier();
         $own = $this->mine($me, $invoice);
@@ -484,6 +505,14 @@ final class FamilyBillingController
                 /** Where it stands, in a sentence. */
                 'text' => __('billing::payments.page.result.'.$checkout->status),
                 'hint' => __('billing::payments.page.result_hint.'.$checkout->status),
+                /** Whether the card was kept (the payer asked, and the gateway kept it): renewals are charged to it. */
+                'card_saved' => $checkout->save_card && PaymentMethod::query()->where('checkout_id', $checkout->id)->exists(),
+            ],
+            /** Saving the card while paying (J5b): the words to tick, their version, and whether this payer's look allows it. */
+            'save_card' => [
+                'offered' => $family->stage($me) === LearnerStage::Classic,
+                'version' => Mandate::VERSION,
+                'text' => Mandate::text(),
             ],
         ]);
     }
@@ -527,6 +556,15 @@ final class FamilyBillingController
             'data' => $summaries->of($again->refresh(), $me)->present($this->time),
             'message' => __('billing::discounts.payer.removed', ['code' => $code]),
         ]);
+    }
+
+    private static function savesCards(GatewayAccount $account): bool
+    {
+        try {
+            return app(GatewayManager::class)->for($account)->savesCards();
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     /** An invoice this person pays; anyone else's reads as not found. */

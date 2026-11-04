@@ -4,6 +4,7 @@ namespace Modules\Billing\Actions\Payments;
 
 use Carbon\CarbonImmutable;
 use Modules\Billing\Models\PaymentCheckout;
+use Modules\Billing\Support\AutoCharges;
 use Throwable;
 
 /**
@@ -15,7 +16,7 @@ final class SweepCheckouts
 {
     public const GRACE_MINUTES = 30;
 
-    public function __construct(private readonly SettleCheckout $settle) {}
+    public function __construct(private readonly SettleCheckout $settle, private readonly AutoCharges $autoCharges) {}
 
     public function handle(?CarbonImmutable $now = null): int
     {
@@ -32,6 +33,9 @@ final class SweepCheckouts
                 }
                 if ($after->status === 'open' && ($after->provider_ref === null || $after->expires_at->addMinutes(self::GRACE_MINUTES)->lessThan($now))) {
                     $after->update(['status' => 'expired']);
+                    if ($after->kind === 'saved') {
+                        $this->autoCharges->checkoutEnded($after);   // never confirmed: never charged again (J5b)
+                    }
                 }
                 $changed += $after->status !== 'open' ? 1 : 0;
             });

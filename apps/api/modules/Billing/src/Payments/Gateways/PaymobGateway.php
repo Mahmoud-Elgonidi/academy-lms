@@ -8,6 +8,9 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Modules\Billing\Payments\Cards\ChargeResult;
+use Modules\Billing\Payments\Cards\SavedCard;
+use Modules\Billing\Payments\Cards\SavedCharge;
 use Modules\Billing\Payments\CheckoutRequest;
 use Modules\Billing\Payments\CheckoutSession;
 use Modules\Billing\Payments\CheckoutState;
@@ -119,6 +122,32 @@ final class PaymobGateway implements PaymentGateway
         } catch (GatewayException $e) {
             return $e->getMessage();
         }
+    }
+
+    /** Saved cards are not offered on Paymob (J5b covers Moyasar, Tap and Stripe): a payer pays each invoice on its page. */
+    public function savesCards(): bool
+    {
+        return false;
+    }
+
+    public function savedCard(string $providerRef): ?SavedCard
+    {
+        return null;
+    }
+
+    public function chargeSaved(SavedCharge $charge): ChargeResult
+    {
+        throw new GatewayException('Saved cards are not offered on Paymob.');
+    }
+
+    public function fetchSaved(string $ref): CheckoutState
+    {
+        throw new GatewayException('Saved cards are not offered on Paymob.');
+    }
+
+    public function findSaved(string $checkoutId): ?string
+    {
+        return null;
     }
 
     /** The string Paymob signs: the twenty fields' values, booleans as "true"/"false", one after another. */

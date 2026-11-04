@@ -42,6 +42,16 @@ final class PayLinks
             array_filter(['invoice' => $invoice->id, 'u' => $payerId]), absolute: false);
     }
 
+    /**
+     * The payer's saved cards and automatic renewal, to turn it off in one tap, without signing in (the link in
+     * "renewal coming"; J5b). It only ever turns things off, so a forwarded link can do no harm.
+     */
+    public function autoRenew(string $payerId): string
+    {
+        return $this->base().URL::temporarySignedRoute('billing.auto-renew', CarbonImmutable::now()->addDays((int) config('billing.payments.link_days')),
+            ['payer' => $payerId], absolute: false);
+    }
+
     /** Back from the gateway's page (paid, or not), to the host the payer left from: their session is there. */
     public function returnTo(PaymentCheckout $checkout): string
     {

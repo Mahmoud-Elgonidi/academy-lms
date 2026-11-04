@@ -5,8 +5,10 @@ namespace Modules\Billing\Actions\Collections;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Modules\Billing\Actions\AutoRenew\FollowUpAutoRenewals;
 use Modules\Billing\Contracts\UnpaidLessons;
 use Modules\Billing\Domain\Collections\CollectionRules;
+use Modules\Billing\Models\AutoCharge;
 use Modules\Billing\Models\CollectionStep;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\Subscription;
@@ -38,6 +40,12 @@ use Modules\SharedKernel\Authorization\Ability;
  * is on (all paused, or ended) is quiet: a pause stops the reminders, an
  * ended course's invoice is the office's (closeEndedCourse voids it when it
  * can). The payer hears it (PayerReach: never a child's own account).
+ *
+ * Automatic renewal (J5b, FollowUpAutoRenewals) runs first: while a renewal
+ * waits for its charge to the saved card (scheduled, charging) the invoice's
+ * steps wait too; while a soft decline waits for its retry only "pay to keep
+ * the lesson" may go; once the charge failed, was cancelled or skipped, the
+ * timeline goes on as usual.
  */
 final class FollowUpCollections
 {
@@ -47,6 +55,7 @@ final class FollowUpCollections
         private readonly UnpaidLessons $lessons,
         private readonly NextRenewals $renewals,
         private readonly PayerReach $reach,
+        private readonly FollowUpAutoRenewals $autoRenewals,
     ) {}
 
     /** @return int how many steps went out */
@@ -54,7 +63,7 @@ final class FollowUpCollections
     {
         $now ??= CarbonImmutable::now();
 
-        return $this->invoices($now) + $this->previews($now);
+        return $this->autoRenewals->handle($now) + $this->invoices($now) + $this->previews($now);
     }
 
     private function invoices(CarbonImmutable $now): int
@@ -72,6 +81,7 @@ final class FollowUpCollections
             return 0;
         }
         $sent = CollectionStep::sentFor($open->pluck('id')->all());
+        $auto = AutoCharge::query()->whereIn('invoice_id', $open->pluck('id')->all())->whereIn('status', AutoCharge::WAITING)->pluck('status', 'invoice_id');
         $courses = $this->coursesOf($open);
 
         $count = 0;
@@ -85,7 +95,10 @@ final class FollowUpCollections
             $atRisk = ! isset($sent[$invoice->id][CollectionRules::LESSON_AT_RISK]) && $invoice->lines->contains('kind', 'block')
                 ? $this->lessons->firstAtRisk($on, $now) : null;
             $step = CollectionRules::due($now, $timezone, $invoice->issued_at, $invoice->due_at, $sent[$invoice->id] ?? [], $atRisk?->cancelsAt);
-            if ($step === null) {
+            // The saved card is about to pay it (J5b): quiet; while a retry waits, only a lesson at risk is said.
+            $charging = $auto[$invoice->id] ?? null;
+            if ($step === null || in_array($charging, [AutoCharge::SCHEDULED, AutoCharge::CHARGING], true)
+                || ($charging === AutoCharge::RETRY && $step !== CollectionRules::LESSON_AT_RISK)) {
                 continue;
             }
             $count += DB::transaction(function () use ($invoice, $payerId, $step, $timezone, $atRisk) {

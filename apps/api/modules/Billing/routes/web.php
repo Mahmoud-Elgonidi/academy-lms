@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Billing\Http\Controllers\AutoRenewController;
 use Modules\Billing\Http\Controllers\DemoGatewayController;
 use Modules\Billing\Http\Controllers\PayController;
 
@@ -15,6 +16,9 @@ Route::middleware(['web', 'tenant'])->prefix('pay')->group(function () {
     Route::post('invoice/{invoice}/coupon/remove', [PayController::class, 'removeCoupon'])->middleware(['signed:relative', 'throttle:10,1'])->name('billing.pay.coupon.remove');
     Route::post('invoice/{invoice}/{account}', [PayController::class, 'start'])->middleware(['signed:relative', 'throttle:12,1'])->name('billing.pay.start');
     Route::get('back/{checkout}', [PayController::class, 'back'])->middleware(['signed:relative', 'throttle:links'])->name('billing.pay.return');
+    // The payer's saved card and automatic renewal, to turn it off in one tap from "renewal coming" (J5b).
+    Route::get('auto-renew/{payer}', [AutoRenewController::class, 'show'])->middleware(['signed:relative', 'throttle:links'])->whereUuid('payer')->name('billing.auto-renew');
+    Route::post('auto-renew/{payer}/off', [AutoRenewController::class, 'off'])->middleware(['signed:relative', 'throttle:6,1'])->whereUuid('payer')->name('billing.auto-renew.off');
     Route::get('demo/{ref}', [DemoGatewayController::class, 'show'])->middleware(['signed:relative', 'throttle:links'])->name('billing.demo-gateway');
     Route::post('demo/{ref}', [DemoGatewayController::class, 'decide'])->middleware(['signed:relative', 'throttle:12,1'])->name('billing.demo-gateway.decide');
 });

@@ -21,6 +21,11 @@ return [
             'transfer_details_saved' => 'Transfer details changed',
             'self_serve_on' => 'Families may start a course and pay on their own',
             'self_serve_off' => 'Families no longer start courses on their own (the office enrols)',
+            'card_saved' => 'A :brand card ending :last4 saved for automatic renewal (mandate :mandate_version)',
+            'card_revoked' => 'A :brand card ending :last4 removed (:reason)',
+            'auto_renew_on' => 'Automatic renewal turned on',
+            'auto_renew_off' => 'Automatic renewal turned off',
+            'auto_charge_cancelled' => 'An automatic charge still to come cancelled (:reason)',
         ],
         'policy' => [
             'saved' => 'Cancellation policy version :version',

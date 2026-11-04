@@ -23,6 +23,7 @@ return [
                     'For a student: birth date, gender, country and school year, and the guardians who follow them.',
                     'Lessons: their times, who attended and when (from the video classroom), cancellations, the teacher\'s reports and homework, and what the student hands in (text, voice recordings, files).',
                     'Payments: invoices, payments and the receipts you send. Card details go straight to the payment provider; they are never seen or kept here.',
+                    'A saved card, only when you tick "save my card and renew automatically" while paying: the payment provider keeps the card, and we keep only its reference there (encrypted), its brand, last four digits and expiry, and the words you agreed to. You are told three days before each automatic charge, and you can turn automatic renewal off or remove the card at any time; removing it, or erasing your account, drops the reference.',
                     'Messages: the notifications sent to you, what you write to support, and your ratings of lessons.',
                     'Lesson recordings: only when the academy turns them on and everyone recorded agreed (a guardian for a child).',
                     'Technical: the devices you sign in on, their notification tokens, and a security log of sign-ins and sensitive steps.',
