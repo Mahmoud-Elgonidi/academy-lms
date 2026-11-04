@@ -72,12 +72,17 @@ class StartRepository {
     return PayerInvoice.fromJson(json['data'] as Map<String, dynamic>);
   }
 
-  /// The gateway's page, coming back through the portal to the app.
-  Future<({String id, Uri url})> checkout(String invoiceId, {String? accountId}) async {
+  /// The gateway's page, coming back through the portal to the app. With [mandateVersion] (the words the payer
+  /// ticked), the gateway also keeps the card and renewals are charged to it (J5b).
+  Future<({String id, Uri url})> checkout(String invoiceId, {String? accountId, String? mandateVersion}) async {
     final json = await _api.post(
       'family/invoices/$invoiceId/checkout',
       idempotent: true,
-      body: {'account_id': ?accountId, 'return': 'app'},
+      body: {
+        'account_id': ?accountId,
+        'return': 'app',
+        if (mandateVersion != null) ...{'save_card': true, 'mandate_version': mandateVersion},
+      },
     );
     return (id: json['checkout_id'] as String? ?? '', url: Uri.parse(json['url'] as String));
   }

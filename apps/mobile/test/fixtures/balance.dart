@@ -12,6 +12,7 @@ Map<String, Object?> fxCourseBalance({
   String status = 'active',
   bool next = true,
   String? renewalNote,
+  Map<String, Object?>? auto,
 }) {
   final shape = stage != 'kids';
   final money = stage == 'classic';
@@ -74,6 +75,7 @@ Map<String, Object?> fxCourseBalance({
           : null,
       'renewal_note': money ? renewalNote : null,
       'auto_renew': null,
+      'automatic_renewal': money && payer ? auto : null,
     },
   };
 }

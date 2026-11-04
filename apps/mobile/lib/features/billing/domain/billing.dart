@@ -115,6 +115,10 @@ class ManualPayment {
   final List<({String value, String label})> methods;
 }
 
+/// One of the academy's gateway accounts that takes an invoice; [savesCards]
+/// when it can keep the card for automatic renewal (J5b).
+typedef Gateway = ({String id, String label, bool savesCards});
+
 /// An invoice the person pays, with the academy's gateways that take it.
 class Invoice {
   const Invoice({
@@ -158,7 +162,7 @@ class Invoice {
     lines: [for (final l in json['lines'] as List<dynamic>? ?? const []) InvoiceLine.fromJson(l as Map<String, dynamic>)],
     payWith: [
       for (final g in json['pay_with'] as List<dynamic>? ?? const [])
-        (id: (g as Map<String, dynamic>)['account_id'] as String, label: g['label'] as String? ?? ''),
+        (id: (g as Map<String, dynamic>)['account_id'] as String, label: g['label'] as String? ?? '', savesCards: g['saves_cards'] == true),
     ],
   );
 
@@ -175,7 +179,7 @@ class Invoice {
   final LocalTime? issuedAt;
   final LocalTime? dueAt;
   final String? documentUrl;
-  final List<({String id, String label})> payWith;
+  final List<Gateway> payWith;
 
   /// What is left as a number to type ("400.00").
   final String outstandingDecimal;
@@ -193,6 +197,9 @@ class Invoice {
   final String? transferDetails;
 
   bool get payable => outstandingMinor > 0 && status != 'void';
+
+  /// A gateway that takes it can keep the card: paying it may also turn automatic renewal on.
+  bool get savesCards => payWith.any((g) => g.savesCards);
 
   /// The transfer details to show: none once nothing is left to pay.
   String? get transferText => payable ? transferDetails : null;

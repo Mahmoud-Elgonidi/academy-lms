@@ -72,7 +72,9 @@ class ApiClient {
     timeout: timeout,
   );
 
-  Future<Map<String, dynamic>> put(String path, {Object? body}) => _send('PUT', path, body: body, retry: true);
+  /// [idempotent] for one that moves money (turning automatic renewal on or off).
+  Future<Map<String, dynamic>> put(String path, {Object? body, bool idempotent = false}) =>
+      _send('PUT', path, body: body, idempotent: idempotent, retry: true);
 
   /// A file the API streams (a homework recording), as bytes.
   Future<Uint8List> download(String path) async {

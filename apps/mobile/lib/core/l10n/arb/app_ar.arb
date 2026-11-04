@@ -4642,6 +4642,104 @@
     }
   },
   "balanceFailed": "تعذّر تحميل رصيد هذه الدورة الآن.",
+  "paySaveCard": "احفظ بطاقتي وجدّد تلقائيًا",
+  "paySaveCardLead": "تُدفع فاتورة كل باقة تالية من هذه البطاقة وحدها، بعد أن نخبركم بالمبلغ وموعد الخصم قبله بثلاثة أيام. ويمكنكم إيقاف ذلك متى شئتم بضغطة واحدة.",
+  "paySaveCardRead": "اقرؤوا نص الموافقة",
+  "paySaveCardHide": "أخفوا نص الموافقة",
+  "paySaveCardSafe": "تحفظ بوابة الدفع البطاقة على صفحتها، ولا نرى رقمها أبدًا.",
+  "payGatewayNoCards": "لا تحفظ البطاقة",
+  "payCardSavedTitle": "حُفظت بطاقتكم، وصار التجديد تلقائيًا",
+  "payCardSavedBody": "تُدفع الباقة التالية من البطاقة بعد أن نخبركم قبلها بثلاثة أيام، ويمكنكم إيقاف ذلك متى شئتم.",
+  "payCardNotSaved": "وصل الدفع، لكن بوابة الدفع لم تحفظ البطاقة، فتصلكم الفاتورة التالية لتدفعوها بأنفسكم.",
+  "cardsTitle": "البطاقات والتجديد التلقائي",
+  "cardsAutoTitle": "التجديد التلقائي",
+  "cardsAutoOn": "يعمل: تُدفع فاتورة كل باقة تالية من بطاقتكم، بعد أن نخبركم بالمبلغ وموعد الخصم قبله بثلاثة أيام.",
+  "cardsAutoOff": "متوقف: تصلكم فاتورة كل باقة تالية لتدفعوها بأنفسكم.",
+  "cardsAutoNeedsCard": "يعمل التجديد التلقائي ببطاقة محفوظة. احفظوا بطاقة عند دفع فاتورتكم التالية.",
+  "cardsAutoCurrency": "الفواتير بعملة {currency}",
+  "@cardsAutoCurrency": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "cardsOffTitle": "إيقاف التجديد التلقائي؟",
+  "cardsOffBody": "لن تُخصم الفواتير التالية من بطاقتكم، وتصلكم لتدفعوها بأنفسكم. وإن كان خصم جاريًا الآن فإنه يكتمل.",
+  "cardsOffYes": "أوقفوه",
+  "cardsOffKeep": "أبقوه يعمل",
+  "cardsCardTitle": "البطاقة المحفوظة",
+  "cardsExpires": "تنتهي في {date}",
+  "@cardsExpires": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cardsKeptAt": "محفوظة لدى {account}",
+  "@cardsKeptAt": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "cardsSavedOn": "حُفظت في {date}",
+  "@cardsSavedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cardsExpiresSoon": "تنتهي هذه البطاقة قريبًا. ادفعوا فاتورتكم التالية ببطاقة جديدة وضعوا علامة «احفظ بطاقتي وجدّد تلقائيًا» لتحلّ محلها.",
+  "cardsInUse": "تُخصم منها التجديدات",
+  "cardsRemove": "أزيلوا البطاقة",
+  "cardsRemoveTitle": "إزالة {card}؟",
+  "@cardsRemoveTitle": {
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "cardsRemoveBody": "لن نخصم منها شيئًا بعد الآن.",
+  "cardsRemoveBodyLast": "إنها بطاقتكم الوحيدة، فيتوقف التجديد التلقائي وتُلغى الخصومات القادمة.",
+  "cardsRemoveYes": "أزيلوها",
+  "cardsComingTitle": "الخصومات القادمة",
+  "cardsComingNote": "إيقاف التجديد التلقائي يلغي الخصومات التي لم تبدأ.",
+  "chargeScheduled": "مجدول",
+  "chargeRetry": "محاولة ثانية",
+  "chargeCharging": "جارٍ الآن",
+  "cardsEmptyTitle": "لا توجد بطاقة محفوظة",
+  "cardsEmptyBody": "عند دفع فاتورتكم التالية، ضعوا علامة «احفظ بطاقتي وجدّد تلقائيًا» قبل الانتقال إلى بوابة الدفع، فتُدفع الباقات التالية وحدها بعد إبلاغكم بثلاثة أيام.",
+  "cardsMandateTitle": "ما وافقتم عليه",
+  "cardsSafe": "لا نرى رقم بطاقتكم ولا نحفظه: تحفظه بوابة الدفع وحدها، ونعرض نوعها وآخر أربعة أرقام منها فقط.",
+  "moneyCardsOn": "التجديد التلقائي يعمل · {card}",
+  "@moneyCardsOn": {
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyCardsOff": "التجديد التلقائي متوقف",
+  "moneyCardsNone": "ادفعوا الباقات التالية تلقائيًا ببطاقة محفوظة",
+  "balanceAutoOn": "يعمل",
+  "balanceAutoOff": "متوقف",
+  "balanceAutoNext": "الخصم التالي {amount} · {when}",
+  "@balanceAutoNext": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceAutoManage": "إدارة التجديد التلقائي",
   "addChildTitle": "إضافة طفل",
   "addChildHint": "أضيفوا ابنًا أو ابنة إلى حسابكم، ثم اختاروا الدورة.",
   "addChildAboutTitle": "عن طفلكم",

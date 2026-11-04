@@ -7,6 +7,7 @@ import '../../core/social/social_sign_in.dart';
 import '../../core/time/zones.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/billing/data/billing_repository.dart';
+import '../../features/billing/data/cards_repository.dart';
 import '../../features/challenges/data/challenges_repository.dart';
 import '../../features/classroom/data/classroom_repository.dart';
 import '../../features/dashboard/data/family_repository.dart';
@@ -41,6 +42,7 @@ class Services {
       family = FamilyRepository(api),
       lessons = LessonsRepository(api),
       billing = BillingRepository(api),
+      cards = CardsRepository(api),
       learning = LearningRepository(api),
       homework = HomeworkRepository(api),
       classroom = ClassroomRepository(api),
@@ -75,6 +77,9 @@ class Services {
   final FamilyRepository family;
   final LessonsRepository lessons;
   final BillingRepository billing;
+
+  /// The payer's saved cards and automatic renewal.
+  final CardsRepository cards;
   final LearningRepository learning;
   final HomeworkRepository homework;
   final ClassroomRepository classroom;
@@ -122,6 +127,7 @@ class Services {
       RepositoryProvider.value(value: family),
       RepositoryProvider.value(value: lessons),
       RepositoryProvider.value(value: billing),
+      RepositoryProvider.value(value: cards),
       RepositoryProvider.value(value: consent),
       RepositoryProvider.value(value: privacy),
       RepositoryProvider.value(value: recordings),

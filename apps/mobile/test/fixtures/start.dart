@@ -253,8 +253,16 @@ Map<String, Object?> fxInvoiceView({
   String? checkout,
   bool offer = true,
   Map<String, Object?>? coupon,
+  bool saveCard = false,
+  bool cardSaved = false,
 }) => {
   'data': fxInvoice(id: id, paid: paid, offer: offer, coupon: coupon),
+  if (saveCard)
+    'save_card': {
+      'offered': true,
+      'version': '2027-07-20',
+      'text': 'أوافق على أن تحفظ بوابة الدفع بطاقتي، وأن تُخصم منها فاتورة كل باقة تالية بعد إبلاغي بثلاثة أيام.',
+    },
   'checkout': checkout == null
       ? null
       : {
@@ -267,6 +275,7 @@ Map<String, Object?> fxInvoiceView({
             _ => 'انتهت صفحة الدفع قبل إتمام الدفع.',
           },
           'hint': checkout == 'failed' ? 'لم يُسحب أي مبلغ. حاول مرة أخرى أو اختر طريقة أخرى.' : 'ستتحدّث الصفحة تلقائيًا.',
+          'card_saved': cardSaved,
         },
 };
 

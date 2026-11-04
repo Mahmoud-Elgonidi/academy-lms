@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../core/time/course_days.dart';
 import '../../../core/time/local_time.dart';
+import 'cards.dart';
 
 /// One course's balance as the person signed in may read it
 /// (`GET family/courses/{enrollment}/balance`, docs/architecture/02, section
@@ -24,6 +25,7 @@ class CourseBalance extends Equatable {
     this.waiting,
     this.next,
     this.renewalNote,
+    this.autoRenew,
   });
 
   factory CourseBalance.fromJson(Map<String, dynamic> json) {
@@ -46,6 +48,7 @@ class CourseBalance extends Equatable {
       waiting: waiting is Map<String, dynamic> ? WaitingInvoice.fromJson(waiting) : null,
       next: next is Map<String, dynamic> ? NextInvoice.fromJson(next) : null,
       renewalNote: _text(data['renewal_note']),
+      autoRenew: CourseAutoRenew.fromJson(data['automatic_renewal']),
     );
   }
 
@@ -83,6 +86,10 @@ class CourseBalance extends Equatable {
   /// Why no invoice comes now: paused, or ending (the classic look).
   final String? renewalNote;
 
+  /// Automatic renewal from the saved card (J5b; the classic look, its payer only): on or off, the card, the
+  /// waiting invoice's charge.
+  final CourseAutoRenew? autoRenew;
+
   bool get kids => stage == 'kids';
   bool get classic => stage == 'classic';
 
@@ -119,6 +126,7 @@ class CourseBalance extends Equatable {
     waiting,
     next,
     renewalNote,
+    autoRenew,
   ];
 }
 

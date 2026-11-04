@@ -20,16 +20,22 @@ import '../../../../shared/widgets/load_view.dart';
 import '../../../dashboard/presentation/widgets/family_header.dart';
 import '../../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../../data/billing_repository.dart';
+import '../../data/cards_repository.dart';
+import '../../domain/cards.dart';
+import 'cards_page.dart';
 import '../../domain/billing.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../core/realtime/live.dart';
 import '../../../../shared/widgets/latin_digits.dart';
 
 class _Money {
-  const _Money(this.invoices, this.balance);
+  const _Money(this.invoices, this.balance, [this.cards]);
 
   final Invoices invoices;
   final List<Balance> balance;
+
+  /// The saved cards and automatic renewal; null when they could not be read (the page stands without them).
+  final SavedCards? cards;
 }
 
 /// What is owed and paying it on the academy's own gateway page, or by hand
@@ -81,9 +87,18 @@ class _MoneyPageState extends State<MoneyPage> {
     key: ValueKey(learnerId),
     create: (c) {
       final repo = c.read<BillingRepository>();
+      final cards = c.read<CardsRepository>();
+      Future<SavedCards?> saved() async {
+        try {
+          return await cards.cards();
+        } on ApiProblem {
+          return null;
+        }
+      }
+
       return _cubit = LoadCubit<_Money>(() async {
-        final results = await Future.wait<Object>([repo.invoices(), repo.balance(learnerId: learnerId)]);
-        return _Money(results[0] as Invoices, results[1] as List<Balance>);
+        final results = await Future.wait<Object?>([repo.invoices(), repo.balance(learnerId: learnerId), saved()]);
+        return _Money(results[0]! as Invoices, results[1]! as List<Balance>, results[2] as SavedCards?);
       }, refreshOn: c.read<Live>().on({Live.payments, Live.lessons}))..load();
     },
     child: LoadView<_Money>(
@@ -112,6 +127,19 @@ class _MoneyList extends StatelessWidget {
           SectionHeader(l.lessonsLeftTitle),
           MenuGroup(children: [for (final b in money.balance) _BalanceRow(balance: b)]),
         ],
+        MenuGroup(
+          title: l.cardsAutoTitle,
+          children: [
+            MenuRow(
+              key: const Key('money-cards'),
+              icon: Icons.credit_card_rounded,
+              tone: money.cards?.autoRenew ?? false ? Tone.brand : Tone.neutral,
+              label: l.cardsTitle,
+              subtitle: _cardsLine(context, money.cards),
+              onTap: () => context.go(CardsPage.location),
+            ),
+          ],
+        ),
         SectionHeader(l.invoices),
         if (money.invoices.list.isEmpty) EmptyState(icon: Icons.receipt_long_outlined, title: l.noInvoices),
         if (money.invoices.list.isNotEmpty)
@@ -131,6 +159,15 @@ class _MoneyList extends StatelessWidget {
       ]),
     );
   }
+}
+
+/// Where automatic renewal stands, in a line under the way to the cards screen.
+String _cardsLine(BuildContext context, SavedCards? cards) {
+  final l = context.l10n;
+  if (cards == null || !cards.hasCard) return l.moneyCardsNone;
+  if (!cards.autoRenew) return l.moneyCardsOff;
+  final inUse = cards.card(cards.accounts.where((a) => a.autoRenew).firstOrNull?.cardId) ?? cards.cards.first;
+  return l.moneyCardsOn(inUse.label);
 }
 
 /// What is owed now, the one surface in the academy's colour: how much, which
@@ -441,6 +478,11 @@ class _PayButtonState extends State<_PayButton> {
     final gateways = widget.invoice.payWith;
     if (gateways.isEmpty) {
       showSnack(context, l.cantPayOnline);
+      return;
+    }
+    // A gateway that can keep the card: the invoice's own page, where "save my card and renew automatically" is offered.
+    if (widget.invoice.savesCards) {
+      unawaited(context.push('/family/pay/${widget.invoice.id}'));
       return;
     }
     var gateway = gateways.first.id;

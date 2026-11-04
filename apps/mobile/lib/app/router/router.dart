@@ -18,6 +18,7 @@ import '../../features/recordings/presentation/recordings_page.dart';
 import '../../features/auth/presentation/pages/welcome_page.dart';
 import '../../features/auth/presentation/pages/web_only_page.dart';
 import '../../features/billing/presentation/pages/course_balance_page.dart';
+import '../../features/billing/presentation/pages/cards_page.dart';
 import '../../features/billing/presentation/pages/money_page.dart';
 import '../../features/classroom/presentation/pages/classroom_page.dart';
 import '../../features/dashboard/presentation/bloc/learner_cubit.dart';
@@ -323,7 +324,10 @@ GoRouter buildRouter(SessionCubit session) {
           branch(
             '/family/money',
             (_) => const MoneyPage(),
-            routes: [page('courses/:enrollment', (s) => CourseBalancePage(enrollmentId: s.pathParameters['enrollment']!))],
+            routes: [
+              page('courses/:enrollment', (s) => CourseBalancePage(enrollmentId: s.pathParameters['enrollment']!)),
+              page('cards', (_) => const CardsPage()),
+            ],
           ),
           branch(
             '/family/me',

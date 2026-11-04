@@ -10376,6 +10376,282 @@ abstract class AppLocalizations {
   /// **'تعذّر تحميل رصيد هذه الدورة الآن.'**
   String get balanceFailed;
 
+  /// No description provided for @paySaveCard.
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ بطاقتي وجدّد تلقائيًا'**
+  String get paySaveCard;
+
+  /// No description provided for @paySaveCardLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'تُدفع فاتورة كل باقة تالية من هذه البطاقة وحدها، بعد أن نخبركم بالمبلغ وموعد الخصم قبله بثلاثة أيام. ويمكنكم إيقاف ذلك متى شئتم بضغطة واحدة.'**
+  String get paySaveCardLead;
+
+  /// No description provided for @paySaveCardRead.
+  ///
+  /// In ar, this message translates to:
+  /// **'اقرؤوا نص الموافقة'**
+  String get paySaveCardRead;
+
+  /// No description provided for @paySaveCardHide.
+  ///
+  /// In ar, this message translates to:
+  /// **'أخفوا نص الموافقة'**
+  String get paySaveCardHide;
+
+  /// No description provided for @paySaveCardSafe.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحفظ بوابة الدفع البطاقة على صفحتها، ولا نرى رقمها أبدًا.'**
+  String get paySaveCardSafe;
+
+  /// No description provided for @payGatewayNoCards.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا تحفظ البطاقة'**
+  String get payGatewayNoCards;
+
+  /// No description provided for @payCardSavedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حُفظت بطاقتكم، وصار التجديد تلقائيًا'**
+  String get payCardSavedTitle;
+
+  /// No description provided for @payCardSavedBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تُدفع الباقة التالية من البطاقة بعد أن نخبركم قبلها بثلاثة أيام، ويمكنكم إيقاف ذلك متى شئتم.'**
+  String get payCardSavedBody;
+
+  /// No description provided for @payCardNotSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'وصل الدفع، لكن بوابة الدفع لم تحفظ البطاقة، فتصلكم الفاتورة التالية لتدفعوها بأنفسكم.'**
+  String get payCardNotSaved;
+
+  /// No description provided for @cardsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'البطاقات والتجديد التلقائي'**
+  String get cardsTitle;
+
+  /// No description provided for @cardsAutoTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'التجديد التلقائي'**
+  String get cardsAutoTitle;
+
+  /// No description provided for @cardsAutoOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'يعمل: تُدفع فاتورة كل باقة تالية من بطاقتكم، بعد أن نخبركم بالمبلغ وموعد الخصم قبله بثلاثة أيام.'**
+  String get cardsAutoOn;
+
+  /// No description provided for @cardsAutoOff.
+  ///
+  /// In ar, this message translates to:
+  /// **'متوقف: تصلكم فاتورة كل باقة تالية لتدفعوها بأنفسكم.'**
+  String get cardsAutoOff;
+
+  /// No description provided for @cardsAutoNeedsCard.
+  ///
+  /// In ar, this message translates to:
+  /// **'يعمل التجديد التلقائي ببطاقة محفوظة. احفظوا بطاقة عند دفع فاتورتكم التالية.'**
+  String get cardsAutoNeedsCard;
+
+  /// No description provided for @cardsAutoCurrency.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفواتير بعملة {currency}'**
+  String cardsAutoCurrency(String currency);
+
+  /// No description provided for @cardsOffTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'إيقاف التجديد التلقائي؟'**
+  String get cardsOffTitle;
+
+  /// No description provided for @cardsOffBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'لن تُخصم الفواتير التالية من بطاقتكم، وتصلكم لتدفعوها بأنفسكم. وإن كان خصم جاريًا الآن فإنه يكتمل.'**
+  String get cardsOffBody;
+
+  /// No description provided for @cardsOffYes.
+  ///
+  /// In ar, this message translates to:
+  /// **'أوقفوه'**
+  String get cardsOffYes;
+
+  /// No description provided for @cardsOffKeep.
+  ///
+  /// In ar, this message translates to:
+  /// **'أبقوه يعمل'**
+  String get cardsOffKeep;
+
+  /// No description provided for @cardsCardTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'البطاقة المحفوظة'**
+  String get cardsCardTitle;
+
+  /// No description provided for @cardsExpires.
+  ///
+  /// In ar, this message translates to:
+  /// **'تنتهي في {date}'**
+  String cardsExpires(String date);
+
+  /// No description provided for @cardsKeptAt.
+  ///
+  /// In ar, this message translates to:
+  /// **'محفوظة لدى {account}'**
+  String cardsKeptAt(String account);
+
+  /// No description provided for @cardsSavedOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'حُفظت في {date}'**
+  String cardsSavedOn(String date);
+
+  /// No description provided for @cardsExpiresSoon.
+  ///
+  /// In ar, this message translates to:
+  /// **'تنتهي هذه البطاقة قريبًا. ادفعوا فاتورتكم التالية ببطاقة جديدة وضعوا علامة «احفظ بطاقتي وجدّد تلقائيًا» لتحلّ محلها.'**
+  String get cardsExpiresSoon;
+
+  /// No description provided for @cardsInUse.
+  ///
+  /// In ar, this message translates to:
+  /// **'تُخصم منها التجديدات'**
+  String get cardsInUse;
+
+  /// No description provided for @cardsRemove.
+  ///
+  /// In ar, this message translates to:
+  /// **'أزيلوا البطاقة'**
+  String get cardsRemove;
+
+  /// No description provided for @cardsRemoveTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'إزالة {card}؟'**
+  String cardsRemoveTitle(String card);
+
+  /// No description provided for @cardsRemoveBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'لن نخصم منها شيئًا بعد الآن.'**
+  String get cardsRemoveBody;
+
+  /// No description provided for @cardsRemoveBodyLast.
+  ///
+  /// In ar, this message translates to:
+  /// **'إنها بطاقتكم الوحيدة، فيتوقف التجديد التلقائي وتُلغى الخصومات القادمة.'**
+  String get cardsRemoveBodyLast;
+
+  /// No description provided for @cardsRemoveYes.
+  ///
+  /// In ar, this message translates to:
+  /// **'أزيلوها'**
+  String get cardsRemoveYes;
+
+  /// No description provided for @cardsComingTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخصومات القادمة'**
+  String get cardsComingTitle;
+
+  /// No description provided for @cardsComingNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'إيقاف التجديد التلقائي يلغي الخصومات التي لم تبدأ.'**
+  String get cardsComingNote;
+
+  /// No description provided for @chargeScheduled.
+  ///
+  /// In ar, this message translates to:
+  /// **'مجدول'**
+  String get chargeScheduled;
+
+  /// No description provided for @chargeRetry.
+  ///
+  /// In ar, this message translates to:
+  /// **'محاولة ثانية'**
+  String get chargeRetry;
+
+  /// No description provided for @chargeCharging.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ الآن'**
+  String get chargeCharging;
+
+  /// No description provided for @cardsEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد بطاقة محفوظة'**
+  String get cardsEmptyTitle;
+
+  /// No description provided for @cardsEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'عند دفع فاتورتكم التالية، ضعوا علامة «احفظ بطاقتي وجدّد تلقائيًا» قبل الانتقال إلى بوابة الدفع، فتُدفع الباقات التالية وحدها بعد إبلاغكم بثلاثة أيام.'**
+  String get cardsEmptyBody;
+
+  /// No description provided for @cardsMandateTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'ما وافقتم عليه'**
+  String get cardsMandateTitle;
+
+  /// No description provided for @cardsSafe.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا نرى رقم بطاقتكم ولا نحفظه: تحفظه بوابة الدفع وحدها، ونعرض نوعها وآخر أربعة أرقام منها فقط.'**
+  String get cardsSafe;
+
+  /// No description provided for @moneyCardsOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'التجديد التلقائي يعمل · {card}'**
+  String moneyCardsOn(String card);
+
+  /// No description provided for @moneyCardsOff.
+  ///
+  /// In ar, this message translates to:
+  /// **'التجديد التلقائي متوقف'**
+  String get moneyCardsOff;
+
+  /// No description provided for @moneyCardsNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادفعوا الباقات التالية تلقائيًا ببطاقة محفوظة'**
+  String get moneyCardsNone;
+
+  /// No description provided for @balanceAutoOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'يعمل'**
+  String get balanceAutoOn;
+
+  /// No description provided for @balanceAutoOff.
+  ///
+  /// In ar, this message translates to:
+  /// **'متوقف'**
+  String get balanceAutoOff;
+
+  /// No description provided for @balanceAutoNext.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخصم التالي {amount} · {when}'**
+  String balanceAutoNext(String amount, String when);
+
+  /// No description provided for @balanceAutoManage.
+  ///
+  /// In ar, this message translates to:
+  /// **'إدارة التجديد التلقائي'**
+  String get balanceAutoManage;
+
   /// No description provided for @addChildTitle.
   ///
   /// In ar, this message translates to:

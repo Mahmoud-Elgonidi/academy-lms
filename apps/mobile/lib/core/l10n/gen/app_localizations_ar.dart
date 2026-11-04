@@ -6505,6 +6505,161 @@ class AppLocalizationsAr extends AppLocalizations {
   String get balanceFailed => 'تعذّر تحميل رصيد هذه الدورة الآن.';
 
   @override
+  String get paySaveCard => 'احفظ بطاقتي وجدّد تلقائيًا';
+
+  @override
+  String get paySaveCardLead =>
+      'تُدفع فاتورة كل باقة تالية من هذه البطاقة وحدها، بعد أن نخبركم بالمبلغ وموعد الخصم قبله بثلاثة أيام. ويمكنكم إيقاف ذلك متى شئتم بضغطة واحدة.';
+
+  @override
+  String get paySaveCardRead => 'اقرؤوا نص الموافقة';
+
+  @override
+  String get paySaveCardHide => 'أخفوا نص الموافقة';
+
+  @override
+  String get paySaveCardSafe => 'تحفظ بوابة الدفع البطاقة على صفحتها، ولا نرى رقمها أبدًا.';
+
+  @override
+  String get payGatewayNoCards => 'لا تحفظ البطاقة';
+
+  @override
+  String get payCardSavedTitle => 'حُفظت بطاقتكم، وصار التجديد تلقائيًا';
+
+  @override
+  String get payCardSavedBody => 'تُدفع الباقة التالية من البطاقة بعد أن نخبركم قبلها بثلاثة أيام، ويمكنكم إيقاف ذلك متى شئتم.';
+
+  @override
+  String get payCardNotSaved => 'وصل الدفع، لكن بوابة الدفع لم تحفظ البطاقة، فتصلكم الفاتورة التالية لتدفعوها بأنفسكم.';
+
+  @override
+  String get cardsTitle => 'البطاقات والتجديد التلقائي';
+
+  @override
+  String get cardsAutoTitle => 'التجديد التلقائي';
+
+  @override
+  String get cardsAutoOn => 'يعمل: تُدفع فاتورة كل باقة تالية من بطاقتكم، بعد أن نخبركم بالمبلغ وموعد الخصم قبله بثلاثة أيام.';
+
+  @override
+  String get cardsAutoOff => 'متوقف: تصلكم فاتورة كل باقة تالية لتدفعوها بأنفسكم.';
+
+  @override
+  String get cardsAutoNeedsCard => 'يعمل التجديد التلقائي ببطاقة محفوظة. احفظوا بطاقة عند دفع فاتورتكم التالية.';
+
+  @override
+  String cardsAutoCurrency(String currency) {
+    return 'الفواتير بعملة $currency';
+  }
+
+  @override
+  String get cardsOffTitle => 'إيقاف التجديد التلقائي؟';
+
+  @override
+  String get cardsOffBody => 'لن تُخصم الفواتير التالية من بطاقتكم، وتصلكم لتدفعوها بأنفسكم. وإن كان خصم جاريًا الآن فإنه يكتمل.';
+
+  @override
+  String get cardsOffYes => 'أوقفوه';
+
+  @override
+  String get cardsOffKeep => 'أبقوه يعمل';
+
+  @override
+  String get cardsCardTitle => 'البطاقة المحفوظة';
+
+  @override
+  String cardsExpires(String date) {
+    return 'تنتهي في $date';
+  }
+
+  @override
+  String cardsKeptAt(String account) {
+    return 'محفوظة لدى $account';
+  }
+
+  @override
+  String cardsSavedOn(String date) {
+    return 'حُفظت في $date';
+  }
+
+  @override
+  String get cardsExpiresSoon =>
+      'تنتهي هذه البطاقة قريبًا. ادفعوا فاتورتكم التالية ببطاقة جديدة وضعوا علامة «احفظ بطاقتي وجدّد تلقائيًا» لتحلّ محلها.';
+
+  @override
+  String get cardsInUse => 'تُخصم منها التجديدات';
+
+  @override
+  String get cardsRemove => 'أزيلوا البطاقة';
+
+  @override
+  String cardsRemoveTitle(String card) {
+    return 'إزالة $card؟';
+  }
+
+  @override
+  String get cardsRemoveBody => 'لن نخصم منها شيئًا بعد الآن.';
+
+  @override
+  String get cardsRemoveBodyLast => 'إنها بطاقتكم الوحيدة، فيتوقف التجديد التلقائي وتُلغى الخصومات القادمة.';
+
+  @override
+  String get cardsRemoveYes => 'أزيلوها';
+
+  @override
+  String get cardsComingTitle => 'الخصومات القادمة';
+
+  @override
+  String get cardsComingNote => 'إيقاف التجديد التلقائي يلغي الخصومات التي لم تبدأ.';
+
+  @override
+  String get chargeScheduled => 'مجدول';
+
+  @override
+  String get chargeRetry => 'محاولة ثانية';
+
+  @override
+  String get chargeCharging => 'جارٍ الآن';
+
+  @override
+  String get cardsEmptyTitle => 'لا توجد بطاقة محفوظة';
+
+  @override
+  String get cardsEmptyBody =>
+      'عند دفع فاتورتكم التالية، ضعوا علامة «احفظ بطاقتي وجدّد تلقائيًا» قبل الانتقال إلى بوابة الدفع، فتُدفع الباقات التالية وحدها بعد إبلاغكم بثلاثة أيام.';
+
+  @override
+  String get cardsMandateTitle => 'ما وافقتم عليه';
+
+  @override
+  String get cardsSafe => 'لا نرى رقم بطاقتكم ولا نحفظه: تحفظه بوابة الدفع وحدها، ونعرض نوعها وآخر أربعة أرقام منها فقط.';
+
+  @override
+  String moneyCardsOn(String card) {
+    return 'التجديد التلقائي يعمل · $card';
+  }
+
+  @override
+  String get moneyCardsOff => 'التجديد التلقائي متوقف';
+
+  @override
+  String get moneyCardsNone => 'ادفعوا الباقات التالية تلقائيًا ببطاقة محفوظة';
+
+  @override
+  String get balanceAutoOn => 'يعمل';
+
+  @override
+  String get balanceAutoOff => 'متوقف';
+
+  @override
+  String balanceAutoNext(String amount, String when) {
+    return 'الخصم التالي $amount · $when';
+  }
+
+  @override
+  String get balanceAutoManage => 'إدارة التجديد التلقائي';
+
+  @override
   String get addChildTitle => 'إضافة طفل';
 
   @override

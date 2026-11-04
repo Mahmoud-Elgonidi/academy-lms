@@ -1,6 +1,9 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../core/time/local_time.dart';
+import '../../billing/domain/cards.dart' show SaveCardOffer;
+
+export '../../billing/domain/cards.dart' show SaveCardOffer;
 
 /// An amount as the API wrote it for the reader ("300.00 ر.س"), with its minor units.
 class Amount extends Equatable {
@@ -680,13 +683,19 @@ enum CheckoutStatus {
 }
 
 class Checkout extends Equatable {
-  const Checkout({required this.id, required this.status, this.text, this.hint});
+  const Checkout({required this.id, required this.status, this.text, this.hint, this.cardSaved = false});
 
   static Checkout? fromJson(Object? json) {
     if (json is! Map<String, dynamic>) return null;
     final status = CheckoutStatus.of(json['status']);
     if (status == null) return null;
-    return Checkout(id: json['id'] as String? ?? '', status: status, text: _text(json['text']), hint: _text(json['hint']));
+    return Checkout(
+      id: json['id'] as String? ?? '',
+      status: status,
+      text: _text(json['text']),
+      hint: _text(json['hint']),
+      cardSaved: json['card_saved'] == true,
+    );
   }
 
   final String id;
@@ -694,22 +703,31 @@ class Checkout extends Equatable {
   final String? text;
   final String? hint;
 
+  /// The payer asked to save the card, and the gateway kept it: renewals are charged to it (J5b).
+  final bool cardSaved;
+
   @override
-  List<Object?> get props => [id, status, text, hint];
+  List<Object?> get props => [id, status, text, hint, cardSaved];
 }
 
 /// The invoice and the latest online payment on it.
 class InvoiceView extends Equatable {
-  const InvoiceView({required this.invoice, this.checkout});
+  const InvoiceView({required this.invoice, this.checkout, this.saveCard});
 
-  factory InvoiceView.fromJson(Map<String, dynamic> json) =>
-      InvoiceView(invoice: PayerInvoice.fromJson(json['data'] as Map<String, dynamic>), checkout: Checkout.fromJson(json['checkout']));
+  factory InvoiceView.fromJson(Map<String, dynamic> json) => InvoiceView(
+    invoice: PayerInvoice.fromJson(json['data'] as Map<String, dynamic>),
+    checkout: Checkout.fromJson(json['checkout']),
+    saveCard: SaveCardOffer.fromJson(json['save_card']),
+  );
 
   final PayerInvoice invoice;
   final Checkout? checkout;
 
+  /// Saving the card while paying it (J5b): offered in the classic look, with the mandate to tick.
+  final SaveCardOffer? saveCard;
+
   @override
-  List<Object?> get props => [invoice, checkout];
+  List<Object?> get props => [invoice, checkout, saveCard];
 }
 
 /// A course the family just started (`POST family/courses`).

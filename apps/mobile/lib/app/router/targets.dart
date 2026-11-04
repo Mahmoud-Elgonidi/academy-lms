@@ -36,12 +36,14 @@ String targetOf(String? screen, String? id, Area area) {
     (_, 'announcement') => '/inbox',
     // The journey: games, the old challenges and the journey itself (a lesson's stars, an egg).
     (Area.kids || Area.middle || Area.teen || Area.family, 'journey' || 'games' || 'challenges') => '$base/journey',
-    // An invoice opens to be paid (or read once paid); a course's balance (the next invoice coming, lessons expiring)
+    // An invoice opens to be paid (or read once paid; a renewal coming, an automatic charge made, retried or failed); a course's balance (the next invoice coming, lessons expiring)
     // on its own page under Payments; an unpaid start closed by itself, the start flow again for the same learner.
     (Area.family, 'invoice') when id != null => '/family/pay/$id',
     (Area.family, 'invoice') => '/family/money',
     (Area.family, 'course_balance') when id != null => '/family/money/courses/$id',
     (Area.family, 'course_balance') => '/family/money',
+    // The payer's saved cards and automatic renewal (a card expiring or stopped, J5b); its id is the payer's own.
+    (Area.family, 'cards') => '/family/money/cards',
     (Area.family, 'start') when id != null => '/family/start?learner=${Uri.encodeQueryComponent(id)}',
     (Area.family, 'start') => '/family/start',
     (Area.family, 'guardian_consent') => '/family/me/privacy',

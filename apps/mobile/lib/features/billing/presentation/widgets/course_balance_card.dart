@@ -14,6 +14,7 @@ import '../../../../shared/widgets/course_state.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../data/billing_repository.dart';
 import '../../domain/billing.dart';
+import '../../domain/cards.dart';
 import '../../domain/course_balance.dart';
 
 /// A course on the family's balance with what its own balance says, or null when it could not be read.
@@ -182,6 +183,7 @@ class CourseBalanceCard extends StatelessWidget {
           ],
           if (b.waiting case final waiting?) ...[const Gap(Space.m), _Waiting(invoice: waiting)],
           if (b.next case final next? when b.waiting == null) ...[const Gap(Space.m), _Next(next: next)],
+          if (b.autoRenew case final auto? when b.classic) ...[const Gap(Space.m), _AutoRenewLine(auto: auto)],
         ],
       ),
     );
@@ -382,6 +384,86 @@ class _Next extends StatelessWidget {
           ],
           const Gap(Space.s),
           Text(l.balanceEstimate, style: context.type.caption),
+        ],
+      ),
+    );
+  }
+}
+
+/// Automatic renewal on this course (J5b, its payer only): on or off in the API's sentence, the waiting invoice's
+/// charge (how much, the moment as the API wrote it), a card that expires soon, and the way to the cards screen.
+class _AutoRenewLine extends StatelessWidget {
+  const _AutoRenewLine({required this.auto});
+
+  final CourseAutoRenew auto;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final next = auto.next;
+    return Container(
+      key: const Key('balance-auto'),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(Space.m + 2, Space.m, Space.m + 2, Space.xs),
+      decoration: BoxDecoration(color: auto.on ? c.brandSoft : c.page, borderRadius: BorderRadius.circular(context.shape.field)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(auto.on ? Icons.autorenew_rounded : Icons.credit_card_outlined, size: 18, color: auto.on ? c.brandDeep : c.muted),
+              const Gap(Space.s),
+              Expanded(child: Text(l.cardsAutoTitle, style: context.type.label)),
+              StatusChip(
+                auto.on ? l.balanceAutoOn : l.balanceAutoOff,
+                key: const Key('balance-auto-state'),
+                tone: auto.on ? Tone.brand : Tone.neutral,
+              ),
+            ],
+          ),
+          if (auto.text.isNotEmpty) ...[
+            const Gap(Space.s),
+            Text(auto.text, key: const Key('balance-auto-text'), style: context.type.body.copyWith(height: 1.6)),
+          ],
+          if (next case final charge? when auto.on) ...[
+            const Gap(Space.s),
+            Row(
+              key: const Key('balance-auto-next'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Icon(
+                    Icons.event_repeat_rounded,
+                    size: 16,
+                    color: charge.status == ChargeStatus.retry ? c.attentionInk : c.brandDeep,
+                  ),
+                ),
+                const Gap(Space.s),
+                Expanded(
+                  child: Text(
+                    l.balanceAutoNext(charge.amount, charge.at?.label ?? ''),
+                    style: context.type.body.copyWith(fontWeight: FontWeight.w700, color: c.brandDeep),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (auto.card?.expiresSoon ?? false) ...[
+            const Gap(Space.s),
+            Note(l.cardsExpiresSoon, key: const Key('balance-auto-expiring'), tone: Tone.attention, icon: Icons.event_busy_outlined),
+          ],
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              key: const Key('balance-auto-manage'),
+              style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact, foregroundColor: c.brandDeep),
+              onPressed: () => context.go('/family/money/cards'),
+              icon: const Icon(Icons.credit_card_rounded, size: 18),
+              label: Text(l.balanceAutoManage),
+            ),
+          ),
         ],
       ),
     );

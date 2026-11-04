@@ -6132,6 +6132,164 @@ class AppLocalizationsEn extends AppLocalizations {
   String get balanceFailed => 'Couldn\'t load this course\'s balance just now.';
 
   @override
+  String get paySaveCard => 'Save my card and renew automatically';
+
+  @override
+  String get paySaveCardLead =>
+      'Each next package is paid from this card on its own, after we tell you the amount and the moment three days before. Stop it whenever you like, in one tap.';
+
+  @override
+  String get paySaveCardRead => 'Read what you agree to';
+
+  @override
+  String get paySaveCardHide => 'Hide the wording';
+
+  @override
+  String get paySaveCardSafe => 'The payment gateway keeps the card on its own page; we never see its number.';
+
+  @override
+  String get payGatewayNoCards => 'Does not keep the card';
+
+  @override
+  String get payCardSavedTitle => 'Your card is saved: renewals are automatic';
+
+  @override
+  String get payCardSavedBody => 'The next package is paid from the card after we tell you three days before; stop it whenever you like.';
+
+  @override
+  String get payCardNotSaved =>
+      'The payment arrived, but the gateway did not keep the card: the next invoice comes for you to pay yourselves.';
+
+  @override
+  String get cardsTitle => 'Cards and automatic renewal';
+
+  @override
+  String get cardsAutoTitle => 'Automatic renewal';
+
+  @override
+  String get cardsAutoOn => 'On: each next package is paid from your card, after we tell you the amount and the moment three days before.';
+
+  @override
+  String get cardsAutoOff => 'Off: each next package\'s invoice comes for you to pay yourselves.';
+
+  @override
+  String get cardsAutoNeedsCard => 'Automatic renewal needs a saved card. Save one when you pay your next invoice.';
+
+  @override
+  String cardsAutoCurrency(String currency) {
+    return 'Invoices in $currency';
+  }
+
+  @override
+  String get cardsOffTitle => 'Turn automatic renewal off?';
+
+  @override
+  String get cardsOffBody =>
+      'The next invoices will not be charged to your card; they come for you to pay. A charge already under way finishes.';
+
+  @override
+  String get cardsOffYes => 'Turn it off';
+
+  @override
+  String get cardsOffKeep => 'Keep it on';
+
+  @override
+  String get cardsCardTitle => 'Saved card';
+
+  @override
+  String cardsExpires(String date) {
+    return 'Expires $date';
+  }
+
+  @override
+  String cardsKeptAt(String account) {
+    return 'Kept at $account';
+  }
+
+  @override
+  String cardsSavedOn(String date) {
+    return 'Saved on $date';
+  }
+
+  @override
+  String get cardsExpiresSoon =>
+      'This card expires soon. Pay your next invoice with a new card and tick \"Save my card and renew automatically\" to put it in its place.';
+
+  @override
+  String get cardsInUse => 'Renewals are charged to it';
+
+  @override
+  String get cardsRemove => 'Remove the card';
+
+  @override
+  String cardsRemoveTitle(String card) {
+    return 'Remove $card?';
+  }
+
+  @override
+  String get cardsRemoveBody => 'Nothing will be charged to it any more.';
+
+  @override
+  String get cardsRemoveBodyLast => 'It is your only card: automatic renewal stops and the charges to come are cancelled.';
+
+  @override
+  String get cardsRemoveYes => 'Remove it';
+
+  @override
+  String get cardsComingTitle => 'Charges coming';
+
+  @override
+  String get cardsComingNote => 'Turning automatic renewal off cancels the charges that have not begun.';
+
+  @override
+  String get chargeScheduled => 'Scheduled';
+
+  @override
+  String get chargeRetry => 'Second try';
+
+  @override
+  String get chargeCharging => 'Under way';
+
+  @override
+  String get cardsEmptyTitle => 'No saved card';
+
+  @override
+  String get cardsEmptyBody =>
+      'When you pay your next invoice, tick \"Save my card and renew automatically\" before going to the gateway: the next packages are then paid on their own, three days after we tell you.';
+
+  @override
+  String get cardsMandateTitle => 'What you agreed to';
+
+  @override
+  String get cardsSafe =>
+      'We never see or keep your card number: the gateway alone keeps it, and we show only its brand and last four digits.';
+
+  @override
+  String moneyCardsOn(String card) {
+    return 'Automatic renewal on · $card';
+  }
+
+  @override
+  String get moneyCardsOff => 'Automatic renewal off';
+
+  @override
+  String get moneyCardsNone => 'Pay the next packages automatically with a saved card';
+
+  @override
+  String get balanceAutoOn => 'On';
+
+  @override
+  String get balanceAutoOff => 'Off';
+
+  @override
+  String balanceAutoNext(String amount, String when) {
+    return 'Next charge $amount · $when';
+  }
+
+  @override
+  String get balanceAutoManage => 'Manage automatic renewal';
+
+  @override
   String get addChildTitle => 'Add a child';
 
   @override

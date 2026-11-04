@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/network/api_problem.dart';
 import '../../../billing/data/billing_repository.dart';
+import '../../../billing/domain/billing.dart' show Gateway;
 import '../../data/start_repository.dart';
 import '../../domain/start.dart';
 
@@ -29,6 +30,9 @@ class PayState extends Equatable {
     this.cancelling = false,
     this.cancelled,
     this.cancelProblem,
+    this.saveCard,
+    this.keepCard = false,
+    this.askedToSave = false,
   });
 
   final PayerInvoice? invoice;
@@ -37,7 +41,7 @@ class PayState extends Equatable {
   final ApiProblem? problem;
 
   /// The academy's gateways that take it (null until read: the first is used then).
-  final List<({String id, String label})>? payWith;
+  final List<Gateway>? payWith;
 
   /// It may be paid by hand, with the receipt sent from Payments.
   final bool canSendProof;
@@ -58,6 +62,24 @@ class PayState extends Equatable {
   final String? cancelled;
   final ApiProblem? cancelProblem;
 
+  /// Saving the card while paying (J5b): offered in the classic look, with the mandate's words and version.
+  final SaveCardOffer? saveCard;
+
+  /// "Save my card and renew automatically" is ticked (never by default).
+  final bool keepCard;
+
+  /// The last checkout from here asked the gateway to keep the card.
+  final bool askedToSave;
+
+  /// The tick is offered: the look allows it and a gateway that takes the invoice keeps cards.
+  bool get canSaveCard => (saveCard?.offered ?? false) && (payWith ?? const []).any((g) => g.savesCards);
+
+  /// Paid with the card kept: automatic renewal is on.
+  bool get cardSaved => checkout?.cardSaved ?? false;
+
+  /// Asked to keep the card, paid, and the gateway did not keep it.
+  bool get cardNotSaved => askedToSave && checkout?.status == CheckoutStatus.paid && !cardSaved;
+
   PayPhase get phase {
     if (cancelled != null) return PayPhase.cancelled;
     final i = invoice;
@@ -77,7 +99,7 @@ class PayState extends Equatable {
     Checkout? Function()? checkout,
     bool? loading,
     ApiProblem? Function()? problem,
-    List<({String id, String label})>? Function()? payWith,
+    List<Gateway>? Function()? payWith,
     bool? canSendProof,
     bool? couponBusy,
     ApiProblem? Function()? couponProblem,
@@ -89,6 +111,9 @@ class PayState extends Equatable {
     bool? cancelling,
     String? Function()? cancelled,
     ApiProblem? Function()? cancelProblem,
+    SaveCardOffer? Function()? saveCard,
+    bool? keepCard,
+    bool? askedToSave,
   }) => PayState(
     invoice: invoice == null ? this.invoice : invoice(),
     checkout: checkout == null ? this.checkout : checkout(),
@@ -106,6 +131,9 @@ class PayState extends Equatable {
     cancelling: cancelling ?? this.cancelling,
     cancelled: cancelled == null ? this.cancelled : cancelled(),
     cancelProblem: cancelProblem == null ? this.cancelProblem : cancelProblem(),
+    saveCard: saveCard == null ? this.saveCard : saveCard(),
+    keepCard: keepCard ?? this.keepCard,
+    askedToSave: askedToSave ?? this.askedToSave,
   );
 
   @override
@@ -126,6 +154,9 @@ class PayState extends Equatable {
     cancelling,
     cancelled,
     cancelProblem,
+    saveCard,
+    keepCard,
+    askedToSave,
   ];
 }
 
@@ -174,6 +205,7 @@ class PayCubit extends Cubit<PayState> {
         state.copyWith(
           invoice: () => view.invoice,
           checkout: () => view.checkout,
+          saveCard: view.saveCard == null ? null : () => view.saveCard,
           loading: false,
           problem: () => null,
           justPaid: paidNow ? true : null,
@@ -229,18 +261,26 @@ class PayCubit extends Cubit<PayState> {
     }
   }
 
-  /// Opens a checkout at [accountId] (else the academy's first); the page to open in the browser.
+  /// Ticks or unticks "save my card and renew automatically".
+  void keepCard(bool keep) => emit(state.copyWith(keepCard: keep));
+
+  /// Opens a checkout at [accountId] (else the academy's first); the page to open in the browser. The card is
+  /// kept only when ticked and that gateway keeps cards, with the mandate's version the payer read.
   Future<Uri?> checkout({String? accountId}) async {
     if (state.paying) return null;
     emit(state.copyWith(paying: true, payProblem: () => null));
+    final gateways = state.payWith ?? const <Gateway>[];
+    final gateway = accountId == null ? gateways.firstOrNull : gateways.where((g) => g.id == accountId).firstOrNull;
+    final save = state.keepCard && state.canSaveCard && (gateway?.savesCards ?? false);
     try {
-      final made = await _repo.checkout(_invoiceId, accountId: accountId);
+      final made = await _repo.checkout(_invoiceId, accountId: accountId, mandateVersion: save ? state.saveCard!.mandate.version : null);
       if (isClosed) return null;
       _checkoutId = made.id;
       emit(
         state.copyWith(
           paying: false,
           awaiting: true,
+          askedToSave: save,
           checkout: () => Checkout(id: made.id, status: CheckoutStatus.open),
         ),
       );

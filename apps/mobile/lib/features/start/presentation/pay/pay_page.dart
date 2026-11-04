@@ -100,8 +100,8 @@ class _PayPageState extends State<PayPage> {
               PayPhase.nothing when widget.invoiceId == 'none' && started != null => _Package(started: started),
               PayPhase.nothing => EmptyState(key: const Key('pay-void'), icon: Icons.block_rounded, title: l.payVoid),
               PayPhase.cancelled => _Cancelled(message: state.cancelled!, started: started),
-              PayPhase.paid when started == null => _Settled(invoice: state.invoice!, fresh: _paidHere || state.justPaid),
-              PayPhase.paid => _Welcome(started: started),
+              PayPhase.paid when started == null => _Settled(invoice: state.invoice!, fresh: _paidHere || state.justPaid, state: state),
+              PayPhase.paid => _Welcome(started: started, state: state),
               PayPhase.waiting => _Waiting(checkout: state.checkout),
               PayPhase.pay => _Pay(state: state, started: started),
             };
@@ -164,6 +164,7 @@ class _Pay extends StatelessWidget {
           _Lines(invoice: invoice),
           const Gap(Space.m),
           _Coupon(state: state),
+          if (state.canSaveCard && !noGateway) ...[const Gap(Space.m), _SaveCard(state: state)],
           const Gap(Space.l),
           if (noGateway) ...[
             Note(l.payNoGateway, key: const Key('pay-no-gateway'), icon: Icons.account_balance_outlined),
@@ -234,7 +235,13 @@ class _Pay extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             for (final g in gateways)
-              ListTile(leading: const Icon(Icons.credit_card_rounded), title: Text(g.label), onTap: () => Navigator.pop(c, g.id)),
+              ListTile(
+                leading: const Icon(Icons.credit_card_rounded),
+                title: Text(g.label),
+                // Ticked to keep the card: the gateway that cannot keep it says so before it is chosen.
+                subtitle: state.keepCard && !g.savesCards ? Text(l.payGatewayNoCards) : null,
+                onTap: () => Navigator.pop(c, g.id),
+              ),
           ],
         ),
       );
@@ -545,6 +552,177 @@ class _CancelCourse extends StatelessWidget {
   }
 }
 
+/// "Save my card and renew automatically" (J5b): never ticked for them; what it means in a line, the mandate's own
+/// words a tap away, and that the gateway alone keeps the card.
+class _SaveCard extends StatefulWidget {
+  const _SaveCard({required this.state});
+
+  final PayState state;
+
+  @override
+  State<_SaveCard> createState() => _SaveCardState();
+}
+
+class _SaveCardState extends State<_SaveCard> {
+  bool _read = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final on = widget.state.keepCard;
+    final mandate = widget.state.saveCard!.mandate;
+    final cubit = context.read<PayCubit>();
+    return AnimatedContainer(
+      key: const Key('pay-save-card'),
+      duration: context.calm ? Duration.zero : const Duration(milliseconds: 240),
+      padding: const EdgeInsets.fromLTRB(Space.s, Space.s, Space.m, Space.m),
+      decoration: BoxDecoration(
+        color: on ? c.brandSoft : c.card,
+        borderRadius: BorderRadius.circular(context.shape.card),
+        border: Border.all(color: on ? c.brand.withValues(alpha: 0.45) : c.line, width: on ? 1.5 : 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          MergeSemantics(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(context.shape.field),
+              onTap: widget.state.paying ? null : () => cubit.keepCard(!on),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Checkbox(
+                    key: const Key('pay-save-card-tick'),
+                    value: on,
+                    onChanged: widget.state.paying ? null : (v) => cubit.keepCard(v ?? false),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: Space.s + 2),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l.paySaveCard, style: context.type.body.copyWith(fontWeight: FontWeight.w700)),
+                          const Gap(Space.xs),
+                          Text(l.paySaveCardLead, style: context.type.caption.copyWith(height: 1.6)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: Space.xxl + Space.xs),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextButton.icon(
+                  key: const Key('pay-save-card-read'),
+                  style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact, foregroundColor: c.brandDeep),
+                  onPressed: () => setState(() => _read = !_read),
+                  icon: Icon(_read ? Icons.expand_less_rounded : Icons.expand_more_rounded, size: 18),
+                  label: Text(_read ? l.paySaveCardHide : l.paySaveCardRead),
+                ),
+                _Unfold(
+                  child: _read
+                      ? Container(
+                          key: const Key('pay-save-card-mandate'),
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: Space.s),
+                          padding: const EdgeInsets.all(Space.m),
+                          decoration: BoxDecoration(color: c.page, borderRadius: BorderRadius.circular(context.shape.field)),
+                          child: SelectableText(mandate.text, style: context.type.caption.copyWith(height: 1.7)),
+                        )
+                      : const SizedBox(width: double.infinity),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Icon(Icons.lock_outline_rounded, size: 14, color: c.muted),
+                    ),
+                    const Gap(Space.xs),
+                    Expanded(child: Text(l.paySaveCardSafe, style: context.type.caption)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Unfolds its child in place, or at once when the phone asks for less motion.
+class _Unfold extends StatelessWidget {
+  const _Unfold({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => context.calm
+      ? child
+      : AnimatedSize(duration: const Duration(milliseconds: 220), alignment: AlignmentDirectional.topStart, child: child);
+}
+
+/// What came of keeping the card, once paid: kept (automatic renewal is on, with the way to the cards screen),
+/// or the gateway did not keep it. Nothing when it was not asked.
+class _CardOutcome extends StatelessWidget {
+  const _CardOutcome({required this.state});
+
+  final PayState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    if (state.cardSaved) {
+      final c = context.colors;
+      return Container(
+        key: const Key('pay-card-saved'),
+        padding: const EdgeInsets.all(Space.l),
+        decoration: BoxDecoration(
+          color: c.brandSoft,
+          borderRadius: BorderRadius.circular(context.shape.card),
+          border: Border.all(color: c.brand.withValues(alpha: 0.35)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const IconBadge(Icons.autorenew_rounded, tone: Tone.brand, size: 36),
+                const Gap(Space.m),
+                Expanded(
+                  child: Text(l.payCardSavedTitle, style: context.type.cardTitle.copyWith(color: c.brandDeep)),
+                ),
+              ],
+            ),
+            const Gap(Space.s),
+            Text(l.payCardSavedBody, style: context.type.body.copyWith(height: 1.6)),
+            const Gap(Space.s),
+            TextButton.icon(
+              key: const Key('pay-open-cards'),
+              style: TextButton.styleFrom(padding: EdgeInsets.zero, foregroundColor: c.brandDeep),
+              onPressed: () => context.go('/family/money/cards'),
+              icon: const Icon(Icons.credit_card_rounded, size: 18),
+              label: Text(l.cardsTitle),
+            ),
+          ],
+        ),
+      ).appear(context, 2);
+    }
+    if (state.cardNotSaved) {
+      return Note(l.payCardNotSaved, key: const Key('pay-card-not-saved'), tone: Tone.attention, icon: Icons.credit_card_off_outlined);
+    }
+    return const SizedBox.shrink();
+  }
+}
+
 /// The gateway is still confirming: a calm wait that follows the payments signal, and a way to look now.
 class _Waiting extends StatelessWidget {
   const _Waiting({this.checkout});
@@ -600,9 +778,10 @@ class _Waiting extends StatelessWidget {
 
 /// Paid: the welcome to the course: the teacher, the weekly times, the first lesson and how to join.
 class _Welcome extends StatelessWidget {
-  const _Welcome({this.started});
+  const _Welcome({this.started, required this.state});
 
   final StartedCourse? started;
+  final PayState state;
 
   @override
   Widget build(BuildContext context) {
@@ -629,6 +808,7 @@ class _Welcome extends StatelessWidget {
           textAlign: TextAlign.center,
           style: context.type.body.copyWith(color: c.muted, height: 1.6),
         ),
+        if (state.cardSaved || state.cardNotSaved) ...[const Gap(Space.l), _CardOutcome(state: state)],
         if (s != null) ...[const Gap(Space.xl), _CourseCard(started: s)],
         const Gap(Space.xl),
         SizedBox(
@@ -647,9 +827,10 @@ class _Welcome extends StatelessWidget {
 
 /// An invoice paid (just now, or opened again once paid): said plainly, its printable copy, and the lessons.
 class _Settled extends StatelessWidget {
-  const _Settled({required this.invoice, required this.fresh});
+  const _Settled({required this.invoice, required this.fresh, required this.state});
 
   final PayerInvoice invoice;
+  final PayState state;
 
   /// Paid while this screen was open: thanks rather than a plain "paid".
   final bool fresh;
@@ -685,6 +866,7 @@ class _Settled extends StatelessWidget {
           textAlign: TextAlign.center,
           style: context.type.body.copyWith(color: c.muted, height: 1.6),
         ),
+        if (state.cardSaved || state.cardNotSaved) ...[const Gap(Space.l), _CardOutcome(state: state)],
         const Gap(Space.l),
         _Lines(invoice: invoice),
         const Gap(Space.xl),
