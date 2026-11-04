@@ -207,3 +207,30 @@ it('shows whoever sees the money the saved cards as brand, last four and expiry,
     $page = $this->actingAs($accountant)->get('http://noor.lms.test/admin/billing/saved-cards')->assertOk();
     $page->assertSee('Visa ****4242')->assertSee('12/2034')->assertDontSee('demo_tok_');
 });
+
+it('tells the payer\'s money screens when a card is kept or removed and automatic renewal is turned off or on', function () {
+    config(['database.connections.cards_listener' => config('database.connections.pgsql')]);
+    $pdo = DB::connection('cards_listener')->getPdo();
+    $pdo->exec('listen lms_live');
+    $raised = function () use ($pdo) {
+        $all = [];
+        while ($note = $pdo->pgsqlGetNotify(PDO::FETCH_ASSOC, 300)) {
+            $all[] = $note['payload'];
+        }
+
+        return $all;
+    };
+    $signal = "payments:{$this->payer->id}";
+
+    $this->payOnDemo($this->invoice);
+    $card = PaymentMethod::query()->sole();
+    expect($raised())->toContain($signal);
+
+    $this->cardApi('PUT', 'family/cards/auto-renew', $this->payer, ['on' => false])->assertOk();
+    expect($raised())->toContain($signal);
+    $this->cardApi('PUT', 'family/cards/auto-renew', $this->payer, ['on' => true])->assertOk();
+    expect($raised())->toContain($signal);
+
+    $this->cardApi('DELETE', "family/cards/{$card->id}", $this->payer)->assertOk();
+    expect($raised())->toContain($signal);
+});
