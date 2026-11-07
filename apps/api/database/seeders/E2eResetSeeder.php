@@ -837,7 +837,7 @@ final class E2eResetSeeder extends Seeder
      * examined on), as the Quran tests need it: the academy holds exams and shows certificates to families, and a
      * lesson of the course to record now (from the room's opening, ten minutes before its start, as
      * RecordQuranLesson allows; a lesson held may still be recorded): one of today's not yet recorded, else one booked
-     * now when Nour and Yousef are both free, else earlier today (the demo's live board has them together now). Null on a demo without the Quran (its area, its text or the plan).
+     * now when Nour and Yousef are both free, else earlier (today, or last night just after midnight; the demo's live board has them together now). Null on a demo without the Quran (its area, its text or the plan).
      *
      * @return ?array{teacher: string, guardian: string, student: string, lesson_id: string, enrollment_id: string, certificate_code: ?string, certificate_number: ?string}
      */
@@ -857,8 +857,9 @@ final class E2eResetSeeder extends Seeder
             ->where('starts_at', '>=', $today)->where('starts_at', '<=', $this->now->addMinutes(10))
             ->whereNotIn('id', $recorded)->orderByDesc('starts_at')->first();
         if ($lesson === null) {
-            // Now, or a few minutes on; else earlier today, when one of them is in another lesson now (held or not, it may be recorded).
-            $starts = collect([...range(0, 10), ...range(-1, -5), ...range(-10, -600, 5)])->map(fn (int $m) => $this->now->addMinutes($m)->startOfMinute())->filter(fn ($at) => $at >= $today);
+            // Now, or a few minutes on; else earlier, when one of them is in another lesson now (held or not, it may be recorded).
+            // Earlier may cross midnight: just after it there is no earlier today, and a held lesson of last night is recorded the same way.
+            $starts = collect([...range(0, 10), ...range(-1, -5), ...range(-10, -600, 5)])->map(fn (int $m) => $this->now->addMinutes($m)->startOfMinute());
             foreach ([30, 20] as $minutes) {
                 foreach ($starts as $at) {
                     try {
