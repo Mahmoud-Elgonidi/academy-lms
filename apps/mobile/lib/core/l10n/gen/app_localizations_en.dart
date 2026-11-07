@@ -46,7 +46,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moduleOffTitle => 'This part isn\'t available now';
 
   @override
-  String get moduleOffByAcademy => 'The academy has turned this part off. Nothing in it is lost, and it comes back when they turn it on again.';
+  String get moduleOffByAcademy =>
+      'The academy has turned this part off. Nothing in it is lost, and it comes back when they turn it on again.';
 
   @override
   String get moduleOffByPlan => 'This part isn\'t in the academy\'s current plan. If you need it, ask the academy.';
