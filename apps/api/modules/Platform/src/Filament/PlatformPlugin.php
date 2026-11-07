@@ -51,14 +51,14 @@ final class PlatformPlugin implements Plugin
             ->middleware([ApplyAcademyColours::class], isPersistent: true)
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => self::headStyles());
 
-        // The back office tells its owner and admins when a limit of the plan is close to full, except on the plan page itself.
+        // The back office tells its owner and admins when a limit of the plan is close to full (each monthly one on its own line, with the ways on), except on the plan page itself.
         if ($panel->getId() === 'academy') {
             // Settings › Academy modules: which optional areas the academy shows.
             $panel->pages([AcademyModulesPage::class]);
             $panel->renderHook(PanelsRenderHook::PAGE_START, function (array $scopes = []): string {
-                $warning = in_array(AcademyPlanPage::class, $scopes, true) ? null : app(PlanWarning::class)->forViewer();
+                $warnings = in_array(AcademyPlanPage::class, $scopes, true) ? [] : app(PlanWarning::class)->forViewer();
 
-                return $warning === null ? '' : view('platform::plans.banner', $warning + ['url' => AcademyPlanPage::getUrl(panel: 'academy')])->render();
+                return $warnings === [] ? '' : view('platform::plans.banner', ['warnings' => $warnings])->render();
             });
         }
     }

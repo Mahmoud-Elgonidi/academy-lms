@@ -17,6 +17,8 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Modules\Platform\Actions\Plans\SavePlan;
+use Modules\Platform\Actions\Plans\SaveTopUpPack;
+use Modules\Platform\Models\Plans\TopUpPack;
 use Modules\Platform\Models\SaasPlan;
 use Modules\Platform\Plans\PlanFormat;
 use Modules\SharedKernel\Money\Money;
@@ -26,7 +28,8 @@ use Modules\SharedKernel\Plans\Limit;
 /**
  * The plans the platform sells academies: each one's limits and areas, its
  * monthly price, how many academies are on it, and which one new academies
- * start on. Editing a plan changes it for every academy on it.
+ * start on. Editing a plan changes it for every academy on it. Below them,
+ * the extra packs academies may ask for in a month (video minutes, AI uses).
  */
 final class Plans extends Page
 {
@@ -76,6 +79,88 @@ final class Plans extends Page
         ])->all();
     }
 
+    /** @return array<string, list<array<string, mixed>>> the extra packs by limit, offered first */
+    #[Computed]
+    public function packs(): array
+    {
+        $out = array_fill_keys(SaveTopUpPack::LIMITS, []);
+        foreach (TopUpPack::query()->orderBy('archived_at')->orderBy('sort')->orderBy('amount')->get() as $p) {
+            $out[$p->limit][] = [
+                'id' => $p->id,
+                'name' => $p->name(),
+                'amount' => '+'.PlanFormat::amount($p->limitKind(), $p->amount),
+                'price' => $p->price_minor !== null && $p->currency !== null ? Money::of($p->price_minor, $p->currency)->format() : null,
+                'archived' => $p->archived_at !== null,
+            ];
+        }
+
+        return $out;
+    }
+
+    public function newPackAction(): Action
+    {
+        return Action::make('newPack')->label(__('platform::topups.packs.new'))->icon(Heroicon::Plus)->color('gray')->size('sm')
+            ->modalHeading(__('platform::topups.packs.new'))
+            ->schema($this->packForm(...))
+            ->fillForm(fn (array $arguments) => ['limit' => $arguments['limit'] ?? 'video_minutes', 'sort' => (int) TopUpPack::query()->max('sort') + 1])
+            ->action(fn (array $data) => $this->savePack(null, $data));
+    }
+
+    public function editPackAction(): Action
+    {
+        return Action::make('editPack')->label(__('platform::plans.catalog.edit'))->icon(Heroicon::OutlinedPencilSquare)->color('gray')->size('xs')->link()
+            ->modalHeading(__('platform::topups.packs.edit'))
+            ->schema($this->packForm(...))
+            ->fillForm(function (array $arguments) {
+                $pack = TopUpPack::query()->findOrFail($arguments['pack']);
+
+                return $pack->only(['limit', 'amount', 'name_ar', 'name_en', 'currency', 'sort']) + [
+                    'price' => $pack->price_minor === null ? null : Money::of($pack->price_minor, (string) $pack->currency)->decimal(),
+                    'archived' => $pack->archived_at !== null,
+                ];
+            })
+            ->action(fn (array $data, array $arguments) => $this->savePack($arguments['pack'], $data));
+    }
+
+    /** @return list<mixed> */
+    private function packForm(): array
+    {
+        $l = 'platform::topups.packs.';
+
+        return [
+            Grid::make(2)->schema([
+                Select::make('limit')->label(__($l.'limit'))->required()->native(false)
+                    ->options(array_combine(SaveTopUpPack::LIMITS, array_map(fn (string $k) => __('shared::plans.limits.'.$k), SaveTopUpPack::LIMITS))),
+                TextInput::make('amount')->label(__($l.'amount'))->helperText(__($l.'amount_hint'))->required()->numeric()->integer()->minValue(1),
+                TextInput::make('name_ar')->label(__('platform::plans.catalog.form.name_ar'))->required()->maxLength(80),
+                TextInput::make('name_en')->label(__('platform::plans.catalog.form.name_en'))->required()->maxLength(80),
+                TextInput::make('price')->label(__($l.'price'))->helperText(__($l.'price_hint'))->numeric()->minValue(0)->requiredWith('currency'),
+                Select::make('currency')->label(__('platform::plans.catalog.form.currency'))->options(['SAR' => 'SAR', 'USD' => 'USD', 'EGP' => 'EGP', 'AED' => 'AED', 'KWD' => 'KWD', 'EUR' => 'EUR'])->requiredWith('price')->native(false),
+                TextInput::make('sort')->label(__('platform::plans.catalog.form.sort'))->numeric()->integer()->minValue(0),
+            ]),
+            Toggle::make('archived')->label(__($l.'archived'))->helperText(__($l.'archived_hint')),
+        ];
+    }
+
+    /** @param  array<string, mixed>  $data */
+    private function savePack(?string $packId, array $data): void
+    {
+        $price = $data['price'] ?? null;
+        $priced = $price !== null && $price !== '' && ! empty($data['currency']);
+        app(SaveTopUpPack::class)->handle($packId, [
+            'limit' => $data['limit'],
+            'amount' => (int) $data['amount'],
+            'name_ar' => $data['name_ar'],
+            'name_en' => $data['name_en'],
+            'price_minor' => $priced ? Money::parse((string) $price, (string) $data['currency'])->minor : null,
+            'currency' => $priced ? $data['currency'] : null,
+            'sort' => $data['sort'] === null || $data['sort'] === '' ? null : (int) $data['sort'],
+            'archived' => (bool) ($data['archived'] ?? false),
+        ]);
+        Notification::make()->success()->title(__('platform::topups.packs.saved'))->send();
+        unset($this->packs);
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -95,7 +180,7 @@ final class Plans extends Page
             ->fillForm(function (array $arguments) {
                 $plan = SaasPlan::query()->findOrFail($arguments['plan']);
 
-                return $plan->only(['code', 'name_ar', 'name_en', 'max_teachers', 'max_active_students', 'video_minutes', 'storage_mb', 'currency', 'is_default', 'sort', 'shown_on_site', 'highlight', 'tagline_ar', 'tagline_en']) + [
+                return $plan->only(['code', 'name_ar', 'name_en', 'max_teachers', 'max_active_students', 'video_minutes', 'storage_mb', 'ai_uses', 'currency', 'is_default', 'sort', 'shown_on_site', 'highlight', 'tagline_ar', 'tagline_en']) + [
                     'features' => array_values(array_intersect((array) $plan->features, array_keys(PlanFormat::features('paid')))),
                     'features_optional' => array_values(array_intersect((array) $plan->features, array_keys(PlanFormat::features('optional')))),
                     'price' => $plan->price_minor === null ? null : Money::of($plan->price_minor, (string) $plan->currency)->decimal(),
@@ -124,6 +209,8 @@ final class Plans extends Page
                     $limit('max_active_students', Limit::ActiveStudents),
                     $limit('video_minutes', Limit::VideoMinutes),
                     $limit('storage_mb', Limit::StorageMb)->suffix(__($l.'mb')),
+                    // The month's uses of the AI helpers, while the plan has the AI area; at the limit they stop and the work goes on by hand.
+                    $limit('ai_uses', Limit::AiUses)->helperText(__($l.'ai_uses_hint')),
                 ]),
             ]),
             CheckboxList::make('features')->label(__($l.'features'))->options(PlanFormat::features('paid'))->columns(2),
@@ -160,6 +247,7 @@ final class Plans extends Page
             'max_active_students' => $num($data['max_active_students'] ?? null),
             'video_minutes' => $num($data['video_minutes'] ?? null),
             'storage_mb' => $num($data['storage_mb'] ?? null),
+            'ai_uses' => $num($data['ai_uses'] ?? null),
             'features' => array_values([...($data['features'] ?? []), ...($data['features_optional'] ?? [])]),
             'price_minor' => $price === null || $price === '' || empty($data['currency']) ? null : Money::parse((string) $price, (string) $data['currency'])->minor,
             'currency' => $price === null || $price === '' ? null : ($data['currency'] ?: null),

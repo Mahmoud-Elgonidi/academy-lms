@@ -33,6 +33,7 @@ return [
     'games-not-enough-items' => 'Not enough practice for this game.',
     'ai-off' => 'This helper is off at the academy.',
     'ai-limit' => 'The helper has been used up for today.',
+    'ai-quota' => 'This month\'s AI helper uses are used up.',
     'ai-unavailable' => 'The helper is not available right now.',
     'ai-unheard' => 'We could not make out the recording.',
     'ai-no-answer' => 'The helper could not answer this.',

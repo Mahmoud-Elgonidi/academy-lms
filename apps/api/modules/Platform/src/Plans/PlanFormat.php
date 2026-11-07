@@ -24,6 +24,18 @@ final class PlanFormat
         return trans_choice('platform::plans.units.'.$limit->value, $value, ['n' => self::number($value)]);
     }
 
+    /** The amount in another reader's language (a message to someone else). */
+    public static function amountIn(Limit $limit, ?int $value, string $locale): string
+    {
+        $was = app()->getLocale();
+        app()->setLocale($locale);
+        try {
+            return self::amount($limit, $value);
+        } finally {
+            app()->setLocale($was);
+        }
+    }
+
     /** "12 of 20", or "12" without a limit. */
     public static function usage(Limit $limit, ?int $used, ?int $max): string
     {

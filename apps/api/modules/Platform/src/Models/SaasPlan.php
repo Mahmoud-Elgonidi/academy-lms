@@ -20,6 +20,7 @@ use Modules\SharedKernel\Plans\Limit;
  * @property ?int $max_active_students
  * @property ?int $video_minutes
  * @property ?int $storage_mb
+ * @property ?int $ai_uses
  * @property list<string> $features
  * @property ?int $price_minor
  * @property ?string $currency
@@ -37,6 +38,7 @@ final class SaasPlan extends Model
         'active_students' => 'max_active_students',
         'video_minutes' => 'video_minutes',
         'storage_mb' => 'storage_mb',
+        'ai_uses' => 'ai_uses',
     ];
 
     protected $connection = 'pgsql_platform';

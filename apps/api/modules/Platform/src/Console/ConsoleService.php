@@ -48,6 +48,7 @@ final class ConsoleService implements ConsoleApi
                 'active_students' => $plan->limit(Limit::ActiveStudents),
                 'video_minutes' => $plan->limit(Limit::VideoMinutes),
                 'storage_mb' => $plan->limit(Limit::StorageMb),
+                'ai_uses' => $plan->limit(Limit::AiUses),
             ]])->all();
     }
 

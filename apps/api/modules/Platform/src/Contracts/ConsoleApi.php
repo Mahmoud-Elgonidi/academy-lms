@@ -23,7 +23,7 @@ interface ConsoleApi
     /**
      * Each plan's limits, for choosing one (null: none), code => limit => value, in offeredPlans()' order.
      *
-     * @return array<string, array{teachers: ?int, active_students: ?int, video_minutes: ?int, storage_mb: ?int}>
+     * @return array<string, array{teachers: ?int, active_students: ?int, video_minutes: ?int, storage_mb: ?int, ai_uses: ?int}>
      */
     public function offeredPlanLimits(): array;
 

@@ -24,7 +24,18 @@
                     @if ($m['monthly']) · {{ __($l.'monthly') }}@endif
                     @if ($m['own']) · {{ __($l.'own') }}@endif
                 </small>
+                @if ($m['extra'] ?? null)<small class="pp-extra">{{ $m['extra'] }}</small>@endif
                 @if ($m['left'] ?? null)<small class="pp-state pp-left">{{ $m['left'] }}</small>@endif
+                {{-- The academy's page: an extra pack for this month, or the request already waiting. --}}
+                @if (! ($console ?? false) && ($m['buyable'] ?? false))
+                    <div class="pp-meter-actions">
+                        @if (in_array($m['key'], $plan['waiting'] ?? [], true))
+                            <small class="pp-waiting">{{ __('platform::topups.buy.waiting') }}</small>
+                        @else
+                            {{ ($this->buyAction)(['limit' => $m['key']]) }}
+                        @endif
+                    </div>
+                @endif
             </div>
         @endforeach
     </div>

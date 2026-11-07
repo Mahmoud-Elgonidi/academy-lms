@@ -44,7 +44,9 @@ final class SiteController
                 'currency' => $plan->currency,
                 /** The one plan the page sets apart. */
                 'highlight' => (bool) $plan->highlight,
-                'limits' => array_map(fn (Limit $l) => ['key' => $l->value, 'label' => __('shared::plans.limits.'.$l->value), 'value' => PlanFormat::amount($l, $plan->limit($l)), 'unlimited' => $plan->limit($l) === null], Limit::cases()),
+                'limits' => array_map(fn (Limit $l) => ['key' => $l->value, 'label' => __('shared::plans.limits.'.$l->value), 'value' => PlanFormat::amount($l, $plan->limit($l)), 'unlimited' => $plan->limit($l) === null],
+                    // The AI helpers' uses only on a plan with the AI area.
+                    array_values(array_filter(Limit::cases(), fn (Limit $l) => $l !== Limit::AiUses || in_array(Feature::Ai->value, $plan->features, true)))),
                 'features' => array_map(fn (Feature $f) => ['key' => $f->value, 'label' => $f->label(), 'on' => in_array($f->value, $plan->features, true)], Feature::cases()),
             ])->values()->all();
 

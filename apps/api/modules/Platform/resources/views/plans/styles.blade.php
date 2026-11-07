@@ -57,3 +57,15 @@
 <style>
     .pp-tags-start { justify-content: flex-start; }
 </style>
+<style>
+    .pp-extra { font-size: .75rem; color: var(--primary-700); font-weight: 600; }
+    .pp-meter-actions { margin-top: auto; padding-top: .3rem; }
+    .pp-waiting { font-size: .75rem; color: var(--warning-700); font-weight: 600; }
+    .pp-requests h3 { display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; }
+    .pp-request { display: flex; flex-wrap: wrap; gap: .3rem .6rem; align-items: center; padding: .55rem 0; border-top: 1px solid var(--gray-100); font-size: .86rem; }
+    .pp-request > span:first-child { flex: 1 1 14rem; }
+    .pp-request small { color: var(--gray-500); }
+    .pp-request .pp-reason { flex-basis: 100%; color: var(--danger-700); }
+    .dark .pp-request { border-color: var(--gray-800); }
+    .dark .pp-extra { color: var(--primary-300); }
+</style>

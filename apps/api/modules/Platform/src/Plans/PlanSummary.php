@@ -28,8 +28,13 @@ final class PlanSummary
             $meters[] = [
                 'key' => $line->limit->value,
                 'label' => __('shared::plans.limits.'.$line->limit->value),
-                'text' => PlanFormat::usage($line->limit, $line->used, $line->max),
-                'max' => PlanFormat::amount($line->limit, $line->max),
+                'text' => PlanFormat::usage($line->limit, $line->used, $line->allowed()),
+                'max' => PlanFormat::amount($line->limit, $line->allowed()),
+                // This month's extra packs over the plan's own amount, said apart.
+                'extra' => $line->extra > 0 && $line->max !== null
+                    ? __('platform::plans.summary.extra', ['plan' => PlanFormat::amount($line->limit, $line->max), 'extra' => PlanFormat::amount($line->limit, $line->extra)])
+                    : null,
+                'buyable' => $line->limit->monthly() && $line->max !== null,
                 'percent' => $ratio === null ? null : (int) min(100, round($ratio * 100)),
                 'state' => $line->state(),
                 'own' => $line->overridden,
@@ -37,8 +42,8 @@ final class PlanSummary
                 'unlimited' => $line->max === null,
                 'counted' => $line->used !== null,
                 // A monthly limit says what is left of it and when it starts again (the academy's page).
-                'left' => $line->limit->monthly() && $line->max !== null && $line->used !== null
-                    ? __('platform::plans.summary.left', ['left' => PlanFormat::amount($line->limit, max(0, $line->max - $line->used))])
+                'left' => $line->limit->monthly() && $line->left() !== null
+                    ? __('platform::plans.summary.left', ['left' => PlanFormat::amount($line->limit, $line->left())])
                         .($renews === null ? '' : ' '.__('platform::plans.summary.renews', ['date' => $renews]))
                     : null,
             ];
@@ -53,7 +58,8 @@ final class PlanSummary
     }
 
     /**
-     * The academy's last counts this month (usage_counters), as usage lines.
+     * The academy's last counts this month (usage_counters), as usage lines,
+     * with the month's extra packs.
      *
      * @return array{lines: list<UsageLine>, measured: ?CarbonImmutable}
      */
@@ -61,12 +67,14 @@ final class PlanSummary
     {
         $period = UsagePeriod::monthOf(CarbonImmutable::now(), $timezone)->key($timezone);
         $rows = DB::connection('pgsql_platform')->table('usage_counters')->where('academy_id', $academyId)->where('period', $period)->get()->keyBy('metric');
+        $extras = Extras::of($academyId, $period);
         $lines = array_map(fn (Limit $l) => new UsageLine(
             $l,
             isset($rows[$l->value]) ? (int) $rows[$l->value]->value : null,
             $terms->limit($l),
             in_array($l->value, $terms->overridden, true),
-        ), Limit::cases());
+            $extras[$l->value] ?? 0,
+        ), PlanUsage::shown($terms->has(...)));
         $measured = $rows->max('measured_at');
 
         return ['lines' => $lines, 'measured' => $measured ? CarbonImmutable::parse($measured) : null];

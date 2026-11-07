@@ -157,6 +157,7 @@ final class AcademyOverview extends Page
                         $own(Limit::ActiveStudents),
                         $own(Limit::VideoMinutes),
                         $own(Limit::StorageMb),
+                        $own(Limit::AiUses),
                     ]),
                 ]),
                 Section::make(__($l.'own_features'))->compact()->collapsible()->collapsed(fn () => ($current?->features_on ?? []) === [] && ($current?->features_off ?? []) === [])->schema([

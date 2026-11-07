@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Modules\SharedKernel\Ai\AiFeature;
+use Modules\SharedKernel\Plans\UsagePeriod;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Throwable;
@@ -66,6 +67,22 @@ final class AiUsage extends Model
             // Counting a request never stops the helper that made it.
             report($e);
         }
+    }
+
+    /**
+     * The academy's uses of the helpers in a month (the plan's ai_uses): each
+     * request that gave an answer. A helper that hears a recording and then
+     * writes from it (the report from a voice note) is one use: its words are
+     * counted, its listening is not. A request that failed costs nothing.
+     */
+    public static function usesIn(UsagePeriod $period): int
+    {
+        $writesAfterListening = array_values(array_map(fn (AiFeature $f) => $f->value,
+            array_filter(AiFeature::cases(), fn (AiFeature $f) => $f->needsSpeech() && $f->needsLanguage())));
+
+        return self::query()->where('outcome', 'ok')->where('created_at', '>=', $period->from)->where('created_at', '<', $period->to)
+            ->where(fn ($q) => $q->where('audio_seconds', 0)->orWhereNotIn('feature', $writesAfterListening))
+            ->count();
     }
 
     /** The academy's requests since the start of today (the server's clock). */

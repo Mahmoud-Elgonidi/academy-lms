@@ -49,6 +49,7 @@ use Modules\Platform\Http\Middleware\ConsoleHost;
 use Modules\Platform\Listeners\RecordConsoleSignIn;
 use Modules\Platform\Live\GameStudioChanged;
 use Modules\Platform\Models\AcademyBranding;
+use Modules\Platform\Models\AiUsage;
 use Modules\Platform\Models\PlatformAdmin;
 use Modules\Platform\Plans\PlanUsage;
 use Modules\Platform\Plans\PlatformAcademyPlan;
@@ -66,6 +67,7 @@ use Modules\SharedKernel\Plans\FeatureNotInPlan;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\PlanLimitReached;
 use Modules\SharedKernel\Plans\UsageMeters;
+use Modules\SharedKernel\Plans\UsagePeriod;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Setup\SetupChecklist;
 use Modules\SharedKernel\Tenancy\TenantResolver;
@@ -152,6 +154,9 @@ final class PlatformServiceProvider extends ServiceProvider
 
             return array_sum(array_map(fn (?string $path) => $path !== null && $disk->exists($path) ? $disk->size($path) : 0, [$branding?->logo_path, $branding?->favicon_path]));
         });
+
+        // The month's uses of the AI helpers, against the plan's ai_uses.
+        $this->app->make(UsageMeters::class)->add(Limit::AiUses, fn (UsagePeriod $month): int => AiUsage::usesIn($month));
 
         // On any panel screen, something the plan stops says why instead of failing the page.
         \Livewire\on('exception', function ($component, $e, $stopPropagation): void {

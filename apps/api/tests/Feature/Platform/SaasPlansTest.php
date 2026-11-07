@@ -245,15 +245,15 @@ it('tells the staff plainly when the month\'s video minutes run out, and the way
     app()->setLocale('ar');
 
     $this->actingAs($this->owner);
-    $warning = app(PlanWarning::class)->forViewer();
+    [$warning] = app(PlanWarning::class)->forViewer();
+    $zoom = collect($warning['actions'])->firstWhere('label', __('platform::plans.banner.video_action'));
     expect($warning['state'])->toBe('full')
         ->and($warning['text'])->toContain('Zoom')->toContain('Google Meet')->toContain(PlanFormat::usage(Limit::VideoMinutes, 30, 30))
-        ->and($warning['action'])->toBe(__('platform::plans.banner.video_action'))
-        ->and($warning['action_url'])->toEndWith('/admin/settings/classroom');
+        ->and($zoom['url'])->toEndWith('/admin/settings/classroom');
 
     // Nothing stops: the room still opens; only the staff are told.
     $this->actingAs($this->teacher);
-    expect(app(PlanWarning::class)->forViewer())->toBeNull();
+    expect(app(PlanWarning::class)->forViewer())->toBe([]);
 });
 
 it('counts each limit with the module that owns it, keeps the day\'s count, and tells the staff', function () {
@@ -270,10 +270,11 @@ it('counts each limit with the module that owns it, keeps the day\'s count, and 
 
     // The owner hears it on every page; a teacher does not.
     $this->actingAs($this->owner);
-    $warning = app(PlanWarning::class)->forViewer();
-    expect($warning['state'])->toBe('full')->and($warning['text'])->toContain(__('shared::plans.limits.teachers'));
+    $warnings = collect(app(PlanWarning::class)->forViewer())->keyBy('limit');
+    expect($warnings['teachers']['state'])->toBe('full')->and($warnings['teachers']['text'])->toContain(__('shared::plans.limits.teachers'))
+        ->and($warnings['video_minutes']['state'])->toBe('full');
     $this->actingAs($this->teacher);
-    expect(app(PlanWarning::class)->forViewer())->toBeNull();
+    expect(app(PlanWarning::class)->forViewer())->toBe([]);
 
     // The night's count, for the console.
     $this->clearTenant();

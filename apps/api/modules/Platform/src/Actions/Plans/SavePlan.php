@@ -20,7 +20,7 @@ final class SavePlan
 {
     public function __construct(private readonly PlatformAudit $audit) {}
 
-    /** @param  array<string, mixed>  $data  code, name_ar, name_en, max_teachers, max_active_students, video_minutes, storage_mb, features, price_minor, currency, is_default, sort, archived, shown_on_site, highlight, tagline_ar, tagline_en */
+    /** @param  array<string, mixed>  $data  code, name_ar, name_en, max_teachers, max_active_students, video_minutes, storage_mb, ai_uses, features, price_minor, currency, is_default, sort, archived, shown_on_site, highlight, tagline_ar, tagline_en */
     public function handle(?string $planId, array $data): SaasPlan
     {
         $limit = ['nullable', 'integer', 'min:0', 'max:10000000'];
@@ -32,6 +32,7 @@ final class SavePlan
             'max_active_students' => $limit,
             'video_minutes' => $limit,
             'storage_mb' => $limit,
+            'ai_uses' => $limit,
             'features' => ['array'],
             'features.*' => [Rule::in(array_column(Feature::cases(), 'value'))],
             'price_minor' => ['nullable', 'integer', 'min:0', 'required_with:currency'],
@@ -66,6 +67,7 @@ final class SavePlan
                 'max_active_students' => $valid['max_active_students'] ?? null,
                 'video_minutes' => $valid['video_minutes'] ?? null,
                 'storage_mb' => $valid['storage_mb'] ?? null,
+                'ai_uses' => $valid['ai_uses'] ?? null,
                 // Areas not named: a new plan takes every optional one (free, the academy may hide them), a plan kept keeps its own.
                 'features' => array_values(array_unique($named ? ($valid['features'] ?? [])
                     : ($plan->exists ? (array) $plan->features : array_map(fn (Feature $f) => $f->value, Feature::optional())))),

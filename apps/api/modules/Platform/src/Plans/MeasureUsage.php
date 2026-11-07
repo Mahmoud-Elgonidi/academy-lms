@@ -46,7 +46,7 @@ final class MeasureUsage
         $rows = [];
         foreach ($this->usage->lines($at) as $line) {
             if ($line->used !== null) {
-                $rows[] = ['academy_id' => $academy->id, 'metric' => $line->limit->value, 'period' => $key, 'value' => $line->used, 'max' => $line->max, 'measured_at' => $now];
+                $rows[] = ['academy_id' => $academy->id, 'metric' => $line->limit->value, 'period' => $key, 'value' => $line->used, 'max' => $line->allowed(), 'measured_at' => $now];
             }
         }
         DB::connection('pgsql_platform')->table('usage_counters')->upsert($rows, ['academy_id', 'metric', 'period'], ['value', 'max', 'measured_at']);

@@ -7,12 +7,13 @@ use RuntimeException;
 /**
  * Why an AI helper gave nothing back. The screens say it in the reader's
  * words (shared::ai.failed.{reason}); the API answers it as a problem
- * (ProblemDetails): off 403, limit 429, busy/unavailable/not_configured 503,
+ * (ProblemDetails): off 403, limit and quota (the month's uses in the
+ * academy's plan, with its extra packs) 429, busy/unavailable/not_configured 503,
  * the rest 422.
  */
 final class AiFailed extends RuntimeException
 {
-    public const REASONS = ['off', 'limit', 'busy', 'not_configured', 'unavailable', 'refused', 'too_long', 'unreadable', 'unheard'];
+    public const REASONS = ['off', 'limit', 'quota', 'busy', 'not_configured', 'unavailable', 'refused', 'too_long', 'unreadable', 'unheard'];
 
     public function __construct(public readonly string $reason, string $detail = '')
     {
@@ -23,7 +24,7 @@ final class AiFailed extends RuntimeException
     {
         return match ($this->reason) {
             'off' => 403,
-            'limit' => 429,
+            'limit', 'quota' => 429,
             'busy', 'unavailable', 'not_configured' => 503,
             default => 422,
         };
@@ -34,6 +35,7 @@ final class AiFailed extends RuntimeException
         return match ($this->reason) {
             'off' => 'ai-off',
             'limit' => 'ai-limit',
+            'quota' => 'ai-quota',
             'busy', 'unavailable', 'not_configured' => 'ai-unavailable',
             'unheard' => 'ai-unheard',
             default => 'ai-no-answer',

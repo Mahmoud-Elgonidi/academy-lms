@@ -12,6 +12,7 @@ return [
     'failed' => [
         'off' => 'This helper is off at the academy.',
         'limit' => 'The helper has been used up for today. Try again tomorrow.',
+        'quota' => 'The academy\'s AI helper uses for this month are used up. Carry on by hand; the helper comes back when the month starts again, or once extra uses the academy\'s owner or an admin asks for on the academy\'s plan page are turned on.',
         'busy' => 'The helper is busy right now. Try again in a minute.',
         'not_configured' => 'The helper is not set up on the platform yet.',
         'unavailable' => 'The helper is not available right now. Try again soon.',
