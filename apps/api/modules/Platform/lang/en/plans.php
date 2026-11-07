@@ -8,7 +8,7 @@ return [
     'units' => [
         'teachers' => '{1} 1 teacher|[2,*] :n teachers',
         'active_students' => '{1} 1 student|[2,*] :n students',
-        'video_minutes' => '{1} 1 minute|[2,*] :n minutes',
+        'video_minutes' => '{0} no minutes|{1} 1 minute|[2,*] :n minutes',
         'mb' => ':n MB',
         'gb' => ':n GB',
     ],
@@ -88,6 +88,8 @@ return [
         'action' => 'See the plan',
     ],
     'summary' => [
+        'left' => 'Left this month: :left.',
+        'renews' => 'It starts again on :date.',
         'title' => 'Plan',
         'since' => 'Since :date',
         'counted' => 'Counted :when',

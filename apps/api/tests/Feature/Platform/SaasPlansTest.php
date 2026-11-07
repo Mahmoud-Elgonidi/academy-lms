@@ -268,7 +268,10 @@ it('counts each limit with the module that owns it, keeps the day\'s count, and 
     $this->actAsTenant($this->academy);
     Filament::setCurrentPanel('academy');
     $this->actingAs($this->owner);
-    Livewire::test(AcademyPlanPage::class)->assertOk()->assertSee(__('platform::plans.summary.state.full'))->assertSee(__('platform::plans.of', ['used' => 2, 'max' => 2]));
+    Livewire::test(AcademyPlanPage::class)->assertOk()->assertSee(__('platform::plans.summary.state.full'))->assertSee(__('platform::plans.of', ['used' => 2, 'max' => 2]))
+        // The month's video minutes: what is left and when they start again.
+        ->assertSee(__('platform::plans.summary.left', ['left' => PlanFormat::amount(Limit::VideoMinutes, 0)]))
+        ->assertSee(__('platform::plans.summary.renews', ['date' => CarbonImmutable::now()->setTimezone($this->academy->defaultTimezone)->startOfMonth()->addMonth()->locale(app()->getLocale())->translatedFormat('j F')]));
     $this->actingAs($this->teacher);
     expect(AcademyPlanPage::canAccess())->toBeFalse();
 });

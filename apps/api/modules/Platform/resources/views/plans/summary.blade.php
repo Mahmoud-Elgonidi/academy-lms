@@ -24,6 +24,7 @@
                     @if ($m['monthly']) · {{ __($l.'monthly') }}@endif
                     @if ($m['own']) · {{ __($l.'own') }}@endif
                 </small>
+                @if ($m['left'] ?? null)<small class="pp-state pp-left">{{ $m['left'] }}</small>@endif
             </div>
         @endforeach
     </div>

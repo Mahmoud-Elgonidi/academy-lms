@@ -64,6 +64,13 @@ final class AcademyPlanPage extends Page
         $usage = app(PlanUsage::class);
         $terms = $usage->terms();
 
-        return $terms === null ? null : PlanSummary::of($terms, $usage->lines());
+        if ($terms === null) {
+            return null;
+        }
+        // Monthly limits start again on the first of next month, on the academy's clock.
+        $renews = $usage->period()->to->setTimezone(app(TenantContext::class)->require()->defaultTimezone)
+            ->locale(app()->getLocale())->translatedFormat('j F');
+
+        return PlanSummary::of($terms, $usage->lines(), renews: $renews);
     }
 }

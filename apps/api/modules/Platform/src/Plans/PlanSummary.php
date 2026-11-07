@@ -20,7 +20,7 @@ final class PlanSummary
      * @param  list<UsageLine>  $lines
      * @return array{name: string, code: string, meters: list<array<string, mixed>>, features: list<array{label: string, on: bool, own: bool}>, measured: ?CarbonImmutable}
      */
-    public static function of(PlanTerms $terms, array $lines, ?CarbonImmutable $measured = null, ?SaasSubscription $subscription = null): array
+    public static function of(PlanTerms $terms, array $lines, ?CarbonImmutable $measured = null, ?SaasSubscription $subscription = null, ?string $renews = null): array
     {
         $meters = [];
         foreach ($lines as $line) {
@@ -36,6 +36,11 @@ final class PlanSummary
                 'monthly' => $line->limit->monthly(),
                 'unlimited' => $line->max === null,
                 'counted' => $line->used !== null,
+                // A monthly limit says what is left of it and when it starts again (the academy's page).
+                'left' => $line->limit->monthly() && $line->max !== null && $line->used !== null
+                    ? __('platform::plans.summary.left', ['left' => PlanFormat::amount($line->limit, max(0, $line->max - $line->used))])
+                        .($renews === null ? '' : ' '.__('platform::plans.summary.renews', ['date' => $renews]))
+                    : null,
             ];
         }
         $features = array_map(fn (Feature $f) => [
