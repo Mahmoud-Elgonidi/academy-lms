@@ -15,7 +15,10 @@ import 'sign_in_flow_test.dart' show frames;
 Map<String, Object?> _me(Set<Feature> off) => {
   'data': {
     ...meJson(),
-    'modules': [for (final f in Feature.values) if (!off.contains(f)) f.value],
+    'modules': [
+      for (final f in Feature.values)
+        if (!off.contains(f)) f.value,
+    ],
   },
 };
 

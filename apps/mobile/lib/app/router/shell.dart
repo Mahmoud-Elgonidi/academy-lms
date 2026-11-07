@@ -50,7 +50,10 @@ class AppShell extends StatelessWidget {
 
   Widget _frame(BuildContext context) {
     // The bar's places and the branches they stand for (a hidden tab's branch has no place).
-    final branches = [for (final (i, t) in tabs.indexed) if (t.shown) i];
+    final branches = [
+      for (final (i, t) in tabs.indexed)
+        if (t.shown) i,
+    ];
     final selected = branches.indexOf(shell.currentIndex);
     return Scaffold(
       body: shell,

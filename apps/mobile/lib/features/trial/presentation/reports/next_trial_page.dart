@@ -104,11 +104,7 @@ class _PickState extends State<_Pick> {
                 title: l.trialRefusedTitle,
                 body: state.refusal,
                 action: help
-                    ? SecondaryAction(
-                        l.trialNextOpenHelp,
-                        icon: Icons.help_outline_rounded,
-                        onPressed: () => context.go('/family/me/help'),
-                      )
+                    ? SecondaryAction(l.trialNextOpenHelp, icon: Icons.help_outline_rounded, onPressed: () => context.go('/family/me/help'))
                     : null,
               )
             else if (days.isEmpty)
@@ -118,11 +114,7 @@ class _PickState extends State<_Pick> {
                 title: l.trialNoTimesTitle,
                 body: l.trialNextNoTimes,
                 action: help
-                    ? SecondaryAction(
-                        l.trialNextOpenHelp,
-                        icon: Icons.help_outline_rounded,
-                        onPressed: () => context.go('/family/me/help'),
-                      )
+                    ? SecondaryAction(l.trialNextOpenHelp, icon: Icons.help_outline_rounded, onPressed: () => context.go('/family/me/help'))
                     : null,
               )
             else ...[

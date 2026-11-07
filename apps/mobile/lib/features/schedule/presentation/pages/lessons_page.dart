@@ -151,7 +151,6 @@ class _LessonDays extends StatelessWidget {
     // Rating a lesson is the evaluation's: not while the academy has it off.
     final rates = context.hasModule(Feature.evaluation);
     final mixed = mixesFormats(data.lessons);
-    final rates = context.hasModule(Feature.evaluation);
     return ListView(
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
@@ -234,6 +233,8 @@ class _FamilyLessonDays extends StatelessWidget {
     final who = learner == null || learner.isSelf ? null : learner.firstName;
     final learnerId = context.learnerId();
     final mixed = mixesFormats(data.lessons);
+    // Rating a lesson is the evaluation's: not while the academy has it off.
+    final rates = context.hasModule(Feature.evaluation);
 
     LessonActions actionsFor(Lesson lesson) => LessonActions(
       cancel: lesson.canCancel
