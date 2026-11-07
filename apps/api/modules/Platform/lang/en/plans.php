@@ -79,6 +79,9 @@ return [
         'ask' => 'Want a bigger plan or another area? Ask the platform team; they change it from their side.',
     ],
     'banner' => [
+        'video_near' => 'Your plan\'s video minutes for this month are nearly used (:usage). When they run out, you can move lessons to Zoom or Google Meet at no cost.',
+        'video_full' => 'This month\'s free video minutes are used up (:usage). No lesson stops, but move your lessons to Zoom or Google Meet now in the live classroom settings, or ask for a bigger plan. The minutes start again on :renews.',
+        'video_action' => 'Move lessons to Zoom or Google Meet',
         'near' => 'You are close to your plan\'s limit for :what (:usage).',
         'full' => 'You have reached your plan\'s limit for :what (:usage).',
         'held_near' => 'At the limit, nothing new can be added.',

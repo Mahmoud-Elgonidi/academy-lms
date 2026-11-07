@@ -4,6 +4,7 @@ namespace Modules\Platform\Plans;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -17,12 +18,15 @@ final class PlanWarning
 {
     public const MINUTES = 10;
 
+    /** Settings › Live classroom, where the academy moves its lessons to the teachers' outside links (Classroom's page, by route name). */
+    private const CLASSROOM = 'filament.academy.pages.settings.classroom';
+
     public function __construct(
         private readonly PlanUsage $usage,
         private readonly TenantContext $tenants,
     ) {}
 
-    /** @return ?array{state: string, text: string} */
+    /** @return ?array{state: string, text: string, action?: string, action_url?: ?string} */
     public function forViewer(): ?array
     {
         if (! $this->tenants->check() || ! Gate::allows(Ability::ViewPlan->value)) {
@@ -49,7 +53,24 @@ final class PlanWarning
             'usage' => PlanFormat::usage($limit, $worst['used'], $worst['max']),
         ];
 
+        if ($limit === Limit::VideoMinutes) {
+            // The month's video minutes: said plainly, with the way on: lessons on Zoom or Google Meet cost nothing.
+            return [
+                'state' => $state,
+                'text' => __('platform::plans.banner.video_'.$state, $words + ['renews' => $this->renews()]),
+                'action' => __('platform::plans.banner.video_action'),
+                'action_url' => Route::has(self::CLASSROOM) ? route(self::CLASSROOM) : null,
+            ];
+        }
+
         return ['state' => $state, 'text' => __('platform::plans.banner.'.$state, $words).' '.__('platform::plans.banner.'.($limit->held() ? 'held' : 'watched').'_'.$state)];
+    }
+
+    /** The day the month's minutes start again, on the academy's clock. */
+    private function renews(): string
+    {
+        return $this->usage->period()->to->setTimezone($this->tenants->require()->defaultTimezone)
+            ->locale(app()->getLocale())->translatedFormat('j F');
     }
 
     public function forget(string $academyId): void

@@ -238,6 +238,24 @@ it('lets an academy pick a ready template or keep its look outside the plan, not
         ->assertNotified(__('platform::plans.stopped'));
 });
 
+it('tells the staff plainly when the month\'s video minutes run out, and the way on to Zoom or Google Meet', function () {
+    $lesson = DB::table('sessions')->where('enrollment_id', $this->booked->enrollmentId)->orderBy('starts_at')->first();
+    DB::table('rooms')->insert(['id' => (string) Str::uuid7(), 'academy_id' => $this->academy->id, 'session_id' => $lesson->id, 'provider' => 'livekit', 'name' => 'r', 'started_at' => $lesson->starts_at, 'created_at' => now(), 'updated_at' => now()]);
+    onPlan(saasPlan(['video_minutes' => 30]));
+    app()->setLocale('ar');
+
+    $this->actingAs($this->owner);
+    $warning = app(PlanWarning::class)->forViewer();
+    expect($warning['state'])->toBe('full')
+        ->and($warning['text'])->toContain('Zoom')->toContain('Google Meet')->toContain(PlanFormat::usage(Limit::VideoMinutes, 30, 30))
+        ->and($warning['action'])->toBe(__('platform::plans.banner.video_action'))
+        ->and($warning['action_url'])->toEndWith('/admin/settings/classroom');
+
+    // Nothing stops: the room still opens; only the staff are told.
+    $this->actingAs($this->teacher);
+    expect(app(PlanWarning::class)->forViewer())->toBeNull();
+});
+
 it('counts each limit with the module that owns it, keeps the day\'s count, and tells the staff', function () {
     // A lesson held on our own video: its room opened.
     $lesson = DB::table('sessions')->where('enrollment_id', $this->booked->enrollmentId)->orderBy('starts_at')->first();
