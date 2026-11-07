@@ -205,6 +205,8 @@ it('apologises when the teacher missed it or the academy cancelled it, and that 
 
     // Booked again and cancelled by the academy (the teacher's leave): another apology, another way to book.
     $again = LeadTrial::query()->with('lead')->where('session_id', ntApi('POST', "site/trials/rebook/{$token}/book", ['starts_at' => CarbonImmutable::parse('2026-10-10 19:00', 'Asia/Riyadh')->toIso8601String()])->assertCreated()->json('data.id'))->sole();
+    // A minute on, so this apology is the latest one (both would otherwise carry the same moment, and the link read could be the first's).
+    CarbonImmutable::setTestNow(CarbonImmutable::now()->addMinute());
     app(CancelSession::class)->handle(Session::query()->findOrFail($again->session_id), 'academy', 'teacher_leave', null, $this->admin->id);
     expect([$again->refresh()->status, $again->outcome])->toBe(['cancelled', 'academy'])
         ->and(Notification::query()->where('user_id', $again->lead->contact_id)->where('template_key', 'crm.trial_sorry_family')->count())->toBe(2);
