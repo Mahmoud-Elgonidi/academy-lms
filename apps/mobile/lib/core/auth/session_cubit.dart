@@ -11,6 +11,7 @@ import '../push/push.dart';
 import '../time/clock_style.dart';
 import 'account.dart';
 import 'account_store.dart';
+import 'modules.dart';
 import 'session_holder.dart';
 import 'session_repository.dart';
 
@@ -37,6 +38,7 @@ class SessionState extends Equatable {
     this.greeting = false,
     this.policy,
     this.appVersion,
+    this.modules = Modules.all,
   });
 
   final SessionStatus status;
@@ -74,6 +76,13 @@ class SessionState extends Equatable {
   /// This app's version (null in tests: never asked to update).
   final String? appVersion;
 
+  /// The open academy's areas that are on (from its look, cached, then the
+  /// profile); everything before anyone signs in or from an older server.
+  final Modules modules;
+
+  /// Whether [feature] is on for the open academy: its tabs, rows and cards show only then.
+  bool has(Feature feature) => modules.has(feature);
+
   /// This app is older than the oldest still served: it asks to be updated first.
   bool get updateRequired => policy != null && appVersion != null && policy!.tooOld(appVersion!);
 
@@ -106,6 +115,7 @@ class SessionState extends Equatable {
     List<NotAddedAccount>? notAdded,
     bool? greeting,
     AppPolicy? policy,
+    Modules? modules,
   }) => SessionState(
     status: status ?? this.status,
     accounts: accounts ?? this.accounts,
@@ -123,6 +133,7 @@ class SessionState extends Equatable {
     greeting: greeting ?? this.greeting,
     policy: policy ?? this.policy,
     appVersion: appVersion,
+    modules: modules ?? this.modules,
   );
 
   @override
@@ -150,6 +161,7 @@ class SessionState extends Equatable {
     notAdded,
     greeting,
     policy?.minVersion,
+    modules,
   ];
 }
 
@@ -344,7 +356,13 @@ class SessionCubit extends Cubit<SessionState> {
         final json = await _repo.branding(account.academySlug);
         await _prefs.setBranding(account.academySlug, json);
         if (state.current?.id == account.id) {
-          _set(state.copyWith(branding: Branding.fromJson(json), policy: AppPolicy.fromJson(json['app'])));
+          _set(
+            state.copyWith(
+              branding: Branding.fromJson(json),
+              policy: AppPolicy.fromJson(json['app']),
+              modules: Modules.fromJson(json['modules']),
+            ),
+          );
         }
       }),
       if (account.isFamily && !account.isTeacher)
@@ -373,7 +391,7 @@ class SessionCubit extends Cubit<SessionState> {
     final id = state.current?.id;
     final me = await _repo.me();
     if (id == null || state.current?.id != id) return;
-    _set(state.copyWith(me: () => me, timeFormat: me.timeFormat));
+    _set(state.copyWith(me: () => me, timeFormat: me.timeFormat, modules: me.modules));
     await _prefs.setTimeFormat(id, me.timeFormat);
   });
 
@@ -387,6 +405,7 @@ class SessionCubit extends Cubit<SessionState> {
           clock: () => null,
           timeFormat: TimeFormat.h12,
           branding: Branding.fallback,
+          modules: Modules.all,
         ),
       );
       return;
@@ -419,6 +438,7 @@ class SessionCubit extends Cubit<SessionState> {
         clock: () => clock,
         timeFormat: timeFormat ?? TimeFormat.h12,
         me: () => null,
+        modules: Modules.fromJson(cached?['modules']),
       ),
     );
     unawaited(refresh());

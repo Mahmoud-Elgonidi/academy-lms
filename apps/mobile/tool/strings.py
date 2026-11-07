@@ -53,6 +53,11 @@ s('errorServerTitle', 'حدثت مشكلة لدينا', 'Something broke on our 
 s('errorServerBody', 'نعمل على إصلاحها. حاول مرة أخرى بعد قليل.', "We're on it. Try again in a little while.")
 s('errorForbiddenTitle', 'لا يُسمح لك بعرض هذا', "You can't see this")
 s('errorForbiddenBody', 'إن رأيت أن هذا خطأ، فتواصل مع الأكاديمية.', 'If that looks wrong, ask the academy.')
+# An area the academy has off (403 feature-not-in-plan): nothing broke, nothing is lost.
+s('moduleOffTitle', 'هذا القسم غير متاح الآن', "This part isn't available now")
+s('moduleOffByAcademy', 'أوقفت الأكاديمية هذا القسم، وما فيه محفوظ ويعود متى أعادت تشغيله.', 'The academy has turned this part off. Nothing in it is lost, and it comes back when they turn it on again.')
+s('moduleOffByPlan', 'هذا القسم ليس ضمن باقة الأكاديمية الحالية. إن احتجت إليه فتواصل مع الأكاديمية.', "This part isn't in the academy's current plan. If you need it, ask the academy.")
+s('journeyOffLead', 'تجد حصصك وواجباتك هنا دائمًا.', 'Your lessons and homework are always here.')
 s('reloadFailed', 'تعذّر التحديث، وقد يكون ما تراه قديمًا.', "Couldn't refresh; what you see may be out of date.")
 s('send', 'أرسل', 'Send')
 s('optional', '(اختياري)', '(optional)')

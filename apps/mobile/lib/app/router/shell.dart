@@ -9,15 +9,18 @@ import '../../shared/motion/motion.dart';
 import '../../shared/motion/tab_pop.dart';
 
 /// One tab of a look's bar; [count] puts a dot with a number on it
-/// (rewards waiting, which beat; work waiting, which keeps still).
+/// (rewards waiting, which beat; work waiting, which keeps still). A tab
+/// not [shown] (its area is off for the academy) leaves the bar; its branch
+/// stays, and nothing leads there.
 class ShellTab {
-  const ShellTab(this.icon, this.selectedIcon, this.label, {this.count = 0, this.beat = true});
+  const ShellTab(this.icon, this.selectedIcon, this.label, {this.count = 0, this.beat = true, this.shown = true});
 
   final IconData icon;
   final IconData selectedIcon;
   final String label;
   final int count;
   final bool beat;
+  final bool shown;
 }
 
 /// The frame of a signed-in look: its tabs at the bottom, each keeping its
@@ -45,24 +48,30 @@ class AppShell extends StatelessWidget {
     );
   }
 
-  Widget _frame(BuildContext context) => Scaffold(
-    body: shell,
-    bottomNavigationBar: NavigationBar(
-      selectedIndex: shell.currentIndex,
-      onDestinationSelected: (i) {
-        if (i != shell.currentIndex) context.flavour == MotionFlavour.kids ? Juice.tap() : Juice.press();
-        shell.goBranch(i, initialLocation: i == shell.currentIndex);
-      },
-      destinations: [
-        for (final t in tabs)
-          NavigationDestination(
-            icon: _counted(t, Icon(t.icon)),
-            selectedIcon: _counted(t, TabPop(child: Icon(t.selectedIcon))),
-            label: t.label,
-          ),
-      ],
-    ),
-  );
+  Widget _frame(BuildContext context) {
+    // The bar's places and the branches they stand for (a hidden tab's branch has no place).
+    final branches = [for (final (i, t) in tabs.indexed) if (t.shown) i];
+    final selected = branches.indexOf(shell.currentIndex);
+    return Scaffold(
+      body: shell,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: selected < 0 ? 0 : selected,
+        onDestinationSelected: (i) {
+          final branch = branches[i];
+          if (branch != shell.currentIndex) context.flavour == MotionFlavour.kids ? Juice.tap() : Juice.press();
+          shell.goBranch(branch, initialLocation: branch == shell.currentIndex);
+        },
+        destinations: [
+          for (final t in tabs.where((t) => t.shown))
+            NavigationDestination(
+              icon: _counted(t, Icon(t.icon)),
+              selectedIcon: _counted(t, TabPop(child: Icon(t.selectedIcon))),
+              label: t.label,
+            ),
+        ],
+      ),
+    );
+  }
 
   static Widget _counted(ShellTab t, Widget icon) => t.count == 0
       ? icon

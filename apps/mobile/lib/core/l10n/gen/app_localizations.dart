@@ -158,6 +158,30 @@ abstract class AppLocalizations {
   /// **'إن رأيت أن هذا خطأ، فتواصل مع الأكاديمية.'**
   String get errorForbiddenBody;
 
+  /// No description provided for @moduleOffTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا القسم غير متاح الآن'**
+  String get moduleOffTitle;
+
+  /// No description provided for @moduleOffByAcademy.
+  ///
+  /// In ar, this message translates to:
+  /// **'أوقفت الأكاديمية هذا القسم، وما فيه محفوظ ويعود متى أعادت تشغيله.'**
+  String get moduleOffByAcademy;
+
+  /// No description provided for @moduleOffByPlan.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا القسم ليس ضمن باقة الأكاديمية الحالية. إن احتجت إليه فتواصل مع الأكاديمية.'**
+  String get moduleOffByPlan;
+
+  /// No description provided for @journeyOffLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'تجد حصصك وواجباتك هنا دائمًا.'**
+  String get journeyOffLead;
+
   /// No description provided for @reloadFailed.
   ///
   /// In ar, this message translates to:

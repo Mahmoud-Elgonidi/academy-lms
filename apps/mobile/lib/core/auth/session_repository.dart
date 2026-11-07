@@ -1,5 +1,6 @@
 import '../network/api_client.dart';
 import '../time/clock_style.dart';
+import 'modules.dart';
 
 /// The person behind the open account, as `GET /me` gives it: the clock of
 /// their profile and whether the phone's differs, and how they read a clock.
@@ -16,6 +17,7 @@ class Me {
     this.timeFormatChoice,
     this.academyTimeFormat = TimeFormat.h12,
     this.zoneChip = true,
+    this.modules = Modules.all,
   });
 
   factory Me.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class Me {
       timeFormatChoice: choice,
       academyTimeFormat: TimeFormat.parse(school['time_format']) ?? (choice == null ? inForce : TimeFormat.h12),
       zoneChip: json['zone_chip'] != false,
+      modules: Modules.fromJson(json['modules']),
     );
   }
 
@@ -65,6 +68,9 @@ class Me {
   /// shown again from the account's settings; the same on the web).
   final bool zoneChip;
 
+  /// The academy's areas that are on (`modules`; everything from an older server).
+  final Modules modules;
+
   /// The same person having chosen [choice] (null: the academy's way).
   Me choosing(TimeFormat? choice) => _with(timeFormat: choice ?? academyTimeFormat, timeFormatChoice: () => choice);
 
@@ -83,6 +89,7 @@ class Me {
     timeFormatChoice: timeFormatChoice == null ? this.timeFormatChoice : timeFormatChoice(),
     academyTimeFormat: academyTimeFormat,
     zoneChip: zoneChip ?? this.zoneChip,
+    modules: modules,
   );
 }
 
@@ -95,10 +102,11 @@ class SessionRepository {
   final ApiClient _api;
 
   /// Public: works before and after sign-in. The app policy (the oldest
-  /// version still served) rides along under `app`, so it is cached with the look.
+  /// version still served) rides along under `app`, and the academy's areas
+  /// that are on under `modules`, so both are cached with the look.
   Future<Map<String, dynamic>> branding(String academy) async {
     final json = await _api.get('branding', academy: academy, anonymous: true);
-    return {...json['data'] as Map<String, dynamic>, 'app': json['app']};
+    return {...json['data'] as Map<String, dynamic>, 'app': json['app'], 'modules': json['modules']};
   }
 
   /// This phone receives the open account's push notifications.

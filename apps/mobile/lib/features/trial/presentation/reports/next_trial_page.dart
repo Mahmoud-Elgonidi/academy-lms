@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_theme.dart';
+import '../../../../core/auth/modules_of.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/time/formats.dart';
@@ -61,6 +62,7 @@ class _PickState extends State<_Pick> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final help = context.hasModule(Feature.support);
     return BlocBuilder<NextTrialCubit, NextTrialState>(
       builder: (context, state) {
         final cubit = context.read<NextTrialCubit>();
@@ -101,11 +103,13 @@ class _PickState extends State<_Pick> {
                 icon: Icons.chat_bubble_outline_rounded,
                 title: l.trialRefusedTitle,
                 body: state.refusal,
-                action: SecondaryAction(
-                  l.trialNextOpenHelp,
-                  icon: Icons.help_outline_rounded,
-                  onPressed: () => context.go('/family/me/help'),
-                ),
+                action: help
+                    ? SecondaryAction(
+                        l.trialNextOpenHelp,
+                        icon: Icons.help_outline_rounded,
+                        onPressed: () => context.go('/family/me/help'),
+                      )
+                    : null,
               )
             else if (days.isEmpty)
               EmptyState(
@@ -113,11 +117,13 @@ class _PickState extends State<_Pick> {
                 icon: Icons.event_busy_rounded,
                 title: l.trialNoTimesTitle,
                 body: l.trialNextNoTimes,
-                action: SecondaryAction(
-                  l.trialNextOpenHelp,
-                  icon: Icons.help_outline_rounded,
-                  onPressed: () => context.go('/family/me/help'),
-                ),
+                action: help
+                    ? SecondaryAction(
+                        l.trialNextOpenHelp,
+                        icon: Icons.help_outline_rounded,
+                        onPressed: () => context.go('/family/me/help'),
+                      )
+                    : null,
               )
             else ...[
               TrialDayStrip(days: days, open: open!, onDay: (d) => setState(() => _day = d)),

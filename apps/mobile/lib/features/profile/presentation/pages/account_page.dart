@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/areas.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../../../../app/theme/stage.dart';
+import '../../../../core/auth/modules.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/auth/session_repository.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -143,11 +144,14 @@ class _Help extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final target = switch (Area.of(context.watch<SessionCubit>().state)) {
-      Area.family => '/family/me/help',
-      Area.middle || Area.teen => '/account/help',
-      _ => null,
-    };
+    final session = context.watch<SessionCubit>().state;
+    final target = !session.has(Feature.support)
+        ? null
+        : switch (Area.of(session)) {
+            Area.family => '/family/me/help',
+            Area.middle || Area.teen => '/account/help',
+            _ => null,
+          };
     if (target == null) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -172,12 +176,15 @@ class _Messages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final area = Area.of(context.watch<SessionCubit>().state);
-    final target = switch (area) {
-      Area.family => '/family/me/messages',
-      Area.kids || Area.middle || Area.teen => '/account/messages',
-      _ => null,
-    };
+    final session = context.watch<SessionCubit>().state;
+    final area = Area.of(session);
+    final target = !session.has(Feature.messaging)
+        ? null
+        : switch (area) {
+            Area.family => '/family/me/messages',
+            Area.kids || Area.middle || Area.teen => '/account/messages',
+            _ => null,
+          };
     if (target == null) return const SizedBox.shrink();
     final l = context.l10n;
     return Padding(

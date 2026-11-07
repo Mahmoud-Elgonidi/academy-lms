@@ -43,6 +43,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorForbiddenBody => 'إن رأيت أن هذا خطأ، فتواصل مع الأكاديمية.';
 
   @override
+  String get moduleOffTitle => 'هذا القسم غير متاح الآن';
+
+  @override
+  String get moduleOffByAcademy => 'أوقفت الأكاديمية هذا القسم، وما فيه محفوظ ويعود متى أعادت تشغيله.';
+
+  @override
+  String get moduleOffByPlan => 'هذا القسم ليس ضمن باقة الأكاديمية الحالية. إن احتجت إليه فتواصل مع الأكاديمية.';
+
+  @override
+  String get journeyOffLead => 'تجد حصصك وواجباتك هنا دائمًا.';
+
+  @override
   String get reloadFailed => 'تعذّر التحديث، وقد يكون ما تراه قديمًا.';
 
   @override

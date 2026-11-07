@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_theme.dart';
+import '../../../../core/auth/modules_of.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/realtime/live.dart';
@@ -101,8 +102,11 @@ class _Home extends StatelessWidget {
           SectionHeader(l.lessonsLeftTitle, action: l.navMoney, onAction: () => context.go('/family/money')),
           CourseBalances(courses: home.balance),
         ],
-        SectionHeader(self ? l.navJourney : l.journeyTitle(name), action: l.openJourney, onAction: () => context.go('/family/journey')),
-        JourneyHomeCard(name: name, to: '/family/journey', map: home.journey, self: self),
+        // The journey is the curriculum's: its card only while the academy has it on.
+        if (context.hasModule(Feature.curriculum)) ...[
+          SectionHeader(self ? l.navJourney : l.journeyTitle(name), action: l.openJourney, onAction: () => context.go('/family/journey')),
+          JourneyHomeCard(name: name, to: '/family/journey', map: home.journey, self: self),
+        ],
         if (report != null) ...[
           SectionHeader(l.lastReport, action: l.allReports, onAction: () => context.go('/family/journey/courses')),
           _ReportCard(report: report, course: home.reportCourse),

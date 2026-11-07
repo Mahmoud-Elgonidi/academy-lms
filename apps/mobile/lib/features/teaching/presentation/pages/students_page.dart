@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_theme.dart';
+import '../../../../core/auth/modules_of.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
 import '../../../../core/realtime/live.dart';
@@ -249,7 +250,8 @@ Future<void> _showStudent(BuildContext context, TeacherStudent s, String? report
               }),
             ),
           ],
-          if (s.studentId != null) ...[
+          // Messages are an area the academy may have off.
+          if (s.studentId != null && context.moduleOn(Feature.messaging)) ...[
             const Gap(Space.s),
             SecondaryAction(
               l.messageStudent,

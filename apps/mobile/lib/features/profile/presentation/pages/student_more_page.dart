@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/areas.dart';
 import '../../../../app/theme/app_theme.dart';
+import '../../../../core/auth/modules_of.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/realtime/live.dart';
@@ -21,7 +22,8 @@ import '../widgets/more_rows.dart';
 /// who they are and where they stand, four tiles (homework with what is
 /// open, levels, creatures, recordings) and help; secondary school's who
 /// card and two groups (studying: messages, recordings, creatures; help),
-/// and signing out.
+/// and signing out. What belongs to an area the academy has off (messages,
+/// help, the creatures, the levels) is left out.
 class StudentMorePage extends StatelessWidget {
   const StudentMorePage({super.key});
 
@@ -29,11 +31,18 @@ class StudentMorePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final area = Area.of(context.watch<SessionCubit>().state);
     if (area == Area.kids) return const _KidsMore();
+    // Without the curriculum there is no journey to say where they stand (its map answers 403).
+    final journey = context.hasModule(Feature.curriculum);
     return BlocProvider(
-      create: (c) => LoadCubit<JourneyMap>(
-        () => c.read<JourneyRepository>().map(),
-        refreshOn: c.read<Live>().on({Live.homework, Live.practice, Live.lessons}),
-      )..load(),
+      key: ValueKey(journey),
+      create: (c) {
+        final cubit = LoadCubit<JourneyMap>(
+          () => c.read<JourneyRepository>().map(),
+          refreshOn: journey ? c.read<Live>().on({Live.homework, Live.practice, Live.lessons}) : null,
+        );
+        if (journey) cubit.load();
+        return cubit;
+      },
       child: Builder(
         builder: (context) {
           final l = context.l10n;
@@ -70,53 +79,52 @@ class StudentMorePage extends StatelessWidget {
   List<Widget> _middle(BuildContext context, JourneyMap? map) {
     final l = context.l10n;
     final open = map?.missions.where((m) => m.kind == 'homework' && !m.done).length ?? 0;
+    final tiles = [
+      _Tile(
+        key: const Key('more-homework'),
+        icon: Icons.edit_outlined,
+        tone: Tone.attention,
+        label: l.navMyHomework,
+        count: open,
+        onTap: () => context.go('/middle/more/homework'),
+      ),
+      if (context.hasModule(Feature.curriculum))
+        _Tile(
+          key: const Key('more-levels'),
+          icon: Icons.bar_chart_rounded,
+          tone: Tone.brand,
+          label: l.journeyLevels,
+          onTap: () => context.go('/middle/journey/levels'),
+        ),
+      if (context.hasModule(Feature.games))
+        _Tile(
+          key: const Key('more-creatures'),
+          icon: Icons.pets_outlined,
+          tone: Tone.info,
+          label: l.gamesAlbum,
+          onTap: () => context.go('/middle/journey/album'),
+        ),
+      _Tile(
+        key: const Key('more-recordings'),
+        icon: Icons.videocam_outlined,
+        tone: Tone.neutral,
+        label: l.recordingsMine,
+        onTap: () => context.go('/middle/more/recordings'),
+      ),
+    ];
     return [
       _MiddleWho(map: map),
       const Gap(Space.m),
       StudentBalances(title: l.lessonsLeftTitle),
-      // Two by two, each row as tall as its tallest tile, so large text grows them.
-      for (final row in [
-        [
-          _Tile(
-            key: const Key('more-homework'),
-            icon: Icons.edit_outlined,
-            tone: Tone.attention,
-            label: l.navMyHomework,
-            count: open,
-            onTap: () => context.go('/middle/more/homework'),
-          ),
-          _Tile(
-            key: const Key('more-levels'),
-            icon: Icons.bar_chart_rounded,
-            tone: Tone.brand,
-            label: l.journeyLevels,
-            onTap: () => context.go('/middle/journey/levels'),
-          ),
-        ],
-        [
-          _Tile(
-            key: const Key('more-creatures'),
-            icon: Icons.pets_outlined,
-            tone: Tone.info,
-            label: l.gamesAlbum,
-            onTap: () => context.go('/middle/journey/album'),
-          ),
-          _Tile(
-            key: const Key('more-recordings'),
-            icon: Icons.videocam_outlined,
-            tone: Tone.neutral,
-            label: l.recordingsMine,
-            onTap: () => context.go('/middle/more/recordings'),
-          ),
-        ],
-      ]) ...[
+      // Two by two, each row as tall as its tallest tile, so large text grows them; a last one alone keeps its half.
+      for (var i = 0; i < tiles.length; i += 2) ...[
         IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: row[0]),
+              Expanded(child: tiles[i]),
               const Gap(Space.m),
-              Expanded(child: row[1]),
+              Expanded(child: i + 1 < tiles.length ? tiles[i + 1] : const SizedBox.shrink()),
             ],
           ),
         ),
@@ -124,12 +132,13 @@ class StudentMorePage extends StatelessWidget {
       ],
       MenuGroup(
         children: [
-          MenuRow(
-            key: const Key('more-help'),
-            icon: Icons.help_outline_rounded,
-            label: l.helpTitle,
-            onTap: () => context.push('/account/help'),
-          ),
+          if (context.hasModule(Feature.support))
+            MenuRow(
+              key: const Key('more-help'),
+              icon: Icons.help_outline_rounded,
+              label: l.helpTitle,
+              onTap: () => context.push('/account/help'),
+            ),
           MenuRow(
             key: const Key('more-tell-us'),
             icon: Icons.flag_outlined,
@@ -151,14 +160,14 @@ class StudentMorePage extends StatelessWidget {
       MenuGroup(
         title: l.moreStudy,
         children: [
-          MessagesRow(at: '/teen/more/messages', label: l.messagesStudentTitle),
+          if (context.hasModule(Feature.messaging)) MessagesRow(at: '/teen/more/messages', label: l.messagesStudentTitle),
           MenuRow(
             key: const Key('more-recordings'),
             icon: Icons.videocam_outlined,
             label: l.recordingsTitle,
             onTap: () => context.go('/teen/more/recordings'),
           ),
-          if (games != null)
+          if (context.hasModule(Feature.games) && games != null)
             MenuRow(
               key: const Key('more-creatures'),
               icon: Icons.pets_outlined,
@@ -171,12 +180,13 @@ class StudentMorePage extends StatelessWidget {
       MenuGroup(
         title: l.moreHelp,
         children: [
-          MenuRow(
-            key: const Key('more-help'),
-            icon: Icons.help_outline_rounded,
-            label: l.helpTitle,
-            onTap: () => context.go('/teen/more/help'),
-          ),
+          if (context.hasModule(Feature.support))
+            MenuRow(
+              key: const Key('more-help'),
+              icon: Icons.help_outline_rounded,
+              label: l.helpTitle,
+              onTap: () => context.go('/teen/more/help'),
+            ),
           MenuRow(
             key: const Key('more-tell-us'),
             icon: Icons.flag_outlined,
@@ -325,6 +335,9 @@ class _KidsMore extends StatelessWidget {
     final area = Area.of(context.watch<SessionCubit>().state);
     final kids = area == Area.kids;
     final base = area.prefix;
+    final games = context.hasModule(Feature.games);
+    final stickers = context.hasModule(Feature.curriculum);
+    final help = context.hasModule(Feature.support);
     final items = <(Key, IconData, String, VoidCallback)>[
       (
         const Key('more-homework'),
@@ -332,9 +345,9 @@ class _KidsMore extends StatelessWidget {
         kids ? l.navMyHomework : l.navHomework,
         () => context.go('$base/more/homework'),
       ),
-      (const Key('more-creatures'), Icons.pets_outlined, l.gamesAlbum, () => context.go('$base/journey/album')),
-      if (kids) (const Key('more-stickers'), Icons.auto_awesome_outlined, l.album, () => context.go('$base/more/stickers')),
-      if (!kids) (const Key('more-help'), Icons.support_agent_outlined, l.helpTitle, () => context.push('/account/help')),
+      if (games) (const Key('more-creatures'), Icons.pets_outlined, l.gamesAlbum, () => context.go('$base/journey/album')),
+      if (kids && stickers) (const Key('more-stickers'), Icons.auto_awesome_outlined, l.album, () => context.go('$base/more/stickers')),
+      if (!kids && help) (const Key('more-help'), Icons.support_agent_outlined, l.helpTitle, () => context.push('/account/help')),
       (
         const Key('more-tell-us'),
         Icons.shield_outlined,

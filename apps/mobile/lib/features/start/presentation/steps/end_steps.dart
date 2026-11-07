@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_theme.dart';
+import '../../../../core/auth/modules_of.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/motion/done_moment.dart';
 import '../../../../shared/widgets/lms.dart';
@@ -250,6 +251,7 @@ class BlockedStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final help = context.hasModule(Feature.support);
     final state = context.watch<StartCubit>().state;
     final block = state.block;
     if (block == null) return const SizedBox.shrink();
@@ -273,7 +275,8 @@ class BlockedStep extends StatelessWidget {
           icon: Icons.calendar_month_outlined,
           onPressed: () => context.go('/family/lessons'),
         ),
-        _ when block.code == 'family_only' => StepButton(label: l.close, onPressed: () => context.go('/')),
+        // Without the academy's help desk (an area it may have off), closing is the way on.
+        _ when block.code == 'family_only' || !help => StepButton(label: l.close, onPressed: () => context.go('/')),
         _ => StepButton(
           key: const Key('blocked-help'),
           label: l.startOffHelp,
@@ -317,17 +320,20 @@ class OffStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final help = context.hasModule(Feature.support);
     final why = context.select<StartCubit, String?>((c) => c.state.options?.whyOff);
     return StepBody(
       badge: Icons.support_agent_rounded,
       title: l.startOffTitle,
       lead: why == null ? null : Lead(why),
-      bottom: StepButton(
-        key: const Key('off-help'),
-        label: l.startOffHelp,
-        icon: Icons.forum_outlined,
-        onPressed: () => context.go('/family/me/help'),
-      ),
+      bottom: help
+          ? StepButton(
+              key: const Key('off-help'),
+              label: l.startOffHelp,
+              icon: Icons.forum_outlined,
+              onPressed: () => context.go('/family/me/help'),
+            )
+          : StepButton(label: l.close, onPressed: () => context.go('/')),
       children: const [],
     );
   }

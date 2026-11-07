@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_theme.dart';
+import '../../../../core/auth/modules_of.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
 import '../../../../core/realtime/live.dart';
@@ -498,6 +499,7 @@ class _PlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final help = context.hasModule(Feature.support);
     final r = report.recommendation;
     final plan = r.plan;
     final perWeek = r.perWeek ?? plan?.sessionsPerWeek;
@@ -541,7 +543,7 @@ class _PlanCard extends StatelessWidget {
         const Gap(Space.l),
         if (report.start case final start? when !start.available) ...[
           Note(start.whyNot ?? l.startBlockedTitle, key: const Key('report-start-why'), icon: Icons.info_outline_rounded),
-          if (start.reason == 'self_serve_off') ...[
+          if (start.reason == 'self_serve_off' && help) ...[
             const Gap(Space.s),
             SecondaryAction(
               l.startOffHelp,

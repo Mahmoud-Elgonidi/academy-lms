@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_theme.dart';
+import '../../../../core/auth/modules_of.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
@@ -14,8 +15,8 @@ import '../../data/quran_repository.dart';
 /// Opens a lesson's Quran portion and record, for its teacher.
 Future<void> openQuranLesson(BuildContext context, String lessonId) => context.push('/teach/lessons/$lessonId/quran');
 
-/// Draws [builder] only once [ask] says yes; nothing while it asks, and nothing when the Quran is not in the
-/// academy's plan.
+/// Draws [builder] only once [ask] says yes; nothing while it asks, and nothing (without asking) when the Quran is
+/// not the academy's.
 class _WhenYes extends StatefulWidget {
   const _WhenYes({required this.askKey, required this.ask, required this.builder});
 
@@ -38,10 +39,14 @@ class _WhenYesState extends State<_WhenYes> {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<bool>(
-    future: _yes,
-    builder: (context, snap) => snap.data == true ? widget.builder(context).appear(context, 0) : const SizedBox.shrink(),
-  );
+  Widget build(BuildContext context) {
+    // Without the Quran's area it is not even asked.
+    if (!context.hasModule(Feature.quran)) return const SizedBox.shrink();
+    return FutureBuilder<bool>(
+      future: _yes,
+      builder: (context, snap) => snap.data == true ? widget.builder(context).appear(context, 0) : const SizedBox.shrink(),
+    );
+  }
 }
 
 /// The way from the journey to the Quran screen, once the learner has a Quran course with a plan. On the kids' sea

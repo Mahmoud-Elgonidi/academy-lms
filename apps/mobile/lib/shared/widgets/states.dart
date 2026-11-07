@@ -42,16 +42,20 @@ class EmptyState extends StatelessWidget {
   }
 }
 
-/// Why something could not load, by kind, and a way to try again.
-enum ErrorKind { offline, server, forbidden, other }
+/// Why something could not load, by kind, and a way to try again. An area
+/// the academy has off ([offByAcademy]) or its plan leaves out ([offByPlan])
+/// is said calmly, with nothing to retry.
+enum ErrorKind { offline, server, forbidden, offByAcademy, offByPlan, other }
 
 class ErrorState extends StatelessWidget {
   const ErrorState({required this.kind, this.message, this.onRetry, super.key});
 
   factory ErrorState.of(ApiProblem problem, {VoidCallback? onRetry, Key? key}) => ErrorState(
-    key: key,
+    key: key ?? (problem.isFeatureOff ? const Key('module-off') : null),
     kind: problem.isOffline
         ? ErrorKind.offline
+        : problem.isFeatureOff
+        ? (problem.offByAcademy ? ErrorKind.offByAcademy : ErrorKind.offByPlan)
         : problem.status == 403
         ? ErrorKind.forbidden
         : problem.status >= 500
@@ -75,6 +79,8 @@ class ErrorState extends StatelessWidget {
       ErrorKind.offline => (Icons.wifi_off_rounded, l.errorOfflineTitle, l.offline),
       ErrorKind.server => (Icons.cloud_off_rounded, l.errorServerTitle, l.errorServerBody),
       ErrorKind.forbidden => (Icons.lock_outline_rounded, l.errorForbiddenTitle, l.errorForbiddenBody),
+      ErrorKind.offByAcademy => (Icons.toggle_off_outlined, l.moduleOffTitle, l.moduleOffByAcademy),
+      ErrorKind.offByPlan => (Icons.toggle_off_outlined, l.moduleOffTitle, l.moduleOffByPlan),
       ErrorKind.other => (Icons.error_outline_rounded, message ?? l.problem, null),
     };
     return Center(

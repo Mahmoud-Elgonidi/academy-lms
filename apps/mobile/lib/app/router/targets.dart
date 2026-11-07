@@ -1,12 +1,20 @@
 import 'package:go_router/go_router.dart';
 
+import '../../core/auth/modules.dart';
 import '../../core/auth/session_cubit.dart';
 import 'areas.dart';
 
 /// Where a notification (in the inbox, by push, or a link
 /// `academyapp://app/open/{screen}/{id}`) opens in each look. Its `screen`
-/// and `id` are the ones the API puts on every message.
-String targetOf(String? screen, String? id, Area area) {
+/// and `id` are the ones the API puts on every message. A place in an area
+/// the academy has off ([modules]: messages, help, the games…) opens the
+/// look's home instead.
+String targetOf(String? screen, String? id, Area area, [Modules modules = Modules.all]) {
+  final to = _place(screen, id, area);
+  return modules.allows(to) ? to : area.home;
+}
+
+String _place(String? screen, String? id, Area area) {
   final home = area.home;
   if (area == Area.teacher) {
     return switch (screen) {
@@ -112,5 +120,5 @@ Future<void> openMessage(SessionCubit session, GoRouter router, Map<String, Stri
     if (!session.state.accounts.any((a) => a.id == owner)) return;
     if (owner != session.state.current?.id) await session.open(owner);
   }
-  openTarget(router, targetOf(data['screen'], data['id'], Area.of(session.state)));
+  openTarget(router, targetOf(data['screen'], data['id'], Area.of(session.state), session.state.modules));
 }

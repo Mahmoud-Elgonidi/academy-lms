@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/theme/app_theme.dart';
 import '../../../../app/theme/stage.dart';
+import '../../../../core/auth/modules_of.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/state/load_cubit.dart';
@@ -147,7 +148,10 @@ class _LessonDays extends StatelessWidget {
     final nextId = past ? null : data.lessons.where((x) => x.upcoming).firstOrNull?.id;
     // A child in the kids' look only joins: cancelling, turning down a substitute, disputing and rating are the family's.
     final kids = context.shape.stage == Stage.kids;
+    // Rating a lesson is the evaluation's: not while the academy has it off.
+    final rates = context.hasModule(Feature.evaluation);
     final mixed = mixesFormats(data.lessons);
+    final rates = context.hasModule(Feature.evaluation);
     return ListView(
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
@@ -193,7 +197,7 @@ class _LessonDays extends StatelessWidget {
                       }
                     }
                   : null,
-              onRate: past && lesson.tookPlace && !kids
+              onRate: past && lesson.tookPlace && !kids && rates
                   ? () async {
                       if (await showRateSheet(context, lesson) && context.mounted) DoneMoment.show(context, title: l.rated);
                     }
@@ -260,7 +264,7 @@ class _FamilyLessonDays extends StatelessWidget {
               }
             }
           : null,
-      rate: past && lesson.tookPlace
+      rate: past && lesson.tookPlace && rates
           ? () async {
               if (await showRateSheet(context, lesson) && context.mounted) DoneMoment.show(context, title: l.rated);
             }

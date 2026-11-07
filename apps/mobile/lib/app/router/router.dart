@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/auth/modules.dart';
 import '../../core/auth/session_cubit.dart';
 import '../../core/l10n/l10n.dart';
 import '../../core/realtime/live.dart';
@@ -208,10 +209,11 @@ GoRouter buildRouter(SessionCubit session) {
           if (loc == '/update') return Area.of(s).home;
           final area = Area.of(s);
           // A link into the app (academyapp://app/open/{screen}/{id}) or a tapped push.
-          if (loc.startsWith('/open/')) return targetOf(state.pathParameters['screen'], state.pathParameters['id'], area);
+          if (loc.startsWith('/open/')) return targetOf(state.pathParameters['screen'], state.pathParameters['id'], area, s.modules);
           if (loc == '/' || loc == '/splash' || loc == '/intro' || welcome) return area.home;
           final elsewhere = Area.values.any((a) => a != area && loc.startsWith(a.prefix));
-          return elsewhere ? area.home : null;
+          // A place of an area the academy has off (messages, help, the games…) goes home rather than to a broken screen.
+          return elsewhere || !s.modules.allows(loc) ? area.home : null;
       }
     },
     routes: [
@@ -350,10 +352,10 @@ GoRouter buildRouter(SessionCubit session) {
 
       // A child in the kids' look: big tabs, their journey (the islands of their course), talking to their teacher.
       _studentShell(
-        tabs: (l) => [
+        tabs: (l, s) => [
           ShellTab(Icons.map_outlined, Icons.map_rounded, l.navJourney),
           ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navMyLessons),
-          ShellTab(Icons.forum_outlined, Icons.forum_rounded, l.messagesKidsTitle),
+          ShellTab(Icons.forum_outlined, Icons.forum_rounded, l.messagesKidsTitle, shown: s.has(Feature.messaging)),
           ShellTab(Icons.more_horiz_rounded, Icons.more_horiz_rounded, l.navMore),
         ],
         branches: [
@@ -372,10 +374,10 @@ GoRouter buildRouter(SessionCubit session) {
       moved('/kids/homework', '/kids/more/homework'),
 
       _studentShell(
-        tabs: (l) => [
+        tabs: (l, s) => [
           ShellTab(Icons.map_outlined, Icons.map_rounded, l.navJourney),
           ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navMyLessons),
-          ShellTab(Icons.forum_outlined, Icons.forum_rounded, l.messagesTitle),
+          ShellTab(Icons.forum_outlined, Icons.forum_rounded, l.messagesTitle, shown: s.has(Feature.messaging)),
           ShellTab(Icons.more_horiz_rounded, Icons.more_horiz_rounded, l.navMore),
         ],
         branches: [
@@ -404,7 +406,7 @@ GoRouter buildRouter(SessionCubit session) {
 
       // Secondary school: the journey, lessons, homework, reports, and More (the account, messages, help).
       _studentShell(
-        tabs: (l) => [
+        tabs: (l, _) => [
           ShellTab(Icons.map_outlined, Icons.map_rounded, l.navJourney),
           ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navMyLessons),
           ShellTab(Icons.edit_outlined, Icons.edit_rounded, l.navHomework),
@@ -508,14 +510,15 @@ Widget _branches(BuildContext context, StatefulNavigationShell shell, List<Widge
 
 /// A student's own area: they are its only learner.
 StatefulShellRoute _studentShell({
-  required List<ShellTab> Function(AppLocalizations l) tabs,
+  required List<ShellTab> Function(AppLocalizations l, SessionState s) tabs,
   required List<StatefulShellBranch> branches,
 }) => StatefulShellRoute(
   navigatorContainerBuilder: _branches,
   builder: (context, state, shell) => BlocProvider(
     create: (c) => LearnerCubit(c.read(), LearnerScope.self)..load(),
     child: Builder(
-      builder: (context) => AppShell(shell: shell, tabs: tabs(context.l10n)),
+      // A tab of an area the academy has off (a child's messages) leaves the bar, and comes back with it.
+      builder: (context) => AppShell(shell: shell, tabs: tabs(context.l10n, context.watch<SessionCubit>().state)),
     ),
   ),
   branches: branches,

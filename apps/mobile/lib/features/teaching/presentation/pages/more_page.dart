@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/auth/modules_of.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/widgets/lms.dart';
@@ -80,13 +81,17 @@ class _GroupsState extends State<_Groups> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final messaging = context.hasModule(Feature.messaging);
+    final card = context.hasModule(Feature.site);
+    final performance = context.hasModule(Feature.evaluation);
+    final help = context.hasModule(Feature.support);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         MenuGroup(
           title: l.moreTeaching,
           children: [
-            MessagesRow(at: '/teach/more/messages', label: l.messagesTitle),
+            if (messaging) MessagesRow(at: '/teach/more/messages', label: l.messagesTitle),
             MenuRow(
               key: const Key('open-meeting-link'),
               icon: Icons.link_rounded,
@@ -103,12 +108,13 @@ class _GroupsState extends State<_Groups> {
               label: l.recordingsMine,
               onTap: () => context.go('/teach/more/recordings'),
             ),
-            MenuRow(
-              key: const Key('open-card'),
-              icon: Icons.badge_outlined,
-              label: l.teacherCardTitle,
-              onTap: () => context.go('/teach/more/card'),
-            ),
+            if (card)
+              MenuRow(
+                key: const Key('open-card'),
+                icon: Icons.badge_outlined,
+                label: l.teacherCardTitle,
+                onTap: () => context.go('/teach/more/card'),
+              ),
           ],
         ),
         MenuGroup(
@@ -136,12 +142,13 @@ class _GroupsState extends State<_Groups> {
               label: l.navEarnings,
               onTap: () => context.go('/teach/more/earnings'),
             ),
-            MenuRow(
-              key: const Key('open-performance'),
-              icon: Icons.insights_outlined,
-              label: l.performanceTitle,
-              onTap: () => context.go('/teach/more/performance'),
-            ),
+            if (performance)
+              MenuRow(
+                key: const Key('open-performance'),
+                icon: Icons.insights_outlined,
+                label: l.performanceTitle,
+                onTap: () => context.go('/teach/more/performance'),
+              ),
             MenuRow(
               key: const Key('open-documents'),
               icon: Icons.fact_check_outlined,
@@ -160,12 +167,13 @@ class _GroupsState extends State<_Groups> {
               label: l.moreAccountSettings,
               onTap: () => context.push('/account'),
             ),
-            MenuRow(
-              key: const Key('open-support'),
-              icon: Icons.help_outline_rounded,
-              label: l.supportTitle,
-              onTap: () => context.go('/teach/more/help'),
-            ),
+            if (help)
+              MenuRow(
+                key: const Key('open-support'),
+                icon: Icons.help_outline_rounded,
+                label: l.supportTitle,
+                onTap: () => context.go('/teach/more/help'),
+              ),
             MenuRow(
               key: const Key('open-concern'),
               icon: Icons.flag_outlined,

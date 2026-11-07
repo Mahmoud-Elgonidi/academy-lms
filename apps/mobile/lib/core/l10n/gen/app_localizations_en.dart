@@ -43,6 +43,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorForbiddenBody => 'If that looks wrong, ask the academy.';
 
   @override
+  String get moduleOffTitle => 'This part isn\'t available now';
+
+  @override
+  String get moduleOffByAcademy => 'The academy has turned this part off. Nothing in it is lost, and it comes back when they turn it on again.';
+
+  @override
+  String get moduleOffByPlan => 'This part isn\'t in the academy\'s current plan. If you need it, ask the academy.';
+
+  @override
+  String get journeyOffLead => 'Your lessons and homework are always here.';
+
+  @override
   String get reloadFailed => 'Couldn\'t refresh; what you see may be out of date.';
 
   @override

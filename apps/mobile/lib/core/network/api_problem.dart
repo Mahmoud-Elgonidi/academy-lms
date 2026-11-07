@@ -67,6 +67,13 @@ class ApiProblem implements Exception {
   bool get isUnauthenticated => status == 401;
   bool get isNotFound => status == 404;
 
+  /// The area this belongs to is off for the academy (403 `feature-not-in-plan`): by the academy itself, or
+  /// outside its plan. Nothing broke; nothing to try again.
+  bool get isFeatureOff => type == 'feature-not-in-plan';
+
+  /// Who has it off, while [isFeatureOff]: true when the academy turned it off, false when its plan leaves it out.
+  bool get offByAcademy => extra['by'] == 'academy';
+
   /// The password or code was right and the account has two-step sign-in on:
   /// the token that takes the authenticator's code (`POST auth/two-factor`).
   String? get twoFactorToken => type == 'two-factor-required' ? extra['two_factor_token'] as String? : null;

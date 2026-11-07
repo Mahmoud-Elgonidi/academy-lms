@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/auth/modules.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/time/formats.dart';
@@ -88,13 +89,14 @@ class FamilyMorePage extends StatelessWidget {
                   MenuGroup(
                     title: l.moreTalk,
                     children: [
-                      MessagesRow(at: '/family/me/messages', label: l.messagesFamilyTitle),
-                      MenuRow(
-                        key: const Key('open-help'),
-                        icon: Icons.help_outline_rounded,
-                        label: l.helpTitle,
-                        onTap: () => context.go('/family/me/help'),
-                      ),
+                      if (s.has(Feature.messaging)) MessagesRow(at: '/family/me/messages', label: l.messagesFamilyTitle),
+                      if (s.has(Feature.support))
+                        MenuRow(
+                          key: const Key('open-help'),
+                          icon: Icons.help_outline_rounded,
+                          label: l.helpTitle,
+                          onTap: () => context.go('/family/me/help'),
+                        ),
                       MenuRow(
                         key: const Key('open-tell-us'),
                         icon: Icons.flag_outlined,

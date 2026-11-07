@@ -101,8 +101,8 @@ class _InboxPageState extends State<InboxPage> {
       setState(() => _expanded.contains(item.id) ? _expanded.remove(item.id) : _expanded.add(item.id));
       return;
     }
-    final area = Area.of(context.read<SessionCubit>().state);
-    openTarget(GoRouter.of(context), targetOf(item.screen, item.targetId, area));
+    final session = context.read<SessionCubit>().state;
+    openTarget(GoRouter.of(context), targetOf(item.screen, item.targetId, Area.of(session), session.modules));
   }
 
   @override
