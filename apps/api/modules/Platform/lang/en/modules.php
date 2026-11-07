@@ -1,0 +1,77 @@
+<?php
+
+// Settings › Academy modules (docs/architecture/02, "وحدات الأكاديمية").
+return [
+    'nav' => 'Academy modules',
+    'title' => 'Academy modules',
+    'subtitle' => 'Choose what your academy uses. What you switch off leaves the menus, the portal and the app; its data stays as it is until you bring it back.',
+    'sections' => [
+        'core' => ['title' => 'Core', 'hint' => 'Always on in every academy.'],
+        'optional' => ['title' => 'Optional', 'hint' => 'Free and on at first. Switch off what you do not need, and bring it back whenever you like.'],
+        'paid' => ['title' => 'Plan modules', 'hint' => "They come with the academy's plan; the platform team adds them."],
+    ],
+    'core' => [
+        'scheduling' => ['label' => 'Lessons and times', 'line' => 'Weekly times, the calendar, time off, and the cancellation and makeup policy.'],
+        'people' => ['label' => 'Teachers and families', 'line' => 'Teachers, students and guardians, and their consents.'],
+        'classroom' => ['label' => 'Live classroom', 'line' => "The lesson's room, attendance and recordings."],
+        'billing' => ['label' => 'Invoices and paying by hand', 'line' => 'Plans and prices, invoices and transfer proofs.'],
+        'reports' => ['label' => 'Reports and homework', 'line' => "Each lesson's report and its questions, homework and marking."],
+        'family' => ['label' => 'Family portal', 'line' => "The student's lessons, reports and invoices in the portal and the app."],
+        'notifications' => ['label' => 'Notifications', 'line' => "The academy's messages by email, WhatsApp and the app, and their templates."],
+        'team' => ['label' => 'Team and security', 'line' => "The academy's team and roles, two-step sign-in and the activity log."],
+        'safeguarding' => ['label' => 'Safeguarding', 'line' => "Raising a concern about a child, and teachers' vetting."],
+        'privacy' => ['label' => 'Privacy', 'line' => 'Copies, erasure and correction of data when its owner asks.'],
+    ],
+    'always_on' => 'Always on',
+    'never_off' => 'Never off',
+    'state' => [
+        'on' => 'On',
+        'off' => 'Off',
+        'platform_off' => 'Switched off for this academy by the platform team',
+        'needs' => 'Works while “:needs” is on',
+        'in_plan' => 'In your plan',
+        'available_in' => 'Available in the :plans plan — contact the platform team',
+        'on_request' => 'Add-on on request — contact the platform team',
+    ],
+    'actions' => [
+        'turn_on' => 'Switch on',
+        'turn_off' => 'Switch off',
+        'confirm_off' => 'Switch off “:module”?',
+        'confirm_on' => 'Switch on “:module”?',
+    ],
+    'preview' => [
+        'where_off' => 'It leaves:',
+        'where_on' => 'It comes back to:',
+        'also' => 'Also switched off with it: :modules.',
+        'stays' => 'Nothing is deleted: the data stays as it is, and all of it comes back when you switch it on again.',
+        'comes_back' => 'Everything that was in it comes back as it was.',
+        'refused' => 'Not now:',
+    ],
+    'saved_on' => '“:module” is on.',
+    'saved_off' => '“:module” is off.',
+    'where' => [
+        'groups' => ['Groups and the group lesson settings in the back office', 'Group mode in “Find a teacher”', 'Open groups when a family starts a course on its own'],
+        'curriculum' => ['Curricula in the back office', "The learning journey and the curriculum's plan for students and guardians, in the portal and the app", "Guardians' cheers and the week's chest"],
+        'games' => ['Game settings in the back office', 'Games and creatures for students and guardians', 'Homework as a game for teachers'],
+        'messaging' => ['Conversations in the back office', 'Messages for teachers and families, in the portal and the app', 'New message notifications'],
+        'announcements' => ['Announcements in the back office', 'Sending new announcements (those sent stay in the notification inboxes)'],
+        'support' => ['Help in the back office', '“Help” for families and teachers, in the portal and the app', 'Late answer reminders'],
+        'evaluation' => ["Teachers' performance in the back office", '“My performance” for teachers', "Families' lesson ratings"],
+        'site' => ["The academy's page and its requests in the back office", 'The public page, and the trial and teaching requests from it', '“My card” for teachers'],
+    ],
+    'errors' => [
+        'paid' => '“:module” is a plan module; the platform team adds it or switches it off. Contact them to change it.',
+        'needs' => '“:module” plays on the curriculum\'s lessons. Switch on “:needs” first, then “:module”.',
+        'not_in_plan' => 'The platform team switched “:module” off for this academy. Contact them to bring it back.',
+        'impersonating' => "The academy's modules are not changed while signed in as someone else.",
+        'in_use' => [
+            'groups' => '{1} One group has students in running courses. End it or move its students to private lessons first, then switch “:module” off.|[2,*] :count groups have students in running courses. End them or move their students to private lessons first, then switch “:module” off.',
+            'support' => '{1} One help request is open. Answer or close it first, then switch “:module” off.|[2,*] :count help requests are open. Answer or close them first, then switch “:module” off.',
+            'other' => '“:module” still has something to finish first (:count). Finish it, then switch it off.',
+        ],
+    ],
+    'setup' => [
+        'title' => 'Choose your academy\'s modules',
+        'hint' => 'Switch off what you do not use, such as group lessons or games, so everyone\'s menus stay simpler. You can bring it back whenever you like.',
+    ],
+];

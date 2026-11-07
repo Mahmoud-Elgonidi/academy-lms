@@ -6,6 +6,8 @@ use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 use Livewire\Attributes\Url;
 use Modules\People\Contracts\FamilyView;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * The old games page (/my/games): the games now live on the learner's journey
@@ -26,7 +28,7 @@ final class FamilyGames extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->check() && app(FamilyView::class)->current((string) auth()->id()) !== null;
+        return auth()->check() && app(FamilyView::class)->current((string) auth()->id()) !== null && app(AcademyPlan::class)->has(Feature::Games);
     }
 
     public function getTitle(): string|Htmlable

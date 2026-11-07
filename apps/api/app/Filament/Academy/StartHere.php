@@ -8,6 +8,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Setup\SetupChecklist;
 use Modules\SharedKernel\Setup\SetupProgress;
 use Modules\SharedKernel\Setup\SetupStep;
@@ -49,12 +50,12 @@ final class StartHere extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return self::progress()->complete() ? __('platform::branding.nav_group') : null;
+        return self::progress()->complete() ? NavGroup::Settings : null;
     }
 
     public static function getNavigationSort(): ?int
     {
-        return self::progress()->complete() ? 99 : -100;
+        return self::progress()->complete() ? 999 : -100;
     }
 
     public static function getNavigationBadge(): ?string

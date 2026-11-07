@@ -36,7 +36,7 @@ final class QuranPrograms extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?int $navigationSort = 43;
+    protected static ?int $navigationSort = 403;
 
     protected static ?string $slug = 'quran/programs';
 

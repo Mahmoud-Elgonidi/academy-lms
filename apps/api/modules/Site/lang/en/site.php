@@ -154,7 +154,6 @@ return [
     ],
     'requests' => [
         'nav' => 'Page requests',
-        'nav_group' => 'Sales',
         'title' => "Requests from the academy's page",
         'subtitle' => 'People who asked for a free trial or to teach with you from the academy\'s page. Trial requests also become leads under "Leads" by themselves.',
         'filter' => 'Show',

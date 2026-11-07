@@ -13,6 +13,7 @@ use Modules\Crm\Database\Seeders\DemoTrialReportSeeder;
 use Modules\People\Database\Seeders\DemoTeacherCardsSeeder;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Platform\Database\Seeders\DemoAiAreaSeeder;
+use Modules\Platform\Database\Seeders\DemoModulesSeeder;
 use Modules\Platform\Database\Seeders\DemoQuranAreaSeeder;
 use Modules\Quran\Database\Seeders\DemoHifzSeeder;
 use Modules\Quran\Database\Seeders\DemoMistakesSeeder;
@@ -43,7 +44,8 @@ use Modules\Site\Database\Seeders\DemoSiteSeeder;
  * Hala's family invoice due tomorrow); and a family on automatic renewal
  * (DemoAutoRenewSeeder: a demo card saved for the family whose renewal is nearest);
  * and the CRM's learners and parents with their lead's country, where they had
- * none, so a family is priced where it lives (FillLearnerCountries).
+ * none, so a family is priced where it lives (FillLearnerCountries); and its
+ * modules chosen, every optional one on (DemoModulesSeeder).
  * Nothing without the demo academy (an academy's own server), and each step
  * only once.
  */
@@ -60,7 +62,7 @@ final class DemoCatchUpSeeder extends Seeder
         // The Quran's area first: what follows writes the demo's Quran (its subject, its lessons' passages).
         $this->call(DemoQuranAreaSeeder::class);
         $counts = $tenants->run($demo, function (): array {
-            $this->call([DemoQuranSeeder::class, DemoMistakesSeeder::class, DemoHifzSeeder::class, DemoRegionCountriesSeeder::class, DemoTeacherCardsSeeder::class, DemoSiteSeeder::class, DemoGroupsSeeder::class, DemoQuranPlansSeeder::class, DemoTrialReportSeeder::class, DemoSelfStartSeeder::class, DemoOpenHoursSeeder::class, DemoCollectionSeeder::class, DemoAutoRenewSeeder::class]);
+            $this->call([DemoModulesSeeder::class, DemoQuranSeeder::class, DemoMistakesSeeder::class, DemoHifzSeeder::class, DemoRegionCountriesSeeder::class, DemoTeacherCardsSeeder::class, DemoSiteSeeder::class, DemoGroupsSeeder::class, DemoQuranPlansSeeder::class, DemoTrialReportSeeder::class, DemoSelfStartSeeder::class, DemoOpenHoursSeeder::class, DemoCollectionSeeder::class, DemoAutoRenewSeeder::class]);
             // The CRM's learners and parents take their lead's country where they have none (Jana's mother pays in Egypt's region).
             app(FillLearnerCountries::class)->handle();
 

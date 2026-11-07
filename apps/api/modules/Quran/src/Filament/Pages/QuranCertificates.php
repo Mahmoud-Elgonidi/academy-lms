@@ -40,7 +40,7 @@ final class QuranCertificates extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTrophy;
 
-    protected static ?int $navigationSort = 45;
+    protected static ?int $navigationSort = 405;
 
     protected static ?string $slug = 'quran/certificates';
 

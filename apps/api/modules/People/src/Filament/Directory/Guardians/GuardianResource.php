@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Gate;
 use Modules\People\Filament\Directory\DirectoryForm;
 use Modules\People\Queries\Models\Person;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use UnitEnum;
 
 /** Guardians (docs/architecture/01, section 6): who signs in for their children and pays; their children on their page. */
@@ -26,7 +27,7 @@ final class GuardianResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHome;
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 202;
 
     protected static ?string $slug = 'people/guardians';
 
@@ -39,7 +40,7 @@ final class GuardianResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('people::directory.nav_group');
+        return NavGroup::People;
     }
 
     public static function getNavigationLabel(): string

@@ -13,6 +13,8 @@ use Modules\Messaging\Events\MessageSent;
 use Modules\Messaging\MessagingRules;
 use Modules\Messaging\Models\Conversation;
 use Modules\Messaging\Models\ConversationMessage;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * Messaging's notifications (wording in lang/{ar,en}/notifications.php).
@@ -45,6 +47,10 @@ final class SendMessagingNotifications
 
     public function sent(MessageSent $event): void
     {
+        // Nothing is told while the academy hid conversations.
+        if (! app(AcademyPlan::class)->has(Feature::Messaging)) {
+            return;
+        }
         $c = Conversation::query()->find($event->conversationId);
         $m = ConversationMessage::query()->find($event->messageId);
         if ($c === null || $m === null) {

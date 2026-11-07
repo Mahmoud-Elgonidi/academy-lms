@@ -28,6 +28,7 @@ use Modules\Payroll\Models\RateCardLine;
 use Modules\Payroll\Models\TeacherRateCard;
 use Modules\Payroll\Queries\PayrollTeachers;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Money\Money;
 use UnitEnum;
 
@@ -42,7 +43,7 @@ final class RateCardResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
-    protected static ?int $navigationSort = 81;
+    protected static ?int $navigationSort = 606;
 
     protected static ?string $slug = 'settings/teacher-rates';
 
@@ -53,7 +54,7 @@ final class RateCardResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('payroll::rates.nav_group');
+        return NavGroup::Finance;
     }
 
     public static function getNavigationLabel(): string

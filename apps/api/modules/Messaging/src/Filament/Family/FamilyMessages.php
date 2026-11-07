@@ -9,6 +9,8 @@ use Illuminate\Contracts\Support\Htmlable;
 use Modules\Messaging\Filament\Concerns\HoldsConversations;
 use Modules\Messaging\Queries\MyConversations;
 use Modules\People\Contracts\FamilyView;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * Messages in the family area (/my), in every look: the learner on screen
@@ -29,7 +31,7 @@ final class FamilyMessages extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->check() && app(FamilyView::class)->current((string) auth()->id()) !== null;
+        return auth()->check() && app(AcademyPlan::class)->has(Feature::Messaging) && app(FamilyView::class)->current((string) auth()->id()) !== null;
     }
 
     public static function getNavigationLabel(): string

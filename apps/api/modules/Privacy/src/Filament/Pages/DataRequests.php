@@ -31,8 +31,10 @@ use Modules\Privacy\Queries\DataRequests as Requests;
 use Modules\Privacy\Queries\ErasurePreview;
 use Modules\Privacy\Subjects;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use UnitEnum;
 
 /**
  * People's requests about their data, for the owner and admins: erasures
@@ -49,13 +51,18 @@ final class DataRequests extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFingerPrint;
 
-    protected static ?int $navigationSort = 95;
+    protected static ?int $navigationSort = 801;
 
     protected static ?string $slug = 'data-requests';
 
     /** The request a message pointed to, shown first. */
     #[Url]
     public ?string $request = null;
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Protection;
+    }
 
     public static function canAccess(): bool
     {

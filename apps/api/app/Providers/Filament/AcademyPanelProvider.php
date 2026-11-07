@@ -43,6 +43,7 @@ use Modules\Privacy\Filament\PrivacyPlugin;
 use Modules\Quran\Filament\QuranPlugin;
 use Modules\Safeguarding\Filament\SafeguardingPlugin;
 use Modules\Scheduling\Filament\SchedulingPlugin;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
 use Modules\Site\Filament\SitePlugin;
 use Modules\Support\Filament\SupportPlugin;
@@ -71,6 +72,9 @@ final class AcademyPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('shared::chrome.styles'))
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::chrome.script'))
             ->renderHook(PanelsRenderHook::SIDEBAR_NAV_START, fn () => view('shared::chrome.greeting'))
+            // The menu in its groups, in their order (SharedKernel\Filament\NavGroup), each group's icon beside its name.
+            ->navigationGroups(NavGroup::forPanel())
+            ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('shared::chrome.nav-groups'))
             // The zone chip in the start corner: the person's own zone and its time, ticking; opened, the academy's and the device's, and a way to change it.
             ->renderHook(PanelsRenderHook::LAYOUT_END, fn () => view('shared::chrome.zone'))
             ->path('admin')

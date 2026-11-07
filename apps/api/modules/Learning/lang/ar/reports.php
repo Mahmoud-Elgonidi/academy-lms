@@ -2,7 +2,6 @@
 
 return [
     'nav' => 'التقارير',
-    'nav_group' => 'التعليم',
     'kinds' => ['lesson' => 'تقرير حصة', 'absence' => 'ملاحظة غياب'],
     'statuses' => ['due' => 'مطلوب', 'overdue' => 'متأخر', 'submitted' => 'مُسلَّم', 'reviewed' => 'مُراجَع'],
     'outcomes' => [

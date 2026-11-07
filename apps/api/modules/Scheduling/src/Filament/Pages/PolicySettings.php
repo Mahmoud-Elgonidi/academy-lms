@@ -23,6 +23,7 @@ use Modules\Scheduling\Domain\Policy\PolicyInput;
 use Modules\Scheduling\Domain\Policy\PolicySettings as Settings;
 use Modules\Scheduling\Domain\Policy\Rule;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Modules\SharedKernel\Time\ZoneHint;
 use UnitEnum;
@@ -40,7 +41,7 @@ final class PolicySettings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedScale;
 
-    protected static ?int $navigationSort = 85;
+    protected static ?int $navigationSort = 904;
 
     protected static ?string $slug = 'settings/policy';
 
@@ -54,7 +55,7 @@ final class PolicySettings extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

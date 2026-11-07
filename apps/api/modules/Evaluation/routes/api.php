@@ -3,7 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Evaluation\Http\V1\Controllers\RatingsController;
 
-Route::middleware('auth:sanctum')->group(function () {
+// An optional area (Settings › Academy modules): 403 feature-not-in-plan while the academy hid it.
+Route::middleware(['auth:sanctum', 'plan.feature:evaluation'])->group(function () {
     // The family app: one-tap rating of a lesson that took place.
     Route::get('lessons/{session}/rating', [RatingsController::class, 'show'])->name('lessons.rating');
     Route::put('lessons/{session}/rating', [RatingsController::class, 'save'])->name('lessons.rating.save');

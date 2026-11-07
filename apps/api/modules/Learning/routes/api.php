@@ -21,19 +21,20 @@ Route::middleware(['auth:sanctum', 'can:reports.write'])->prefix('teacher')->gro
 // Students and guardians: the roadmap, the reports and the homework of each child.
 Route::middleware('auth:sanctum')->prefix('learning')->group(function () {
     Route::get('students', [LearnerController::class, 'students'])->name('learning.students');
-    Route::get('journey', [LearnerController::class, 'journey'])->name('learning.journey');
+    // The curriculum's part (an optional area the academy may hide): the journey, the roadmap, the challenges and cheers.
+    Route::get('journey', [LearnerController::class, 'journey'])->middleware('plan.feature:curriculum')->name('learning.journey');
     // The journey: the curriculum as islands and stations, the missions, the stars and the week's chest.
-    Route::get('journey/map', [JourneyController::class, 'map'])->middleware('throttle:60,1')->name('learning.journey.map');
-    Route::post('journey/chest', [JourneyController::class, 'chest'])->middleware(['idempotent', 'throttle:10,1'])->name('learning.journey.chest');
-    Route::get('enrollments/{enrollment}/roadmap', [LearnerController::class, 'roadmap'])->name('learning.roadmap');
+    Route::get('journey/map', [JourneyController::class, 'map'])->middleware(['plan.feature:curriculum', 'throttle:60,1'])->name('learning.journey.map');
+    Route::post('journey/chest', [JourneyController::class, 'chest'])->middleware(['plan.feature:curriculum', 'idempotent', 'throttle:10,1'])->name('learning.journey.chest');
+    Route::get('enrollments/{enrollment}/roadmap', [LearnerController::class, 'roadmap'])->middleware('plan.feature:curriculum')->name('learning.roadmap');
     Route::get('enrollments/{enrollment}/reports', [LearnerController::class, 'reports'])->name('learning.reports');
     Route::get('homework', [LearnerController::class, 'homework'])->name('learning.homework');
     Route::post('homework/{homework}/submissions', [LearnerController::class, 'handIn'])->name('learning.homework.submit');
     Route::get('submissions/{submission}/file', [LearnerController::class, 'file'])->name('learning.submissions.file');
 
     // The game layer: challenges by stage, collecting rewards, and guardians' cheers.
-    Route::get('challenges', [ChallengesController::class, 'index'])->name('learning.challenges');
-    Route::post('challenges/claim', [ChallengesController::class, 'claim'])->middleware(['idempotent', 'throttle:20,1'])->name('learning.challenges.claim');
-    Route::post('cheers', [ChallengesController::class, 'cheer'])->middleware('throttle:20,1')->name('learning.cheers.send');
-    Route::post('cheers/seen', [ChallengesController::class, 'seen'])->middleware('throttle:30,1')->name('learning.cheers.seen');
+    Route::get('challenges', [ChallengesController::class, 'index'])->middleware('plan.feature:curriculum')->name('learning.challenges');
+    Route::post('challenges/claim', [ChallengesController::class, 'claim'])->middleware(['plan.feature:curriculum', 'idempotent', 'throttle:20,1'])->name('learning.challenges.claim');
+    Route::post('cheers', [ChallengesController::class, 'cheer'])->middleware(['plan.feature:curriculum', 'throttle:20,1'])->name('learning.cheers.send');
+    Route::post('cheers/seen', [ChallengesController::class, 'seen'])->middleware(['plan.feature:curriculum', 'throttle:30,1'])->name('learning.cheers.seen');
 });

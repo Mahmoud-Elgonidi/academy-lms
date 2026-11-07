@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Modules\Support\Http\V1\Controllers\TicketsController;
 
 // The family and teacher apps: writing to the academy and following the answers (the same as "Help" in /my and "Support" in /teach).
-Route::middleware('auth:sanctum')->prefix('support')->group(function () {
+// An optional area (Settings › Academy modules): 403 feature-not-in-plan while the academy hid it.
+Route::middleware(['auth:sanctum', 'plan.feature:support'])->prefix('support')->group(function () {
     Route::get('new', [TicketsController::class, 'options'])->name('support.new');
     Route::get('tickets', [TicketsController::class, 'index'])->name('support.tickets');
     Route::post('tickets', [TicketsController::class, 'store'])->middleware(['idempotent', 'throttle:10,1'])->name('support.tickets.store');

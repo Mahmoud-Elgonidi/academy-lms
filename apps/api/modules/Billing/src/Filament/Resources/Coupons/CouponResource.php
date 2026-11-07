@@ -30,6 +30,7 @@ use Modules\Billing\Filament\Resources\Plans\ManagePlans;
 use Modules\Billing\Models\Coupon;
 use Modules\Billing\Models\Plan;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use UnitEnum;
@@ -45,7 +46,7 @@ final class CouponResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
 
-    protected static ?int $navigationSort = 81;
+    protected static ?int $navigationSort = 605;
 
     protected static ?string $slug = 'settings/coupons';
 
@@ -62,7 +63,7 @@ final class CouponResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('billing::plans.nav_group');
+        return NavGroup::Finance;
     }
 
     public static function getNavigationLabel(): string

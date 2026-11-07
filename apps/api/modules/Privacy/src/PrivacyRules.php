@@ -34,7 +34,7 @@ final class PrivacyRules
     /** Where the signed-in person asks from on their own: a teacher's area, or the family's. */
     public function ownSide(): string
     {
-        return Gate::allows(Ability::ViewOwnPerformance->value) ? 'teacher' : 'family';
+        return Gate::allows(Ability::WriteReports->value) ? 'teacher' : 'family';
     }
 
     /** @return list<array{id: string, name: string, self: bool}> whom a person may ask about from their own area */

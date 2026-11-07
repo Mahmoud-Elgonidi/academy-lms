@@ -21364,7 +21364,7 @@
         "/v1/branding": {
             "get": {
                 "operationId": "platform.branding",
-                "description": "With `app`: the oldest app version still served (an older app asks to be updated first) and where to update it.\n`time_format` is how the academy writes a clock for everyone who has not chosen their own (pages before sign-in).",
+                "description": "With `app`: the oldest app version still served (an older app asks to be updated first) and where to update it.\n`time_format` is how the academy writes a clock for everyone who has not chosen their own (pages before sign-in).\n`modules` are the academy's modules that are on (Settings \u203a Academy modules and its plan), for screens before sign-in.",
                 "summary": "The academy's look",
                 "tags": [
                     "Platform"
@@ -21532,6 +21532,13 @@
                                             "type": "string",
                                             "description": "h12 (5:00 PM) or h24 (17:00): the academy's choice."
                                         },
+                                        "modules": {
+                                            "type": "array",
+                                            "description": "Every module that is on, paid and optional, as Feature values (crm, online_payments, import, custom_branding, payroll,\nai, quran, groups, curriculum, games, messaging, announcements, support, evaluation, site); the core is always on and not listed.",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
                                         "app": {
                                             "type": "object",
                                             "properties": {
@@ -21558,6 +21565,7 @@
                                     "required": [
                                         "data",
                                         "time_format",
+                                        "modules",
                                         "app"
                                     ]
                                 }
@@ -41472,7 +41480,14 @@
                     },
                     "plan_features": {
                         "type": "array",
-                        "description": "The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll): the apps show only these.",
+                        "description": "The areas the academy's plan includes and the academy did not hide (crm, online_payments, \u2026, groups, messaging, \u2026): the apps show only these.",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "modules": {
+                        "type": "array",
+                        "description": "Every module that is on for this academy, paid (in its plan) and optional (not hidden in Settings \u203a Academy modules),\nas SharedKernel\\Plans\\Feature values: crm, online_payments, import, custom_branding, payroll, ai, quran, groups,\ncurriculum, games, messaging, announcements, support, evaluation, site. The portal and the app show only these;\nthe core (lessons, families, reports, billing, safeguarding, privacy, \u2026) is always on and not listed.",
                         "items": {
                             "type": "string"
                         }
@@ -41535,6 +41550,7 @@
                     "zone_chip",
                     "roles",
                     "plan_features",
+                    "modules",
                     "academy"
                 ],
                 "title": "UserResource"

@@ -7,6 +7,8 @@ use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Livewire\WithFileUploads;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\Support\Filament\Concerns\RequesterTickets;
 use Modules\Support\Queries\MyTickets;
 use Modules\Support\SupportRules;
@@ -27,7 +29,7 @@ final class MySupport extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->check() && app(SupportRules::class)->isTeacher((string) auth()->id());
+        return auth()->check() && app(AcademyPlan::class)->has(Feature::Support) && app(SupportRules::class)->isTeacher((string) auth()->id());
     }
 
     public static function getNavigationLabel(): string

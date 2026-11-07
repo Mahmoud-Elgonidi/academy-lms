@@ -501,7 +501,7 @@ it('takes no trial while the page is off, and books one while the academy\'s pla
 
     SiteSettings::query()->update(['enabled' => true]);
     $this->clearTenant();
-    $plan = SaasPlan::query()->create(['code' => 'basic', 'name_ar' => 'أساسية', 'name_en' => 'Basic', 'features' => []]);
+    $plan = SaasPlan::query()->create(['code' => 'basic', 'name_ar' => 'أساسية', 'name_en' => 'Basic', 'features' => ['groups', 'curriculum', 'games', 'messaging', 'announcements', 'support', 'evaluation', 'site']]);
     app(ChangeAcademyPlan::class)->handle($this->academy->id, $plan->id, 'For this test');
     $this->actAsTenant($this->academy);
     bookOwnTrial()->assertCreated();

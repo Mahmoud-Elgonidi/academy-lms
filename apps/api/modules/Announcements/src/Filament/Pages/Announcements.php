@@ -34,6 +34,7 @@ use Modules\Announcements\Queries\AudienceMembers;
 use Modules\Announcements\Queries\TodaysAnnouncements;
 use Modules\Catalog\Contracts\CatalogApi;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
@@ -59,7 +60,7 @@ final class Announcements extends Page implements HasTable
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMegaphone;
 
-    protected static ?int $navigationSort = 59;
+    protected static ?int $navigationSort = 701;
 
     protected static ?string $slug = 'announcements';
 
@@ -76,7 +77,7 @@ final class Announcements extends Page implements HasTable
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('communication::communication.nav_group');
+        return NavGroup::Communication;
     }
 
     public static function getNavigationLabel(): string

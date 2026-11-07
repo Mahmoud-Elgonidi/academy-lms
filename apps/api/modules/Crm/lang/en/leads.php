@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'nav_group' => 'Sales',
     'nav' => 'Leads',
     'title' => 'Leads',
     'subtitle' => 'Everyone who asked about lessons, from first contact to a subscription. Book them a trial from "Find a teacher", and the teacher assesses them after it.',

@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'nav_group' => 'المعلّمون والأسر',
     'teachers' => [
         'nav' => 'المعلّمون',
         'model' => 'معلّم',

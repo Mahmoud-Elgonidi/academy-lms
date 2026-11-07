@@ -30,6 +30,7 @@ use Modules\People\Filament\Directory\DirectoryForm;
 use Modules\People\Queries\Models\Person;
 use Modules\People\Support\Countries;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use UnitEnum;
 
 /**
@@ -47,7 +48,7 @@ final class StudentResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 201;
 
     protected static ?string $slug = 'people/students';
 
@@ -60,7 +61,7 @@ final class StudentResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('people::directory.nav_group');
+        return NavGroup::People;
     }
 
     public static function getNavigationLabel(): string

@@ -19,6 +19,7 @@ use Modules\Classroom\Actions\SaveClassroomSettings;
 use Modules\Classroom\Models\ClassroomSettings;
 use Modules\Classroom\Video\ProviderManager;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use UnitEnum;
 
 /**
@@ -35,7 +36,7 @@ final class ClassroomSettingsPage extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedVideoCamera;
 
-    protected static ?int $navigationSort = 85;
+    protected static ?int $navigationSort = 905;
 
     protected static ?string $slug = 'settings/classroom';
 
@@ -48,7 +49,7 @@ final class ClassroomSettingsPage extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

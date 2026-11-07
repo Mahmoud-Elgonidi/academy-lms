@@ -12,6 +12,7 @@ use Modules\Platform\Models\SaasSubscription;
 use Modules\Platform\Plans\PlanSummary;
 use Modules\Platform\Plans\PlanUsage;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use UnitEnum;
 
@@ -26,7 +27,7 @@ final class AcademyPlanPage extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?int $navigationSort = 99;
+    protected static ?int $navigationSort = 913;
 
     protected static ?string $slug = 'settings/plan';
 
@@ -38,7 +39,7 @@ final class AcademyPlanPage extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

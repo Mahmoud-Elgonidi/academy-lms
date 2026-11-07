@@ -14,6 +14,7 @@ use Livewire\Attributes\Url;
 use Modules\Identity\Models\User;
 use Modules\SharedKernel\Audit\AuditEntries;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
 
@@ -29,7 +30,7 @@ final class ActivityLog extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static ?int $navigationSort = 95;
+    protected static ?int $navigationSort = 802;
 
     protected static ?string $slug = 'settings/activity';
 
@@ -50,7 +51,7 @@ final class ActivityLog extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Protection;
     }
 
     public static function getNavigationLabel(): string

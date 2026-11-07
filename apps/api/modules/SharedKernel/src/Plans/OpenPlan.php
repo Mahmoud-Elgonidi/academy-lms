@@ -10,6 +10,11 @@ final class OpenPlan implements AcademyPlan
         return true;
     }
 
+    public function modules(): array
+    {
+        return Feature::cases();
+    }
+
     public function limit(Limit $limit): ?int
     {
         return null;

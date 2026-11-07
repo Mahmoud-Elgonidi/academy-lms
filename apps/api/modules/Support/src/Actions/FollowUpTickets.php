@@ -4,6 +4,8 @@ namespace Modules\Support\Actions;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\Support\Contracts\Events\TicketOverdue;
 use Modules\Support\Enums\TicketStatus;
@@ -20,6 +22,10 @@ final class FollowUpTickets
 
     public function handle(?CarbonImmutable $now = null): int
     {
+        // Nothing is raised or closed while the academy hid help (no ticket is open then).
+        if (! app(AcademyPlan::class)->has(Feature::Support)) {
+            return 0;
+        }
         $now ??= CarbonImmutable::now();
         $academyId = $this->tenants->require()->id;
         $changed = 0;

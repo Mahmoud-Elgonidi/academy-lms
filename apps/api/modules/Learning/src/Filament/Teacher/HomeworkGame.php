@@ -20,6 +20,8 @@ use Modules\People\Contracts\PeopleApi;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Games\CatalogGame;
 use Modules\SharedKernel\Games\GameCatalog;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -50,7 +52,7 @@ final class HomeworkGame extends Page
 
     public static function canAccess(): bool
     {
-        return Gate::allows(Ability::WriteReports->value);
+        return Gate::allows(Ability::WriteReports->value) && app(AcademyPlan::class)->has(Feature::Games);
     }
 
     public function mount(string $report): void

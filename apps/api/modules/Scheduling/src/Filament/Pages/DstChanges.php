@@ -30,10 +30,12 @@ use Modules\Scheduling\Domain\Models\RecurringSlot;
 use Modules\Scheduling\Domain\Models\ShiftNotice;
 use Modules\Scheduling\Filament\TimeOffForm;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Modules\SharedKernel\Time\ZoneHint;
+use UnitEnum;
 
 /**
  * The DST planner's screen (docs/architecture/01, "مخطِّط التوقيت الصيفي"):
@@ -49,12 +51,17 @@ final class DstChanges extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected static ?int $navigationSort = -4;
+    protected static ?int $navigationSort = 106;
 
     protected static ?string $slug = 'clock-changes';
 
     /** @var list<string> notices picked for a decision on several at once */
     public array $selected = [];
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Lessons;
+    }
 
     public static function canAccess(): bool
     {

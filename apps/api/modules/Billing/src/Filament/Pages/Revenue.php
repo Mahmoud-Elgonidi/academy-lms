@@ -17,10 +17,12 @@ use Modules\Billing\Live\RevenueChanged;
 use Modules\Billing\Queries\RevenueBoard;
 use Modules\Billing\Support\RevenuePeriod;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use UnitEnum;
 
 /**
  * The academy's revenue (docs/architecture/01, section 17): what came in
@@ -38,7 +40,7 @@ final class Revenue extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
 
-    protected static ?int $navigationSort = -3;
+    protected static ?int $navigationSort = 600;
 
     protected static ?string $slug = 'revenue';
 
@@ -53,6 +55,11 @@ final class Revenue extends Page
 
     #[Url]
     public ?string $currency = null;
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Finance;
+    }
 
     public static function canAccess(): bool
     {

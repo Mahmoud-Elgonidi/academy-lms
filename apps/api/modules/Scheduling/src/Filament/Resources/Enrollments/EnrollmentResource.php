@@ -17,8 +17,10 @@ use Modules\Enrollment\Contracts\EnrollmentStatus;
 use Modules\Scheduling\Queries\EnrollmentAccountQuery;
 use Modules\Scheduling\Queries\Models\EnrolledStudent;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use UnitEnum;
 
 /** Enrolled students: what they study, when, and how much credit is left. */
 final class EnrollmentResource extends Resource
@@ -27,9 +29,14 @@ final class EnrollmentResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
-    protected static ?int $navigationSort = -3;
+    protected static ?int $navigationSort = 101;
 
     protected static ?string $slug = 'enrollments';
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Lessons;
+    }
 
     public static function canAccess(): bool
     {

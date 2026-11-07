@@ -21,6 +21,7 @@ use Modules\Learning\Models\LearningSettings;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\ReportFormQuery;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
@@ -36,7 +37,7 @@ final class ReportsOversight extends Page implements HasTable
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
 
-    protected static ?int $navigationSort = 41;
+    protected static ?int $navigationSort = 302;
 
     protected static ?string $slug = 'reports';
 
@@ -50,7 +51,7 @@ final class ReportsOversight extends Page implements HasTable
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('learning::reports.nav_group');
+        return NavGroup::Teaching;
     }
 
     public static function getNavigationLabel(): string

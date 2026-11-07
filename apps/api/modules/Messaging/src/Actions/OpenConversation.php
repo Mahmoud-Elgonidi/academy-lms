@@ -6,6 +6,8 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 use Modules\Messaging\MessagingRules;
 use Modules\Messaging\Models\Conversation;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * The conversation between a teacher and a student, made the first time one
@@ -19,6 +21,7 @@ final class OpenConversation
 
     public function handle(string $actorId, string $teacherId, string $studentId): Conversation
     {
+        app(AcademyPlan::class)->requireFeature(Feature::Messaging);
         if ($actorId !== $teacherId && $actorId !== $studentId && ! in_array($actorId, $this->rules->guardiansOf($studentId), true)) {
             throw new AuthorizationException;
         }

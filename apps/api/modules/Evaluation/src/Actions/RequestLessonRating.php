@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 use Modules\Evaluation\Contracts\Events\LessonRatingDue;
 use Modules\Evaluation\Models\LessonRating;
 use Modules\Evaluation\Queries\LessonFacts;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * After a lesson took place, the family is asked how it went, with their
@@ -20,6 +22,10 @@ final class RequestLessonRating
 
     public function handle(string $sessionId, string $outcome): bool
     {
+        // Nobody is asked while the academy hid teachers' performance and ratings.
+        if (! app(AcademyPlan::class)->has(Feature::Evaluation)) {
+            return false;
+        }
         $asked = false;
         // Each student who was there: a group lesson asks each attending seat's family on its own.
         foreach ($outcome === 'completed' ? $this->lessons->students($sessionId, attended: true) : [] as $studentId) {

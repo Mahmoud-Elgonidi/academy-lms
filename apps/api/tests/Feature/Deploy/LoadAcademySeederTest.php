@@ -33,7 +33,7 @@ it('never runs in production', function () {
 
 it('lives an academy\'s week through the real actions: courses, lessons, reports, money and pay', function () {
     SaasPlan::query()->create(['code' => 'pro', 'name_ar' => 'الاحتراف', 'name_en' => 'Pro', 'max_teachers' => 75, 'max_active_students' => 1000,
-        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll', 'quran']]);
+        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll', 'quran', 'groups', 'curriculum', 'games', 'messaging', 'announcements', 'support', 'evaluation', 'site']]);
     loadSize(['LOAD_TEACHERS' => 3, 'LOAD_STUDENTS' => 6, 'LOAD_WEEKS' => 1]);
 
     $this->seed(LoadAcademySeeder::class);

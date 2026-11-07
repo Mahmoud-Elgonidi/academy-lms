@@ -8,6 +8,8 @@ use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Modules\People\Contracts\LearnerStage;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * The journey page (docs/architecture/02, section 18) of guardians and adults
@@ -28,7 +30,7 @@ final class FamilyJourney extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->check() && FamilyLearning::learner() !== null;
+        return auth()->check() && FamilyLearning::learner() !== null && app(AcademyPlan::class)->has(Feature::Curriculum);
     }
 
     /** Students find their journey on the home page. */

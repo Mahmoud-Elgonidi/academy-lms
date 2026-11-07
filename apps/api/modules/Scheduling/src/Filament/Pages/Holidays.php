@@ -21,6 +21,7 @@ use Modules\Scheduling\Actions\Holidays\RemoveHoliday;
 use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Filament\TimeOffView;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\Timezones;
 use UnitEnum;
 
@@ -36,7 +37,7 @@ final class Holidays extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static ?int $navigationSort = 84;
+    protected static ?int $navigationSort = 903;
 
     protected static ?string $slug = 'settings/holidays';
 
@@ -47,7 +48,7 @@ final class Holidays extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

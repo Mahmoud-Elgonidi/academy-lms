@@ -9,6 +9,8 @@ use Modules\Evaluation\Contracts\Events\LessonRated;
 use Modules\Evaluation\Models\LessonRating;
 use Modules\Evaluation\Queries\LessonFacts;
 use Modules\People\Contracts\PeopleApi;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * The family's one-tap rating of a lesson (docs/architecture/01, "تقييم
@@ -60,6 +62,7 @@ final class RateLesson
     /** May this person rate this lesson now? The lesson, or why not. */
     public function check(string $sessionId, string $raterId): object
     {
+        app(AcademyPlan::class)->requireFeature(Feature::Evaluation);
         $l = 'evaluation::ratings.errors.';
         // The rater's own seat: themself, or the first child of theirs in it (a group lesson has a student per seat).
         $student = collect($this->lessons->students($sessionId))->first(fn (string $id) => $raterId === $id || in_array($raterId, $this->people->guardiansOf($id), true));

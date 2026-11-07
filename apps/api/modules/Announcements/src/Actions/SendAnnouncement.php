@@ -17,6 +17,8 @@ use Modules\Catalog\Contracts\CatalogApi;
 use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
@@ -48,6 +50,7 @@ final class SendAnnouncement
      */
     public function handle(string $senderId, string $title, string $body, Audience $audience, array $channels = []): Announcement
     {
+        app(AcademyPlan::class)->requireFeature(Feature::Announcements);
         if (! Gate::allows(Ability::SendAnnouncements->value)) {
             throw new AuthorizationException;
         }

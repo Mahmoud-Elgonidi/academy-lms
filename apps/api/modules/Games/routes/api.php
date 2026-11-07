@@ -5,7 +5,8 @@ use Modules\Games\Http\V1\Controllers\GamesController;
 
 // Students and guardians: rounds on the journey's lessons, hatching, the album of creatures, a guardian's limits (and the old games world).
 // Each write has its own tight limit on top of the api ceiling (a round is a minute or more of play).
-Route::middleware('auth:sanctum')->prefix('games')->group(function () {
+// The whole area is optional (Settings › Academy modules): 403 feature-not-in-plan while the academy hid it.
+Route::middleware(['auth:sanctum', 'plan.feature:games'])->prefix('games')->group(function () {
     Route::get('world', [GamesController::class, 'world'])->name('games.world');
     Route::post('plays', [GamesController::class, 'start'])->middleware('throttle:30,1')->name('games.plays.start');
     Route::post('plays/{play}/finish', [GamesController::class, 'finish'])->middleware(['idempotent', 'throttle:30,1'])->whereUuid('play')->name('games.plays.finish');

@@ -33,6 +33,7 @@ use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Payments\StripeConnect;
 use Modules\Billing\Queries\TransferDetails;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use UnitEnum;
 
@@ -48,7 +49,7 @@ final class PaymentSettings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
 
-    protected static ?int $navigationSort = 86;
+    protected static ?int $navigationSort = 907;
 
     protected static ?string $slug = 'settings/payments';
 
@@ -65,7 +66,7 @@ final class PaymentSettings extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

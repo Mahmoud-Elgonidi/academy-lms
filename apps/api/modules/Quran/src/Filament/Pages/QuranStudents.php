@@ -35,7 +35,7 @@ final class QuranStudents extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    protected static ?int $navigationSort = 41;
+    protected static ?int $navigationSort = 401;
 
     protected static ?string $slug = 'quran/students';
 

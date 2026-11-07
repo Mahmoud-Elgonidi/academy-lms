@@ -13,6 +13,8 @@ use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Templates\TemplateAnswers;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\DTOs\LearnerLesson;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * What a learner's week was, for the note to their guardians: only what the
@@ -79,7 +81,7 @@ final class WeekFacts
             'answers' => $this->answers($reports->first()),
             'homework' => $this->homework($studentId, $from, $to),
             'practice' => ['rounds' => (int) $practice->rounds, 'stars' => (int) $practice->stars],
-            'stars' => LearningSettings::current()->journey_style === 'plain' ? null : $lessonStars + (int) $practice->stars,
+            'stars' => LearningSettings::current()->journey_style === 'plain' || ! app(AcademyPlan::class)->has(Feature::Curriculum) ? null : $lessonStars + (int) $practice->stars,
             'voice' => $this->voice($studentId, $from, $to),
         ];
     }

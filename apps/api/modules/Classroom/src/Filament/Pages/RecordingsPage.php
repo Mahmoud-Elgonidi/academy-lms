@@ -35,6 +35,7 @@ use Modules\Classroom\Models\Recording;
 use Modules\Classroom\Models\RecordingAccessLog;
 use Modules\Classroom\Queries\RecordingBoard;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
@@ -57,7 +58,7 @@ final class RecordingsPage extends Page implements HasTable
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFilm;
 
-    protected static ?int $navigationSort = 43;
+    protected static ?int $navigationSort = 305;
 
     protected static ?string $slug = 'recordings';
 
@@ -77,7 +78,7 @@ final class RecordingsPage extends Page implements HasTable
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('learning::reports.nav_group');
+        return NavGroup::Teaching;
     }
 
     public static function getNavigationLabel(): string

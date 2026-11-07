@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Gate;
 use Modules\Billing\Models\AutoCharge;
 use Modules\Billing\Models\PaymentMethod;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
@@ -36,7 +37,7 @@ final class SavedCards extends Page implements HasTable
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
 
-    protected static ?int $navigationSort = -1;
+    protected static ?int $navigationSort = 602;
 
     protected static ?string $slug = 'billing/saved-cards';
 
@@ -47,7 +48,7 @@ final class SavedCards extends Page implements HasTable
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return null;    // beside Invoices
+        return NavGroup::Finance;    // beside Invoices
     }
 
     public static function getNavigationLabel(): string

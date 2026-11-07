@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'nav_group' => 'Settings',
     'title' => 'Identity and colours',
     'subtitle' => 'How the academy looks in the back office and in the student and teacher apps.',
     'sections' => [

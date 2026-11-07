@@ -2,9 +2,11 @@
 
 namespace Modules\Scheduling\Providers;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +58,7 @@ use Modules\Scheduling\Contracts\StartOffers;
 use Modules\Scheduling\Contracts\TrialBooking;
 use Modules\Scheduling\Contracts\TrialConversionRates;
 use Modules\Scheduling\Domain\AttendancePolicy;
+use Modules\Scheduling\Domain\Models\LessonGroup;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Filament\Family\FamilyLessons;
 use Modules\Scheduling\Filament\Pages\Holidays;
@@ -80,6 +83,8 @@ use Modules\Scheduling\Setup\PolicyStep;
 use Modules\Scheduling\Setup\TeacherHoursStep;
 use Modules\Scheduling\TrialBookingService;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Plans\Feature;
+use Modules\SharedKernel\Plans\ModulesInUse;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Setup\SetupChecklist;
@@ -125,6 +130,11 @@ final class SchedulingServiceProvider extends ServiceProvider
         // The new academy's checklist: its policy looked at, and a teacher's weekly hours.
         $this->app->make(SetupChecklist::class)->add(PolicyStep::class);
         $this->app->make(SetupChecklist::class)->add(TeacherHoursStep::class);
+        // Group lessons stay on while a group has students in courses that have not ended (Settings › Academy modules).
+        $this->app->make(ModulesInUse::class)->add(Feature::Groups, fn (): int => LessonGroup::query()->where('status', '!=', LessonGroup::ENDED)
+            ->whereHas('members', fn ($m) => $m->where(fn ($q) => $q->whereNull('left_on')->orWhere('left_on', '>', CarbonImmutable::now()->toDateString()))
+                ->whereIn('enrollment_id', DB::table('enrollments')->where('status', '!=', 'ended')->select('id')))
+            ->count());
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'scheduling');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'scheduling');

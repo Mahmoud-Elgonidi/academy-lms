@@ -15,7 +15,9 @@ use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Evaluation\Contracts\TeacherComplaints;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Plans\Limit;
+use Modules\SharedKernel\Plans\ModulesInUse;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\LiveSignals;
@@ -27,11 +29,13 @@ use Modules\Support\Contracts\Events\TicketOpened;
 use Modules\Support\Contracts\Events\TicketOverdue;
 use Modules\Support\Contracts\Events\TicketReplied;
 use Modules\Support\Contracts\Events\TicketResolved;
+use Modules\Support\Enums\TicketStatus;
 use Modules\Support\Filament\Pages\TicketPage;
 use Modules\Support\Http\Controllers\TicketFileController;
 use Modules\Support\Listeners\SendSupportNotifications;
 use Modules\Support\Live\MyTicketsChanged;
 use Modules\Support\Live\TicketsChanged;
+use Modules\Support\Models\Ticket;
 use Modules\Support\Privacy\SupportData;
 use Modules\Support\Queries\ComplaintRecordingHolds;
 use Modules\Support\Queries\ConfirmedComplaints;
@@ -58,6 +62,8 @@ final class SupportServiceProvider extends ServiceProvider
     {
         // The tickets a person opened, for their copy (Privacy).
         $this->app->make(PersonalData::class)->add(SupportData::class);
+        // Help stays on while a ticket is open or waiting (Settings › Academy modules).
+        $this->app->make(ModulesInUse::class)->add(Feature::Support, fn (): int => Ticket::query()->whereIn('status', [TicketStatus::Open, TicketStatus::Waiting])->count());
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'support');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'support');

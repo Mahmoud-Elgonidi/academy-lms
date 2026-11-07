@@ -27,6 +27,7 @@ use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Templates\TemplateDefinition;
 use Modules\Learning\Templates\TemplateField;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
 
@@ -43,7 +44,7 @@ final class ReportTemplates extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
 
-    protected static ?int $navigationSort = 42;
+    protected static ?int $navigationSort = 303;
 
     protected static ?string $slug = 'report-questions';
 
@@ -54,12 +55,12 @@ final class ReportTemplates extends Page
 
     public static function canAccess(): bool
     {
-        return Gate::allows(Ability::ManageCurriculum->value);
+        return Gate::allows(Ability::ManageReportQuestions->value);
     }
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('learning::reports.nav_group');
+        return NavGroup::Teaching;
     }
 
     public static function getNavigationLabel(): string

@@ -26,6 +26,7 @@ use Modules\Scheduling\Actions\Shifts\CounterShiftProposal;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Policy\PolicySettings;
 use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Setup\SetupChecklist;
 use Modules\SharedKernel\Setup\SetupStep;
 
@@ -37,7 +38,7 @@ use Modules\SharedKernel\Setup\SetupStep;
  */
 
 const SETUP_REQUIRED = ['platform.branding', 'scheduling.policy', 'privacy.details', 'catalog.subjects', 'people.teacher', 'scheduling.teacher_hours', 'billing.prices', 'billing.payment'];
-const SETUP_OPTIONAL = ['identity.team', 'site.page', 'quran.programs', 'curriculum.program', 'import.people'];
+const SETUP_OPTIONAL = ['platform.modules', 'identity.team', 'site.page', 'quran.programs', 'curriculum.program', 'import.people'];
 
 beforeEach(function () {
     $this->academy = $this->actAsTenant($this->createAcademy(['slug' => 'noor']));
@@ -236,7 +237,7 @@ it('heads the menu with what is left, and moves down to Settings once the essent
 
     app()->instance(SetupChecklist::class, new SetupChecklist(app()));   // nothing left to set up
     request()->attributes->remove(StartHere::class);
-    expect($item()->getBadge())->toBeNull()->and($item()->getGroup())->toBe(__('platform::branding.nav_group'))->and($item()->getSort())->toBeGreaterThan(0);
+    expect($item()->getBadge())->toBeNull()->and($item()->getGroup())->toBe(NavGroup::Settings)->and($item()->getSort())->toBeGreaterThan(0);
 });
 
 it('reads each step once for its page, the menu and the landing together', function () {
@@ -265,7 +266,7 @@ it('reads each step once for its page, the menu and the landing together', funct
     $withoutSteps = $queries('http://noor.lms.test/admin/start-here');
     app()->instance(SetupChecklist::class, $real);
 
-    expect($steps)->toBe(13)
+    expect($steps)->toBe(14)
         ->and($withSteps - $withoutSteps)->toBeLessThanOrEqual($steps)   // the page, the menu's place and badge: one reading
         ->and($landing)->toBeLessThanOrEqual(5)                          // a redirect: the account, its roles, the first step not done
         ->and($landingWithout)->toBeGreaterThan($landing);

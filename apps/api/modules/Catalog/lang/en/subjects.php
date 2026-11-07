@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'nav_group' => 'Teaching',
     'nav' => 'Subjects',
     'model' => 'subject',
     'subtitle' => 'Each subject with its levels in order and its categories (tracks such as memorising and tajweed, or curricula such as British and Saudi). A teacher takes a range of levels and the categories they teach, and "Find a teacher" searches by them.',

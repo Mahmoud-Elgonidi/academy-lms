@@ -235,8 +235,9 @@ it('reads three courses of sixty lessons each in a bounded number of queries, ho
     $one = jeQueries($read);
 
     // Measured on this fixture: 78 with four homework and 75 with one before (a read of its report's lessons for each homework, and
-    // the lessons a week read twice per course), 69 for either after.
-    expect($four)->toBe($one)->and($four)->toBeLessThanOrEqual(70);
+    // the lessons a week read twice per course), 69 for either after; and two more since the games ask whether the academy has them
+    // (its plan and its modules, read once a request).
+    expect($four)->toBe($one)->and($four)->toBeLessThanOrEqual(72);
 });
 
 it('shows a guardian of three children each child\'s own journey, and nobody else\'s', function () {

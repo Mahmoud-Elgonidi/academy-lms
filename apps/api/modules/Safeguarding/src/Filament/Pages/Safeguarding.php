@@ -32,8 +32,10 @@ use Modules\Safeguarding\Live\ConcernsChanged;
 use Modules\Safeguarding\Models\Concern;
 use Modules\Safeguarding\Queries\ConcernBoard;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\LocalTimePresenter;
+use UnitEnum;
 
 /**
  * Concerns about children's safety, for the academy's safeguarding leads
@@ -49,12 +51,17 @@ final class Safeguarding extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldExclamation;
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 800;
 
     protected static ?string $slug = 'safeguarding';
 
     #[Url]
     public ?string $concern = null;
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Protection;
+    }
 
     public static function canAccess(): bool
     {

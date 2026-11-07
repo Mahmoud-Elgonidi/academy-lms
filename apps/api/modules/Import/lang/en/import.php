@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'nav_group' => 'Settings',
     'nav' => 'Import data',
     'title' => 'Import data',
     'subtitle' => 'Bring your teachers, students and their schedules in from Excel or CSV sheets. Before anything is written you see what each row will do.',

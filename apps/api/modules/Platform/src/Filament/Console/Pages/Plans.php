@@ -82,7 +82,7 @@ final class Plans extends Page
             Action::make('new')->label(__('platform::plans.catalog.new'))->icon(Heroicon::Plus)
                 ->modalHeading(__('platform::plans.catalog.new'))
                 ->schema($this->form(...))
-                ->fillForm(['features' => [], 'sort' => SaasPlan::query()->max('sort') + 1, 'shown_on_site' => true])
+                ->fillForm(['features' => [], 'features_optional' => array_keys(PlanFormat::features('optional')), 'sort' => SaasPlan::query()->max('sort') + 1, 'shown_on_site' => true])
                 ->action(fn (array $data) => $this->save(null, $data)),
         ];
     }
@@ -95,7 +95,9 @@ final class Plans extends Page
             ->fillForm(function (array $arguments) {
                 $plan = SaasPlan::query()->findOrFail($arguments['plan']);
 
-                return $plan->only(['code', 'name_ar', 'name_en', 'max_teachers', 'max_active_students', 'video_minutes', 'storage_mb', 'features', 'currency', 'is_default', 'sort', 'shown_on_site', 'highlight', 'tagline_ar', 'tagline_en']) + [
+                return $plan->only(['code', 'name_ar', 'name_en', 'max_teachers', 'max_active_students', 'video_minutes', 'storage_mb', 'currency', 'is_default', 'sort', 'shown_on_site', 'highlight', 'tagline_ar', 'tagline_en']) + [
+                    'features' => array_values(array_intersect((array) $plan->features, array_keys(PlanFormat::features('paid')))),
+                    'features_optional' => array_values(array_intersect((array) $plan->features, array_keys(PlanFormat::features('optional')))),
                     'price' => $plan->price_minor === null ? null : Money::of($plan->price_minor, (string) $plan->currency)->decimal(),
                     'archived' => $plan->archived_at !== null,
                 ];
@@ -124,7 +126,9 @@ final class Plans extends Page
                     $limit('storage_mb', Limit::StorageMb)->suffix(__($l.'mb')),
                 ]),
             ]),
-            CheckboxList::make('features')->label(__($l.'features'))->options(PlanFormat::features())->columns(2),
+            CheckboxList::make('features')->label(__($l.'features'))->options(PlanFormat::features('paid'))->columns(2),
+            // The free areas: in a plan at first; an academy on it may still hide any of them (Settings › Academy modules).
+            CheckboxList::make('features_optional')->label(__($l.'features_optional'))->helperText(__($l.'features_optional_hint'))->options(PlanFormat::features('optional'))->columns(2),
             Grid::make(3)->schema([
                 TextInput::make('price')->label(__($l.'price'))->numeric()->minValue(0)->requiredWith('currency'),
                 Select::make('currency')->label(__($l.'currency'))->options(['SAR' => 'SAR', 'USD' => 'USD', 'EGP' => 'EGP', 'AED' => 'AED', 'KWD' => 'KWD', 'EUR' => 'EUR'])->requiredWith('price')->native(false),
@@ -156,7 +160,7 @@ final class Plans extends Page
             'max_active_students' => $num($data['max_active_students'] ?? null),
             'video_minutes' => $num($data['video_minutes'] ?? null),
             'storage_mb' => $num($data['storage_mb'] ?? null),
-            'features' => array_values($data['features'] ?? []),
+            'features' => array_values([...($data['features'] ?? []), ...($data['features_optional'] ?? [])]),
             'price_minor' => $price === null || $price === '' || empty($data['currency']) ? null : Money::parse((string) $price, (string) $data['currency'])->minor,
             'currency' => $price === null || $price === '' ? null : ($data['currency'] ?: null),
             'is_default' => (bool) ($data['is_default'] ?? false),

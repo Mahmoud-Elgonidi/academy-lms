@@ -10,6 +10,8 @@ use Modules\Announcements\Models\Announcement;
 use Modules\Communication\Contracts\DTOs\Message;
 use Modules\Communication\Contracts\DTOs\TemplateDefinition;
 use Modules\Communication\Contracts\NotificationsApi;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * An announcement reaches each person in the notifications they already
@@ -47,7 +49,8 @@ final class SendAnnouncementNotifications implements ShouldQueue
     public function handle(AnnouncementSent $event): void
     {
         $announcement = Announcement::query()->find($event->announcementId);
-        if ($announcement === null) {
+        // Hidden meanwhile (Settings › Academy modules): what was not sent yet stays unsent.
+        if ($announcement === null || ! app(AcademyPlan::class)->has(Feature::Announcements)) {
             return;
         }
         foreach (array_chunk($event->recipients, self::BATCH) as $batch) {

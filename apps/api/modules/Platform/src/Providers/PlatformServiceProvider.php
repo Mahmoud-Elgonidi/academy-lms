@@ -55,6 +55,7 @@ use Modules\Platform\Plans\PlatformAcademyPlan;
 use Modules\Platform\PlatformService;
 use Modules\Platform\Settings\PlatformSettings;
 use Modules\Platform\Setup\BrandingStep;
+use Modules\Platform\Setup\ModulesStep;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\LanguageModel;
 use Modules\SharedKernel\Ai\SpeechToText;
@@ -114,6 +115,7 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'platform');
         // The new academy's checklist: its name and logo.
         $this->app->make(SetupChecklist::class)->add(BrandingStep::class);
+        $this->app->make(SetupChecklist::class)->add(ModulesStep::class);
         // The console's zone chip changes the platform team's own zone.
         $this->app->make(OwnTimezones::class)->add(PlatformAdmin::class, SavePlatformAdminTimezone::class);
         Event::listen(Login::class, RecordConsoleSignIn::class);

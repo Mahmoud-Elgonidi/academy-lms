@@ -35,7 +35,7 @@ final class SiteController
     public function show(TenantContext $tenants, CatalogApi $catalog, CurriculumApi $curriculum, PeopleApi $people, BillingApi $billing): JsonResponse
     {
         $settings = SiteSettings::current();
-        abort_unless($settings->exists && $settings->enabled, 404);
+        abort_unless($settings->shows(), 404);
         $locale = app()->getLocale() === 'en' ? 'en' : 'ar';
         $academy = $tenants->require();
         $said = $settings->said();

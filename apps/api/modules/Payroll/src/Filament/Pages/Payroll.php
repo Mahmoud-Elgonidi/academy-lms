@@ -30,6 +30,8 @@ use Modules\Payroll\Queries\PayrollMonth;
 use Modules\Payroll\Queries\PayrollTeachers;
 use Modules\Payroll\Support\PayrollMonths;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
+use UnitEnum;
 
 /**
  * The month's payroll (docs/architecture/01, section 13): what each teacher
@@ -46,9 +48,14 @@ final class Payroll extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
-    protected static ?int $navigationSort = -1;
+    protected static ?int $navigationSort = 603;
 
     protected static ?string $slug = 'payroll';
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Finance;
+    }
 
     public static function canAccess(): bool
     {

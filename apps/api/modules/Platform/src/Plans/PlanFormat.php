@@ -44,12 +44,14 @@ final class PlanFormat
         return $plan->price_minor === null || $plan->currency === null ? null : Money::of($plan->price_minor, $plan->currency)->format();
     }
 
-    /** @return array<string, string> Feature value => label, in order */
-    public static function features(): array
+    /** @return array<string, string> Feature value => label, in order; only one kind (paid, optional) when given */
+    public static function features(?string $kind = null): array
     {
         $out = [];
         foreach (Feature::cases() as $feature) {
-            $out[$feature->value] = $feature->label();
+            if ($kind === null || $feature->kind() === $kind) {
+                $out[$feature->value] = $feature->label();
+            }
         }
 
         return $out;

@@ -13,6 +13,8 @@ use Modules\Learning\Models\SessionReport;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\SharedKernel\Games\GameCatalog;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
@@ -40,6 +42,7 @@ final class ChoosePracticeGame
      */
     public function handle(SessionReport $report, string $teacherId, string $gameKey, bool $practiceOnly, bool $beforeNext, ?CarbonImmutable $now = null): Homework
     {
+        app(AcademyPlan::class)->requireFeature(Feature::Games);
         $now ??= CarbonImmutable::now();
         if ($report->teacher_id !== $teacherId) {
             throw new AuthorizationException;

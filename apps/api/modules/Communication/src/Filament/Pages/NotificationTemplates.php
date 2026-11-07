@@ -22,6 +22,7 @@ use Modules\Communication\Models\TemplateWording;
 use Modules\Communication\Templates\Renderer;
 use Modules\Communication\Templates\TemplateRegistry;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use UnitEnum;
 
 /**
@@ -34,7 +35,7 @@ final class NotificationTemplates extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
 
-    protected static ?int $navigationSort = 61;
+    protected static ?int $navigationSort = 704;
 
     protected static ?string $slug = 'messages/templates';
 
@@ -45,7 +46,7 @@ final class NotificationTemplates extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('communication::communication.nav_group');
+        return NavGroup::Communication;
     }
 
     public static function getNavigationLabel(): string

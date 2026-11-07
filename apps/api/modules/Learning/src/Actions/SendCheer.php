@@ -9,6 +9,8 @@ use Modules\Learning\Contracts\Events\CheerSent;
 use Modules\Learning\Domain\Journey\Cheers;
 use Modules\Learning\Models\Cheer;
 use Modules\People\Contracts\FamilyView;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * A guardian cheers a child on from their app ("برافو!"): the child sees it
@@ -22,6 +24,7 @@ final class SendCheer
     /** @throws ValidationException not their child, an unknown kind, or too many today */
     public function handle(string $fromId, string $studentId, string $kind): Cheer
     {
+        app(AcademyPlan::class)->requireFeature(Feature::Curriculum);
         if ($fromId === $studentId || ! $this->family->follows($fromId, $studentId)) {
             throw ValidationException::withMessages(['learner_id' => __('learning::challenges.errors.not_yours')]);
         }

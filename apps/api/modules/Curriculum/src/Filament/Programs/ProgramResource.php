@@ -23,6 +23,7 @@ use Modules\Curriculum\Actions\Outline\CopyProgram;
 use Modules\Curriculum\Actions\SaveProgram;
 use Modules\Curriculum\Models\Program;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use UnitEnum;
 
 /**
@@ -35,7 +36,7 @@ final class ProgramResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMap;
 
-    protected static ?int $navigationSort = 40;
+    protected static ?int $navigationSort = 301;
 
     protected static ?string $slug = 'curricula';
 
@@ -46,7 +47,7 @@ final class ProgramResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('curriculum::curriculum.nav_group');
+        return NavGroup::Teaching;
     }
 
     public static function getNavigationLabel(): string

@@ -142,8 +142,10 @@ final class AcademyOverview extends Page
             ->fillForm(fn () => [
                 'plan' => $current?->plan_id ?? SaasPlan::default()?->id,
                 'limits' => $current?->limits ?? [],
-                'features_on' => $current?->features_on ?? [],
-                'features_off' => $current?->features_off ?? [],
+                'features_on' => array_values(array_intersect($current?->features_on ?? [], array_keys(PlanFormat::features('paid')))),
+                'features_off' => array_values(array_intersect($current?->features_off ?? [], array_keys(PlanFormat::features('paid')))),
+                'features_on_optional' => array_values(array_intersect($current?->features_on ?? [], array_keys(PlanFormat::features('optional')))),
+                'features_off_optional' => array_values(array_intersect($current?->features_off ?? [], array_keys(PlanFormat::features('optional')))),
             ])
             ->schema([
                 Select::make('plan')->label(__($l.'plan'))->required()->native(false)
@@ -159,8 +161,11 @@ final class AcademyOverview extends Page
                 ]),
                 Section::make(__($l.'own_features'))->compact()->collapsible()->collapsed(fn () => ($current?->features_on ?? []) === [] && ($current?->features_off ?? []) === [])->schema([
                     Grid::make(2)->schema([
-                        CheckboxList::make('features_on')->label(__($l.'features_on'))->options(PlanFormat::features()),
-                        CheckboxList::make('features_off')->label(__($l.'features_off'))->options(PlanFormat::features()),
+                        CheckboxList::make('features_on')->label(__($l.'features_on').' · '.__($l.'kinds.paid'))->options(PlanFormat::features('paid')),
+                        CheckboxList::make('features_off')->label(__($l.'features_off').' · '.__($l.'kinds.paid'))->options(PlanFormat::features('paid')),
+                        // The free areas: the academy may hide them itself too; taken away here, it cannot bring them back.
+                        CheckboxList::make('features_on_optional')->label(__($l.'features_on').' · '.__($l.'kinds.optional'))->options(PlanFormat::features('optional')),
+                        CheckboxList::make('features_off_optional')->label(__($l.'features_off').' · '.__($l.'kinds.optional'))->options(PlanFormat::features('optional')),
                     ]),
                 ]),
                 Textarea::make('reason')->label(__('platform::plans.attributes.reason'))->helperText(__($l.'reason_hint'))
@@ -173,7 +178,9 @@ final class AcademyOverview extends Page
                         $limits[$key] = (int) $value;
                     }
                 }
-                app(ChangeAcademyPlan::class)->handle($this->academy, (string) $data['plan'], (string) $data['reason'], $limits, array_values($data['features_on'] ?? []), array_values($data['features_off'] ?? []));
+                app(ChangeAcademyPlan::class)->handle($this->academy, (string) $data['plan'], (string) $data['reason'], $limits,
+                    array_values([...($data['features_on'] ?? []), ...($data['features_on_optional'] ?? [])]),
+                    array_values([...($data['features_off'] ?? []), ...($data['features_off_optional'] ?? [])]));
                 Notification::make()->success()->title(__($l.'done'))->send();
                 unset($this->plan);
             });

@@ -5,6 +5,8 @@ namespace Modules\Site\Models;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 use Modules\Site\Domain\SiteContent;
 
@@ -44,10 +46,16 @@ final class SiteSettings extends Model
         return ['enabled' => 'boolean', 'content' => 'array', 'response_hours' => 'integer', 'trial_notice_hours' => 'integer', 'updated_at' => 'immutable_datetime', 'created_at' => 'immutable_datetime'];
     }
 
-    /** Whether families book their own free trial from the page (the page on, and the academy lets them). */
+    /** Whether the page shows: the academy turned it on, and has not hidden its page (an optional area, Settings › Academy modules). */
+    public function shows(): bool
+    {
+        return $this->exists && $this->enabled && app(AcademyPlan::class)->has(Feature::Site);
+    }
+
+    /** Whether families book their own free trial from the page (the page shows, and the academy lets them). */
     public function familyBooks(): bool
     {
-        return $this->exists && $this->enabled && $this->trial_booking === 'family';
+        return $this->shows() && $this->trial_booking === 'family';
     }
 
     public static function current(): self
@@ -57,7 +65,7 @@ final class SiteSettings extends Model
 
     public static function isOn(): bool
     {
-        return self::query()->where('enabled', true)->exists();
+        return app(AcademyPlan::class)->has(Feature::Site) && self::query()->where('enabled', true)->exists();
     }
 
     /** @return array<string, mixed> what the page says now: the saved content over the defaults */

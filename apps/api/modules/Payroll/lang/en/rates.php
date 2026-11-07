@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'nav_group' => 'Settings',
     'nav' => 'Teacher rates',
     'model' => 'rate card',
     'subtitle' => 'Each teacher is paid from one card; the default card covers everyone without one. The closest price wins: subject and kind of lesson, then subject, then kind, then any lesson. A new price applies to lessons from now on.',

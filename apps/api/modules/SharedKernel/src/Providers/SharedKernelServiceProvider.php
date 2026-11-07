@@ -38,6 +38,7 @@ use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Health\TestAddresses;
 use Modules\SharedKernel\Http\ContentSecurityPolicy;
 use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\ModulesInUse;
 use Modules\SharedKernel\Plans\OpenPlan;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Privacy\PersonalData;
@@ -81,6 +82,7 @@ final class SharedKernelServiceProvider extends ServiceProvider
         // The academy's plan: everything until Platform binds the plans; the meters, from each module that counts.
         $this->app->scopedIf(AcademyPlan::class, OpenPlan::class);
         $this->app->singleton(UsageMeters::class);
+        $this->app->singleton(ModulesInUse::class);
         // The platform's games: none until Platform binds its catalog.
         $this->app->singletonIf(GameCatalog::class, NoGames::class);
         // The AI helpers: all off until Platform binds them.

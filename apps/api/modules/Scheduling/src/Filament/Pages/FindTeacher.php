@@ -59,9 +59,13 @@ use Modules\Scheduling\Queries\FindTeachersQuery;
 use Modules\Scheduling\Queries\FreeTimesQuery;
 use Modules\Scheduling\Queries\Groups\OpenGroups;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
+use UnitEnum;
 
 /**
  * "Find a teacher" (docs/architecture/02, section 2): the student's times on
@@ -90,7 +94,7 @@ final class FindTeacher extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMagnifyingGlass;
 
-    protected static ?int $navigationSort = -5;
+    protected static ?int $navigationSort = 100;
 
     protected static ?string $slug = 'find-teacher';
 
@@ -142,6 +146,11 @@ final class FindTeacher extends Page
     /** The group another screen sent us to (?group=, "add a student" on its page): shown first, marked. */
     public ?string $focusGroup = null;
 
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Lessons;
+    }
+
     public static function canAccess(): bool
     {
         return Gate::allows(Ability::FindTeachers->value);
@@ -165,7 +174,7 @@ final class FindTeacher extends Page
         $focus = Str::isUuid((string) ($query['group'] ?? '')) ? LessonGroup::query()->whereKey($query['group'])->where('status', '!=', LessonGroup::ENDED)->first() : null;
         $this->focusGroup = $focus?->id;
         $this->form->fill([
-            'mode' => $focus !== null ? 'group' : (in_array($query['mode'] ?? null, ['trial', 'group'], true) ? $query['mode'] : 'series'),
+            'mode' => $focus !== null && self::groupsOn() ? 'group' : (in_array($query['mode'] ?? null, self::groupsOn() ? ['trial', 'group'] : ['trial'], true) ? $query['mode'] : 'series'),
             'student_id' => $query['student'] ?? null,
             'timezone' => in_array($query['tz'] ?? null, Timezones::all(), true) ? $query['tz'] : app(TenantContext::class)->require()->defaultTimezone,
             'subject_id' => $focus?->subject_id ?? $query['subject'] ?? null,
@@ -208,13 +217,19 @@ final class FindTeacher extends Page
     /** Group mode: a seat in a group, or a new group. */
     public function isGroup(): bool
     {
-        return ($this->data['mode'] ?? 'series') === 'group';
+        return ($this->data['mode'] ?? 'series') === 'group' && self::groupsOn();
+    }
+
+    /** Whether the academy has group lessons (an optional area it may hide): without them, no group mode. */
+    public static function groupsOn(): bool
+    {
+        return app(AcademyPlan::class)->has(Feature::Groups);
     }
 
     /** The big switch at the top: private, group or a trial. */
     public function setMode(string $mode): void
     {
-        if (! in_array($mode, ['series', 'group', 'trial'], true) || ($this->data['mode'] ?? 'series') === $mode) {
+        if (! in_array($mode, self::groupsOn() ? ['series', 'group', 'trial'] : ['series', 'trial'], true) || ($this->data['mode'] ?? 'series') === $mode) {
             return;
         }
         if ($this->holdBatch !== null) {
@@ -945,6 +960,10 @@ final class FindTeacher extends Page
     /** A teacher's groups with a seat at the student's hours (the private mode's hint on their card). */
     public function groupsOf(string $teacherId): array
     {
+        if (! self::groupsOn()) {
+            return [];
+        }
+
         return array_values(array_filter($this->openGroups, fn (array $g) => $g['teacher_id'] === $teacherId));
     }
 

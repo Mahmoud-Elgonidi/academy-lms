@@ -49,7 +49,7 @@ final class AcademyCalendar extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
-    protected static ?int $navigationSort = -9;
+    protected static ?int $navigationSort = -80;
 
     protected static ?string $slug = 'calendar';
 

@@ -72,7 +72,7 @@ afterEach(fn () => CarbonImmutable::setTestNow());
 function quranInPlan(TestCase $test, bool $with): void
 {
     app(TenantContext::class)->clear();
-    $plan = SaasPlan::query()->firstOrCreate(['code' => $with ? 'with-quran' : 'no-quran'], ['name_ar' => 'باقة', 'name_en' => 'Plan', 'features' => $with ? ['quran'] : []]);
+    $plan = SaasPlan::query()->firstOrCreate(['code' => $with ? 'with-quran' : 'no-quran'], ['name_ar' => 'باقة', 'name_en' => 'Plan', 'features' => $with ? ['quran', 'groups', 'curriculum', 'games', 'messaging', 'announcements', 'support', 'evaluation', 'site'] : ['groups', 'curriculum', 'games', 'messaging', 'announcements', 'support', 'evaluation', 'site']]);
     app(ChangeAcademyPlan::class)->handle($test->academy->id, $plan->id, 'For this test');
 }
 

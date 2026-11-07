@@ -22,6 +22,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
@@ -38,6 +39,7 @@ use Modules\Support\Queries\SupportPeople;
 use Modules\Support\Queries\TicketQueue;
 use Modules\Support\SupportRules;
 use Modules\Support\TicketView;
+use UnitEnum;
 
 /**
  * What families and teachers wrote to the academy (docs/architecture/01,
@@ -53,7 +55,7 @@ final class Tickets extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLifebuoy;
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 702;
 
     protected static ?string $slug = 'support';
 
@@ -68,6 +70,11 @@ final class Tickets extends Page
 
     #[Url(as: 'q')]
     public string $search = '';
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Communication;
+    }
 
     public static function canAccess(): bool
     {

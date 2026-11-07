@@ -74,6 +74,8 @@ function expectedAbilities(): array
         'site.manage' => [$o, $a],
         'security.manage' => [$o],
         'academy.manage-timezone' => [$o],
+        'academy.manage-modules' => [$o, $a],
+        'reports.manage-questions' => [$o, $a, $su],
         'quran.manage' => [$o, $a],
         'quran.teach' => [$t],
         'quran.examine' => [$o, $a, $su],
@@ -81,12 +83,18 @@ function expectedAbilities(): array
     ];
 }
 
-/** The areas a plan may leave out, and the abilities that close with each. */
+/** The areas a plan may leave out (paid) or the academy may hide (optional), and the abilities that close with each, in Ability's order. */
 const ABILITY_PLAN_AREAS = [
+    'curriculum.manage' => 'curriculum',
     'leads.manage' => 'crm', 'trials.book' => 'crm', 'trials.assess' => 'crm',
+    'performance.review' => 'evaluation', 'performance.view-own' => 'evaluation',
     'payroll.manage' => 'payroll', 'payroll.view-own' => 'payroll',
     'data.import' => 'import',
+    'tickets.handle' => 'support', 'complaints.decide' => 'support', 'support.manage' => 'support',
+    'conversations.oversee' => 'messaging', 'conversations.manage' => 'messaging',
+    'announcements.send' => 'announcements',
     'ai.manage' => 'ai',
+    'site.manage' => 'site',
     'quran.manage' => 'quran', 'quran.teach' => 'quran', 'quran.examine' => 'quran', 'quran.board' => 'quran',
 ];
 

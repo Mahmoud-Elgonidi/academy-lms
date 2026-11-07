@@ -15,6 +15,9 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\Catalog\Contracts\CatalogApi;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Modules\Site\Actions\HandleJoinRequest;
@@ -34,7 +37,7 @@ final class SiteRequests extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInboxArrowDown;
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 501;
 
     protected static ?string $slug = 'site/requests';
 
@@ -46,12 +49,12 @@ final class SiteRequests extends Page
 
     public static function canAccess(): bool
     {
-        return app(RequestAccess::class)->kinds() !== [];
+        return app(AcademyPlan::class)->has(Feature::Site) && app(RequestAccess::class)->kinds() !== [];
     }
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('site::site.requests.nav_group');
+        return NavGroup::Sales;
     }
 
     public static function getNavigationLabel(): string

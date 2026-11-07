@@ -91,7 +91,7 @@ function demoQuranState(): array
 }
 
 beforeEach(fn () => SaasPlan::query()->create(['code' => 'pro', 'name_ar' => 'الاحتراف', 'name_en' => 'Pro', 'max_teachers' => 75, 'max_active_students' => 1000,
-    'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll', 'quran']]));
+    'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll', 'quran', 'groups', 'curriculum', 'games', 'messaging', 'announcements', 'support', 'evaluation', 'site']]));
 
 afterEach(fn () => File::deleteDirectory(storage_path('framework/testing/quran-demo')));
 

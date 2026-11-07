@@ -45,7 +45,9 @@ final class SavePlan
             'tagline_en' => ['nullable', 'string', 'max:120'],
         ], [], ['code' => __('platform::plans.attributes.code')])->validate();
 
-        return DB::connection('pgsql_platform')->transaction(function () use ($planId, $valid) {
+        $named = array_key_exists('features', $data);
+
+        return DB::connection('pgsql_platform')->transaction(function () use ($planId, $valid, $named) {
             $plan = $planId ? SaasPlan::query()->lockForUpdate()->findOrFail($planId) : new SaasPlan;
             $archived = (bool) ($valid['archived'] ?? false);
             $default = (bool) ($valid['is_default'] ?? false) && ! $archived;
@@ -64,7 +66,9 @@ final class SavePlan
                 'max_active_students' => $valid['max_active_students'] ?? null,
                 'video_minutes' => $valid['video_minutes'] ?? null,
                 'storage_mb' => $valid['storage_mb'] ?? null,
-                'features' => array_values(array_unique($valid['features'] ?? [])),
+                // Areas not named: a new plan takes every optional one (free, the academy may hide them), a plan kept keeps its own.
+                'features' => array_values(array_unique($named ? ($valid['features'] ?? [])
+                    : ($plan->exists ? (array) $plan->features : array_map(fn (Feature $f) => $f->value, Feature::optional())))),
                 'price_minor' => $valid['price_minor'] ?? null,
                 'currency' => $valid['currency'] ?? null,
                 'is_default' => $default,

@@ -86,7 +86,7 @@ it('puts a number an open lead already has on that lead\'s timeline, and never s
 });
 
 it('keeps the leads coming while the academy\'s plan leaves the CRM out, and tells its owner and admins', function () {
-    $plan = SaasPlan::query()->create(['code' => 'basic', 'name_ar' => 'أساسية', 'name_en' => 'Basic', 'features' => []]);
+    $plan = SaasPlan::query()->create(['code' => 'basic', 'name_ar' => 'أساسية', 'name_en' => 'Basic', 'features' => ['groups', 'curriculum', 'games', 'messaging', 'announcements', 'support', 'evaluation', 'site']]);
     app(ChangeAcademyPlan::class)->handle($this->academy->id, $plan->id, 'For this test');
 
     $this->postJson('http://noor.lms.test/api/v1/site/requests', trialForm())->assertCreated();

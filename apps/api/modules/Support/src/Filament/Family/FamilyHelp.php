@@ -8,6 +8,8 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Livewire\WithFileUploads;
 use Modules\People\Contracts\FamilyView;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\Support\Filament\Concerns\RequesterTickets;
 use Modules\Support\Queries\MyTickets;
 use Modules\Support\SupportRules;
@@ -33,7 +35,7 @@ final class FamilyHelp extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->check() && app(FamilyView::class)->current((string) auth()->id()) !== null
+        return auth()->check() && app(AcademyPlan::class)->has(Feature::Support) && app(FamilyView::class)->current((string) auth()->id()) !== null
             && app(SupportRules::class)->kindsFor('family', (string) auth()->id()) !== [];
     }
 

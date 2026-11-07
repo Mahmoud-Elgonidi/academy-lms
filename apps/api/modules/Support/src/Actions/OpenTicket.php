@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Modules\People\Contracts\FamilyView;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\Support\Attachments;
 use Modules\Support\Contracts\Events\TicketOpened;
@@ -59,6 +61,7 @@ final class OpenTicket
         ?string $priority = null,
         ?string $teacherId = null,
     ): Ticket {
+        app(AcademyPlan::class)->requireFeature(Feature::Support);
         $byStaff = $openedBy !== null && $openedBy !== $requesterId;
         if ($byStaff && ! $this->rules->isStaff($openedBy)) {
             throw new AuthorizationException;

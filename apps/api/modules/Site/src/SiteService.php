@@ -37,7 +37,7 @@ final class SiteService implements SiteApi
         $settings = SiteSettings::current();
 
         return new TrialSettings(
-            pageOn: $settings->exists && $settings->enabled,
+            pageOn: $settings->shows(),
             familyBooks: $settings->familyBooks(),
             responseHours: (int) $settings->response_hours,
             defaultSubjectId: $settings->default_trial_subject_id,

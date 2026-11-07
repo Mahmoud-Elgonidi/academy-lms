@@ -2,7 +2,6 @@
 
 return [
     'nav' => 'Message log',
-    'nav_group' => 'Communication',
     'categories' => ['lessons' => 'Lessons', 'learning' => 'Reports and homework', 'billing' => 'Invoices', 'staff' => 'Staff work'],
     'channels' => ['inbox' => 'In the app', 'email' => 'Email', 'whatsapp' => 'WhatsApp', 'push' => 'Phone notification'],
     // Who a message spoke of, once their account was erased.

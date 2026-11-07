@@ -31,6 +31,7 @@ use Modules\People\Live\TeacherChecksChanged;
 use Modules\People\Models\TeacherCheck;
 use Modules\People\Queries\TeacherChecksBoard;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use UnitEnum;
 
@@ -47,7 +48,7 @@ final class TeacherChecks extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static ?int $navigationSort = 41;
+    protected static ?int $navigationSort = 204;
 
     protected static ?string $slug = 'teacher-checks';
 
@@ -62,7 +63,7 @@ final class TeacherChecks extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('people::directory.nav_group');
+        return NavGroup::People;
     }
 
     public static function getNavigationLabel(): string

@@ -2,7 +2,6 @@
 
 return [
     'nav' => 'Reports',
-    'nav_group' => 'Teaching',
     'kinds' => ['lesson' => 'Lesson report', 'absence' => 'Absence note'],
     'statuses' => ['due' => 'Due', 'overdue' => 'Overdue', 'submitted' => 'Handed in', 'reviewed' => 'Reviewed'],
     'outcomes' => [

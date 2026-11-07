@@ -29,7 +29,7 @@ final class QuranHomePage extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPresentationChartLine;
 
-    protected static ?int $navigationSort = 40;
+    protected static ?int $navigationSort = 400;
 
     protected static ?string $slug = 'quran';
 

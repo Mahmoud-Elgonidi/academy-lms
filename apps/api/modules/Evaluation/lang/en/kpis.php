@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'nav_group' => 'Teaching',
     'nav' => 'Teacher performance',
     'title' => 'Teacher performance',
     'subtitle' => 'The last 90 days. Each KPI against its target: green within it, red needs following up. Lessons the platform or an outage spoiled can be taken out of a teacher\'s numbers from their page.',

@@ -21,6 +21,9 @@ use Modules\Scheduling\Domain\Groups\GroupRules;
 use Modules\Scheduling\Domain\Groups\LateJoin;
 use Modules\Scheduling\Domain\Models\SchedulingSettings;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use UnitEnum;
 
 /**
@@ -37,7 +40,7 @@ final class GroupSettings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    protected static ?int $navigationSort = 86;
+    protected static ?int $navigationSort = 906;
 
     protected static ?string $slug = 'settings/groups';
 
@@ -46,12 +49,12 @@ final class GroupSettings extends Page
 
     public static function canAccess(): bool
     {
-        return Gate::allows(Ability::ManagePolicies->value);
+        return Gate::allows(Ability::ManagePolicies->value) && app(AcademyPlan::class)->has(Feature::Groups);
     }
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

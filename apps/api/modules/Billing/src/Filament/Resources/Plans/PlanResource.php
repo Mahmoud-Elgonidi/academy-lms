@@ -33,6 +33,7 @@ use Modules\Billing\Models\PriceRegion;
 use Modules\Billing\Models\Subscription;
 use Modules\Billing\Queries\GroupPriceComparison;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Money\Money;
 use UnitEnum;
 
@@ -46,7 +47,7 @@ final class PlanResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?int $navigationSort = 80;
+    protected static ?int $navigationSort = 604;
 
     protected static ?string $slug = 'settings/plans';
 
@@ -57,7 +58,7 @@ final class PlanResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('billing::plans.nav_group');
+        return NavGroup::Finance;
     }
 
     public static function getNavigationLabel(): string

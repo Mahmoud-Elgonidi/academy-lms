@@ -31,6 +31,7 @@ use Modules\Platform\Branding\TemplateCatalog;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\Platform\Models\AcademyBranding;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Files\CleanFile;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
@@ -53,7 +54,7 @@ final class BrandingSettings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSwatch;
 
-    protected static ?int $navigationSort = 90;
+    protected static ?int $navigationSort = 911;
 
     protected static ?string $slug = 'settings/branding';
 
@@ -70,7 +71,7 @@ final class BrandingSettings extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

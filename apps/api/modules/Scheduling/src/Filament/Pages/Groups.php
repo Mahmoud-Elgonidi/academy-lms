@@ -15,9 +15,13 @@ use Modules\Scheduling\Domain\Models\LessonGroup;
 use Modules\Scheduling\Live\BoardChanged;
 use Modules\Scheduling\Queries\Groups\GroupBoard;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Modules\SharedKernel\Time\ZoneHint;
+use UnitEnum;
 
 /**
  * Scheduling › Groups (docs/architecture/02, "الحصص الجماعية"): the
@@ -33,7 +37,7 @@ final class Groups extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    protected static ?int $navigationSort = -4;
+    protected static ?int $navigationSort = 102;
 
     protected static ?string $slug = 'groups';
 
@@ -46,9 +50,15 @@ final class Groups extends Page
     #[Url]
     public ?string $status = null;
 
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Lessons;
+    }
+
     public static function canAccess(): bool
     {
-        return Gate::allows(Ability::FindTeachers->value) || Gate::allows(Ability::ViewLiveBoard->value);
+        return app(AcademyPlan::class)->has(Feature::Groups)
+            && (Gate::allows(Ability::FindTeachers->value) || Gate::allows(Ability::ViewLiveBoard->value));
     }
 
     public static function getNavigationLabel(): string

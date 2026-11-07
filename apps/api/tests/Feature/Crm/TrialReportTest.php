@@ -395,7 +395,7 @@ it('shows a signed-in family its trials and reports, without money or booking in
 it('keeps the report readable without the CRM in the academy\'s plan or with its page off', function () {
     $trial = j2Assess(j2Held(j2Trial()));
     $token = j2Token($trial);
-    $plan = SaasPlan::query()->create(['code' => 'basic', 'name_ar' => 'أساسية', 'name_en' => 'Basic', 'max_teachers' => 5, 'max_active_students' => 50, 'features' => []]);
+    $plan = SaasPlan::query()->create(['code' => 'basic', 'name_ar' => 'أساسية', 'name_en' => 'Basic', 'max_teachers' => 5, 'max_active_students' => 50, 'features' => ['groups', 'curriculum', 'games', 'messaging', 'announcements', 'support', 'evaluation', 'site']]);
     app(ChangeAcademyPlan::class)->handle($this->academy->id, $plan->id, 'For this test');
     SiteSettings::query()->update(['enabled' => false]);
 

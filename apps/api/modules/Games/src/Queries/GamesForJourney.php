@@ -13,6 +13,8 @@ use Modules\Learning\Contracts\DTOs\JourneyStation;
 use Modules\Learning\Contracts\JourneyGames;
 use Modules\SharedKernel\Games\CatalogGame;
 use Modules\SharedKernel\Games\GameCatalog;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * The games on a learner's journey (docs/architecture/02, section 18): on each
@@ -36,6 +38,10 @@ final class GamesForJourney implements JourneyGames
 
     public function layer(string $studentId, string $stage, array $stations, int $stars, bool $guardian): ?JourneyGamesLayer
     {
+        // The journey stands without its games while the academy hid them (Settings › Academy modules).
+        if (! app(AcademyPlan::class)->has(Feature::Games)) {
+            return null;
+        }
         $games = $this->pool->games($stage);
         if (! GameSettings::current()->enabled || $games === []) {
             return null;

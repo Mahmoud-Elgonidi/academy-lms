@@ -5,12 +5,20 @@ namespace Modules\Curriculum\Setup;
 use Illuminate\Support\Facades\Gate;
 use Modules\Curriculum\Models\Program;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
+use Modules\SharedKernel\Setup\ConditionalSetupStep;
 use Modules\SharedKernel\Setup\SetupGroup;
-use Modules\SharedKernel\Setup\SetupStep;
 
 /** Optional: a curriculum with a published version, so courses follow it and students see their journey. */
-final class ProgramStep implements SetupStep
+final class ProgramStep implements ConditionalSetupStep
 {
+    /** Only while the academy has the curriculum (an optional area it may hide). */
+    public function applies(): bool
+    {
+        return app(AcademyPlan::class)->has(Feature::Curriculum);
+    }
+
     public function key(): string
     {
         return 'curriculum.program';

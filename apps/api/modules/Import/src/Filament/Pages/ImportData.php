@@ -23,6 +23,7 @@ use Modules\Import\Importers\Importers;
 use Modules\Import\Models\ImportRow;
 use Modules\Import\Models\ImportRun;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use UnitEnum;
 
@@ -42,7 +43,7 @@ final class ImportData extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowUpTray;
 
-    protected static ?int $navigationSort = 79;
+    protected static ?int $navigationSort = 912;
 
     protected static ?string $slug = 'settings/import';
 
@@ -70,7 +71,7 @@ final class ImportData extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('import::import.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

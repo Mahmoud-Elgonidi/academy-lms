@@ -26,6 +26,8 @@ use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Support\CourseDays;
 use Modules\Scheduling\Support\MinorsGuard;
 use Modules\SharedKernel\Audit\AuditTrail;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * A student takes a seat in a group (docs/architecture/02, "الحصص
@@ -76,6 +78,8 @@ final class JoinGroup
 
     public function handle(string $groupId, string $studentId, GroupJoin $terms, ?string $actorId): GroupJoined
     {
+        app(AcademyPlan::class)->requireFeature(Feature::Groups);
+
         return DB::transaction(function () use ($groupId, $studentId, $terms, $actorId) {
             DB::select('select pg_advisory_xact_lock(hashtext(?))', ['group:'.$groupId]);
             $group = LessonGroup::query()->whereKey($groupId)->lockForUpdate()->first();

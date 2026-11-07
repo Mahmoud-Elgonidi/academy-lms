@@ -31,7 +31,7 @@ final class ProblemDetails
 
         [$status, $type, $extra] = match (true) {
             $e instanceof PlanLimitReached => [403, 'plan-limit-reached', ['limit' => $e->limit->value, 'max' => $e->max]],
-            $e instanceof FeatureNotInPlan => [403, 'feature-not-in-plan', ['feature' => $e->feature->value]],
+            $e instanceof FeatureNotInPlan => [403, 'feature-not-in-plan', ['feature' => $e->feature->value, 'by' => $e->hiddenByAcademy ? 'academy' : 'plan']],
             $e instanceof AiFailed => [$e->status(), $e->type(), ['reason' => $e->reason]],
             $e instanceof ValidationException => [422, 'validation', ['errors' => $e->errors()]],
             $e instanceof ProblemException => [$e->getStatusCode(), $e->type, $e->extra],

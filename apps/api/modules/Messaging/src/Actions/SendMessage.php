@@ -10,6 +10,8 @@ use Modules\Messaging\Events\MessageSent;
 use Modules\Messaging\MessagingRules;
 use Modules\Messaging\Models\Conversation;
 use Modules\Messaging\Models\ConversationMessage;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * Someone in a conversation writes (docs/architecture/02, section 17): the
@@ -25,6 +27,7 @@ final class SendMessage
 
     public function handle(Conversation $conversation, string $authorId, ?string $body): ConversationMessage
     {
+        app(AcademyPlan::class)->requireFeature(Feature::Messaging);
         $side = $this->rules->sideOf($conversation, $authorId) ?? throw new AuthorizationException;
         $text = trim((string) preg_replace("/\n{3,}/", "\n\n", str_replace(["\r\n", "\r"], "\n", (string) $body)));
         if ($text === '') {

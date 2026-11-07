@@ -30,6 +30,7 @@ use Modules\Crm\Models\CrmSettings;
 use Modules\Crm\Models\Lead;
 use Modules\Crm\Queries\LeadFunnel;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
@@ -49,7 +50,7 @@ final class Leads extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserPlus;
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 500;
 
     protected static ?string $slug = 'leads';
 
@@ -69,7 +70,7 @@ final class Leads extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('crm::leads.nav_group');
+        return NavGroup::Sales;
     }
 
     public static function getNavigationLabel(): string

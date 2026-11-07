@@ -14,6 +14,8 @@ use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Queries\AvailabilityQuery;
 use Modules\Scheduling\Queries\Groups\OpenGroups;
 use Modules\Scheduling\Support\MinorsGuard;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * The weekly times a family may start a course at with one teacher (docs/
@@ -198,12 +200,15 @@ final class StartSlots
 
     /**
      * The open groups of a group plan's shape in the subject that this learner may join: a seat free, their age group,
-     * and (for a learner under 18) a teacher cleared for minors.
+     * and (for a learner under 18) a teacher cleared for minors. None while the academy hid group lessons.
      *
      * @return list<array<string, mixed>> as OpenGroups gives them
      */
     public function groups(string $subjectId, PlanOption $plan, ?string $ageGroup, bool $minor, string $timezone, ?string $teacherId = null, ?CarbonImmutable $now = null): array
     {
+        if (! app(AcademyPlan::class)->has(Feature::Groups)) {
+            return [];
+        }
         $groups = array_values(array_filter(
             $this->groups->handle($subjectId, null, $ageGroup, $timezone, $teacherId === null ? null : [$teacherId], $now),
             fn (array $g) => $g['minutes'] === $plan->sessionMinutes && $g['per_week'] === $plan->sessionsPerWeek && $g['free'] > 0,

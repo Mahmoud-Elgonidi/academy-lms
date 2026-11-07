@@ -26,7 +26,7 @@
             @unless ($locked)
                 <div class="flex flex-wrap gap-2">
                     <x-filament::button type="submit">{{ $this->sessionReport->isOpen() ? __('learning::teacher.write.submit') : __('learning::teacher.write.save') }}</x-filament::button>
-                    @if (! $this->sessionReport->isOpen() && $this->sessionReport->kind === 'lesson')
+                    @if (! $this->sessionReport->isOpen() && $this->sessionReport->kind === 'lesson' && \Modules\Learning\Filament\Teacher\HomeworkGame::canAccess())
                         <x-filament::button color="gray" icon="heroicon-m-puzzle-piece" tag="a" :href="\Modules\Learning\Filament\Teacher\HomeworkGame::getUrl(['report' => $this->sessionReport->id])">{{ __('learning::homework.game.open') }}</x-filament::button>
                     @endif
                 </div>

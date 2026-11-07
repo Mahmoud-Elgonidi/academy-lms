@@ -7,6 +7,8 @@ use Filament\Widgets\Widget;
 use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\LearnerStage;
 use Modules\Scheduling\Queries\LessonList;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /** Home of guardians and adults: the next three lessons, with the way in once the classroom opens (a student sees their next lesson on their journey). */
@@ -23,7 +25,8 @@ final class NextLessonsWidget extends Widget
 
     public static function canView(): bool
     {
-        return auth()->check() && app(FamilyView::class)->stage((string) auth()->id()) === LearnerStage::Classic;
+        // A student's home is their journey; while the academy hid the curriculum, their next lessons take its place.
+        return auth()->check() && (app(FamilyView::class)->stage((string) auth()->id()) === LearnerStage::Classic || ! app(AcademyPlan::class)->has(Feature::Curriculum));
     }
 
     /** @return list<array<string, mixed>> */

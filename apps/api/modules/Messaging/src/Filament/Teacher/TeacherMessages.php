@@ -9,6 +9,8 @@ use Illuminate\Contracts\Support\Htmlable;
 use Modules\Messaging\Filament\Concerns\HoldsConversations;
 use Modules\Messaging\MessagingRules;
 use Modules\Messaging\Queries\MyConversations;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /** "Messages" for a teacher: each student they teach, with the student's guardians in every conversation. */
 final class TeacherMessages extends Page
@@ -25,7 +27,7 @@ final class TeacherMessages extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->check() && app(MessagingRules::class)->isTeacher((string) auth()->id());
+        return auth()->check() && app(AcademyPlan::class)->has(Feature::Messaging) && app(MessagingRules::class)->isTeacher((string) auth()->id());
     }
 
     public static function getNavigationLabel(): string

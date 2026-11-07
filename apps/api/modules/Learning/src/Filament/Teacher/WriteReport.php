@@ -433,7 +433,7 @@ final class WriteReport extends Page
         Notification::make()->success()->title(__('learning::teacher.write.sent'))->send();
         // A lesson whose lessons have practice goes on to its homework game (the approved design, Teacher).
         $nodes = $this->sessionReport->items()->pluck('node_id')->all();
-        $practice = $this->sessionReport->kind === 'lesson' && $nodes !== [] && array_filter(app(CurriculumApi::class)->practiceItems($nodes)) !== [];
+        $practice = $this->sessionReport->kind === 'lesson' && $nodes !== [] && HomeworkGame::canAccess() && array_filter(app(CurriculumApi::class)->practiceItems($nodes)) !== [];
         $this->redirect($practice ? HomeworkGame::getUrl(['report' => $this->sessionReport->id]) : MyReports::getUrl(), navigate: true);
     }
 }

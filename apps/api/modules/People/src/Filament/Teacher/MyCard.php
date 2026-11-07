@@ -20,6 +20,8 @@ use Modules\People\Actions\Cards\SaveTeacherCard;
 use Modules\People\Contracts\DTOs\PublicTeacherSubject;
 use Modules\People\Models\TeacherPublicCard;
 use Modules\People\Queries\PublicTeachers;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * "My card on the academy's page" in /teach: the teacher writes the card
@@ -44,7 +46,7 @@ final class MyCard extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->check() && DB::table('teacher_profiles')->where('user_id', auth()->id())->exists();
+        return auth()->check() && app(AcademyPlan::class)->has(Feature::Site) && DB::table('teacher_profiles')->where('user_id', auth()->id())->exists();
     }
 
     public static function getNavigationLabel(): string

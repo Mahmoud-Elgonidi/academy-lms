@@ -18,6 +18,7 @@ use Modules\Platform\Models\AiSettings;
 use Modules\Platform\Models\AiUsage;
 use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use UnitEnum;
 
 /**
@@ -33,7 +34,7 @@ final class AiSettingsPage extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static ?int $navigationSort = 86;
+    protected static ?int $navigationSort = 909;
 
     protected static ?string $slug = 'settings/ai';
 
@@ -46,7 +47,7 @@ final class AiSettingsPage extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

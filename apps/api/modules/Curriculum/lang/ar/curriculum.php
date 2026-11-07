@@ -2,7 +2,6 @@
 
 return [
     'nav' => 'المناهج',
-    'nav_group' => 'التعليم',
     'model' => 'برنامج',
     'models' => 'البرامج',
     'fields' => [

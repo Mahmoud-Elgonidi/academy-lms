@@ -63,7 +63,7 @@ final class LiveBoard extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
 
-    protected static ?int $navigationSort = -10;
+    protected static ?int $navigationSort = -90;
 
     protected static ?string $slug = 'live';
 

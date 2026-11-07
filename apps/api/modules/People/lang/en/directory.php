@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'nav_group' => 'People',
     'teachers' => [
         'nav' => 'Teachers',
         'model' => 'teacher',

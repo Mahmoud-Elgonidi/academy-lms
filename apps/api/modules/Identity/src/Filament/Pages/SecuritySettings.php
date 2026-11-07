@@ -16,6 +16,7 @@ use Illuminate\Validation\ValidationException;
 use Modules\Identity\Actions\SaveSecuritySettings;
 use Modules\Identity\Models\IdentitySettings;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use UnitEnum;
 
 /**
@@ -32,7 +33,7 @@ final class SecuritySettings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static ?int $navigationSort = 81;
+    protected static ?int $navigationSort = 902;
 
     protected static ?string $slug = 'settings/security';
 
@@ -45,7 +46,7 @@ final class SecuritySettings extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

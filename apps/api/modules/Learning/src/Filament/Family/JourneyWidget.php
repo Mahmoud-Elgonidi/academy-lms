@@ -6,6 +6,8 @@ use Filament\Widgets\Widget;
 use Modules\Learning\Queries\Journey\JourneyMap;
 use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\LearnerStage;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * The journey on the family home (docs/architecture/02, section 18): a
@@ -27,7 +29,7 @@ final class JourneyWidget extends Widget
 
     public static function canView(): bool
     {
-        return FamilyLearning::learner() !== null;
+        return FamilyLearning::learner() !== null && app(AcademyPlan::class)->has(Feature::Curriculum);
     }
 
     /** The whole journey on a student's home; a card on a guardian's or an adult's. */

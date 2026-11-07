@@ -50,7 +50,7 @@ final class QuranSettingsPage extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
 
-    protected static ?int $navigationSort = 49;
+    protected static ?int $navigationSort = 406;
 
     protected static ?string $slug = 'quran/settings';
 

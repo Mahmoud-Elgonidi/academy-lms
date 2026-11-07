@@ -57,7 +57,7 @@ final class QuranExams extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
 
-    protected static ?int $navigationSort = 44;
+    protected static ?int $navigationSort = 404;
 
     protected static ?string $slug = 'quran/exams';
 

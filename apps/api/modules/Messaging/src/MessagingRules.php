@@ -14,6 +14,8 @@ use Modules\People\Contracts\LearnerStage;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
@@ -48,9 +50,10 @@ final class MessagingRules
         private readonly TenantContext $tenant,
     ) {}
 
+    /** The academy has conversations (an optional area it may hide) and has not switched messages off. */
     public function enabled(): bool
     {
-        return MessagingSettings::enabled();
+        return app(AcademyPlan::class)->has(Feature::Messaging) && MessagingSettings::enabled();
     }
 
     public function isTeacher(string $userId): bool

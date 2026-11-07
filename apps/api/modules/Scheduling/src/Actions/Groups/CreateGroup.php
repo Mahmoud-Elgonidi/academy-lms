@@ -14,6 +14,8 @@ use Modules\Scheduling\Domain\Models\SchedulingSettings;
 use Modules\Scheduling\Domain\Slots\WeeklyTime;
 use Modules\Scheduling\Support\CourseDays;
 use Modules\SharedKernel\Audit\AuditTrail;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * Opens a group with a teacher who takes groups (docs/architecture/02,
@@ -33,6 +35,7 @@ final class CreateGroup
 
     public function handle(NewGroup $new, ?string $actorId): LessonGroup
     {
+        app(AcademyPlan::class)->requireFeature(Feature::Groups);
         $teacherMax = $this->people->groupCapacity($new->teacherId);
         $capacity = $new->capacity ?? $teacherMax ?? 0;
         $minToStart = $new->minToStart ?? SchedulingSettings::current()->group_min_default;

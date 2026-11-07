@@ -17,6 +17,7 @@ use Modules\Learning\Models\WeeklyDigest;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use UnitEnum;
 
 /**
@@ -31,7 +32,7 @@ final class WeeklyNoteSettings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelopeOpen;
 
-    protected static ?int $navigationSort = 87;
+    protected static ?int $navigationSort = 910;
 
     protected static ?string $slug = 'settings/weekly-note';
 
@@ -44,7 +45,7 @@ final class WeeklyNoteSettings extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

@@ -12,6 +12,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\Quran\Queries\Hifz\HifzBoard;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
 
@@ -27,7 +28,7 @@ final class HifzOverview extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 
-    protected static ?int $navigationSort = 42;
+    protected static ?int $navigationSort = 402;
 
     protected static ?string $slug = 'hifz';
 
@@ -50,7 +51,7 @@ final class HifzOverview extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('quran::quran.nav_group');
+        return NavGroup::Quran;
     }
 
     public static function getNavigationLabel(): string

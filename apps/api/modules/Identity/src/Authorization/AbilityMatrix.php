@@ -21,7 +21,7 @@ final class AbilityMatrix
             // Leads and trials (CRM): sales, and the scheduler who books for them; a teacher assesses their own trials.
             Ability::ManageLeads => [Role::Owner, Role::Admin, Role::Scheduler, Role::Sales],
             Ability::ProposeOwnShifts, Ability::WriteReports, Ability::RequestOwnTimeOff, Ability::AssessTrials, Ability::ViewOwnPerformance, Ability::ViewOwnEarnings => [Role::Teacher],
-            Ability::ManageCurriculum, Ability::ReviewReports, Ability::ViewMessageLog, Ability::ReviewPerformance => [Role::Owner, Role::Admin, Role::Supervisor],
+            Ability::ManageCurriculum, Ability::ReviewReports, Ability::ManageReportQuestions, Ability::ViewMessageLog, Ability::ReviewPerformance => [Role::Owner, Role::Admin, Role::Supervisor],
             Ability::ViewEnrollments => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler, Role::Accountant],
             Ability::ViewBilling, Ability::RecordPayments => [Role::Owner, Role::Admin, Role::Accountant],
             // Prices, tax, regions and voiding invoices: the owner and the accountant (Admin is "◐" for billing).
@@ -71,6 +71,8 @@ final class AbilityMatrix
             Ability::ManageSecurity => [Role::Owner],
             // The academy's own zone (accounts with none of their own, the academy's holidays and calendar days): the owner alone.
             Ability::ManageAcademyTimezone => [Role::Owner],
+            // Which optional areas the academy shows: the academy's setup, so its owner and admins.
+            Ability::ManageModules => [Role::Owner, Role::Admin],
             // The Quran module: its settings and programs are the academy's setup; the board is for who follows the teachers;
             // a teacher teaches the Quran; examining is for who oversees the teachers until the academy chooses examiners.
             Ability::ManageQuran => [Role::Owner, Role::Admin],

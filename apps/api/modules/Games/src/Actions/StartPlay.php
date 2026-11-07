@@ -13,6 +13,8 @@ use Modules\Learning\Contracts\LearningApi;
 use Modules\People\Contracts\PeopleApi;
 use Modules\SharedKernel\Games\CatalogGame;
 use Modules\SharedKernel\Http\ProblemException;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * A learner (or their guardian on their screen) starts a round
@@ -36,6 +38,7 @@ final class StartPlay
     /** @return array{play: GamePlay, game: CatalogGame, round: list<array<string, mixed>>, stage: string, focus: ?PracticeFocus} */
     public function handle(string $studentId, string $viewerId, string $gameIdOrKey, ?string $quest = null, ?string $homeworkId = null, ?string $station = null): array
     {
+        app(AcademyPlan::class)->requireFeature(Feature::Games);
         $allowance = $this->allowance->for($studentId);
         if (! $allowance['may']) {
             throw new ProblemException(403, 'games-'.$allowance['reason'], '', ['limit' => $allowance['limit'], 'used' => $allowance['used']]);

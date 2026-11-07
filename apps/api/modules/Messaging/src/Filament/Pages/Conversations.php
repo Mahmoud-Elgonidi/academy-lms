@@ -24,9 +24,11 @@ use Modules\Messaging\Models\Conversation;
 use Modules\Messaging\Models\MessagingSettings;
 use Modules\Messaging\Queries\OversightBoard;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use UnitEnum;
 
 /**
  * Teachers' and families' conversations, for who oversees them
@@ -42,7 +44,7 @@ final class Conversations extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 700;
 
     protected static ?string $slug = 'conversations';
 
@@ -58,6 +60,11 @@ final class Conversations extends Page
 
     /** @var array<string, string> message id => the words as typed, once revealed (each reveal is logged) */
     public array $revealed = [];
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Communication;
+    }
 
     public static function canAccess(): bool
     {

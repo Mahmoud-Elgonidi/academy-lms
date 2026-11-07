@@ -11,6 +11,8 @@ use Livewire\Component;
 use Livewire\Livewire;
 use Modules\Evaluation\Actions\RateLesson;
 use Modules\Evaluation\Models\LessonRating;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * Five stars under a lesson that took place in the family's recent lessons
@@ -35,7 +37,7 @@ final class RateLessonChip extends Component
     public static function register(): void
     {
         Livewire::component('evaluation.rate-chip', self::class);
-        FilamentView::registerRenderHook(self::HOOK, fn (array $data) => Filament::getCurrentPanel()?->getId() === 'family' && ($data['lesson']['status'] ?? null) === 'completed'
+        FilamentView::registerRenderHook(self::HOOK, fn (array $data) => Filament::getCurrentPanel()?->getId() === 'family' && ($data['lesson']['status'] ?? null) === 'completed' && app(AcademyPlan::class)->has(Feature::Evaluation)
             ? Blade::render('@livewire(\'evaluation.rate-chip\', [\'sessionId\' => $id], key(\'rate-\'.$id))', ['id' => $data['lesson']['id']])
             : '');
     }

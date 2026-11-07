@@ -17,7 +17,9 @@ use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Queries\InvoiceCourses;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use UnitEnum;
 
 /** Invoices: what is due, what is late, what came in (docs/architecture/03, section 5). */
 final class InvoiceResource extends Resource
@@ -26,11 +28,16 @@ final class InvoiceResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static ?int $navigationSort = -2;
+    protected static ?int $navigationSort = 601;
 
     protected static ?string $slug = 'invoices';
 
     protected static ?string $recordTitleAttribute = 'number';
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Finance;
+    }
 
     public static function canAccess(): bool
     {

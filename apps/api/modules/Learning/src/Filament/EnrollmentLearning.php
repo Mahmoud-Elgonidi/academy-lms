@@ -22,6 +22,8 @@ use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\RoadmapQuery;
 use Modules\Learning\Templates\TemplateAnswers;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -87,7 +89,7 @@ final class EnrollmentLearning extends Component implements HasActions, HasSchem
             ->icon(Heroicon::OutlinedMap)
             ->color(fn () => $this->roadmap ? 'gray' : 'primary')
             ->size('sm')
-            ->visible(fn () => $programs !== [] && Gate::any([Ability::ManageSessions->value, Ability::ManageCurriculum->value]))
+            ->visible(fn () => $programs !== [] && app(AcademyPlan::class)->has(Feature::Curriculum) && Gate::any([Ability::ManageSessions->value, Ability::ManageCurriculum->value]))
             ->fillForm(['program_id' => $enrollment?->programId])
             ->schema([
                 Select::make('program_id')->label(__('learning::progress.program'))->required()->native(false)

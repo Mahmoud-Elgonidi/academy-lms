@@ -2,7 +2,6 @@
 
 return [
     'nav' => 'Curricula',
-    'nav_group' => 'Teaching',
     'model' => 'program',
     'models' => 'Programs',
     'fields' => [

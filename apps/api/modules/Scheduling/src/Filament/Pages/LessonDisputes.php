@@ -21,9 +21,11 @@ use Modules\Scheduling\Domain\Models\SessionDispute;
 use Modules\Scheduling\Live\BoardChanged;
 use Modules\Scheduling\Queries\Disputes\DisputeList;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use UnitEnum;
 
 /**
  * Disputes over lessons' outcomes (docs/architecture/01, section 8): the
@@ -38,13 +40,18 @@ final class LessonDisputes extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedScale;
 
-    protected static ?int $navigationSort = -4;
+    protected static ?int $navigationSort = 105;
 
     protected static ?string $slug = 'disputes';
 
     /** The dispute a notification pointed at: shown first, marked. */
     #[Url]
     public ?string $dispute = null;
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Lessons;
+    }
 
     public static function canAccess(): bool
     {

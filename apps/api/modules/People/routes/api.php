@@ -26,7 +26,7 @@ Route::middleware('auth:sanctum')->prefix('teacher/checks')->group(function () {
 });
 
 // A teacher's own card on the academy's public page (the same as "My card" in /teach).
-Route::middleware('auth:sanctum')->prefix('teacher/card')->group(function () {
+Route::middleware(['auth:sanctum', 'plan.feature:site'])->prefix('teacher/card')->group(function () {
     Route::get('/', [TeacherCardController::class, 'show'])->name('teacher.card');
     Route::post('/', [TeacherCardController::class, 'update'])->middleware('throttle:20,1')->name('teacher.card.update');
 });

@@ -64,6 +64,10 @@ enum Ability: string
     case ManageSite = 'site.manage';
     case ManageSecurity = 'security.manage';
     case ManageAcademyTimezone = 'academy.manage-timezone';
+    // Which optional areas the academy shows (Settings › Academy modules).
+    case ManageModules = 'academy.manage-modules';
+    // A subject's own questions after a lesson report: reports are in every plan, so this stays when the curriculum is hidden.
+    case ManageReportQuestions = 'reports.manage-questions';
     // The Quran module (docs/architecture/02, section 26): its settings and programs, teaching it, examining, the board.
     case ManageQuran = 'quran.manage';
     case TeachQuran = 'quran.teach';
@@ -79,6 +83,13 @@ enum Ability: string
             self::ImportData => Feature::Import,
             self::ManageAi => Feature::Ai,
             self::ManageQuran, self::TeachQuran, self::ExamineQuran, self::ViewQuranBoard => Feature::Quran,
+            // Optional areas the academy may hide (Feature::optional()).
+            self::ManageCurriculum => Feature::Curriculum,
+            self::ReviewPerformance, self::ViewOwnPerformance => Feature::Evaluation,
+            self::HandleTickets, self::DecideComplaints, self::ManageSupport => Feature::Support,
+            self::OverseeConversations, self::ManageConversations => Feature::Messaging,
+            self::SendAnnouncements => Feature::Announcements,
+            self::ManageSite => Feature::Site,
             default => null,
         };
     }

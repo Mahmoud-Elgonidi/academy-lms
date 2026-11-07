@@ -10,6 +10,7 @@ use Filament\View\PanelsRenderHook;
 use Illuminate\Support\HtmlString;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\Platform\Contracts\DTOs\Branding;
+use Modules\Platform\Filament\Pages\AcademyModulesPage;
 use Modules\Platform\Filament\Pages\AcademyPlanPage;
 use Modules\Platform\Filament\Pages\AiSettingsPage;
 use Modules\Platform\Filament\Pages\BrandingSettings;
@@ -52,6 +53,8 @@ final class PlatformPlugin implements Plugin
 
         // The back office tells its owner and admins when a limit of the plan is close to full, except on the plan page itself.
         if ($panel->getId() === 'academy') {
+            // Settings › Academy modules: which optional areas the academy shows.
+            $panel->pages([AcademyModulesPage::class]);
             $panel->renderHook(PanelsRenderHook::PAGE_START, function (array $scopes = []): string {
                 $warning = in_array(AcademyPlanPage::class, $scopes, true) ? null : app(PlanWarning::class)->forViewer();
 

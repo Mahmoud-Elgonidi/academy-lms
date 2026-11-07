@@ -49,8 +49,13 @@ final class UserResource extends JsonResource
             // Whether the person shows the floating time-zone chip (they may hide it from its card, and show it again from the account page).
             'zone_chip' => app(PreferenceStore::class)->valueFor($this->resource, ZoneChipPreference::KEY) === ZoneChipPreference::SHOWN,
             'roles' => array_map(fn (Role $r) => $r->value, $this->roles()),
-            // The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll): the apps show only these.
+            // The areas the academy's plan includes and the academy did not hide (crm, online_payments, …, groups, messaging, …): the apps show only these.
             'plan_features' => $academy === null ? [] : $this->planFeatures(),
+            // Every module that is on for this academy, paid (in its plan) and optional (not hidden in Settings › Academy modules),
+            // as SharedKernel\Plans\Feature values: crm, online_payments, import, custom_branding, payroll, ai, quran, groups,
+            // curriculum, games, messaging, announcements, support, evaluation, site. The portal and the app show only these;
+            // the core (lessons, families, reports, billing, safeguarding, privacy, …) is always on and not listed.
+            'modules' => $academy === null ? [] : $this->modules(),
             'academy' => $academy === null ? null : [
                 'id' => $academy->id,
                 'slug' => $academy->slug,
@@ -63,6 +68,17 @@ final class UserResource extends JsonResource
                 'time_format' => (TimeFormat::of($academy->timeFormat) ?? TimeFormat::DEFAULT)->value,
             ],
         ];
+    }
+
+    /** @return list<string> */
+    private function modules(): array
+    {
+        $on = [];
+        foreach (app(AcademyPlan::class)->modules() as $feature) {
+            $on[] = $feature->value;
+        }
+
+        return $on;
     }
 
     /** @return list<string> */

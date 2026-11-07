@@ -13,6 +13,7 @@ use Modules\Evaluation\Domain\Kpi;
 use Modules\Evaluation\Filament\KpiView;
 use Modules\Evaluation\Queries\TeacherKpis;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use UnitEnum;
 
 /**
@@ -26,7 +27,7 @@ final class TeachersPerformance extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
 
-    protected static ?int $navigationSort = 42;
+    protected static ?int $navigationSort = 304;
 
     protected static ?string $slug = 'teachers/performance';
 
@@ -37,7 +38,7 @@ final class TeachersPerformance extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('evaluation::kpis.nav_group');
+        return NavGroup::Teaching;
     }
 
     public static function getNavigationLabel(): string

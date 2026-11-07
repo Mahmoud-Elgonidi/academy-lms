@@ -20,6 +20,8 @@ use Modules\Scheduling\Filament\TimeOffForm;
 use Modules\Scheduling\Filament\TimeOffView;
 use Modules\Scheduling\Queries\TimeOffCover;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
+use UnitEnum;
 
 /**
  * Teachers' time off in the back office (docs/architecture/01, flow "ز"):
@@ -32,9 +34,14 @@ final class TimeOffRequests extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSun;
 
-    protected static ?int $navigationSort = -4;
+    protected static ?int $navigationSort = 103;
 
     protected static ?string $slug = 'time-off';
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Lessons;
+    }
 
     public static function canAccess(): bool
     {

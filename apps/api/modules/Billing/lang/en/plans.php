@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'nav_group' => 'Settings',
     'nav' => 'Plans and prices',
     'model' => 'plan',
     'subtitle' => 'Each plan is a number of sessions of a fixed length, priced per region. The next invoice goes out by itself when the number of sessions you set is left.',

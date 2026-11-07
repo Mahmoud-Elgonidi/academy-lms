@@ -25,7 +25,7 @@ final class MyData extends Page
 
     public static function canAccess(): bool
     {
-        return Gate::allows(Ability::ViewOwnPerformance->value);
+        return Gate::allows(Ability::WriteReports->value);
     }
 
     public static function getNavigationLabel(): string

@@ -8,6 +8,8 @@ use Modules\Games\Domain\Round;
 use Modules\Games\Models\GameLimit;
 use Modules\Games\Models\GamePlay;
 use Modules\Games\Models\GameSettings;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Timezones;
 
@@ -48,7 +50,7 @@ final class PlayAllowance
         $night = ($limit?->night_lock ?? false) && ($hour >= self::NIGHT || $hour < self::MORNING);
 
         $reason = match (true) {
-            ! $settings->enabled => 'off',
+            ! $settings->enabled || ! app(AcademyPlan::class)->has(Feature::Games) => 'off',
             $limit !== null && ! $limit->enabled => 'paused',
             $night => 'night',
             $left === 0 => 'limit',

@@ -29,6 +29,7 @@ use Modules\Catalog\Models\Subject;
 use Modules\Catalog\Models\SubjectCategory;
 use Modules\Catalog\Models\SubjectLevel;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
 use UnitEnum;
@@ -44,7 +45,7 @@ final class SubjectResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 300;
 
     protected static ?string $slug = 'subjects';
 
@@ -55,7 +56,7 @@ final class SubjectResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('catalog::subjects.nav_group');
+        return NavGroup::Teaching;
     }
 
     public static function getNavigationLabel(): string

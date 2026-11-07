@@ -26,6 +26,7 @@ use Modules\Catalog\Contracts\CatalogApi;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\Site\Actions\SaveSiteSettings;
 use Modules\Site\Domain\SiteContent;
@@ -49,7 +50,7 @@ final class SiteSettings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGlobeAlt;
 
-    protected static ?int $navigationSort = 86;
+    protected static ?int $navigationSort = 908;
 
     protected static ?string $slug = 'settings/site';
 
@@ -62,7 +63,7 @@ final class SiteSettings extends Page
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

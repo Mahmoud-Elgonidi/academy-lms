@@ -7,6 +7,8 @@ use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Livewire\Attributes\Computed;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * The curriculum in detail: where the learner is on each course's roadmap
@@ -26,6 +28,12 @@ final class FamilyProgress extends Page
 
     /** The journey is in the menu; the roadmap opens from it. */
     protected static bool $shouldRegisterNavigation = false;
+
+    /** The curriculum's roadmap: only while the academy has the curriculum. */
+    public static function canAccess(): bool
+    {
+        return auth()->check() && app(AcademyPlan::class)->has(Feature::Curriculum);
+    }
 
     public static function getNavigationLabel(): string
     {

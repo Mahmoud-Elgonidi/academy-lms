@@ -27,7 +27,9 @@ use Modules\People\Models\GuardianConsent;
 use Modules\People\Models\PeopleSettings;
 use Modules\People\Queries\ConsentBoard;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use UnitEnum;
 
 /**
  * Guardians' consent to children's accounts, for whoever follows the
@@ -44,12 +46,17 @@ final class GuardianConsents extends Page implements HasTable
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static ?int $navigationSort = -2;
+    protected static ?int $navigationSort = 203;
 
     protected static ?string $slug = 'guardian-consents';
 
     #[Url]
     public string $tab = 'waiting';
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::People;
+    }
 
     public static function canAccess(): bool
     {

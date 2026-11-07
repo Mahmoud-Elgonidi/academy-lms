@@ -2212,6 +2212,7 @@ export interface paths {
          * The academy's look
          * @description With `app`: the oldest app version still served (an older app asks to be updated first) and where to update it.
          *     `time_format` is how the academy writes a clock for everyone who has not chosen their own (pages before sign-in).
+         *     `modules` are the academy's modules that are on (Settings › Academy modules and its plan), for screens before sign-in.
          */
         get: operations["platform.branding"];
         put?: never;
@@ -3743,8 +3744,15 @@ export interface components {
             /** @description Whether the person shows the floating time-zone chip (they may hide it from its card, and show it again from the account page). */
             zone_chip: boolean;
             roles: unknown[];
-            /** @description The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll): the apps show only these. */
+            /** @description The areas the academy's plan includes and the academy did not hide (crm, online_payments, …, groups, messaging, …): the apps show only these. */
             plan_features: string[];
+            /**
+             * @description Every module that is on for this academy, paid (in its plan) and optional (not hidden in Settings › Academy modules),
+             *     as SharedKernel\Plans\Feature values: crm, online_payments, import, custom_branding, payroll, ai, quran, groups,
+             *     curriculum, games, messaging, announcements, support, evaluation, site. The portal and the app show only these;
+             *     the core (lessons, families, reports, billing, safeguarding, privacy, …) is always on and not listed.
+             */
+            modules: string[];
             academy: {
                 id: string;
                 slug: string;
@@ -11742,6 +11750,11 @@ export interface operations {
                         };
                         /** @description h12 (5:00 PM) or h24 (17:00): the academy's choice. */
                         time_format: string;
+                        /**
+                         * @description Every module that is on, paid and optional, as Feature values (crm, online_payments, import, custom_branding, payroll,
+                         *     ai, quran, groups, curriculum, games, messaging, announcements, support, evaluation, site); the core is always on and not listed.
+                         */
+                        modules: string[];
                         app: {
                             /** @description The oldest app version still served, like "1.0.0". */
                             min_version: string;

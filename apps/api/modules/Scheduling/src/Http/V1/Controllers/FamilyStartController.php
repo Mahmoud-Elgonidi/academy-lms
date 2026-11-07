@@ -23,6 +23,8 @@ use Modules\Scheduling\Queries\Start\StartSlots;
 use Modules\Scheduling\Support\StartRefused;
 use Modules\SharedKernel\Http\ProblemException;
 use Modules\SharedKernel\Money\Money;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 use Modules\SharedKernel\Time\Timezones;
@@ -134,7 +136,8 @@ final class FamilyStartController
         $plans = [];
         if ($region !== null) {
             foreach ($this->billing->planOptions() as $plan) {
-                if (! isset($plan->prices[$region->id])) {
+                // A group plan only while the academy has group lessons.
+                if (! isset($plan->prices[$region->id]) || ($plan->group && ! app(AcademyPlan::class)->has(Feature::Groups))) {
                     continue;
                 }
                 $plans[] = $this->plan($plan, $plan->prices[$region->id], $region->id, $me, $learner->id, $offerCode);

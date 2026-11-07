@@ -19,6 +19,7 @@ use Modules\Communication\Contracts\DTOs\TemplateDefinition;
 use Modules\Communication\Models\Delivery;
 use Modules\Communication\Models\Notification;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
@@ -32,7 +33,7 @@ final class MessageLog extends Page implements HasTable
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
 
-    protected static ?int $navigationSort = 60;
+    protected static ?int $navigationSort = 703;
 
     protected static ?string $slug = 'messages';
 
@@ -43,7 +44,7 @@ final class MessageLog extends Page implements HasTable
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('communication::communication.nav_group');
+        return NavGroup::Communication;
     }
 
     public static function getNavigationLabel(): string

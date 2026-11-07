@@ -35,7 +35,7 @@ final class NotificationPreferences
                 default: 'all',
                 hint: "communication::communication.preferences.hints.{$category}",
                 // Work messages only reach the academy's team and its teachers.
-                abilities: $category === 'staff' ? [Ability::HandleTickets->value, Ability::WriteReports->value] : [],
+                abilities: $category === 'staff' ? [Ability::HandleTickets->value, Ability::WriteReports->value, Ability::ViewEnrollments->value, Ability::FindTeachers->value] : [],
             ));
         }
         $this->preferences->define(new PreferenceDefinition(

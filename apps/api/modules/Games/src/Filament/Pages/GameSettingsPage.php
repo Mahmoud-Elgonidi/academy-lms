@@ -14,9 +14,13 @@ use Modules\Games\Models\CreatureFind;
 use Modules\Games\Models\GamePlay;
 use Modules\Games\Models\GameSettings;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Games\CatalogGame;
 use Modules\SharedKernel\Games\GameCatalog;
 use Modules\SharedKernel\Games\ItemKind;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
+use UnitEnum;
 
 /**
  * The academy's games (curriculum.manage): on or off for its learners, the
@@ -30,7 +34,7 @@ final class GameSettingsPage extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPuzzlePiece;
 
-    protected static ?int $navigationSort = 40;
+    protected static ?int $navigationSort = 306;
 
     protected static ?string $slug = 'games';
 
@@ -38,9 +42,14 @@ final class GameSettingsPage extends Page
 
     public ?int $minutes = null;
 
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Teaching;
+    }
+
     public static function canAccess(): bool
     {
-        return Gate::allows(Ability::ManageCurriculum->value);
+        return Gate::allows(Ability::ManageCurriculum->value) && app(AcademyPlan::class)->has(Feature::Games);
     }
 
     public static function getNavigationLabel(): string

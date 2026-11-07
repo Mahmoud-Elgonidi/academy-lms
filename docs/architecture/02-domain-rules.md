@@ -2311,3 +2311,46 @@ stateDiagram-v2
 
 ### الديمو (J5b)
 - `DemoAutoRenewSeeder` (بعد خط التحصيل في الـ seeding الأول، وفي `DemoCatchUpSeeder`، مرة بعلامة `demo:j5b`): العيلة اللي تجديدها أقرب (مش هالة ولا عمر) عندها بطاقة تجريبية (Visa ****4242) والتجديد شغال؛ لما الفاتورة تطلع، `billing:follow-up` بيبلغهم ويخصم بعد 3 أيام بالبوابة التجريبية. (`DemoGateway::nextCharge` بيخلّي الخصم الجاي يترفض أو يقع للتجربة.)
+
+## 28. وحدات الأكاديمية
+
+كل أكاديمية بتشوف الوحدات اللي بتستخدمها بس، والقايمة الجانبية في المكتب متقسّمة مجموعات منطقية. **مافيش حاجة بتتمسح أبدًا**: الوحدة الموقوفة بتختفي من الشاشات والـ API والرسايل، ولما ترجع كل حاجة بترجع زي ما كانت.
+
+### الأنواع الثلاثة (`SharedKernel\Plans\Feature`، `kind()`)
+- **الأساسية** (دايمًا شغالة، مش `Feature`): الحصص والمواعيد، المعلّمين والأسر، الفصل المباشر، الفواتير والدفع اليدوي، التقارير والواجبات، بوابة الأسرة، الإشعارات، الفريق والأمان؛ و**حماية الأطفال والخصوصية ما بتتطفيش أبدًا**. تسجيل الحصص فاضل على مفتاحه (`classroom_settings.recording`)، مش وحدة.
+- **المدفوعة** (`paid`، بتاعة الباقة): `crm`، `online_payments`، `import`، `custom_branding`، `payroll`، `ai`، `quran`. **فريق المنصة بس** بيشغّلها ويطفيها (`saas_plans.features` والـ `features_on/off` بتاعة الأكاديمية، `ChangeAcademyPlan` من الكونسول).
+- **الاختيارية** (`optional`، `Feature::optional()`، مجانية): `groups` (الحصص الجماعية)، `curriculum` (بناء المناهج ورحلة التعلّم)، `games`، `messaging` (المحادثات)، `announcements`، `support` (المساعدة والشكاوى)، `evaluation` (أداء المعلّمين وتقييم الحصص)، `site` (صفحة الأكاديمية وطلباتها وبطاقات المعلّمين). **شغالة في الأول**: الـ migration ضافتها لكل باقة موجودة، والباقة الجديدة بتاخدها كلها (`SavePlan` لما مايتقالش `features`، والفورم بتاع الكونسول متعلّم عليها). الأكاديمية تقدر تخفيها وترجّعها؛ وفريق المنصة يقدر يقفلها لأكاديمية (`features_off`)، ساعتها الأكاديمية ماتقدرش ترجّعها.
+- **الاعتماد** (`dependsOn()`): الألعاب بتلعب على دروس المنهج، فـ`games` محتاجة `curriculum`.
+
+### الاختيار (`academy_modules`، بـ `Platform\Actions\Modules\SaveAcademyModules` بس)
+- صف واحد لكل أكاديمية (`hidden` jsonb: قيم `Feature` الاختيارية المخفية، `updated_by`). الصف بيتعمل أول حفظ؛ مافيهوش بيانات شخصية (`updated_by` حد من الفريق).
+- **المالك والمدير بس** (`Ability::ManageModules`، `academy.manage-modules`)، **مش واحنا داخلين باسم حد** (`AuditActor::current()->onBehalfOf`)، والوحدات الاختيارية بس (المدفوعة 422 «من وحدات الباقة»). متسجّل `academy.modules_changed` بأسامي الوحدات بس (`modules_hidden`، `modules_shown`).
+- **قواعد الإيقاف** (الـ pure `Platform\Domain\Modules\ModuleRules`، وكل رفض جملة فصحى لطيفة بتقول يعمل إيه الأول، `ValidationException` على `modules` عشان `ShowRefusals` يعرضها):
+  - `groups`: مرفوض طول ما فيه مجموعة مش منتهية فيها طلاب في كورسات مااتنهتش (بيقول كام، وينهيها أو ينقل طلابها لحصص فردية الأول).
+  - `support`: مرفوض طول ما فيه طلبات مساعدة مفتوحة أو مستنية (بيقول كام).
+  - `curriculum`: إيقافه بيوقف `games` معاه (والتأكيد بيقول كده)؛ و`games` ماتشتغلش والمنهج مقفول.
+  - `site`: مسموح؛ الصفحة العامة بترد 404 وهي مقفولة، والطلبات اللي جت فاضلة.
+  - `messaging`، `announcements`، `evaluation`، `games`: مسموح.
+  - كل وحدة بتعدّ اللي ماسكها مفتوحة بنفسها في الـ provider بتاعها (`SharedKernel\Plans\ModulesInUse::add`)، فالمنصة ماتعرفش جدول أي وحدة.
+- `preview()` للتأكيد: هتختفي منين (`platform::modules.where.*`)، إيه اللي هيقف معاها، إن البيانات فاضلة، وسبب الرفض لو فيه.
+
+### القراءة (`AcademyPlan::has`)
+- `PlatformAcademyPlan::has(feature)` = الباقة (`PlanTerms`) **و** مش مخفية عند الأكاديمية **و** اللي بتعتمد عليه شغال؛ بتتقري مرة في الطلب (scoped)، و`forget()` بعد الحفظ. `modules()` بيرجّع كل اللي شغال. أكاديمية من غير باقة: كل حاجة شغالة، بس تقدر تخفي الاختياري.
+- `FeatureNotInPlan` بيعرف لو الأكاديمية هي اللي خبّتها (`hiddenByAcademy`): الـ API بيرد 403 `feature-not-in-plan` بـ `feature` و`by` (`academy` أو `plan`)، والجملة بتقول المالك أو المدير يرجّعها من الإعدادات › وحدات الأكاديمية.
+
+### الإخفاء في كل حتة
+- **القدرات** (`Ability::feature()`، و`AbilityMatrix` بيعمل AND مع `AcademyPlan::has`): `ManageSite`→`site`؛ `OverseeConversations`/`ManageConversations`→`messaging`؛ `SendAnnouncements`→`announcements`؛ `HandleTickets`/`DecideComplaints`/`ManageSupport`→`support`؛ `ReviewPerformance`/`ViewOwnPerformance`→`evaluation`؛ `ManageCurriculum`→`curriculum`. **أسئلة التقرير بتاعة التقارير** (أساسية): ليها قدرة لوحدها `ManageReportQuestions` (`reports.manage-questions`، نفس الأدوار)، فبتفضل والمنهج مقفول. وأي حتة كانت بتستخدم قدرة اختيارية عشان تعرف «ده معلّم» أو «ده من الفريق» بقت بتسأل قدرة أساسية (`WriteReports`، `ViewEnrollments`…).
+- **الشاشات** اللي مالهاش قدرة بتسأل `AcademyPlan::has` في `canAccess`: المجموعات وصفحتها وإعدادها، وضع المجموعات في «ابحث عن معلّم» (`FindTeacher::groupsOn()`)، إعداد الألعاب، الرحلة والمنهج بالتفصيل وكارت الرحلة في /my، الألعاب والمخلوقات، الواجب كلعبة عند المعلّم، الرسايل عند الأسرة والمعلّم، «المساعدة» عند الأسرة والمعلّم، «بطاقتي»، «أدائي»، طلبات الصفحة، شريحة تقييم الحصة. وخطوات «ابدأ هنا» بتاعة المنهج والصفحة `ConditionalSetupStep`.
+- **الـ API** (`plan.feature:{module}` قبل `can:`): `messages/*`، `support/*`، `games/*`، `lessons/{session}/rating` و`teacher/performance`، `teacher/card`، و`learning/journey`، `learning/journey/map`، `learning/journey/chest`، `learning/enrollments/{e}/roadmap`، `learning/challenges*`، `learning/cheers*` (المنهج). النسخ القديمة من التطبيق بتاخد 403 نضيف، عمرها ما 500. الصفحة العامة (`GET site`، `POST site/requests`، وحجز التجريبية بنفسها) بترد **404** زي ما تكون الأكاديمية قافلاها (`SiteSettings::shows()`).
+- **الكتابة**: `CreateGroup`، `JoinGroup`، `OpenConversation`، `SendMessage`، `OpenTicket`، `SendAnnouncement`، `StartPlay`، `ChoosePracticeGame`، `SendCheer`، `OpenWeeklyChest`، `RateLesson` بيرفضوا بـ `requireFeature`. البدء الذاتي مابيعرضش باقات ولا مجموعات جماعية والمجموعات مقفولة.
+- **الرسايل**: `messaging.new_message` ماتتبعتش، الإعلان اللي لسه ماطلعش مابيطلعش، `support:follow-up` مابيعملش حاجة، ماحدش بيتسأل يقيّم الحصة، والرحلة من غير ألعابها (`GamesForJourney` بترجّع `null`)، والرسالة الأسبوعية من غير نجوم لما المنهج مقفول. البيانات نفسها (التراكم، المؤشرات، الشكاوى) بتمشي زي ما هي.
+- **التطبيق والبوابة**: `GET me` (`modules`، وكمان `plan_features` بنفس المعنى) و`GET branding` (`modules`) بيقولوا قيم `Feature` الشغالة؛ اللي مش فيها مايظهرش.
+
+### القايمة الجانبية (`SharedKernel\Filament\NavGroup`)
+- مجموعات بالترتيب ده، كل واحدة بأيقونة (heroicons outline، مرسومة جنب الاسم في `shared::chrome.nav-groups` لأن Filament بياخد أيقونة المجموعة أو أيقونات العناصر مش الاتنين، والعناصر فاضلة بأيقوناتها)، وبتتطوي: فوق من غير مجموعة «ابدأ هنا» (لحد ما التجهيز يخلص)، «العمليات اللحظية»، «التقويم»؛ **الحصص**، **المعلّمون والأسر**، **التعليم**، **القرآن**، **المبيعات**، **المالية**، **التواصل والمساعدة**، **الحماية والخصوصية**، **الإعدادات** (أولها «وحدات الأكاديمية»، و«ابدأ هنا» آخرها لما يخلص).
+- كل شاشة في قايمة المكتب بترجّع `NavGroup` من `getNavigationGroup()`، وترتيبها `navigationSort` = مية المجموعة (الحصص 100 … الإعدادات 900) + مكانها. `tests/Arch/NavGroupTest.php` بيتأكد من ده ومن الترتيب. المجموعة اللي كل شاشاتها مقفولة بتختفي لوحدها.
+
+### الشاشة (الإعدادات › وحدات الأكاديمية، `Platform\Filament\Pages\AcademyModulesPage`)
+- ثلاث أقسام: الاختيارية (زرار تشغيل/إيقاف بتأكيد فيه المعاينة؛ اللي فريق المنصة قافله مكتوب كده ومن غير زرار)، وحدات الباقة («في باقتك»، أو «متاحة في باقة …» من الباقات المعروضة اللي فيها، أو «إضافة عند الطلب»)، والأساسية («تعمل دائمًا»، وحماية الأطفال والخصوصية «لا تُطفأ»). ألوان Filament، `lms-stagger` و`lms-lift`. بعد الحفظ الصفحة بتفتح تاني فالقايمة بتتغيّر؛ مافيش `wire:poll`.
+- «ابدأ هنا»: خطوة اختيارية «اختر وحدات أكاديميتك» (`Platform\Setup\ModulesStep`، خلصت لما الصف موجود). الديمو كل حاجة فيه شغالة ومن غير حاجة مخفية (`DemoModulesSeeder`، وفي `DemoCatchUpSeeder`).
+- الكونسول: صفحة الأكاديمية بتقسّم «أضف/أغلق» لوحدات الباقة والوحدات الاختيارية، وفورم الباقة فيه الاختيارية متعلّم عليها في الأول.

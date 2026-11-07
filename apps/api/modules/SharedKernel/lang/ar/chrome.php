@@ -1,6 +1,18 @@
 <?php
 
 return [
+    // The back office's menu groups (SharedKernel\Filament\NavGroup), in their order.
+    'nav_groups' => [
+        'lessons' => 'الحصص',
+        'people' => 'المعلّمون والأسر',
+        'teaching' => 'التعليم',
+        'quran' => 'القرآن',
+        'sales' => 'المبيعات',
+        'finance' => 'المالية',
+        'communication' => 'التواصل والمساعدة',
+        'protection' => 'الحماية والخصوصية',
+        'settings' => 'الإعدادات',
+    ],
     // The greeting at the top of the side menu, by the time of day where the viewer is.
     'hello' => [
         'morning' => 'صباح الخير، :name',

@@ -34,7 +34,9 @@ use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
 use Modules\Scheduling\Filament\ShiftBlocksField;
 use Modules\Scheduling\Filament\ShiftProposalView;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Time\ZoneHint;
+use UnitEnum;
 
 use function Filament\Support\generate_icon_html;
 
@@ -51,7 +53,7 @@ final class ShiftProposals extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
-    protected static ?int $navigationSort = -4;
+    protected static ?int $navigationSort = 104;
 
     protected static ?string $slug = 'shifts/proposals';
 
@@ -60,6 +62,11 @@ final class ShiftProposals extends Page
     public string $tab = '';
 
     public string $reply = '';
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return NavGroup::Lessons;
+    }
 
     public static function canAccess(): bool
     {

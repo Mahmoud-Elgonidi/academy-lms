@@ -296,7 +296,7 @@
     <div class="ft">
         {{-- What is booked: a private course, a seat in a group, or a trial. --}}
         <div class="ft-mode" role="radiogroup" aria-label="{{ __($gw.'mode.label') }}">
-            @foreach (['series' => ['heroicon-o-user', null], 'group' => ['heroicon-o-user-group', 'group'], 'trial' => ['heroicon-o-sparkles', null]] as $m => [$icon, $tone])
+            @foreach (array_filter(['series' => ['heroicon-o-user', null], 'group' => ['heroicon-o-user-group', 'group'], 'trial' => ['heroicon-o-sparkles', null]], fn ($v, $k) => $k !== 'group' || $this::groupsOn(), ARRAY_FILTER_USE_BOTH) as $m => [$icon, $tone])
                 <button type="button" role="radio" aria-checked="{{ $mode === $m ? 'true' : 'false' }}" wire:click="setMode('{{ $m }}')" wire:key="mode-{{ $m }}"
                     @if ($tone) data-tone="{{ $tone }}" @endif>
                     <span class="ft-mode-ico" aria-hidden="true"><x-filament::icon :icon="$icon" /></span>

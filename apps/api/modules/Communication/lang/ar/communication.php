@@ -2,7 +2,6 @@
 
 return [
     'nav' => 'سجل الرسائل',
-    'nav_group' => 'التواصل',
     'categories' => ['lessons' => 'الحصص', 'learning' => 'التقارير والواجبات', 'billing' => 'الفواتير', 'staff' => 'عمل المعلّمين والإدارة'],
     'channels' => ['inbox' => 'داخل التطبيق', 'email' => 'البريد الإلكتروني', 'whatsapp' => 'واتساب', 'push' => 'تنبيه على الهاتف'],
     // Who a message spoke of, once their account was erased.

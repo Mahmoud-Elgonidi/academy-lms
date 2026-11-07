@@ -33,6 +33,7 @@ use Modules\People\Contracts\DTOs\TeacherSubjectData;
 use Modules\People\Filament\Directory\DirectoryForm;
 use Modules\People\Queries\Models\Person;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Filament\NavGroup;
 use UnitEnum;
 
 /**
@@ -46,7 +47,7 @@ final class TeacherResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 200;
 
     protected static ?string $slug = 'people/teachers';
 
@@ -59,7 +60,7 @@ final class TeacherResource extends Resource
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('people::directory.nav_group');
+        return NavGroup::People;
     }
 
     public static function getNavigationLabel(): string

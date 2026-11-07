@@ -44,6 +44,7 @@ use Modules\Identity\TwoFactor\AcademyTwoFactorRule;
 use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Contact\Phone;
+use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
@@ -67,7 +68,7 @@ final class Team extends Page implements HasTable
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    protected static ?int $navigationSort = 80;
+    protected static ?int $navigationSort = 901;
 
     protected static ?string $slug = 'settings/team';
 
@@ -78,7 +79,7 @@ final class Team extends Page implements HasTable
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('platform::branding.nav_group');
+        return NavGroup::Settings;
     }
 
     public static function getNavigationLabel(): string

@@ -9,6 +9,8 @@ use Illuminate\Validation\ValidationException;
 use Modules\Learning\Domain\Journey\Stars;
 use Modules\Learning\Models\ChallengeClaim;
 use Modules\Learning\Queries\Journey\JourneyMap;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * A student opens the week's chest on their journey (docs/architecture/02,
@@ -27,6 +29,7 @@ final class OpenWeeklyChest
      */
     public function handle(string $studentId, string $stage, string $period, ?CarbonImmutable $now = null): array
     {
+        app(AcademyPlan::class)->requireFeature(Feature::Curriculum);
         $now ??= CarbonImmutable::now();
         $state = $this->journey->for($studentId, $stage, false, $now);
         $chest = $state['chest'];
