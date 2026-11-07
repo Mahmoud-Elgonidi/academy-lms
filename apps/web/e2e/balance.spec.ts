@@ -13,7 +13,8 @@ import { KID, PASSWORD, STUDENT, expect, fitsTheScreen, noRawKeys, signInWithPas
  * field) and landing back in the flow for them.
  *
  * The demo's Hala (DemoCollectionSeeder) has a family invoice for her two
- * children's next packages, due tomorrow at 6 pm on her clock.
+ * children's next packages; the end-to-end reset puts it due within a day
+ * (E2eCollection), so it reads as soon at whatever hour the tests run.
  */
 
 const HALA = process.env.E2E_COLLECTION_GUARDIAN ?? 'hala.guardian@demo.test';

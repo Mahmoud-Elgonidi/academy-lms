@@ -12,6 +12,7 @@ use Modules\Billing\Actions\Discounts\SaveCoupon;
 use Modules\Billing\Actions\Proofs\ApprovePaymentProof;
 use Modules\Billing\Actions\Proofs\RejectPaymentProof;
 use Modules\Billing\Contracts\BillingApi;
+use Modules\Billing\Database\Seeders\E2eCollection;
 use Modules\Billing\Models\PaymentProof;
 use Modules\Classroom\Actions\SaveClassroomSettings;
 use Modules\Classroom\Actions\SaveMeetingLink;
@@ -138,6 +139,8 @@ final class E2eResetSeeder extends Seeder
                 $quran = $this->quran();
                 // Every optional area shows, as the demo has it (a test may have hidden some: academyModules).
                 E2eModules::showAll();
+                // Hala's waiting invoice due within a day, whatever the hour (the portal's balance test reads it as soon).
+                E2eCollection::dueSoon();
                 // Families book their own free trials, as the demo has it (a test may have switched the academy to booking them).
                 SiteSettings::query()->where('trial_booking', '!=', 'family')->update(['trial_booking' => 'family']);
             } finally {
