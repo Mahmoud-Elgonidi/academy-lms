@@ -11,23 +11,27 @@ import { balanceMoments } from '@/lib/family/balance';
 import { isGuardian, seesMoney } from '@/lib/family/rules';
 import type { Balance, Consents, CourseBalance, FamilyLessons, Homework, Invoices } from '@/lib/family/types';
 import type { JourneyMap } from '@/lib/journey/types';
+import { hasModule, modulesOf } from '@/lib/modules';
 import { me } from '@/lib/viewer';
 
 /**
  * The family's home, in the look of the person signed in: a student's is
  * their journey (one map, the same as /family/journey); a guardian's or an
- * adult's is the classic home with the journey's card.
+ * adult's is the classic home with the journey's card. While the academy has
+ * its curriculum off there is no journey: everyone gets the plain home (the
+ * next lesson, the courses' balances, homework, notices), without its card.
  */
 export default async function FamilyHome() {
   const [t, fam, person] = await Promise.all([getTranslations('family'), family(), me()]);
   const learner = fam.current;
   if (!learner) return <Empty>{t('noLearner')}</Empty>;
-  if (fam.stage !== 'classic') return <JourneyScreen />;
+  const curriculum = hasModule(modulesOf(person), 'curriculum');
+  if (fam.stage !== 'classic' && curriculum) return <JourneyScreen />;
   const who = { learner_id: learner.id };
 
   const [lessons, journey, homework, balance, invoices, consents] = await Promise.all([
     get<FamilyLessons>('/v1/family/lessons', { query: who }),
-    get<{ data: JourneyMap }>('/v1/learning/journey/map', { query: who }),
+    curriculum ? get<{ data: JourneyMap }>('/v1/learning/journey/map', { query: who }) : Promise.resolve(null),
     get<{ data: Homework[] }>('/v1/learning/homework', { query: { student_id: learner.id } }),
     get<Balance>('/v1/family/balance', { query: who }),
     seesMoney(fam.stage) ? get<Invoices>('/v1/family/invoices') : Promise.resolve(null),
@@ -55,7 +59,7 @@ export default async function FamilyHome() {
         guardian={isGuardian(fam.learners)}
         invoices={invoices}
         homework={homework.data}
-        journey={journey.data}
+        journey={journey?.data ?? null}
       />
     </>
   );

@@ -6,6 +6,7 @@ import { LanguageSwitch } from '@/components/teach/nav';
 import { Heading } from '@/components/ui';
 import { Unread } from '@/components/unread';
 import { liveOf } from '@/lib/live-server';
+import { modulesOf } from '@/lib/modules';
 import { inPlan } from '@/lib/teach/areas';
 import { me } from '@/lib/viewer';
 
@@ -35,7 +36,7 @@ export default async function More() {
     <div>
       <Heading title={nav('more')} hint={person.name} />
       <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-white">
-        {ITEMS.filter((item) => inPlan(item.href, person.plan_features ?? [])).map((item) => (
+        {ITEMS.filter((item) => inPlan(item.href, modulesOf(person))).map((item) => (
           <li key={item.href}>
             <Link href={item.href} className={`${row} hover:bg-paper`}>
               <Icon name={item.icon} className="text-muted" />

@@ -49,6 +49,8 @@ export default defineConfig({
     { name: 'groups', testMatch: /groups\.spec\.ts/, dependencies: ['setup', 'groups-setup'], use: { ...devices['Pixel 7'] } },
     // The Quran program (the demo's Quran course): its teacher, family and the public certificate check, each signed in apart.
     { name: 'quran', testMatch: /quran\.spec\.ts/, dependencies: ['setup'], use: { ...devices['Pixel 7'] } },
+    // Academy modules: the owner hides the games and the messages; their entries leave both portals, a direct visit is calm, then they come back.
+    { name: 'modules', testMatch: /modules\.spec\.ts/, dependencies: ['setup'], use: { ...devices['Pixel 7'] } },
     // The pages before signing in (the academy's, the platform's), on a phone.
     { name: 'site', testMatch: /site\.spec\.ts/, dependencies: ['setup'], use: { ...devices['Pixel 7'] } },
     // A family asks for and books its own free trial on the academy's page, and uses the trial's own links (no sign-in).

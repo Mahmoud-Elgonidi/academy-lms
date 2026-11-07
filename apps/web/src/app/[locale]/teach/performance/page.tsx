@@ -1,7 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 import { Icon } from '@/components/icons';
 import { Badge, Card, Empty, Heading, SectionTitle, join } from '@/components/ui';
-import { get } from '@/lib/api/server';
+import { AreaOff } from '@/components/area-off';
+import { areaGet } from '@/lib/modules-server';
 import type { Performance } from '@/lib/teach/types';
 
 const GROUPS = ['commitment', 'quality', 'professionalism', 'business'] as const;
@@ -9,9 +10,12 @@ const GROUPS = ['commitment', 'quality', 'professionalism', 'business'] as const
 /**
  * The teacher's own numbers over the last 90 days (TeacherKpis, as the academy
  * sees them), what counted against them, and families' ratings without names.
+ * While the academy has evaluation off, a calm word.
  */
 export default async function PerformancePage() {
-  const [t, nav, perf] = await Promise.all([getTranslations('teach'), getTranslations('nav'), get<Performance>('/v1/teacher/performance')]);
+  const [t, nav, found] = await Promise.all([getTranslations('teach'), getTranslations('nav'), areaGet<Performance>('/v1/teacher/performance')]);
+  if (found.off) return <AreaOff title={nav('performance')} by={found.by} icon="chart" home="/teach" />;
+  const perf = found.data;
   return (
     <div>
       <Heading title={nav('performance')} hint={t('perfLead', { days: perf.days })} />

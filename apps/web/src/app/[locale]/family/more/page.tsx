@@ -9,6 +9,7 @@ import { Unread } from '@/components/unread';
 import { liveOf } from '@/lib/live-server';
 import { family } from '@/lib/family/context';
 import { isGuardian, seesMoney } from '@/lib/family/rules';
+import { modulesOf } from '@/lib/modules';
 import { quranInPlan } from '@/lib/quran/quran';
 import { me } from '@/lib/viewer';
 
@@ -16,7 +17,7 @@ import { me } from '@/lib/viewer';
 export default async function More() {
   const [fam, person, common, { unread }] = await Promise.all([family(), me(), getTranslations('common'), liveOf()]);
   const nav = await getTranslations(`nav.${fam.stage}`);
-  const { all, tabs } = itemsOf(fam.stage, seesMoney(fam.stage), isGuardian(fam.learners), quranInPlan(person.plan_features));
+  const { all, tabs } = itemsOf(fam.stage, seesMoney(fam.stage), isGuardian(fam.learners), quranInPlan(modulesOf(person)), modulesOf(person));
   const rest = all.filter((item) => !tabs.some((tab) => tab.href === item.href));
   const row = 'flex min-h-13 items-center gap-3 px-4 py-3';
   return (

@@ -151,7 +151,8 @@ export async function ClassicHome({ name, learner, lessons, notices, courses, gu
   guardian: boolean;
   invoices: Invoices | null;
   homework: Homework[];
-  journey: JourneyMap;
+  /** The journey, or null while the academy has its curriculum off (no card then). */
+  journey: JourneyMap | null;
 }) {
   const t = await getTranslations('family');
   const due = invoices?.data.find((i) => i.outstanding_minor > 0);
@@ -193,8 +194,8 @@ export async function ClassicHome({ name, learner, lessons, notices, courses, gu
           </Card>
         ) : null}
       </div>
-      <JourneyCard journey={journey} learner={learner} />
-      {journey.hifz ? <HifzCard hifz={journey.hifz} /> : null}
+      {journey ? <JourneyCard journey={journey} learner={learner} /> : null}
+      {journey?.hifz ? <HifzCard hifz={journey.hifz} /> : null}
       <HomeworkDue homework={openHomework(homework)} />
       {invoices || guardian ? (
         <div className="grid gap-3 sm:grid-cols-2">

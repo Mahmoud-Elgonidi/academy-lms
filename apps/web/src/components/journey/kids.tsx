@@ -313,9 +313,16 @@ export function KidsJourney({ map, learnerName, autoplay, openIsland, hifz }: {
 
           <header className="gw-head">
             <div>
-              <Link className="gw-avatar" href="/family/games/album" aria-label={t('kids.album')}>
-                <CreatureArt look={buddy?.look ?? fallbackLook} size={40} />
-              </Link>
+              {/* The album is the games' (none while the academy has them off: the buddy stands alone). */}
+              {layer ? (
+                <Link className="gw-avatar" href="/family/games/album" aria-label={t('kids.album')}>
+                  <CreatureArt look={buddy?.look ?? fallbackLook} size={40} />
+                </Link>
+              ) : (
+                <span className="gw-avatar" aria-hidden="true">
+                  <CreatureArt look={buddy?.look ?? fallbackLook} size={40} />
+                </span>
+              )}
               <h1 className="gw-title jr-title">{t('kids.title', { name: learnerName })}</h1>
             </div>
             <div>

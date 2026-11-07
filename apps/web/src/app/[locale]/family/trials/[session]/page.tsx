@@ -10,7 +10,8 @@ import { family } from '@/lib/family/context';
 import { seesMoney } from '@/lib/family/rules';
 import { momentNow, type FamilyTrial, type TrialReport } from '@/lib/site/report';
 import { academySite } from '@/lib/site/server';
-import { viewerTimeFormat } from '@/lib/viewer';
+import { hasModule, modulesOf } from '@/lib/modules';
+import { me, viewerTimeFormat } from '@/lib/viewer';
 
 type Props = { params: Promise<{ session: string }> };
 
@@ -24,7 +25,7 @@ type Props = { params: Promise<{ session: string }> };
 export default async function FamilyTrial({ params }: Props) {
   const { session } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(session)) notFound();
-  const [fam, locale, t, site, timeFormat] = await Promise.all([family(), getLocale(), getTranslations('site.report'), academySite(), viewerTimeFormat()]);
+  const [fam, locale, t, site, timeFormat, person] = await Promise.all([family(), getLocale(), getTranslations('site.report'), academySite(), viewerTimeFormat(), me()]);
   const classic = seesMoney(fam.stage);
   const found = await read<{ data: TrialReport; viewer_stage: string }>('/v1/family/trials/{session}', { params: { session } });
   const now = momentNow();
@@ -78,7 +79,7 @@ export default async function FamilyTrial({ params }: Props) {
         look={classic ? 'family' : 'student'}
         locale={locale}
         now={now}
-        start={classic ? <StartWays report={report} whatsapp={whatsapp} locale={locale} family /> : null}
+        start={classic ? <StartWays report={report} whatsapp={whatsapp} locale={locale} family help={hasModule(modulesOf(person), 'support')} /> : null}
         next={next ? (
           <div id="next" className="scroll-mt-24">
             {next.available ? (

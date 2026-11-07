@@ -3,7 +3,9 @@ import { HifzCard } from '@/components/hifz/card';
 import { RefreshAt } from '@/components/live-refresh';
 import { CourseBalanceCard } from '@/components/family/course-balance';
 import { Empty, Notice } from '@/components/ui';
-import { get, read } from '@/lib/api/server';
+import { AreaOff } from '@/components/area-off';
+import { read } from '@/lib/api/server';
+import { areaGet } from '@/lib/modules-server';
 import { balanceMoments } from '@/lib/family/balance';
 import type { CourseBalance } from '@/lib/family/types';
 import { family } from '@/lib/family/context';
@@ -26,12 +28,15 @@ import { MiddleJourney } from './middle';
  * an island (back from the album). With pages on the learner's hifz map, a
  * card says what is left of today's review and opens it. A student's own look
  * has each course's lessons left beside it (J5a: the kids' in a few words).
+ * While the academy has its curriculum off there is no journey: a calm word.
  */
 export async function JourneyScreen({ homework, island }: { homework?: string; island?: string }) {
   const [t, fam] = await Promise.all([getTranslations('journey'), family()]);
   const learner = fam.current;
   if (!learner) return <Empty>{t('noLearner')}</Empty>;
-  const { data: map } = await get<{ data: JourneyMap }>('/v1/learning/journey/map', { query: { learner_id: learner.id } });
+  const found = await areaGet<{ data: JourneyMap }>('/v1/learning/journey/map', { query: { learner_id: learner.id } });
+  if (found.off) return <AreaOff title={learner.is_self ? t('mine') : t('journeyOf', { name: firstName(learner.name) })} by={found.by} icon="map" home="/family" />;
+  const map = found.data.data;
   // The name keeps its own direction inside the sentence (an Arabic name in English words, and back).
   const name = `\u2068${firstName(learner.name)}\u2069`;
   const autoplay = homeworkTarget(map, homework);

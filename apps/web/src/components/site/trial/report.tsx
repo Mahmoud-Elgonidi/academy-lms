@@ -239,12 +239,14 @@ async function Recommendation({ report, locale, now, start }: { report: TrialRep
  * (else writing from Help, or signing in). A course already started leads to
  * the family's lessons, or to its invoice while it waits for payment.
  */
-export async function StartWays({ report, whatsapp, locale, family }: {
+export async function StartWays({ report, whatsapp, locale, family, help = true }: {
   report: TrialReport;
   whatsapp: string | null;
   locale: string;
   /** In the family's account (else the report's own link: the flow signs in first). */
   family?: boolean;
+  /** Whether the academy has Help on (writing to it is the last way; without it, none). */
+  help?: boolean;
 }) {
   const t = await getTranslations('site.report');
   const signIn = `/${locale}/sign-in?next=${encodeURIComponent(`/${locale}/family/trials/${report.id}`)}`;
@@ -304,6 +306,7 @@ export async function StartWays({ report, whatsapp, locale, family }: {
       </div>
     );
   }
+  if (family && !help) return null;
   const href = family ? at('/family/help') : signIn;
   return (
     <div className="lr-start">

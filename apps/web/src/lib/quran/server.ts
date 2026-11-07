@@ -1,6 +1,5 @@
 import 'server-only';
-import { read } from '../api/server';
-import { featureOff } from './quran';
+import { areaRead } from '../modules-server';
 
 /**
  * The Quran's reads for a page. With the academy's plan leaving the Quran
@@ -9,10 +8,10 @@ import { featureOff } from './quran';
  */
 export type QuranRead<T> = { state: 'ok'; data: T } | { state: 'off' } | { state: 'missing' };
 
-export async function quranRead<T>(...args: Parameters<typeof read>): Promise<QuranRead<T>> {
-  const done = await read<{ data: T }>(...args);
-  if (done.ok) return { state: 'ok', data: done.data.data };
-  return featureOff(done.problem) ? { state: 'off' } : { state: 'missing' };
+export async function quranRead<T>(...args: Parameters<typeof areaRead>): Promise<QuranRead<T>> {
+  const done = await areaRead<{ data: T }>(...args);
+  if (done.state === 'ok') return { state: 'ok', data: done.data.data };
+  return done.state === 'off' ? { state: 'off' } : { state: 'missing' };
 }
 
 /** The data of a read, or null. */

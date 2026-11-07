@@ -9,6 +9,7 @@ import { TimeFormatProvider } from '@/components/time-format';
 import { ZoneChip } from '@/components/zone-chip';
 import type { Family } from '@/lib/family/context';
 import { isGuardian, seesMoney, showsZoneChip } from '@/lib/family/rules';
+import { modulesOf } from '@/lib/modules';
 import { quranInPlan } from '@/lib/quran/quran';
 import { liveOf } from '@/lib/live-server';
 import { CHOSEN_ZONE_COOKIE, TIMEZONE_COOKIE } from '@/lib/session';
@@ -29,7 +30,8 @@ export async function FamilyShell({ person, look, locale, fam, fontClasses, chil
   const academy = locale === 'ar' ? look.name.ar : look.name.en;
   const money = seesMoney(fam.stage);
   const guardian = isGuardian(fam.learners);
-  const quran = quranInPlan(person.plan_features);
+  const modules = modulesOf(person);
+  const quran = quranInPlan(modules);
   return (
     <div data-stage={fam.stage} className={`${fontClasses} min-h-dvh lg:grid lg:grid-cols-[16rem_1fr]`}>
       <LiveRefresh realtime={live.realtime} />
@@ -42,7 +44,7 @@ export async function FamilyShell({ person, look, locale, fam, fontClasses, chil
           <p className="font-heading text-[15px] font-bold leading-tight">{academy}</p>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-2">
-          <SideNav stage={fam.stage} money={money} guardian={guardian} quran={quran} unread={live.unread} chats={live.chats} />
+          <SideNav stage={fam.stage} money={money} guardian={guardian} quran={quran} modules={modules} unread={live.unread} chats={live.chats} />
         </div>
         <div className="space-y-1 border-t border-line p-3">
           <p className="truncate px-3 pb-1 text-sm font-semibold">{person.name}</p>
@@ -82,7 +84,7 @@ export async function FamilyShell({ person, look, locale, fam, fontClasses, chil
           wanted={zoneChipWanted(person)}
         />
       ) : null}
-      <TabBar stage={fam.stage} money={money} unread={live.unread} chats={live.chats} />
+      <TabBar stage={fam.stage} money={money} modules={modules} unread={live.unread} chats={live.chats} />
     </div>
   );
 }

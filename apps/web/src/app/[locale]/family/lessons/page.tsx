@@ -11,6 +11,7 @@ import { lessonActionsFor } from '@/lib/family/rules';
 import { dayLabel } from '@/lib/format';
 import type { FamilyLessons } from '@/lib/family/types';
 import { formatOf } from '@/lib/lesson-format';
+import { modulesOf } from '@/lib/modules';
 import { me } from '@/lib/viewer';
 
 /** The learner's lessons: the coming four weeks, or the last four (?when=past), with what the family may do with each. */
@@ -54,7 +55,7 @@ export default async function Lessons({ searchParams }: { searchParams: Promise<
       ) : (
         <ul className="stagger space-y-3">
           {lessons.data.map((lesson) => {
-            const allowed = lessonActionsFor(lesson, fam.stage);
+            const allowed = lessonActionsFor(lesson, fam.stage, modulesOf(person));
             return (
               <li key={lesson.id}>
                 <FamilyLessonCard

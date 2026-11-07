@@ -2,25 +2,33 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
 import { Empty, Heading, Notice, join } from '@/components/ui';
-import { get } from '@/lib/api/server';
+import { AreaOff } from '@/components/area-off';
+import { areaGet } from '@/lib/modules-server';
 import type { Conversation, ConversationRow } from '@/lib/messages/types';
 import { ChatThread } from './chat-thread';
 import { StartChat } from './start-chat';
 
 type Base = '/family/messages' | '/teach/messages';
 
+/** The portal's home a calm "off" leads back to. */
+function homeOf(base: Base): string {
+  return base.startsWith('/teach') ? '/teach' : '/family';
+}
+
 /**
  * A teacher's or a family's conversations: a teacher's students, or the
  * learner's teachers, the newest first, with what is new since they last
  * read. One not opened yet starts on a tap. Live through LiveRefresh
- * (messages.changed).
+ * (messages.changed). While the academy has messages off, a calm word.
  */
 export async function ChatIndex({ base, title, learnerId }: { base: Base; title: string; learnerId?: string }) {
   const query = learnerId ? { learner_id: learnerId } : undefined;
-  const [t, list] = await Promise.all([
+  const [t, found] = await Promise.all([
     getTranslations('chat'),
-    get<{ data: ConversationRow[]; meta: { notice: string } }>('/v1/messages/conversations', { query }),
+    areaGet<{ data: ConversationRow[]; meta: { notice: string } }>('/v1/messages/conversations', { query }),
   ]);
+  if (found.off) return <AreaOff title={title} by={found.by} icon="chat" home={homeOf(base)} />;
+  const list = found.data;
   return (
     <div>
       <Heading title={title} />
@@ -76,10 +84,12 @@ export async function ChatIndex({ base, title, learnerId }: { base: Base; title:
 
 /** One conversation, with the way back to the list. */
 export async function ChatConversation({ base, id }: { base: Base; id: string }) {
-  const [t, conversation] = await Promise.all([
+  const [t, found] = await Promise.all([
     getTranslations('chat'),
-    get<{ data: Conversation }>('/v1/messages/conversations/{conversation}', { params: { conversation: id } }),
+    areaGet<{ data: Conversation }>('/v1/messages/conversations/{conversation}', { params: { conversation: id } }),
   ]);
+  if (found.off) return <AreaOff title={t('teacherTitle')} by={found.by} icon="chat" home={homeOf(base)} />;
+  const conversation = found.data;
   return (
     <div>
       <Link href={base} className="mb-3 inline-flex items-center gap-1 text-sm text-muted hover:text-ink">

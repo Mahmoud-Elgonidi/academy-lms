@@ -2966,5 +2966,18 @@
       "off": "Automatic renewal off · {card}",
       "none": "No saved card. Save it at your next payment."
     }
+  },
+  "areas": {
+    "off": {
+      "academy": {
+        "title": "The academy has turned this section off",
+        "lead": "It isn't available right now. Everything recorded in it is kept and shows again when the academy turns it back on."
+      },
+      "plan": {
+        "title": "This section isn't available right now",
+        "lead": "The academy's plan doesn't include this section at the moment. Everything recorded in it is kept and shows again when it comes back."
+      }
+    },
+    "home": "Back to the home page"
   }
 }

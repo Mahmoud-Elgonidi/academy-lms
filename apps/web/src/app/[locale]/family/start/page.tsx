@@ -9,6 +9,7 @@ import { family } from '@/lib/family/context';
 import { choiceFrom, learnerOf, stepToShow, type Choice } from '@/lib/start/flow';
 import type { StartOptions, StartSlots } from '@/lib/start/types';
 import { academySite } from '@/lib/site/server';
+import { hasModule, modulesOf } from '@/lib/modules';
 import { me } from '@/lib/viewer';
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
@@ -81,7 +82,7 @@ export default async function StartCourse({ searchParams }: Props) {
       slots={slots}
       slotsProblem={slotsProblem}
       zoneLabel={person.timezone_label}
-      help="/family/help"
+      help={hasModule(modulesOf(person), 'support') ? '/family/help' : null}
       whatsapp={whatsapp}
       recommended={recommended}
       trial={trial}

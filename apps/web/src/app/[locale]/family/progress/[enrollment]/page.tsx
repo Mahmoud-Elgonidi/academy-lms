@@ -8,6 +8,9 @@ import { RefreshAt } from '@/components/live-refresh';
 import { get, read } from '@/lib/api/server';
 import { balanceMoments } from '@/lib/family/balance';
 import { family } from '@/lib/family/context';
+import { hasModule, modulesOf } from '@/lib/modules';
+import { areaGet } from '@/lib/modules-server';
+import { me } from '@/lib/viewer';
 import { ReportAnswers } from '@/components/report-answers';
 import type { CourseBalance, FamilyReport, Roadmap } from '@/lib/family/types';
 
@@ -18,18 +21,20 @@ import type { CourseBalance, FamilyReport, Roadmap } from '@/lib/family/types';
  */
 export default async function Course({ params }: { params: Promise<{ enrollment: string }> }) {
   const { enrollment } = await params;
-  const [t, fam, roadmap, reports, balance] = await Promise.all([
+  const [t, fam, person, roadmap, reports, balance] = await Promise.all([
     getTranslations('family'),
     family(),
-    get<{ data: Roadmap | null }>('/v1/learning/enrollments/{enrollment}/roadmap', { params: { enrollment } }),
+    me(),
+    // The roadmap is the curriculum's: while the academy has it off, none (the rest of the page stays).
+    areaGet<{ data: Roadmap | null }>('/v1/learning/enrollments/{enrollment}/roadmap', { params: { enrollment } }).then((r) => (r.off ? null : r.data.data)),
     get<{ data: FamilyReport[] }>('/v1/learning/enrollments/{enrollment}/reports', { params: { enrollment } }),
     // A course with no balance to read (none of its own yet) still shows its roadmap.
     read<{ data: CourseBalance }>('/v1/family/courses/{enrollment}/balance', { params: { enrollment } }),
   ]);
   const nav = await getTranslations(`nav.${fam.stage}`);
-  // Back to where it was opened from: the journey in the classic look, the courses list in a student's.
-  const back = fam.stage === 'classic' ? { href: '/family/journey', label: nav('journey') } : { href: '/family/progress', label: nav('progress') };
-  const map = roadmap.data;
+  // Back to where it was opened from: the journey in the classic look, the courses list in a student's (and everyone's without the curriculum).
+  const back = fam.stage === 'classic' && hasModule(modulesOf(person), 'curriculum') ? { href: '/family/journey', label: nav('journey') } : { href: '/family/progress', label: nav('progress') };
+  const map = roadmap;
   return (
     <div>
       <Link href={back.href} className="mb-3 inline-flex items-center gap-1 text-sm text-muted hover:text-ink">

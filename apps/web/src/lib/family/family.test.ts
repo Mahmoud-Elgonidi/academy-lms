@@ -205,3 +205,47 @@ describe('the free trials', () => {
     expect(familyTargetOf('family_trial', false)).toBe('/family/trials');
   });
 });
+
+describe('the places while the academy has modules off', () => {
+  const ALL = ['messaging', 'support', 'curriculum', 'games', 'evaluation', 'quran'];
+  const without = (...off: string[]) => ALL.filter((m) => !off.includes(m));
+  const keys = (items: { key: string }[]) => items.map((i) => i.key);
+
+  it('keeps every place while every module is on', () => {
+    for (const stage of STAGES) {
+      expect(itemsOf(stage, seesMoney(stage), stage === 'classic', true, ALL)).toEqual(itemsOf(stage, seesMoney(stage), stage === 'classic', true));
+    }
+  });
+
+  it('drops messages and help, and the kids’ and middle school’s bar takes homework in place of messages', () => {
+    for (const stage of STAGES) {
+      const { all, tabs } = itemsOf(stage, seesMoney(stage), false, false, without('messaging', 'support'));
+      expect(keys(all)).not.toContain('messages');
+      expect(all.some((i) => i.href === '/family/help')).toBe(false);
+      expect(keys(tabs)).not.toContain('messages');
+    }
+    expect(keys(itemsOf('kids', false, false, false, without('messaging')).tabs)).toEqual(['home', 'lessons', 'homework', 'more']);
+    expect(keys(itemsOf('middle', false, false, false, without('messaging')).tabs)).toEqual(['home', 'lessons', 'homework', 'more']);
+  });
+
+  it('without the curriculum: no journey, a student’s home is no longer it, and a guardian finds the courses in progress', () => {
+    for (const stage of STAGES) {
+      const { all, tabs } = itemsOf(stage, seesMoney(stage), false, false, without('curriculum'));
+      expect([...all, ...tabs].some((i) => i.href === '/family/journey' || (i.also ?? []).includes('/family/journey'))).toBe(false);
+      expect(keys(all)).toContain('progress');
+    }
+    expect(keys(itemsOf('classic', true, false, false, without('curriculum')).tabs)).toEqual(['home', 'lessons', 'homework', 'money', 'more']);
+    expect(keys(itemsOf('classic', false, false, false, without('curriculum')).tabs)).toEqual(['home', 'lessons', 'homework', 'more']);
+  });
+
+  it('drops the Quran when its module is off even if asked for', () => {
+    expect(keys(itemsOf('classic', true, false, true, without('quran')).all)).not.toContain('quran');
+    expect(keys(itemsOf('classic', true, false, true, ALL).all)).toContain('quran');
+  });
+
+  it('offers rating only while evaluation is on', () => {
+    expect(lessonActionsFor(lesson('completed'), 'classic', ALL)?.rate).toBe(true);
+    expect(lessonActionsFor(lesson('completed'), 'classic', without('evaluation'))).toBeNull();
+    expect(lessonActionsFor(lesson('scheduled', true), 'classic', without('evaluation'))).toEqual({ cancel: true, refuse: false, rate: false, dispute: false });
+  });
+});

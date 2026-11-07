@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -23,13 +24,16 @@ use Modules\Crm\Models\CrmSettings;
 use Modules\Crm\Models\LeadTrial;
 use Modules\Crm\Support\ReportLinks;
 use Modules\Games\Actions\SaveGameLimit;
+use Modules\Identity\Models\User;
 use Modules\Learning\Actions\AssignHomework;
 use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Contracts\LearningApi;
 use Modules\Learning\Domain\Challenges\ChallengeCatalog;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\SessionReport;
+use Modules\Platform\Actions\Modules\SaveAcademyModules;
 use Modules\Platform\Contracts\TenantDirectory;
+use Modules\Platform\Models\AcademyModules;
 use Modules\Quran\Actions\Settings\SaveQuranSettings;
 use Modules\Quran\Domain\Certificates\CertificateNumber;
 use Modules\Quran\Models\QuranCertificate;
@@ -60,6 +64,7 @@ use Modules\Scheduling\Domain\Models\SessionParticipant;
 use Modules\Scheduling\Support\TrialLinks;
 use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Money\Money;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantRef;
 use Modules\Site\Models\JoinRequest;
@@ -134,6 +139,8 @@ final class E2eResetSeeder extends Seeder
                 $this->practiceHomework();
                 $group = $this->group();
                 $quran = $this->quran();
+                // Every optional area shows, as the demo has it (a test may have hidden some: academyModules).
+                $this->showModules();
                 // Families book their own free trials, as the demo has it (a test may have switched the academy to booking them).
                 SiteSettings::query()->where('trial_booking', '!=', 'family')->update(['trial_booking' => 'family']);
             } finally {
@@ -172,6 +179,70 @@ final class E2eResetSeeder extends Seeder
 
             return (string) $invoice->number;
         });
+    }
+
+    /**
+     * The owner hides or shows the demo's optional areas, as in Settings › Academy modules (SaveAcademyModules,
+     * audited): `games=0,messaging=0` hides those, `games=1` shows one again; areas not named stay as they are.
+     * The reset shows every one again. Returns the areas hidden now, comma-separated (empty for none).
+     */
+    public static function academyModules(string $spec): string
+    {
+        $on = [];
+        foreach (array_filter(explode(',', $spec)) as $pair) {
+            [$name, $value] = array_pad(explode('=', $pair, 2), 2, '');
+            if (Feature::tryFrom($name) === null || ! in_array($value, ['0', '1'], true)) {
+                throw new RuntimeException("Not an area=0|1: {$pair}.");
+            }
+            $on[$name] = $value === '1';
+        }
+        $academy = self::demo(app(TenantDirectory::class));
+
+        return app(TenantContext::class)->run($academy, fn (): string => implode(',', array_map(fn (Feature $f) => $f->value, self::asOwner(fn () => app(SaveAcademyModules::class)->handle($on, self::ownerId())))));
+    }
+
+    /** Every optional area the demo hid shows again (SaveAcademyModules, as the owner). */
+    private function showModules(): void
+    {
+        $hidden = AcademyModules::current()->hiddenFeatures();
+        if ($hidden === []) {
+            return;
+        }
+        self::asOwner(fn () => app(SaveAcademyModules::class)->handle(array_fill_keys(array_map(fn (Feature $f) => $f->value, $hidden), true), self::ownerId()));
+    }
+
+    private static function ownerId(): string
+    {
+        return (string) DB::table('users')->where('email', 'owner@demo.test')->value('id');
+    }
+
+    /**
+     * @template T
+     *
+     * @param  callable(): T  $work
+     * @return T
+     */
+    private static function asOwner(callable $work): mixed
+    {
+        $owner = User::query()->findOrFail(self::ownerId());
+        $before = Auth::user();
+        Auth::setUser($owner);
+        $outside = AuditActor::current()->id === null;
+        if ($outside) {
+            AuditActor::use(new AuditActor('user', (string) $owner->id, (string) $owner->name));
+        }
+        try {
+            return $work();
+        } finally {
+            if ($outside) {
+                AuditActor::forget();
+            }
+            if ($before !== null) {
+                Auth::setUser($before);
+            } else {
+                Auth::forgetUser();
+            }
+        }
     }
 
     /**

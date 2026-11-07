@@ -251,7 +251,8 @@ export function GroupStep({ groups, problem, chosen, onChoose, onPrivate, help }
   chosen?: string;
   onChoose: (id: string) => void;
   onPrivate: () => void;
-  help: string;
+  /** Writing to the academy (Help), or null while the academy has it off. */
+  help: string | null;
 }) {
   const t = useTranslations('start.group');
   if (problem || groups.length === 0) {
@@ -260,7 +261,7 @@ export function GroupStep({ groups, problem, chosen, onChoose, onPrivate, help }
         <p className="flex items-start gap-2 font-semibold"><Icon name="people" className="mt-0.5 shrink-0 text-group-strong" />{problem ?? t('none')}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <button type="button" onClick={onPrivate} className={join(buttonLook('primary'), 'min-h-10 px-4 text-sm')}>{t('private')}</button>
-          <Link href={help} className={join(buttonLook('quiet'), 'min-h-10 px-4 text-sm')}>{t('ask')}</Link>
+          {help ? <Link href={help} className={join(buttonLook('quiet'), 'min-h-10 px-4 text-sm')}>{t('ask')}</Link> : null}
         </div>
       </div>
     );

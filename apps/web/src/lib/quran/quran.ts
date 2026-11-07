@@ -1,4 +1,5 @@
 import type { Tone } from '@/components/ui';
+import { hasModule } from '../modules';
 import type { Juz } from '../hifz/types';
 import type { Certificate, ExamStatus, GradeKey, MistakeType, PartKey, PartRecord, Portion } from './types';
 
@@ -17,17 +18,12 @@ export const GRADE_ORDER: readonly GradeKey[] = ['excellent', 'very_good', 'good
 /** The parts of the mushaf. */
 export const JUZ_COUNT = 30;
 
-/** The API's problem when the academy's plan leaves the Quran out. */
-export const FEATURE_OFF = 'feature-not-in-plan';
+/** The API's problem when the academy's plan leaves the Quran out (every area's, lib/modules.ts). */
+export { FEATURE_OFF, featureOff } from '../modules';
 
-/** Whether a refused read means the academy's plan has no Quran (a calm "not available", never an error page). */
-export function featureOff(problem: { status: number; type?: string } | null | undefined): boolean {
-  return problem?.status === 403 && problem.type === FEATURE_OFF;
-}
-
-/** Whether the academy's plan includes the Quran (`me.plan_features`). */
+/** Whether the academy has the Quran on (`me.modules`). */
 export function quranInPlan(features: readonly string[] | null | undefined): boolean {
-  return (features ?? []).includes('quran');
+  return hasModule(features, 'quran');
 }
 
 /** A share (0 to 1) as a whole percent, held between 0 and 100. */

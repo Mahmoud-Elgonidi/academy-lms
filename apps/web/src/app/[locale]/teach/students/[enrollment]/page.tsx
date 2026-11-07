@@ -9,6 +9,7 @@ import { call, get } from '@/lib/api/server';
 import type { TeacherHifz } from '@/lib/hifz/types';
 import { teacherNotebook } from '@/lib/mushaf/server';
 import type { Roadmap, Student } from '@/lib/teach/types';
+import { areaGet } from '@/lib/modules-server';
 import { dataOf, quranRead } from '@/lib/quran/server';
 import type { StudentPlan } from '@/lib/quran/types';
 
@@ -36,7 +37,8 @@ export default async function StudentRoadmap({ params }: { params: Promise<{ enr
     getTranslations('mushaf'),
     getTranslations('quran'),
     getTranslations('nav'),
-    get<{ data: Roadmap | null }>('/v1/learning/enrollments/{enrollment}/roadmap', { params: { enrollment } }),
+    // The roadmap is the curriculum's: while the academy has it off, none (the rest of the page stays).
+    areaGet<{ data: Roadmap | null }>('/v1/learning/enrollments/{enrollment}/roadmap', { params: { enrollment } }).then((r) => (r.off ? null : r.data.data)),
     get<{ data: Student[] }>('/v1/teacher/students'),
     hifzOf(enrollment),
     teacherNotebook(enrollment),
@@ -45,7 +47,7 @@ export default async function StudentRoadmap({ params }: { params: Promise<{ enr
   ]);
   const plan = quran?.plan ?? null;
   const student = students.data.find((s) => s.enrollment_id === enrollment);
-  const map = roadmap.data;
+  const map = roadmap;
 
   return (
     <div>

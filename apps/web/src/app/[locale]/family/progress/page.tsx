@@ -6,18 +6,24 @@ import { FormatBadge } from '@/components/lesson-format';
 import { Empty, Heading, Progress, join } from '@/components/ui';
 import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
+import type { Balance } from '@/lib/family/types';
 import type { JourneyMap } from '@/lib/journey/types';
+import { hasModule, modulesOf } from '@/lib/modules';
+import { me } from '@/lib/viewer';
 import { courseGroup } from '@/lib/lesson-format';
 
 /**
  * The learner's courses (from the journey), each with how far along and
  * where now; each opens its roadmap and reports. A group course says so, with
- * its seats and the learner's own, as the journey's course says it.
+ * its seats and the learner's own, as the journey's course says it. While
+ * the academy has its curriculum off there is no journey: the courses come
+ * from the learner's balances, each opening its reports.
  */
 export default async function ProgressPage() {
-  const [t, f, fam] = await Promise.all([getTranslations('family'), getTranslations('format'), family()]);
+  const [t, f, fam, person] = await Promise.all([getTranslations('family'), getTranslations('format'), family(), me()]);
   const learner = fam.current;
   if (!learner) return <Empty>{t('noLearner')}</Empty>;
+  if (!hasModule(modulesOf(person), 'curriculum')) return <PlainCourses learner={learner} />;
   const journey = await get<{ data: JourneyMap }>('/v1/learning/journey/map', { query: { learner_id: learner.id } });
   const courses = journey.data.courses;
   return (
@@ -73,6 +79,30 @@ export default async function ProgressPage() {
             </li>
             );
           })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** The learner's courses without the curriculum: from their balances, each to its reports. */
+async function PlainCourses({ learner }: { learner: { id: string; name: string } }) {
+  const [t, balance] = await Promise.all([getTranslations('family'), get<Balance>('/v1/family/balance', { query: { learner_id: learner.id } })]);
+  return (
+    <div>
+      <Heading title={t('progressOf', { name: learner.name })} />
+      {balance.data.length === 0 ? (
+        <Empty>{t('noCourses')}</Empty>
+      ) : (
+        <ul className="stagger space-y-3" data-plain-courses>
+          {balance.data.map((c) => (
+            <li key={c.enrollment_id}>
+              <Link href={`/family/progress/${c.enrollment_id}`} className="lift flex items-center justify-between gap-3 rounded-card border border-line bg-white p-5">
+                <span className="font-heading text-lg font-bold">{c.subject ?? t('reports')}</span>
+                <Icon name="chevron" size={18} className="shrink-0 text-muted rtl:-scale-x-100" />
+              </Link>
+            </li>
+          ))}
         </ul>
       )}
     </div>

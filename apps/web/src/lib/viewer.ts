@@ -75,6 +75,8 @@ export type Me = {
   zone_chip?: boolean;
   /** The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll). */
   plan_features?: string[];
+  /** The academy's modules that are on (paid in its plan, optional not hidden; the core is not listed): lib/modules.ts. */
+  modules?: string[];
   /** The academy's own clock is the one for everyone who has not chosen theirs. */
   academy: { id: string; slug: string; name_ar: string; name_en: string; default_timezone: string; timezone_label: string; time_format: TimeFormat } | null;
 };

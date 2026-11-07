@@ -57,7 +57,8 @@ export function StartFlow({ options, choice, step, slots, slotsProblem, zoneLabe
   /** Why the times or groups cannot be read for this choice (the API's words). */
   slotsProblem: string | null;
   zoneLabel: string;
-  help: string;
+  /** Writing to the academy (Help), or null while the academy has it off. */
+  help: string | null;
   whatsapp: string | null;
   /** The plan the trial's teacher recommended (from the report). */
   recommended: string | null;
@@ -361,7 +362,7 @@ function stepHint(step: Step, plan: StartPlan | undefined, t: (key: string, valu
 }
 
 /** A refusal in its own calm card, with what to do next. */
-function RefusalCard({ refusal, step, help, whatsapp, onSubject }: { refusal: Refusal; step: Step; help: string; whatsapp: string | null; onSubject: () => void }) {
+function RefusalCard({ refusal, step, help, whatsapp, onSubject }: { refusal: Refusal; step: Step; help: string | null; whatsapp: string | null; onSubject: () => void }) {
   const t = useTranslations('start.refused');
   if (refusal.kind === 'consent') return null;
   if (refusal.kind === 'course') {
@@ -382,7 +383,7 @@ function RefusalCard({ refusal, step, help, whatsapp, onSubject }: { refusal: Re
       <div role="alert" className="rounded-card border border-info/30 bg-info-soft p-4" data-refusal="contact">
         <p className="flex items-start gap-2 font-semibold text-ink"><Icon name="chat" className="mt-0.5 shrink-0 text-info" />{refusal.message}</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Link href={help} className={join(buttonLook('primary'), 'min-h-10 px-4 text-sm')}>{t('writeToUs')}</Link>
+          {help ? <Link href={help} className={join(buttonLook('primary'), 'min-h-10 px-4 text-sm')}>{t('writeToUs')}</Link> : null}
           {chat ? <a href={chat} target="_blank" rel="noopener" className={join(buttonLook('quiet'), 'min-h-10 px-4 text-sm')}>{t('whatsapp')}</a> : null}
         </div>
       </div>

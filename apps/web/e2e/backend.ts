@@ -293,3 +293,22 @@ export function renewalChargedNow(invoice: string): string {
     `return (string) Illuminate\\Support\\Facades\\DB::table('auto_charges')->where('invoice_id', '${invoice}')->value('status');`,
   ].join(' '));
 }
+
+/* ── Academy modules ── */
+
+/**
+ * The owner hides or shows the demo's optional areas, as in Settings › Academy
+ * modules (E2eResetSeeder::academyModules, through SaveAcademyModules):
+ * `{ games: false, messaging: false }` hides those; areas not named stay. The
+ * global setup's reset shows every one again. Returns the areas hidden now.
+ */
+export function academyModules(on: Record<string, boolean>): string[] {
+  const spec = Object.entries(on).map(([area, wanted]) => {
+    if (!/^[a-z_]+$/.test(area)) throw new Error(`Not an area: ${area}`);
+    return `${area}=${wanted ? 1 : 0}`;
+  }).join(',');
+  const out = artisan(['tinker', `--execute=echo '[' . Database\\Seeders\\E2eResetSeeder::academyModules('${spec}') . ']';`]).trim().split('\n').pop() ?? '';
+  const found = /^\[(.*)\]$/.exec(out);
+  if (!found) throw new Error(`The academy's modules did not change: ${out}`);
+  return found[1] ? found[1].split(',') : [];
+}

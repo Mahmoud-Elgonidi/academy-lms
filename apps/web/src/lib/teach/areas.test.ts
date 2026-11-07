@@ -19,3 +19,17 @@ describe('the teacher pages a plan may leave out', () => {
     expect(inPlan('/teach/time-off', [])).toBe(true);
   });
 });
+
+describe('the teacher pages an academy may turn off', () => {
+  it('drops messages, help, performance and the card while their module is off', () => {
+    for (const [href, area] of [
+      ['/teach/messages', 'messaging'],
+      ['/teach/help', 'support'],
+      ['/teach/performance', 'evaluation'],
+      ['/teach/card', 'site'],
+    ] as const) {
+      expect(inPlan(href, [area])).toBe(true);
+      expect(inPlan(href, [])).toBe(false);
+    }
+  });
+});
