@@ -179,6 +179,12 @@
                 </section>
             @endif
 
+            {{-- The academy's video minutes ran out under the hard limit: this lesson is on the teacher's own link; said before going. --}}
+            <section class="notice" id="held" hidden>
+                <h1 id="held-text"></h1>
+                <div class="row"><a class="button primary" href="{{ $goUrl }}" @if ($side) target="_blank" rel="noopener" @endif>{{ __('classroom::classroom.video_held_go') }}</a></div>
+            </section>
+
             <section class="notice" id="left" hidden>
                 <h1>{{ __($r.'left') }}</h1>
                 <div class="row"><button type="button" class="primary" id="rejoin">{{ __($r.'rejoin') }}</button></div>
@@ -258,6 +264,7 @@
             $('call').hidden = s !== 'live';
             $('left').hidden = s !== 'left';
             if ($('outside')) $('outside').hidden = s !== 'outside';
+            $('held').hidden = s !== 'held';
             $('timer').hidden = $('people').hidden = $('quality').hidden = s !== 'live';
             if (s !== 'live') { $('waiting').hidden = true; $('reconnecting').hidden = true; stopClock(); closePip(); closePops(); }
             else layout(false);
@@ -658,6 +665,12 @@
                 ticket = body.data;
             } catch (e) { return fail(e.message); }
 
+            if (ticket.provider === 'external' && ticket.notice) {
+                // Why the lesson is on the teacher's link today, then the way there.
+                stopPreview(); $('held-text').textContent = ticket.notice; setState('held');
+                $('join').disabled = false; $('join').textContent = $('join').dataset.label;
+                return;
+            }
             if (ticket.provider === 'external') {
                 // Beside a tool next to the room, Zoom or Meet opens in a tab of its own and this page stays.
                 if (!cfg.side) { window.location.href = cfg.goUrl; return; }

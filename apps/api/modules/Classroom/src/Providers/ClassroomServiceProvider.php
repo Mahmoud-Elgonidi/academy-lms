@@ -26,7 +26,6 @@ use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
-use Modules\SharedKernel\Plans\UsagePeriod;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
@@ -48,8 +47,8 @@ final class ClassroomServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'classroom');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'classroom');
-        // The plan's video minutes count the lessons held on our own video this month.
-        $this->app->make(UsageMeters::class)->add(Limit::VideoMinutes, fn (UsagePeriod $month) => $this->app->make(VideoMinutes::class)->in($month));
+        // The plan's video minutes: a closed room is counted into the platform's ledger (MeterRoom); the rooms open now show while they run.
+        $this->app->make(UsageMeters::class)->running(Limit::VideoMinutes, fn () => $this->app->make(VideoMinutes::class)->running());
         // And the plan's storage, the recordings kept.
         $this->app->make(UsageMeters::class)->add(Limit::StorageMb, fn () => (int) DB::table('recordings')->where('status', 'ready')->sum('size'));
 

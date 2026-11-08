@@ -70,6 +70,7 @@ With `PLATFORM_DEV_ACADEMY=demo` in `.env`, plain http://localhost:8000/admin wo
 - **Teacher area** at `/teach` (`khaled@demo.test` / `password`, Ziad's teacher): **My reports** with the overdue one to write, opening on today's plan; **Homework** with Ziad's voice recording to listen to and mark.
 - **Live classroom** (LiveKit runs in docker compose): sign in to `/teach` as `nour@demo.test`, **My lessons today** › join Yousef's lesson; in **Communication › Message log** open the "join now" message to Yousef and open its link in a private window (signed in as staff, the same link makes you a hidden observer); on the live board, "observe" joins hidden. Joins and leaves come back as webhooks and show on the live board and the lesson's log.
 - **Notifications**: the bell (top bar) has the owner's latest messages; **Communication › Message log** shows everything the demo sent (invoices, reports, homework, cancellations, "join now" for the live board's late students), one WhatsApp held for quiet hours; **Message templates** to reword any message and switch channels. Emails are in Mailpit (http://localhost:8025).
+- **Settings › Usage and balance** (owner and admin): each meter (video minutes, AI credits) with this month's allowance, the bought balance and its lots, when it runs out, the daily use against last month, by helper and by teacher, and the ledger as a statement with its spreadsheet; the console's academy page grants, corrects and refunds balance and sets the hard limit on video, and console › AI credit rates sets what each helper costs.
 - **Settings › Identity and colours** (owner and admin): templates, colours, fonts, logo, live preview; save as your own template.
 - **Settings › Academy modules** (owner and admin): the core that is always on, the free optional modules (group lessons, curricula and the journey, games, conversations, announcements, help, teachers' performance, the academy's page) to switch off and back on after a confirmation that says where each one disappears, and the plan's modules. The demo has every one on.
 - **Platform console** at `/console`: `admin@platform.test` / `password`, then the code from `php artisan platform:code admin@platform.test` (or add `LMSDEMOPLATFORMCONSOLE2FASECRET2` to an authenticator app). Rawda Academy is suspended; sign in as someone of the demo academy from **Sign in as someone** (a bar with the time left on every page); **Settings › Activity log** as `owner@demo.test` shows it all, with two earlier support sign-ins.
@@ -116,7 +117,8 @@ $this->app->make(Capabilities::class)->add(new Capability(
     key: 'lesson_summary',                 // stable, snake_case, ≤ 40 characters (ai_usage.feature)
     kinds: ['text'],                       // 'text', 'speech', or ['speech', 'text'] in the order it uses them
     tier: 'fast',                          // the model it is written for (a route may say otherwise)
-    credits: 1,                            // a use's cost in credits (stored and shown now)
+    credits: 1,                            // AI credits a request costs (the console's rate may change it)
+    creditsPerMinute: 0,                   // and each minute of audio heard, for one that listens
     label: 'learning::ai.lesson_summary',  // the module's own wording (ar + en)
     description: 'learning::ai.lesson_summary_about',
     module: 'learning',
@@ -132,7 +134,9 @@ $answer = $this->model->json('lesson_summary', new AiPrompt(
 Then: send only what the feature needs (no names: a child is `{child}`, never a lesson's recording), check
 every value of the answer again, keep it a draft a person reviews, add a line to the privacy notice (raise
 `LegalController::VERSION`), and test with a fake `LanguageModel` bound in the container. A capability is on
-in every academy until the academy switches it off; the console's owners choose its engines.
+in every academy until the academy switches it off; the console's owners choose its engines. The gateway
+charges its credits itself (the estimate held before the call, the actual taken after an answer, nothing for a
+failure, a hear-then-write helper once); the module does nothing for it.
 
 ## The API and its OpenAPI document
 

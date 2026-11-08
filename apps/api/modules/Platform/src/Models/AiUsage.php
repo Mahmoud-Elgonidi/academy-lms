@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Platform\Ai\Gateway\CallContext;
 use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Ai\Capabilities;
-use Modules\SharedKernel\Ai\Capability;
-use Modules\SharedKernel\Plans\UsagePeriod;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Throwable;
@@ -19,7 +17,8 @@ use Throwable;
  * provider, engine (none: the server's settings) and model, how long it took,
  * which engine it fell back from, the tokens or seconds of audio it took, and how it
  * went. Nothing about who asked and nothing that was said. Never changed
- * (the grants are revoked); it is how the platform sees cost and the daily cap.
+ * (the grants are revoked); it is how the platform sees cost and the daily cap
+ * (what a request costs the academy is the usage ledger's: AiCharges).
  *
  * @property string $feature
  * @property string $provider
@@ -74,22 +73,6 @@ final class AiUsage extends Model
             // Counting a request never stops the helper that made it.
             report($e);
         }
-    }
-
-    /**
-     * The academy's uses of the helpers in a month (the plan's ai_uses): each
-     * request that gave an answer. A helper that hears a recording and then
-     * writes from it (the report from a voice note) is one use: its words are
-     * counted, its listening is not. A request that failed costs nothing.
-     */
-    public static function usesIn(UsagePeriod $period): int
-    {
-        $writesAfterListening = array_values(array_map(fn (Capability $c) => $c->key,
-            array_filter(app(Capabilities::class)->all(), fn (Capability $c) => $c->needsSpeech() && $c->needsLanguage())));
-
-        return self::query()->where('outcome', 'ok')->where('created_at', '>=', $period->from)->where('created_at', '<', $period->to)
-            ->where(fn ($q) => $q->where('audio_seconds', 0)->orWhereNotIn('feature', $writesAfterListening))
-            ->count();
     }
 
     /** The academy's requests since the start of today (the server's clock). */

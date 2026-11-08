@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Classroom\Actions\MeterRoom;
+use Modules\Classroom\Models\Room;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
 use Modules\Platform\Actions\Plans\ChangeAcademyPlan;
@@ -24,7 +26,8 @@ use Modules\Platform\Actions\TopUps\RequestTopUp;
 use Modules\Platform\Filament\Console\Pages\PlanRequests;
 use Modules\Platform\Filament\Console\Pages\Plans;
 use Modules\Platform\Filament\Pages\AcademyPlanPage;
-use Modules\Platform\Models\AiUsage;
+use Modules\Platform\Metering\AiCreditRates;
+use Modules\Platform\Metering\Meters;
 use Modules\Platform\Models\Plans\PlanUpgradeRequest;
 use Modules\Platform\Models\Plans\TopUpPack;
 use Modules\Platform\Models\Plans\UsageTopUp;
@@ -35,6 +38,7 @@ use Modules\Platform\Plans\PlanUsage;
 use Modules\Platform\Plans\PlanWarning;
 use Modules\Platform\Plans\Requests\PlanRequestAnswered;
 use Modules\Platform\Plans\Requests\PlanRequestMail;
+use Modules\Scheduling\Domain\Models\Session;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
@@ -42,6 +46,7 @@ use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Http\ProblemDetails;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Limit;
+use Modules\SharedKernel\Plans\Meter;
 use Tests\Support\EnrolledStudent;
 
 uses(EnrolledStudent::class);
@@ -52,7 +57,8 @@ uses(EnrolledStudent::class);
  * the work goes on by hand; video minutes are only warned about; at 80% and
  * at the limit the staff hear it with two ways on, an extra pack for this
  * month or a bigger plan, both asked from the academy and answered by the
- * platform team in the console. An extra pack counts in its month alone.
+ * platform team in the console. An extra pack is a lot in the usage ledger
+ * that lasts 12 months (UsageLedgerTest has the ledger itself).
  *
  * The fixture (EnrolledStudent): academy "noor" with an admin, two teachers
  * and a student enrolled, Monday 5 October 2026.
@@ -89,18 +95,22 @@ function topUpPack(Limit $limit, int $amount): TopUpPack
     return TopUpPack::query()->firstOrCreate(['limit' => $limit->value, 'amount' => $amount], ['name_ar' => $names[$amount] ?? 'رصيد', 'name_en' => 'Pack '.$amount]);
 }
 
-/** A lesson held on our own video: its room opened (30 minutes). */
+/** A lesson held on our own video: its room was open 30 minutes and closed, counted into the month. */
 function thirtyVideoMinutes(): void
 {
-    $lesson = DB::table('sessions')->where('enrollment_id', test()->booked->enrollmentId)->orderBy('starts_at')->first();
-    DB::table('rooms')->insert(['id' => (string) Str::uuid7(), 'academy_id' => test()->academy->id, 'session_id' => $lesson->id, 'provider' => 'livekit', 'name' => 'r', 'started_at' => $lesson->starts_at, 'created_at' => now(), 'updated_at' => now()]);
+    $lesson = Session::query()->where('enrollment_id', test()->booked->enrollmentId)->orderBy('starts_at')->first();
+    $room = Room::query()->create(['session_id' => $lesson->id, 'provider' => 'livekit', 'name' => 'r', 'started_at' => $lesson->starts_at, 'finished_at' => $lesson->starts_at->addMinutes(30)]);
+    app(MeterRoom::class)->handle($room);
+    app(PlanWarning::class)->forget(test()->academy->id);
 }
 
+/** So many requests of a helper that answered, each charged its credits (practice suggestions: one each). */
 function useAiTimes(int $times, AiFeature $feature = AiFeature::PracticeItems): void
 {
     foreach (range(1, $times) as $_) {
-        AiUsage::note($feature, 'anthropic', 'm', ['input' => 10, 'output' => 5], 'ok');
+        app(Meters::class)->consume(test()->academy->id, Meter::AiCredits, app(AiCreditRates::class)->charge($feature->value), ['subject' => $feature->value]);
     }
+    app(PlanWarning::class)->forget(test()->academy->id);
 }
 
 it('stops the AI helpers at the month\'s uses, and brings them back with an extra pack or the next month', function () {
@@ -109,11 +119,8 @@ it('stops the AI helpers at the month\'s uses, and brings them back with an extr
     $ai = app(AcademyAi::class);
     app()->setLocale('ar');
 
-    // A use is a request that answered; a failure costs nothing, and a report from a voice note is one use, not two.
-    useAiTimes(1);
-    AiUsage::note(AiFeature::PracticeItems, 'anthropic', 'm', [], 'unavailable');
-    AiUsage::note(AiFeature::ReportDraft, 'elevenlabs', 'scribe', ['audio_seconds' => 40], 'ok');
-    AiUsage::note(AiFeature::ReportDraft, 'anthropic', 'm', ['input' => 10], 'ok');
+    // Each request that answered is charged its credits (UsageLedgerTest has the rates and the failures).
+    useAiTimes(2);
     expect(collect(app(PlanUsage::class)->lines())->firstWhere('limit', Limit::AiUses)->used)->toBe(2)
         ->and($ai->on(AiFeature::PracticeItems))->toBeTrue();
 
@@ -136,7 +143,7 @@ it('stops the AI helpers at the month\'s uses, and brings them back with an extr
     expect($ai->on(AiFeature::PracticeItems))->toBeTrue()
         ->and(collect(app(PlanUsage::class)->lines())->firstWhere('limit', Limit::AiUses)->allowed())->toBe(103);
 
-    // Next month: the plan's own amount comes back, and the extra pack is over.
+    // Next month: the plan's own amount comes back; the pack, used up here, would have lasted 12 months.
     useAiTimes(100);
     expect($ai->why(AiFeature::PracticeItems))->toBe('quota');
     $this->travelTo(CarbonImmutable::parse('2026-11-01 00:30', $this->academy->defaultTimezone));
@@ -150,8 +157,8 @@ it('stops the AI helpers at the month\'s uses, and brings them back with an extr
 });
 
 it('raises the month\'s video minutes with an extra pack, and the warning clears', function () {
-    thirtyVideoMinutes();
     topUpPlan(['video_minutes' => 30]);
+    thirtyVideoMinutes();
     $this->actingAs($this->owner);
     app()->setLocale('ar');
 
@@ -179,8 +186,8 @@ it('raises the month\'s video minutes with an extra pack, and the warning clears
 });
 
 it('shows both monthly warnings at once, each with its ways on', function () {
-    thirtyVideoMinutes();
     topUpPlan(['video_minutes' => 36, 'features' => ['ai'], 'ai_uses' => 10]);
+    thirtyVideoMinutes();
     useAiTimes(10);
     $this->actingAs($this->owner);
     app()->setLocale('ar');
@@ -304,8 +311,8 @@ it('turns a pack on for the academy\'s current month, even when it was asked for
 });
 
 it('shows the academy what is used, left and extra, and asks from the plan page', function () {
-    thirtyVideoMinutes();
     topUpPlan(['video_minutes' => 100, 'features' => ['ai'], 'ai_uses' => 50]);
+    thirtyVideoMinutes();
     useAiTimes(5);
     Filament::setCurrentPanel('academy');
     $this->actingAs($this->owner);

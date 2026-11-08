@@ -14,6 +14,7 @@ use Modules\Platform\Filament\Pages\AcademyModulesPage;
 use Modules\Platform\Filament\Pages\AcademyPlanPage;
 use Modules\Platform\Filament\Pages\AiSettingsPage;
 use Modules\Platform\Filament\Pages\BrandingSettings;
+use Modules\Platform\Filament\Pages\UsagePage;
 use Modules\Platform\Plans\PlanWarning;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
@@ -36,7 +37,7 @@ final class PlatformPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel
-            ->pages([BrandingSettings::class, AcademyPlanPage::class, AiSettingsPage::class])
+            ->pages([BrandingSettings::class, AcademyPlanPage::class, UsagePage::class, AiSettingsPage::class])
             ->brandName(fn (): string => self::branding()?->name() ?? config('app.name'))
             ->brandLogo(fn () => self::branding()?->logoUrl)
             ->brandLogoHeight('2.25rem')
@@ -56,7 +57,7 @@ final class PlatformPlugin implements Plugin
             // Settings › Academy modules: which optional areas the academy shows.
             $panel->pages([AcademyModulesPage::class]);
             $panel->renderHook(PanelsRenderHook::PAGE_START, function (array $scopes = []): string {
-                $warnings = in_array(AcademyPlanPage::class, $scopes, true) ? [] : app(PlanWarning::class)->forViewer();
+                $warnings = array_intersect([AcademyPlanPage::class, UsagePage::class], $scopes) !== [] ? [] : app(PlanWarning::class)->forViewer();
 
                 return $warnings === [] ? '' : view('platform::plans.banner', ['warnings' => $warnings])->render();
             });

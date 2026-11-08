@@ -8,8 +8,9 @@ use InvalidArgumentException;
  * One AI capability of the system (docs/architecture/02, section 22): what
  * a module asks a model for, under a stable key. It says what it needs (the
  * language model, speech to text, or both, in the order it uses them), the
- * tier it is written for, the credits a use will cost (kept for the credits
- * phase; shown now), its name and description in the owning module's
+ * tier it is written for, the AI credits a use costs (a base for each request
+ * and, for one that hears a recording, more for each minute of audio: the
+ * defaults the console's rates start from), its name and description in the owning module's
  * wording, and what the demo driver answers when the prompt carries nothing.
  * Registered by its module with Capabilities::add(); the gateway routes,
  * meters and switches it with no change to Platform.
@@ -32,6 +33,7 @@ final readonly class Capability
         public ?string $description = null,
         public array $demo = [],
         public string $module = '',
+        public int $creditsPerMinute = 0,
     ) {
         if (preg_match('/^[a-z][a-z0-9_]{1,39}$/', $key) !== 1) {
             throw new InvalidArgumentException("An AI capability's key is a short snake_case name: {$key}");
@@ -39,7 +41,7 @@ final readonly class Capability
         if ($kinds === [] || array_diff($kinds, self::KINDS) !== []) {
             throw new InvalidArgumentException("An AI capability needs text, speech or both: {$key}");
         }
-        if (! in_array($tier, AiPrompt::TIERS, true) || $credits < 0) {
+        if (! in_array($tier, AiPrompt::TIERS, true) || $credits < 0 || $creditsPerMinute < 0) {
             throw new InvalidArgumentException("An AI capability's tier is fast or best, its credits zero or more: {$key}");
         }
     }
@@ -49,7 +51,7 @@ final readonly class Capability
      *
      * @param  array<string, mixed>  $demo
      */
-    public static function of(AiFeature $feature, string $tier = 'fast', int $credits = 1, string $module = '', array $demo = []): self
+    public static function of(AiFeature $feature, string $tier = 'fast', int $credits = 1, string $module = '', array $demo = [], int $perMinute = 0): self
     {
         return new self(
             key: $feature->value,
@@ -60,6 +62,7 @@ final readonly class Capability
             description: 'shared::ai.about.'.$feature->value,
             demo: $demo,
             module: $module,
+            creditsPerMinute: $perMinute,
         );
     }
 

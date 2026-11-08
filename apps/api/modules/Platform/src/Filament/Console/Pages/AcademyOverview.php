@@ -11,10 +11,13 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Route;
 use Livewire\Attributes\Computed;
+use Modules\Platform\Actions\Metering\GrantUsage;
+use Modules\Platform\Actions\Metering\SetVideoHardLimit;
 use Modules\Platform\Actions\Plans\ChangeAcademyPlan;
 use Modules\Platform\Actions\SetAcademyStatus;
 use Modules\Platform\Console\AcademyPeople;
@@ -24,7 +27,12 @@ use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Platform\Enums\AcademyStatus;
 use Modules\Platform\Enums\DomainKind;
 use Modules\Platform\Filament\Console\ConsoleView;
+use Modules\Platform\Metering\MeterFormat;
+use Modules\Platform\Metering\Meters;
+use Modules\Platform\Metering\UsageReport;
 use Modules\Platform\Models\Academy;
+use Modules\Platform\Models\Metering\AcademyMetering;
+use Modules\Platform\Models\PlatformAdmin;
 use Modules\Platform\Models\SaasPlan;
 use Modules\Platform\Models\SaasSubscription;
 use Modules\Platform\Plans\MeasureUsage;
@@ -33,6 +41,7 @@ use Modules\Platform\Plans\PlanSummary;
 use Modules\Platform\Plans\PlanTerms;
 use Modules\SharedKernel\Audit\AuditEntries;
 use Modules\SharedKernel\Plans\Limit;
+use Modules\SharedKernel\Plans\Meter;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Modules\SharedKernel\Time\ZoneHint;
@@ -104,6 +113,11 @@ final class AcademyOverview extends Page
                 ->url(app(TenantDirectory::class)->baseUrl($record->toTenantRef()).'/admin', shouldOpenInNewTab: true);
         }
         $actions[] = $this->planAction();
+        // The academy's balance (owners): a bonus, a correction or a refund, and the hard limit on video.
+        if (AiCreditRatesPage::canAccess() && SaasSubscription::currentFor($this->academy) !== null) {
+            $actions[] = $this->creditAction();
+            $actions[] = $this->hardLimitAction();
+        }
         $actions[] = $active
             ? Action::make('suspend')->label(__('platform::console.overview.suspend.label'))->icon(Heroicon::OutlinedPauseCircle)->color('danger')
                 ->modalHeading(__('platform::console.overview.suspend.heading', ['name' => $name]))
@@ -190,6 +204,117 @@ final class AcademyOverview extends Page
                 Notification::make()->success()->title(__($l.'done'))->send();
                 unset($this->plan);
             });
+    }
+
+    /** A bonus, a correction or a refund of the academy's balance, with a reason. */
+    private function creditAction(): Action
+    {
+        $l = 'platform::metering.grant.';
+        $meters = array_combine(array_map(fn (Meter $m) => $m->value, Meter::cases()), array_map(fn (Meter $m) => $m->label(), Meter::cases()));
+
+        return Action::make('credit')->label(__($l.'label'))->icon(Heroicon::OutlinedAdjustmentsHorizontal)->color('gray')
+            ->modalHeading(__($l.'heading', ['name' => ConsoleView::name($this->record)]))
+            ->modalDescription(__($l.'body'))
+            ->modalSubmitActionLabel(__($l.'confirm'))
+            ->schema([
+                Grid::make(2)->schema([
+                    Select::make('kind')->label(__($l.'kind'))->required()->native(false)->live()
+                        ->options(['bonus' => __($l.'kinds.bonus'), 'adjust' => __($l.'kinds.adjust'), 'refund' => __($l.'kinds.refund')])->default('bonus'),
+                    Select::make('meter')->label(__($l.'meter'))->required()->native(false)->live()->options($meters)->default(Meter::AiCredits->value),
+                ]),
+                Select::make('lot')->label(__($l.'lot'))->native(false)
+                    ->visible(fn (Get $get) => $get('kind') === 'refund')->required(fn (Get $get) => $get('kind') === 'refund')
+                    ->options(fn (Get $get) => $this->lotOptions((string) $get('meter'))),
+                TextInput::make('amount')->label(__($l.'amount'))->helperText(fn (Get $get) => __($l.'amount_hint.'.($get('kind') ?: 'bonus')))
+                    ->numeric()->integer()->required(),
+                TextInput::make('months')->label(__($l.'months'))->numeric()->integer()->minValue(1)->maxValue(24)->default(12)
+                    ->visible(fn (Get $get) => $get('kind') !== 'refund'),
+                Textarea::make('reason')->label(__('platform::plans.attributes.reason'))->helperText(__($l.'reason_hint'))
+                    ->required()->minLength(GrantUsage::REASON_MIN)->maxLength(300)->rows(2),
+            ])
+            ->action(function (array $data) use ($l): void {
+                $admin = auth('platform')->user();
+                abort_unless($admin instanceof PlatformAdmin, 403);
+                app(GrantUsage::class)->handle($admin, $this->academy, $data);
+                Notification::make()->success()->title(__($l.'done'))->send();
+                unset($this->metering, $this->plan);
+            });
+    }
+
+    /** Soft (no lesson cut, overage covered later) or hard (at zero, new lessons on the teacher's link). */
+    private function hardLimitAction(): Action
+    {
+        $l = 'platform::metering.console.';
+        $on = AcademyMetering::for($this->academy)->video_hard_limit;
+
+        return Action::make('hardLimit')->label(__($l.($on ? 'hard_turn_off' : 'hard_turn_on')))->icon(Heroicon::OutlinedNoSymbol)->color('gray')
+            ->modalHeading(__($l.($on ? 'hard_turn_off' : 'hard_turn_on')))
+            ->modalDescription(__($l.($on ? 'hard_off_body' : 'hard_on_body')))
+            ->schema([
+                Textarea::make('reason')->label(__('platform::plans.attributes.reason'))->required()->minLength(5)->maxLength(300)->rows(2),
+            ])
+            ->action(function (array $data) use ($on, $l): void {
+                $admin = auth('platform')->user();
+                abort_unless($admin instanceof PlatformAdmin, 403);
+                app(SetVideoHardLimit::class)->handle($admin, $this->academy, ! $on, (string) $data['reason']);
+                Notification::make()->success()->title(__($l.'hard_saved'))->send();
+                $this->reloadPage();
+            });
+    }
+
+    /** @return array<string, string> the academy's bought lots with something left */
+    private function lotOptions(string $meter): array
+    {
+        $m = Meter::tryFrom($meter);
+        if ($m === null) {
+            return [];
+        }
+        $tz = app(ViewerTimezone::class)->effective();
+        $out = [];
+        foreach (app(Meters::class)->state($this->academy, $m)->lots as $lot) {
+            if ($lot['kind'] === 'purchase' && $lot['left'] > 0) {
+                $out[$lot['id']] = __('platform::metering.kinds.purchase').' · '.MeterFormat::amount($m, $lot['left']).' · '.ConsoleView::date($lot['created_at'], $tz);
+            }
+        }
+
+        return $out;
+    }
+
+    /** @return list<array<string, mixed>> each meter's ledger as the console reads it */
+    #[Computed]
+    public function metering(): array
+    {
+        if (SaasSubscription::currentFor($this->academy) === null) {
+            return [];
+        }
+        $meters = app(Meters::class);
+        $report = app(UsageReport::class);
+        $tz = app(ViewerTimezone::class)->effective();
+        $hard = AcademyMetering::for($this->academy)->video_hard_limit;
+        $out = [];
+        foreach (Meter::cases() as $meter) {
+            $state = $meters->state($this->academy, $meter);
+            $f = fn (int $n) => MeterFormat::amount($meter, $n);
+            $out[] = [
+                'key' => $meter->value,
+                'label' => $meter->label(),
+                'state' => ! $state->limited ? 'ok' : ($state->available() <= 0 ? 'full' : 'ok'),
+                'allowance' => $state->limited ? __('platform::metering.card.allowance', ['used' => $f($state->allowanceUsed()), 'max' => $f($state->allowance)]) : __('platform::metering.card.unlimited_used', ['used' => $f($state->used)]),
+                'bought' => $f($state->bought),
+                'available' => $state->limited ? $f(max(0, $state->available())) : __('platform::metering.card.unlimited_short'),
+                'debt' => $state->debt > 0 ? __('platform::metering.card.debt', ['n' => $f($state->debt)]) : null,
+                'hard' => $meter === Meter::VideoMinutes && $hard,
+                'lines' => array_map(fn (array $line) => [
+                    'when' => ConsoleView::date($line['at'], $tz),
+                    'what' => MeterFormat::line($line),
+                    'amount' => MeterFormat::signed($meter, $line['amount']),
+                    'sign' => $line['amount'] > 0 ? 'in' : 'out',
+                    'after' => number_format($line['after']),
+                ], $report->statement($this->academy, $meter, 6)),
+            ];
+        }
+
+        return $out;
     }
 
     /** Counts this academy's use now, instead of waiting for the night's count. */

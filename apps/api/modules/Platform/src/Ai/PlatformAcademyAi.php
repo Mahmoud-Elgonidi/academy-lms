@@ -2,11 +2,11 @@
 
 namespace Modules\Platform\Ai;
 
-use Carbon\CarbonImmutable;
 use Modules\Platform\Ai\Gateway\Routes;
+use Modules\Platform\Metering\AiCreditRates;
+use Modules\Platform\Metering\Meters;
 use Modules\Platform\Models\AiSettings;
 use Modules\Platform\Models\AiUsage;
-use Modules\Platform\Plans\Extras;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
@@ -14,8 +14,7 @@ use Modules\SharedKernel\Ai\Capabilities;
 use Modules\SharedKernel\Ai\Capability;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
-use Modules\SharedKernel\Plans\Limit;
-use Modules\SharedKernel\Plans\UsagePeriod;
+use Modules\SharedKernel\Plans\Meter;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
@@ -24,9 +23,10 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * area, the academy turned this helper on (Settings › AI, off by default),
  * its route has a ready engine for each kind of work (console › AI routing;
  * with no route, the chosen provider has its key and model and the speech
- * key is set where it listens), the month's uses are under the plan's
- * ai_uses (with the month's active extra packs; else quota, and the work
- * goes on by hand), and today's requests are under AI_DAILY_CAP.
+ * key is set where it listens), its AI credits (the month's allowance from
+ * the plan's ai_uses and the bought balance, in the usage ledger) still pay
+ * for the least request (else quota, and the work goes on by hand), and
+ * today's requests are under AI_DAILY_CAP.
  */
 final class PlatformAcademyAi implements AcademyAi
 {
@@ -44,7 +44,8 @@ final class PlatformAcademyAi implements AcademyAi
     {
         $why = $this->why($capability);
         if ($why !== null) {
-            throw new AiFailed($why);
+            $known = app(Capabilities::class)->get($capability);
+            throw new AiFailed($why, needed: $why === 'quota' && $known !== null ? app(AiCreditRates::class)->least($known) : null);
         }
     }
 
@@ -61,7 +62,7 @@ final class PlatformAcademyAi implements AcademyAi
         if (! self::configured($known)) {
             return 'not_configured';
         }
-        if ($this->monthUsedUp()) {
+        if ($this->usedUp($known)) {
             return 'quota';
         }
         if (AiUsage::today() >= (int) config('platform.ai.daily_cap', 500)) {
@@ -71,17 +72,16 @@ final class PlatformAcademyAi implements AcademyAi
         return null;
     }
 
-    /** The month's uses reached the plan's AI uses and this month's extra packs (no limit: never). */
-    private function monthUsedUp(): bool
+    /**
+     * The academy's AI credits (the month's allowance and the bought balance,
+     * less what is owed and held) cannot pay for even the least request of
+     * this helper. No limit: never. The gateway holds the exact estimate.
+     */
+    private function usedUp(Capability $capability): bool
     {
-        $max = $this->plan->limit(Limit::AiUses);
-        if ($max === null) {
-            return false;
-        }
-        $academy = $this->tenants->require();
-        $month = UsagePeriod::monthOf(CarbonImmutable::now(), $academy->defaultTimezone);
+        $state = app(Meters::class)->state($this->tenants->require()->id, Meter::AiCredits);
 
-        return AiUsage::usesIn($month) >= $max + Extras::amount($academy->id, Limit::AiUses, $month->key($academy->defaultTimezone));
+        return $state->limited && $state->available() < app(AiCreditRates::class)->least($capability);
     }
 
     /**

@@ -37,6 +37,7 @@ use Modules\Platform\Filament\Pages\AcademyModulesPage;
 use Modules\Platform\Filament\Pages\AcademyPlanPage;
 use Modules\Platform\Filament\Pages\AiSettingsPage;
 use Modules\Platform\Filament\Pages\BrandingSettings;
+use Modules\Platform\Filament\Pages\UsagePage;
 use Modules\Privacy\Filament\Pages\DataRequests;
 use Modules\Quran\Filament\Pages\HifzOverview;
 use Modules\Quran\Filament\Pages\QuranCertificates;
@@ -94,7 +95,7 @@ const ACADEMY_MENU = [
     'Settings' => [AcademyModulesPage::class, Team::class, SecuritySettings::class, Holidays::class,
         PolicySettings::class, ClassroomSettingsPage::class, GroupSettings::class, PaymentSettings::class,
         SiteSettings::class, AiSettingsPage::class, WeeklyNoteSettings::class, BrandingSettings::class,
-        ImportData::class, AcademyPlanPage::class],
+        ImportData::class, AcademyPlanPage::class, UsagePage::class],
 ];
 
 /** Whether a screen can show in the menu at all (not one opened from another screen). */

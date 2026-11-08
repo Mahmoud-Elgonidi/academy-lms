@@ -42,14 +42,19 @@ return [
         'active_students' => 'Active students',
         'video_minutes' => 'Video minutes a month',
         'storage_mb' => 'File storage',
-        'ai_uses' => 'AI helper uses a month',
+        'ai_uses' => 'AI credits a month',
+    ],
+    // The platform's meters (usage_ledger): each with its monthly allowance and bought balance.
+    'meters' => [
+        'video_minutes' => 'Video minutes',
+        'ai_credits' => 'AI credits',
     ],
     'reached' => [
         'teachers' => "The academy's plan allows :max teachers. Ask the platform team to raise it.",
         'active_students' => "The academy's plan allows :max active students. Ask the platform team to raise it.",
         'video_minutes' => "This month's video minutes are used up (:max minutes).",
         'storage_mb' => 'The file storage is full (:max MB).',
-        'ai_uses' => 'This month\'s AI helper uses are used up (:max uses).',
+        'ai_uses' => 'The AI credits are used up (:max credits a month).',
     ],
     'not_in_plan' => ":feature is not in the academy's plan. Ask the platform team to add it.",
     'hidden' => '“:feature” is switched off at this academy. The owner or an admin can bring it back in Settings › Academy modules.',

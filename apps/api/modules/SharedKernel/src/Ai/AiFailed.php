@@ -7,17 +7,19 @@ use RuntimeException;
 /**
  * Why an AI helper gave nothing back. The screens say it in the reader's
  * words (shared::ai.failed.{reason}); the API answers it as a problem
- * (ProblemDetails): off 403, limit and quota (the month's uses in the
- * academy's plan, with its extra packs) 429, busy/unavailable/not_configured 503,
- * the rest 422.
+ * (ProblemDetails): off 403, limit and quota (the academy's AI credits,
+ * the month's allowance and the bought balance, are used up; with the
+ * credits the request needed when it is known) 429,
+ * busy/unavailable/not_configured 503, the rest 422.
  */
 final class AiFailed extends RuntimeException
 {
     public const REASONS = ['off', 'limit', 'quota', 'busy', 'not_configured', 'unavailable', 'refused', 'too_long', 'unreadable', 'unheard'];
 
-    public function __construct(public readonly string $reason, string $detail = '')
+    /** @param  ?int  $needed  for quota: the credits this request needed */
+    public function __construct(public readonly string $reason, string $detail = '', public readonly ?int $needed = null)
     {
-        parent::__construct($detail !== '' ? $detail : __('shared::ai.failed.'.$reason));
+        parent::__construct($detail !== '' ? $detail : self::say($reason, $needed));
     }
 
     public function status(): int
@@ -45,6 +47,13 @@ final class AiFailed extends RuntimeException
     /** What the reader is told, never the provider's own message. */
     public function sayable(): string
     {
-        return __('shared::ai.failed.'.$this->reason);
+        return self::say($this->reason, $this->needed);
+    }
+
+    private static function say(string $reason, ?int $needed): string
+    {
+        return $reason === 'quota' && $needed !== null && $needed > 0
+            ? trans_choice('shared::ai.failed.quota_needed', $needed, ['n' => $needed])
+            : __('shared::ai.failed.'.$reason);
     }
 }

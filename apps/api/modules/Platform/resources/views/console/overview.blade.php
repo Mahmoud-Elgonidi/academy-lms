@@ -26,6 +26,34 @@
             @include('platform::plans.summary', ['plan' => $plan, 'console' => true])
         @endif
 
+        {{-- The usage ledger of each meter: this month, the bought balance, overage, the hard limit, the latest lines. --}}
+        @if ($metering = $this->metering)
+            @include('platform::plans.usage-styles')
+            <section class="pc-base pc-box">
+                <h3><span>{{ __('platform::metering.console.title') }}</span></h3>
+                <div class="mu-cards">
+                    @foreach ($metering as $m)
+                        <div class="mu-card pc-base" data-state="{{ $m['state'] }}" wire:key="console-meter-{{ $m['key'] }}">
+                            <header><h3>{{ $m['label'] }}</h3>@if ($m['hard'])<span class="pp-tag" data-tone="warn">{{ __('platform::metering.console.hard_on') }}</span>@endif</header>
+                            <div class="mu-row"><span>{{ __('platform::metering.card.this_month') }}</span><span>{{ $m['allowance'] }}</span></div>
+                            <div class="mu-row"><span>{{ __('platform::metering.card.bought') }}</span><span>{{ $m['bought'] }}</span></div>
+                            <div class="mu-row"><span>{{ __('platform::metering.card.available') }}</span><span>{{ $m['available'] }}</span></div>
+                            @if ($m['debt'])<p class="mu-debt">{{ $m['debt'] }}</p>@endif
+                            <table class="mu-table">
+                                <tbody>
+                                    @forelse ($m['lines'] as $line)
+                                        <tr><td><small>{{ $line['when'] }}</small></td><td>{{ $line['what'] }}</td><td class="mu-num" data-sign="{{ $line['sign'] }}" dir="ltr">{{ $line['amount'] }}</td><td class="mu-num" dir="ltr">{{ $line['after'] }}</td></tr>
+                                    @empty
+                                        <tr><td colspan="4"><small>{{ __('platform::metering.statement.empty') }}</small></td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
         <div class="pc-two">
             <section class="pc-base pc-box">
                 <h3>

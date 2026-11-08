@@ -5,6 +5,8 @@ namespace Modules\Platform\Ai\Gateway;
 use Modules\Platform\Ai\AiSlots;
 use Modules\Platform\Ai\Engines\EngineSpec;
 use Modules\Platform\Ai\PlatformAcademyAi;
+use Modules\Platform\Metering\AiCharges;
+use Modules\Platform\Metering\AiCreditRates;
 use Modules\SharedKernel\Ai\AiAnswer;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiPrompt;
@@ -20,7 +22,7 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * with their capability's key; both are this gateway. It refuses a key no
  * module registered, says no while the helpers are off (AI_DRIVER=off) or,
  * in an academy, while AcademyAi does (the academy's switch, its plan, the
- * month's uses, today's cap), answers from the demo while AI_DRIVER=demo
+ * AI credits, today's cap), answers from the demo while AI_DRIVER=demo
  * (never in production), and otherwise asks the engines of the capability's
  * route in turn (Routes: the academy's, its plan's, the default, else the
  * server's settings): on to the next on an error, a time-out or an
@@ -28,7 +30,9 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * an answer that cannot be used. While a person waits it starts no new try
  * once AI_TIMEOUT has passed. Each try is a line in ai_usage (the adapter
  * notes it, with the engine, how long it took and what it fell back from:
- * CallContext); nothing that was asked or answered is kept or logged. The
+ * CallContext); nothing that was asked or answered is kept or logged. In an
+ * academy each call is charged here alone (AiCharges: its estimate held
+ * before, the actual taken after an answer, nothing for a failure). The
  * games designer is not a capability: it stays on Claude, outside here.
  */
 final class Gateway
@@ -42,24 +46,27 @@ final class Gateway
         private readonly CallContext $context,
         private readonly AiSlots $slots,
         private readonly TenantContext $tenants,
+        private readonly AiCharges $charges,
     ) {}
 
     /** @throws AiFailed */
     public function text(string $capability, AiPrompt $prompt): AiAnswer
     {
-        $route = $this->route($this->capabilities->require($capability), 'text');
+        $known = $this->capabilities->require($capability);
+        $route = $this->route($known, 'text');
 
-        return $this->down($route, fn (Step $step) => app($step->engine->kind->textAdapter())
-            ->ask($step->engine, $capability, $prompt, $step->tier ?? $prompt->tier));
+        return $this->charges->text($known, fn () => $this->down($route, fn (Step $step) => app($step->engine->kind->textAdapter())
+            ->ask($step->engine, $capability, $prompt, $step->tier ?? $prompt->tier)));
     }
 
     /** @throws AiFailed */
     public function speech(string $capability, AudioClip $clip, string $language): Transcript
     {
-        $route = $this->route($this->capabilities->require($capability), 'speech');
+        $known = $this->capabilities->require($capability);
+        $route = $this->route($known, 'speech');
 
-        return $this->down($route, fn (Step $step) => app($step->engine->kind->speechAdapter())
-            ->hear($step->engine, $capability, $clip, $language));
+        return $this->charges->speech($known, $clip, fn () => $this->down($route, fn (Step $step) => app($step->engine->kind->speechAdapter())
+            ->hear($step->engine, $capability, $clip, $language)));
     }
 
     /**
@@ -102,7 +109,7 @@ final class Gateway
         if ($this->tenants->id() !== null) {
             $why = app(PlatformAcademyAi::class)->why($capability->key);
             if ($why !== null) {
-                throw new AiFailed($why);
+                throw new AiFailed($why, needed: $why === 'quota' ? app(AiCreditRates::class)->least($capability) : null);
             }
         }
         if (PlatformAcademyAi::demo()) {

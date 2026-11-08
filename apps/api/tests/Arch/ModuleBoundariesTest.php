@@ -412,6 +412,18 @@ arch('the live board rules are pure: dates and domain types only, no database or
     ->expect('Modules\Scheduling\Domain\LiveBoard')
     ->toOnlyUse(['Carbon\CarbonImmutable', 'Modules\Scheduling\Domain', 'app']);
 
+arch('the usage ledger\'s rules are pure: dates and numbers only, no database or framework')
+    ->expect('Modules\Platform\Domain\Metering')
+    ->toOnlyUse(['Carbon\CarbonImmutable', 'Modules\Platform\Domain\Metering', 'InvalidArgumentException']);
+
+arch('the classroom meters its video minutes only through the shared kernel\'s VideoMeter, never Platform\'s metering')
+    ->expect('Modules\Classroom')
+    ->not->toUse(['Modules\Platform\Metering', 'Modules\Platform\Domain', 'Modules\Platform\Plans']);
+
+arch('only the gateway charges AI credits, and only Platform writes the usage ledger')
+    ->expect('Modules\Platform\Metering\AiCharges')
+    ->toOnlyBeUsedIn(['Modules\Platform\Ai\Gateway', 'Modules\Platform\Providers']);
+
 arch('no debugging leftovers')
     ->expect(['dd', 'dump', 'ray', 'var_dump'])
     ->not->toBeUsed();

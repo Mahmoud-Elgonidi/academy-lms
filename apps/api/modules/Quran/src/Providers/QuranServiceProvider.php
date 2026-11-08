@@ -90,7 +90,7 @@ final class QuranServiceProvider extends ServiceProvider
         // The hifz map, the mistakes notebook and the checks of recited homework, for a learner's copy and erasure.
         $this->app->make(PersonalData::class)->add(QuranData::class);
         // Its AI capability (the gateway routes, meters and switches it): the recitation check, by speech to text.
-        $this->app->make(Capabilities::class)->add(Capability::of(AiFeature::RecitationCheck, credits: 2, module: 'quran'));
+        $this->app->make(Capabilities::class)->add(Capability::of(AiFeature::RecitationCheck, credits: 0, module: 'quran', perMinute: 2));
         // "Start here": a Quran subject and a program, while the plan has the Quran.
         $this->app->make(SetupChecklist::class)->add(QuranStep::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');

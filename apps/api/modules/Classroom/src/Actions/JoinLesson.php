@@ -13,13 +13,16 @@ use Modules\Classroom\Video\Seat;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\DTOs\LessonCard;
+use Modules\SharedKernel\Plans\VideoMeter;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
  * A ticket into a lesson's room (docs/architecture/01-features.md, section
  * 9): for its people, from 10 minutes before the lesson until 10 minutes
  * after its end, while it is not cancelled or closed. The room is made on
- * the first ticket, with the academy's provider at that moment.
+ * the first ticket, with the academy's provider at that moment; under the
+ * hard limit on video minutes with none left, a lesson that has not begun
+ * opens on the teacher's outside link instead, and says why.
  */
 final class JoinLesson
 {
@@ -29,6 +32,7 @@ final class JoinLesson
         private readonly ProviderManager $providers,
         private readonly TenantContext $tenant,
         private readonly PeopleApi $people,
+        private readonly VideoMeter $meter,
     ) {}
 
     public function handle(string $sessionId, string $userId, ?CarbonImmutable $now = null): JoinTicket
@@ -49,6 +53,11 @@ final class JoinLesson
         }
 
         $chosen = ClassroomSettings::current()->provider;
+        // The video minutes ran out under the hard limit: a lesson not under way yet opens on the teacher's outside link.
+        $held = $chosen === 'livekit' && ! $this->meter->ownVideoAllowed();
+        if ($held) {
+            $chosen = 'external';
+        }
         $room = Room::query()->firstOrCreate(['session_id' => $lesson->id], [
             'provider' => $chosen,
             'name' => Room::nameFor($this->tenant->require()->id, $lesson->id),
@@ -60,7 +69,9 @@ final class JoinLesson
         }
 
         // A LiveKit room on a server that no longer has LiveKit: the teacher's outside link still works.
-        return $this->providers->get($this->providers->effective($room->provider))->ticket($room, $seat, $lesson)->withCamera($this->cameraOn($seat, $lesson));
+        $ticket = $this->providers->get($this->providers->effective($room->provider))->ticket($room, $seat, $lesson)->withCamera($this->cameraOn($seat, $lesson));
+
+        return $held && $ticket->provider === 'external' ? $ticket->withNotice(__('classroom::classroom.video_held')) : $ticket;
     }
 
     /**

@@ -18,6 +18,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property string $name
  * @property ?CarbonImmutable $started_at
  * @property ?CarbonImmutable $finished_at
+ * @property ?CarbonImmutable $metered_at the close its open time was last counted up to (the video minutes)
  */
 final class Room extends Model
 {
@@ -28,7 +29,7 @@ final class Room extends Model
 
     protected function casts(): array
     {
-        return ['started_at' => 'immutable_datetime', 'finished_at' => 'immutable_datetime'];
+        return ['started_at' => 'immutable_datetime', 'finished_at' => 'immutable_datetime', 'metered_at' => 'immutable_datetime'];
     }
 
     public static function nameFor(string $academyId, string $sessionId): string

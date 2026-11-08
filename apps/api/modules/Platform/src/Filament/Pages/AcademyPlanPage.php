@@ -40,7 +40,9 @@ use UnitEnum;
  * and when they start again), and the areas it includes. Changing it is the
  * platform team's: from here the academy asks for an extra pack for this
  * month or a bigger plan, and follows its requests. The warning's buttons
- * open the same windows here (?buy=video_minutes|ai_uses, ?upgrade=1).
+ * open the same windows here (?buy=video_minutes|ai_uses, ?upgrade=1). The
+ * meters in full (the bought balance, the charts, the ledger) are on the usage
+ * page (UsagePage).
  */
 final class AcademyPlanPage extends Page
 {
@@ -76,6 +78,14 @@ final class AcademyPlanPage extends Page
     public function getSubheading(): string|Htmlable|null
     {
         return __('platform::plans.academy.subtitle');
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('usage')->label(__('platform::metering.page.open'))->icon(Heroicon::OutlinedChartBar)->color('gray')
+                ->url(UsagePage::getUrl()),
+        ];
     }
 
     /** The warning's buttons: the window to open in place. */

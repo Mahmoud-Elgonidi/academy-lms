@@ -71,7 +71,7 @@ final class LearningServiceProvider extends ServiceProvider
         // A learner's homework, reports, challenges and cheers, for their copy and erasure (Privacy).
         $this->app->make(PersonalData::class)->add(LearningData::class);
         // Its AI capabilities (the gateway routes, meters and switches them): the report from a voice note, the weekly note's wording.
-        $this->app->make(Capabilities::class)->add(Capability::of(AiFeature::ReportDraft, tier: 'fast', credits: 2, module: 'learning'));
+        $this->app->make(Capabilities::class)->add(Capability::of(AiFeature::ReportDraft, tier: 'fast', credits: 2, module: 'learning', perMinute: 1));
         $this->app->make(Capabilities::class)->add(Capability::of(AiFeature::DigestWording, tier: 'fast', credits: 1, module: 'learning'));
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'learning');

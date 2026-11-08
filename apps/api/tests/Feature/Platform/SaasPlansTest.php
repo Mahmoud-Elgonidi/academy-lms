@@ -14,6 +14,8 @@ use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Catalog\Contracts\CatalogApi;
+use Modules\Classroom\Actions\MeterRoom;
+use Modules\Classroom\Models\Room;
 use Modules\Crm\Filament\Pages\Leads;
 use Modules\Enrollment\Contracts\DTOs\NewEnrollment;
 use Modules\Enrollment\Contracts\EnrollmentApi;
@@ -40,6 +42,7 @@ use Modules\Platform\Models\SaasSubscription;
 use Modules\Platform\Plans\PlanFormat;
 use Modules\Platform\Plans\PlanUsage;
 use Modules\Platform\Plans\PlanWarning;
+use Modules\Scheduling\Domain\Models\Session;
 use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Plans\AcademyPlan;
@@ -84,6 +87,14 @@ function onPlan(SaasPlan $plan, array $limits = [], array $on = [], array $off =
     app(PlanWarning::class)->forget(test()->academy->id);
 
     return $subscription;
+}
+
+/** The first lesson's room on our own video, open so many minutes and closed: counted into the month. */
+function heldOnOurVideo(int $minutes): void
+{
+    $lesson = Session::query()->where('enrollment_id', test()->booked->enrollmentId)->orderBy('starts_at')->first();
+    app(MeterRoom::class)->handle(Room::query()->create(['session_id' => $lesson->id, 'provider' => 'livekit', 'name' => 'r', 'started_at' => $lesson->starts_at, 'finished_at' => $lesson->starts_at->addMinutes($minutes)]));
+    app(PlanWarning::class)->forget(test()->academy->id);
 }
 
 function newTeacher(string $name): string
@@ -239,9 +250,8 @@ it('lets an academy pick a ready template or keep its look outside the plan, not
 });
 
 it('tells the staff plainly when the month\'s video minutes run out, and the way on to Zoom or Google Meet', function () {
-    $lesson = DB::table('sessions')->where('enrollment_id', $this->booked->enrollmentId)->orderBy('starts_at')->first();
-    DB::table('rooms')->insert(['id' => (string) Str::uuid7(), 'academy_id' => $this->academy->id, 'session_id' => $lesson->id, 'provider' => 'livekit', 'name' => 'r', 'started_at' => $lesson->starts_at, 'created_at' => now(), 'updated_at' => now()]);
     onPlan(saasPlan(['video_minutes' => 30]));
+    heldOnOurVideo(30);
     app()->setLocale('ar');
 
     $this->actingAs($this->owner);
@@ -257,10 +267,9 @@ it('tells the staff plainly when the month\'s video minutes run out, and the way
 });
 
 it('counts each limit with the module that owns it, keeps the day\'s count, and tells the staff', function () {
-    // A lesson held on our own video: its room opened.
-    $lesson = DB::table('sessions')->where('enrollment_id', $this->booked->enrollmentId)->orderBy('starts_at')->first();
-    DB::table('rooms')->insert(['id' => (string) Str::uuid7(), 'academy_id' => $this->academy->id, 'session_id' => $lesson->id, 'provider' => 'livekit', 'name' => 'r', 'started_at' => $lesson->starts_at, 'created_at' => now(), 'updated_at' => now()]);
     onPlan(saasPlan(['max_teachers' => 2, 'max_active_students' => 10, 'video_minutes' => 30, 'storage_mb' => 100]));
+    // A lesson held on our own video: its room was open 30 minutes, counted when it closed.
+    heldOnOurVideo(30);
 
     $lines = collect(app(PlanUsage::class)->lines())->keyBy(fn ($l) => $l->limit->value);
     expect($lines['teachers']->used)->toBe(2)->and($lines['teachers']->state())->toBe('full')

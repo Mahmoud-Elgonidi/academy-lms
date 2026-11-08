@@ -15,11 +15,18 @@ final readonly class JoinTicket
         public Seat $seat,
         public CarbonImmutable $expiresAt,
         public bool $camera = true,   // come in with the camera on (a student may always switch it)
+        public ?string $notice = null,
     ) {}
 
     public function withCamera(bool $camera): self
     {
-        return new self($this->provider, $this->url, $this->token, $this->room, $this->seat, $this->expiresAt, $camera);
+        return new self($this->provider, $this->url, $this->token, $this->room, $this->seat, $this->expiresAt, $camera, $this->notice);
+    }
+
+    /** Why the lesson is not where the academy holds its lessons (the video minutes ran out under the hard limit). */
+    public function withNotice(?string $notice): self
+    {
+        return new self($this->provider, $this->url, $this->token, $this->room, $this->seat, $this->expiresAt, $this->camera, $notice);
     }
 
     /** @return array<string, mixed> */
@@ -37,6 +44,8 @@ final readonly class JoinTicket
             /** Come in with the camera on; false: the academy has this student start with it off (they may switch it on). */
             'camera' => (bool) ($this->seat->publishes() && $this->camera),
             'expires_at' => $this->expiresAt->utc()->toIso8601ZuluString(),
+            /** Why this lesson opens on the teacher's own link instead of the academy's video (its video minutes ran out), to show before going; null: nothing to say. */
+            'notice' => $this->notice !== null ? (string) $this->notice : null,
         ];
     }
 }

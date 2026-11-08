@@ -1,11 +1,11 @@
 <?php
 
-// What an academy asks about its plan: an extra pack for this month (video minutes, AI uses) or a bigger plan; and the console's answers.
+// What an academy asks about its plan: an extra pack (video minutes, AI credits) or a bigger plan; and the console's answers.
 return [
     'fields' => ['note' => 'Note for the platform team'],
     'status' => [
         'requested' => 'Waiting for the platform team',
-        'active' => 'On this month',
+        'active' => 'On',
         'declined' => 'Declined',
         'cancelled' => 'Cancelled',
         'handled' => 'Handled',
@@ -25,7 +25,7 @@ return [
     'buy' => [
         'label' => 'Buy extra',
         'heading' => 'Extra pack: :what',
-        'body' => 'It is added to this month only, as soon as the platform team turns it on once paid the way you agree with them. It ends with the month, and the plan\'s full amount comes back on :renews.',
+        'body' => 'It is added as soon as the platform team turns it on once paid the way you agree with them, and lasts 12 months. It is used after the plan\'s monthly balance, which starts again on :renews.',
         'pack' => 'Pack',
         'note_hint' => 'Optional: how you would like to pay, or anything the team should know.',
         'confirm' => 'Send the request',
@@ -51,7 +51,7 @@ return [
     ],
     'list' => [
         'title' => 'Extra packs and upgrades',
-        'subtitle' => 'This month\'s requests. An extra pack counts in the current month only, as soon as it is turned on.',
+        'subtitle' => 'This month\'s requests. An extra pack is added as soon as it is turned on and lasts 12 months.',
         'upgrade' => 'Plan upgrade',
         'reason' => 'Declined because: :reason',
         'empty' => 'No requests this month.',
@@ -60,14 +60,14 @@ return [
         'team' => [
             'subject_topup' => 'Extra pack requested: :academy',
             'subject_upgrade' => 'Plan upgrade requested: :academy',
-            'intro_topup' => ':academy asked for an extra pack for this month.',
+            'intro_topup' => ':academy asked for an extra pack.',
             'intro_upgrade' => ':academy asked for a bigger plan.',
             'answer' => 'Answer it in the console:',
         ],
         'answer' => [
             'subject_active' => 'Your academy\'s extra pack is on',
             'subject_declined' => 'The extra pack you asked for was not turned on',
-            'active' => 'The extra pack (:extra) is on for this month and ready to use. It ends with the month, and the plan\'s full amount comes back on :renews.',
+            'active' => 'The extra pack (:extra) is on and ready to use. It is used after the plan\'s monthly balance and lasts until :expires.',
             'declined' => 'The platform team did not turn on the extra pack you asked for. The reason: :reason',
             'open' => 'Your plan:',
         ],
@@ -75,7 +75,7 @@ return [
     'console' => [
         'nav' => 'Plan requests',
         'title' => 'Plan requests',
-        'subtitle' => 'Extra packs academies ask for their month, and requests for a bigger plan. Turn a pack on once paid: it is added to the academy\'s current month at once.',
+        'subtitle' => 'Extra packs academies ask for, and requests for a bigger plan. Turn a pack on once paid: it is added to the academy\'s balance at once and lasts 12 months.',
         'filter' => 'Requests',
         'filters' => ['waiting' => 'Waiting', 'all' => 'All'],
         'kinds' => ['topup' => 'Extra pack', 'upgrade' => 'Upgrade'],
@@ -83,13 +83,13 @@ return [
         'upgrade' => 'From :from to :to',
         'any_plan' => 'a plan not chosen',
         'activate' => 'Turn it on',
-        'activate_body' => 'It is added to the academy\'s current month at once and ends with it. Turn it on once the payment has arrived.',
+        'activate_body' => 'It is added to the academy\'s balance at once and lasts 12 months. Turn it on once the payment has arrived.',
         'decline' => 'Decline',
         'reason_hint' => 'The academy reads it. At least 5 characters.',
         'mark_handled' => 'Handled',
         'handled_body' => 'Change the plan on the academy\'s page first, if that is what you agreed.',
         'change_plan' => 'Change the plan',
-        'activated' => 'Turned on by :name for :month.',
+        'activated' => 'Turned on by :name in :month.',
         'declined' => 'Declined by :name: :reason',
         'handled' => 'Handled by :name.',
         'answered' => 'The answer was saved.',
@@ -97,12 +97,12 @@ return [
     ],
     'packs' => [
         'title' => 'Extra packs',
-        'subtitle' => 'What an academy may ask for over its plan, for one month. Turned on from Plan requests once paid; it ends with the month.',
+        'subtitle' => 'What an academy may ask for over its plan. Turned on from Plan requests once paid; it lasts 12 months.',
         'new' => 'New pack',
         'edit' => 'Edit the pack',
         'limit' => 'Kind',
         'amount' => 'Amount',
-        'amount_hint' => 'Minutes for video, uses for the AI helpers.',
+        'amount_hint' => 'Minutes for video, credits for the AI helpers.',
         'price' => 'Price',
         'price_hint' => 'Optional; the academy sees it when asking.',
         'archived' => 'Stop offering it',

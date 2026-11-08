@@ -4,6 +4,7 @@ namespace Modules\Platform\Plans;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\Platform\Metering\Meters;
 use Modules\Platform\Models\SaasSubscription;
 use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Plans\Limit;
@@ -30,9 +31,9 @@ final class PlanSummary
                 'label' => __('shared::plans.limits.'.$line->limit->value),
                 'text' => PlanFormat::usage($line->limit, $line->used, $line->allowed()),
                 'max' => PlanFormat::amount($line->limit, $line->allowed()),
-                // This month's extra packs over the plan's own amount, said apart.
-                'extra' => $line->extra > 0 && $line->max !== null
-                    ? __('platform::plans.summary.extra', ['plan' => PlanFormat::amount($line->limit, $line->max), 'extra' => PlanFormat::amount($line->limit, $line->extra)])
+                // The bought balance over the plan's monthly allowance, said apart.
+                'extra' => $line->bought > 0 && $line->max !== null
+                    ? __('platform::plans.summary.extra', ['plan' => PlanFormat::amount($line->limit, $line->max), 'extra' => PlanFormat::amount($line->limit, $line->bought)])
                     : null,
                 'buyable' => $line->limit->monthly() && $line->max !== null,
                 'percent' => $ratio === null ? null : (int) min(100, round($ratio * 100)),
@@ -58,8 +59,8 @@ final class PlanSummary
     }
 
     /**
-     * The academy's last counts this month (usage_counters), as usage lines,
-     * with the month's extra packs.
+     * The academy's last counts this month (usage_counters), as usage lines;
+     * the monthly ones from the usage ledger now.
      *
      * @return array{lines: list<UsageLine>, measured: ?CarbonImmutable}
      */
@@ -67,14 +68,15 @@ final class PlanSummary
     {
         $period = UsagePeriod::monthOf(CarbonImmutable::now(), $timezone)->key($timezone);
         $rows = DB::connection('pgsql_platform')->table('usage_counters')->where('academy_id', $academyId)->where('period', $period)->get()->keyBy('metric');
-        $extras = Extras::of($academyId, $period);
-        $lines = array_map(fn (Limit $l) => new UsageLine(
-            $l,
-            isset($rows[$l->value]) ? (int) $rows[$l->value]->value : null,
-            $terms->limit($l),
-            in_array($l->value, $terms->overridden, true),
-            $extras[$l->value] ?? 0,
-        ), PlanUsage::shown($terms->has(...)));
+        $ledger = app(Meters::class);
+        $lines = array_map(fn (Limit $l) => $l->monthly()
+            ? PlanUsage::monthly($ledger, $academyId, $l, $terms->limit($l), in_array($l->value, $terms->overridden, true))
+            : new UsageLine(
+                $l,
+                isset($rows[$l->value]) ? (int) $rows[$l->value]->value : null,
+                $terms->limit($l),
+                in_array($l->value, $terms->overridden, true),
+            ), PlanUsage::shown($terms->has(...)));
         $measured = $rows->max('measured_at');
 
         return ['lines' => $lines, 'measured' => $measured ? CarbonImmutable::parse($measured) : null];

@@ -7,6 +7,8 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
@@ -26,6 +28,7 @@ use Modules\Platform\Commands\CreatePlatformAdmin;
 use Modules\Platform\Commands\HealthCommand;
 use Modules\Platform\Commands\MailTestCommand;
 use Modules\Platform\Commands\MeasureUsageCommand;
+use Modules\Platform\Commands\MeteringCommand;
 use Modules\Platform\Commands\ServicesCommand;
 use Modules\Platform\Commands\ShowPlatformCode;
 use Modules\Platform\Commands\SweepSignupRequests;
@@ -48,8 +51,13 @@ use Modules\Platform\Http\Controllers\HealthController;
 use Modules\Platform\Http\Middleware\ConsoleHost;
 use Modules\Platform\Listeners\RecordConsoleSignIn;
 use Modules\Platform\Live\GameStudioChanged;
+use Modules\Platform\Metering\AiCharges;
+use Modules\Platform\Metering\AiCreditRates;
+use Modules\Platform\Metering\Meters;
+use Modules\Platform\Metering\PendingCharges;
+use Modules\Platform\Metering\PlatformVideoMeter;
+use Modules\Platform\Metering\UsageAlerts;
 use Modules\Platform\Models\AcademyBranding;
-use Modules\Platform\Models\AiUsage;
 use Modules\Platform\Models\PlatformAdmin;
 use Modules\Platform\Plans\PlanUsage;
 use Modules\Platform\Plans\PlatformAcademyPlan;
@@ -67,7 +75,7 @@ use Modules\SharedKernel\Plans\FeatureNotInPlan;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\PlanLimitReached;
 use Modules\SharedKernel\Plans\UsageMeters;
-use Modules\SharedKernel\Plans\UsagePeriod;
+use Modules\SharedKernel\Plans\VideoMeter;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Setup\SetupChecklist;
 use Modules\SharedKernel\Tenancy\TenantResolver;
@@ -112,6 +120,16 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->scoped(Gateway::class);
         $this->app->bind(LanguageModel::class, GatewayLanguageModel::class);
         $this->app->bind(SpeechToText::class, GatewaySpeechToText::class);
+
+        // The usage ledger (video minutes, AI credits): read and written on the platform connection; the AI credits are
+        // charged in the gateway, the video minutes by the classroom through SharedKernel's VideoMeter.
+        $this->app->scoped(Meters::class);
+        $this->app->scoped(UsageAlerts::class);
+        $this->app->scoped(AiCreditRates::class);
+        $this->app->scoped(PendingCharges::class);
+        $this->app->scoped(AiCharges::class);
+        $this->app->scoped(PlatformVideoMeter::class);
+        $this->app->alias(PlatformVideoMeter::class, VideoMeter::class);
     }
 
     public function boot(): void
@@ -125,6 +143,9 @@ final class PlatformServiceProvider extends ServiceProvider
         // The console's zone chip changes the platform team's own zone.
         $this->app->make(OwnTimezones::class)->add(PlatformAdmin::class, SavePlatformAdminTimezone::class);
         Event::listen(Login::class, RecordConsoleSignIn::class);
+        // What a helper heard and never wrote from costs nothing: let its hold go when the request or the job ends.
+        $this->app->terminating(fn () => $this->app->resolved(PendingCharges::class) ? $this->app->make(PendingCharges::class)->releaseAll() : null);
+        Event::listen([JobProcessed::class, JobFailed::class], fn () => $this->app->resolved(PendingCharges::class) ? $this->app->make(PendingCharges::class)->releaseAll() : null);
         // The platform's settings from the console over the server's .env: at each job and command too (requests:
         // ApplyPlatformSettings). Never here in boot, so caching the config never writes them out.
         Event::listen(JobProcessing::class, fn () => $this->app->make(PlatformSettings::class)->apply());
@@ -134,10 +155,12 @@ final class PlatformServiceProvider extends ServiceProvider
             }
         });
         if ($this->app->runningInConsole()) {
-            $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class, HealthCommand::class, MailTestCommand::class, ServicesCommand::class, SweepSignupRequests::class]);
+            $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class, MeteringCommand::class, HealthCommand::class, MailTestCommand::class, ServicesCommand::class, SweepSignupRequests::class]);
         }
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('platform:usage')->dailyAt('02:10')->withoutOverlapping()->onOneServer();
+            // The usage ledger: each month's allowance, ended lots, unsettled holds and the alerts.
+            $schedule->command('platform:metering')->hourlyAt(7)->withoutOverlapping()->onOneServer();
             // The stack's heartbeats (the scheduler's own, and one through the queue to the worker) and the alerts.
             $schedule->call(fn () => Heartbeats::beat('scheduler'))->everyMinute()->name('health:scheduler');
             $schedule->call(fn () => WorkerBeat::dispatch(now()->getTimestamp())->onQueue('default'))->everyMinute()->name('health:worker');
@@ -158,9 +181,6 @@ final class PlatformServiceProvider extends ServiceProvider
 
             return array_sum(array_map(fn (?string $path) => $path !== null && $disk->exists($path) ? $disk->size($path) : 0, [$branding?->logo_path, $branding?->favicon_path]));
         });
-
-        // The month's uses of the AI helpers, against the plan's ai_uses.
-        $this->app->make(UsageMeters::class)->add(Limit::AiUses, fn (UsagePeriod $month): int => AiUsage::usesIn($month));
 
         // On any panel screen, something the plan stops says why instead of failing the page.
         \Livewire\on('exception', function ($component, $e, $stopPropagation): void {

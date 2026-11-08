@@ -18,7 +18,8 @@ use Throwable;
  * the inbox, then turned into attendance (who came and went, when), or into
  * a recording's progress (egress events). A supervisor's comings and goings
  * are not attendance. When the academy records every lesson, the teacher and
- * the student both being in starts it.
+ * the student both being in starts it. A room that closed counts its open
+ * time into the academy's video minutes.
  */
 final class HandleLiveKitWebhook
 {
@@ -28,6 +29,7 @@ final class HandleLiveKitWebhook
         private readonly AttendanceApi $attendance,
         private readonly HandleEgressEvent $egress,
         private readonly RecordWhenBothIn $autoRecord,
+        private readonly MeterRoom $meter,
     ) {}
 
     /** @param  array<string, mixed>  $event */
@@ -75,6 +77,10 @@ final class HandleLiveKitWebhook
             $item->update(['processed_at' => CarbonImmutable::now()]);
             if ($name === 'participant_joined') {
                 $this->autoRecord->handle($room->refresh());
+            }
+            if ($name === 'room_finished') {
+                // Its open time into the month's video minutes (the sweep counts it if this fails).
+                $this->meter->handle($room->refresh());
             }
         } catch (Throwable $e) {
             $item->update(['error' => Str::limit($e->getMessage(), 490)]);

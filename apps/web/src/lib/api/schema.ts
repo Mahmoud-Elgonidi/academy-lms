@@ -5137,6 +5137,8 @@ export interface operations {
                             /** @description Come in with the camera on; false: the academy has this student start with it off (they may switch it on). */
                             camera: boolean;
                             expires_at: string;
+                            /** @description Why this lesson opens on the teacher's own link instead of the academy's video (its video minutes ran out), to show before going; null: nothing to say. */
+                            notice: string | null;
                         } | {
                             /** @constant */
                             provider: "external";
@@ -5150,6 +5152,8 @@ export interface operations {
                             /** @description Come in with the camera on; false: the academy has this student start with it off (they may switch it on). */
                             camera: boolean;
                             expires_at: string;
+                            /** @description Why this lesson opens on the teacher's own link instead of the academy's video (its video minutes ran out), to show before going; null: nothing to say. */
+                            notice: string | null;
                         };
                         recording: {
                             /** @description off | manual | auto */

@@ -78,6 +78,8 @@ return [
         'body' => 'This link has expired or is not yours. Open the lesson from the app, or ask the academy for a new link.',
         'consent' => 'Your account is waiting for your parent\'s consent. Once they agree you can join from here; for now, your parent can bring you in from their account.',
     ],
+    'video_held' => 'The academy\'s video minutes have run out, so this lesson is on the teacher\'s own link (Zoom or Google Meet). Press "Go to the lesson" to open it.',
+    'video_held_go' => 'Go to the lesson',
     'errors' => [
         'not_yours' => 'This lesson is not yours.',
         'closed' => 'This lesson has ended or was cancelled.',
