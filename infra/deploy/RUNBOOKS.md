@@ -328,6 +328,43 @@ docker compose exec web php artisan queue:failed           # a helper's job that
   docker compose exec web rm -r /tmp/recitations
   ```
 
+### Engines and routes (console › AI engines, AI routing)
+
+Every model call goes through one gateway. With no engines saved it runs on the settings above, as
+before. An owner can instead save **engines** (a provider's address, key, models, time-out and cost:
+Claude, an OpenAI-compatible server, Gemini, Ollama, ElevenLabs, a Whisper-compatible speech server) and,
+for each capability, a **route**: the engines in turn (the next is asked only when one is down, times out
+or is overloaded), for every academy, a plan or one academy (the narrowest wins; with none, the
+settings). "Import the current settings" on the engines page makes engines and default routes that change
+nothing; after that, change a route to move a capability. Each engine has its own check on System health
+(`service_ai_engine_{id}`), its "Try it", and a line in the daily `platform:services`
+(`platform:services --group=engines` for the engines alone). "Compare" on the routing page runs saved test
+inputs (never a learner's data) through two chains before you switch.
+
+- **An engine is failing**: its check says why. The route goes on to its next engine by itself; if it has
+  none, turn the engine off on its card (its routes skip it) or edit the route.
+- **Turn everything off at once**: `AI_DRIVER=off` still does it, engines or not.
+
+### An engine of the platform's own (GPU server)
+
+The platform never runs models inside the app. Run them on a separate machine with a GPU and reach it
+like any engine, by address and key:
+
+1. **Words**: vLLM (`vllm serve <model> --api-key <key> --port 8000`, OpenAI-compatible with JSON-schema
+   answers) or Ollama (`/v1` for an OpenAI-compatible engine, or its own API as an Ollama engine).
+   **Speech**: a faster-whisper server with OpenAI's `/v1/audio/transcriptions`
+   (e.g. `fedirz/faster-whisper-server`), model `large-v3` or a smaller one.
+2. Put it behind https (Caddy or nginx with a certificate) unless it sits on the same private network
+   as the app (a container name, 10/8, 172.16/12, 192.168/16, `*.internal`): an address over the internet
+   in clear is refused. Require a key (vLLM's `--api-key`, or the proxy's).
+3. In console › AI engines add it (`openai_compatible` or `whisper_compatible`, the address up to `/v1`,
+   the key, the model names), "Try it", and fill in its cost per server minute to compare.
+4. Send a share of one capability to it first (a route's "Share to compare", say 10%), read "Compare" and
+   the `ai_usage` lines (`engine_id`, `latency_ms`, `outcome`), then make it the first engine of the chain,
+   keeping a provider after it as the fallback.
+5. Its check on System health is the platform's heartbeat for it: a GPU server that stops answering
+   shows there and in `platform:health --alert`.
+
 ## An outside service needs you
 
 A key refused, a credit or plan run out, an account suspended, a model or template gone: each service in

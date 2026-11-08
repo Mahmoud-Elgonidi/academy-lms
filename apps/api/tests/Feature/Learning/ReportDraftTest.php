@@ -82,7 +82,7 @@ function fakeEars(string $text): object
 
         public function __construct(public string $text) {}
 
-        public function transcribe(AiFeature $feature, AudioClip $clip, string $language = 'ara'): Transcript
+        public function transcribe(AiFeature|string $feature, AudioClip $clip, string $language = 'ara'): Transcript
         {
             $this->clip = $clip;
             $this->existed = is_file($clip->path);
@@ -104,7 +104,7 @@ function fakeWriter(array $answer): object
 
         public function __construct(private array $answer) {}
 
-        public function json(AiFeature $feature, AiPrompt $prompt): AiAnswer
+        public function json(AiFeature|string $feature, AiPrompt $prompt): AiAnswer
         {
             $this->prompt = $prompt;
 

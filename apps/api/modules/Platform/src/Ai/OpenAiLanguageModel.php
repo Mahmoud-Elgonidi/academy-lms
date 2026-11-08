@@ -3,6 +3,8 @@
 namespace Modules\Platform\Ai;
 
 use Illuminate\Http\Client\PendingRequest;
+use Modules\Platform\Ai\Engines\EngineSpec;
+use Modules\Platform\Ai\Engines\TextEngine;
 use Modules\Platform\Ai\Faults\OpenAiFaults;
 use Modules\Platform\Ai\Support\JsonAnswer;
 use Modules\Platform\Ai\Support\ModelCall;
@@ -11,6 +13,7 @@ use Modules\SharedKernel\Ai\AiAnswer;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Ai\AiPrompt;
+use Modules\SharedKernel\Ai\Capabilities;
 use Modules\SharedKernel\Ai\LanguageModel;
 
 /**
@@ -19,21 +22,30 @@ use Modules\SharedKernel\Ai\LanguageModel;
  * stored on OpenAI's side (store: false), and the reasoning effort only for
  * the models that take one. The key is the platform's (OPENAI_API_KEY).
  */
-final class OpenAiLanguageModel implements LanguageModel
+final class OpenAiLanguageModel implements LanguageModel, TextEngine
 {
     public function __construct(private readonly ModelCall $call) {}
 
-    public function json(AiFeature $feature, AiPrompt $prompt): AiAnswer
+    public function json(AiFeature|string $capability, AiPrompt $prompt): AiAnswer
     {
         $provider = AiProvider::OpenAi;
-        $model = $provider->model($prompt->tier);
-        if (! $provider->hasCredentials() || $model === '') {
+        if (! $provider->hasCredentials() || $provider->model($prompt->tier) === '') {
             throw new AiFailed('not_configured');
         }
-        $request = self::request($prompt, $model, $feature->value);
 
-        return $this->call->run($feature, $provider, $model,
-            send: fn (PendingRequest $http) => $http->withToken($provider->key())->post($provider->baseUrl().'/chat/completions', $request),
+        return $this->ask(EngineSpec::legacyText($provider), Capabilities::key($capability), $prompt, $prompt->tier);
+    }
+
+    public function ask(EngineSpec $engine, string $capability, AiPrompt $prompt, string $tier): AiAnswer
+    {
+        $model = $engine->model($tier);
+        if (! $engine->ready('text') || $model === '') {
+            throw new AiFailed('not_configured');
+        }
+        $request = self::request($prompt, $model, $capability);
+
+        return $this->call->run($capability, $engine, $model,
+            send: fn (PendingRequest $http) => ($engine->key !== '' ? $http->withToken($engine->key) : $http)->post($engine->baseUrl.'/chat/completions', $request),
             read: fn (array $body) => self::read($body, $prompt->schema, $model),
             usage: fn (array $body) => self::usage($body),
             fault: fn (int $status, mixed $body) => OpenAiFaults::of($status, $body),

@@ -14,13 +14,13 @@ final class SpeechRecitation implements RecitationEngine
 {
     public function __construct(private readonly SpeechToText $speech) {}
 
-    public function check(AiFeature $feature, AudioClip $clip, ExpectedText $expected): RecitationResult
+    public function check(AiFeature|string $capability, AudioClip $clip, ExpectedText $expected): RecitationResult
     {
         $words = $expected->words();
         if ($words === [] || count($words) > WordAlignment::MAX_EXPECTED) {
             throw new AiFailed('too_long');
         }
-        $heard = $this->speech->transcribe($feature, $clip, 'ara');
+        $heard = $this->speech->transcribe($capability, $clip, 'ara');
         $said = array_map(fn (HeardWord $w) => $w->text, $heard->words) ?: (preg_split('/\s+/u', trim($heard->text), -1, PREG_SPLIT_NO_EMPTY) ?: []);
         if ($said === []) {
             throw new AiFailed('unheard');

@@ -3,6 +3,8 @@
 namespace Modules\Platform\Ai;
 
 use Illuminate\Http\Client\PendingRequest;
+use Modules\Platform\Ai\Engines\EngineSpec;
+use Modules\Platform\Ai\Engines\TextEngine;
 use Modules\Platform\Ai\Faults\GeminiFaults;
 use Modules\Platform\Ai\Support\JsonAnswer;
 use Modules\Platform\Ai\Support\ModelCall;
@@ -10,6 +12,7 @@ use Modules\SharedKernel\Ai\AiAnswer;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Ai\AiPrompt;
+use Modules\SharedKernel\Ai\Capabilities;
 use Modules\SharedKernel\Ai\LanguageModel;
 
 /**
@@ -18,25 +21,34 @@ use Modules\SharedKernel\Ai\LanguageModel;
  * the platform's (GEMINI_API_KEY, from a project with billing on, whose
  * prompts Google does not use), sent as a header, never in the address.
  */
-final class GeminiLanguageModel implements LanguageModel
+final class GeminiLanguageModel implements LanguageModel, TextEngine
 {
     /** A candidate stopped for one of these was refused. */
     private const REFUSED = ['SAFETY', 'RECITATION', 'BLOCKLIST', 'PROHIBITED_CONTENT', 'SPII', 'IMAGE_SAFETY', 'LANGUAGE'];
 
     public function __construct(private readonly ModelCall $call) {}
 
-    public function json(AiFeature $feature, AiPrompt $prompt): AiAnswer
+    public function json(AiFeature|string $capability, AiPrompt $prompt): AiAnswer
     {
         $provider = AiProvider::Gemini;
-        $model = $provider->model($prompt->tier);
-        if (! $provider->hasCredentials() || $model === '') {
+        if (! $provider->hasCredentials() || $provider->model($prompt->tier) === '') {
+            throw new AiFailed('not_configured');
+        }
+
+        return $this->ask(EngineSpec::legacyText($provider), Capabilities::key($capability), $prompt, $prompt->tier);
+    }
+
+    public function ask(EngineSpec $engine, string $capability, AiPrompt $prompt, string $tier): AiAnswer
+    {
+        $model = $engine->model($tier);
+        if (! $engine->ready('text') || $model === '') {
             throw new AiFailed('not_configured');
         }
         $request = self::request($prompt);
 
-        return $this->call->run($feature, $provider, $model,
-            send: fn (PendingRequest $http) => $http->withHeaders(['x-goog-api-key' => $provider->key()])
-                ->post($provider->baseUrl().'/models/'.rawurlencode($model).':generateContent', $request),
+        return $this->call->run($capability, $engine, $model,
+            send: fn (PendingRequest $http) => $http->withHeaders(['x-goog-api-key' => $engine->key])
+                ->post($engine->baseUrl.'/models/'.rawurlencode($model).':generateContent', $request),
             read: fn (array $body) => self::read($body, $model),
             usage: fn (array $body) => self::usage($body),
             fault: fn (int $status, mixed $body) => GeminiFaults::of($status, $body),

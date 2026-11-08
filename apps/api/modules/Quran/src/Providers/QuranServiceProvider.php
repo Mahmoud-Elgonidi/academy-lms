@@ -41,6 +41,9 @@ use Modules\Quran\QuranService;
 use Modules\Quran\Setup\QuranStep;
 use Modules\Quran\Texts\QuranFiles;
 use Modules\Quran\Texts\QuranText;
+use Modules\SharedKernel\Ai\AiFeature;
+use Modules\SharedKernel\Ai\Capabilities;
+use Modules\SharedKernel\Ai\Capability;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Quran\LessonQuran;
 use Modules\SharedKernel\Realtime\LiveSignals;
@@ -86,6 +89,8 @@ final class QuranServiceProvider extends ServiceProvider
     {
         // The hifz map, the mistakes notebook and the checks of recited homework, for a learner's copy and erasure.
         $this->app->make(PersonalData::class)->add(QuranData::class);
+        // Its AI capability (the gateway routes, meters and switches it): the recitation check, by speech to text.
+        $this->app->make(Capabilities::class)->add(Capability::of(AiFeature::RecitationCheck, credits: 2, module: 'quran'));
         // "Start here": a Quran subject and a program, while the plan has the Quran.
         $this->app->make(SetupChecklist::class)->add(QuranStep::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');

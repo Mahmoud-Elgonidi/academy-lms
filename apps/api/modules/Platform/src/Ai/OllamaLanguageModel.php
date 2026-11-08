@@ -3,6 +3,8 @@
 namespace Modules\Platform\Ai;
 
 use Illuminate\Http\Client\PendingRequest;
+use Modules\Platform\Ai\Engines\EngineSpec;
+use Modules\Platform\Ai\Engines\TextEngine;
 use Modules\Platform\Ai\Faults\OllamaFaults;
 use Modules\Platform\Ai\Support\JsonAnswer;
 use Modules\Platform\Ai\Support\ModelCall;
@@ -10,6 +12,7 @@ use Modules\SharedKernel\Ai\AiAnswer;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Ai\AiPrompt;
+use Modules\SharedKernel\Ai\Capabilities;
 use Modules\SharedKernel\Ai\LanguageModel;
 
 /**
@@ -18,22 +21,31 @@ use Modules\SharedKernel\Ai\LanguageModel;
  * temperature 0. Nothing leaves the platform's servers; a key is sent only
  * when a proxy in front of it asks for one (OLLAMA_API_KEY).
  */
-final class OllamaLanguageModel implements LanguageModel
+final class OllamaLanguageModel implements LanguageModel, TextEngine
 {
     public function __construct(private readonly ModelCall $call) {}
 
-    public function json(AiFeature $feature, AiPrompt $prompt): AiAnswer
+    public function json(AiFeature|string $capability, AiPrompt $prompt): AiAnswer
     {
         $provider = AiProvider::Ollama;
-        $model = $provider->model($prompt->tier);
-        if (! $provider->hasCredentials() || $model === '') {
+        if (! $provider->hasCredentials() || $provider->model($prompt->tier) === '') {
+            throw new AiFailed('not_configured');
+        }
+
+        return $this->ask(EngineSpec::legacyText($provider), Capabilities::key($capability), $prompt, $prompt->tier);
+    }
+
+    public function ask(EngineSpec $engine, string $capability, AiPrompt $prompt, string $tier): AiAnswer
+    {
+        $model = $engine->model($tier);
+        if (! $engine->ready('text') || $model === '') {
             throw new AiFailed('not_configured');
         }
         $request = self::request($prompt, $model);
 
-        return $this->call->run($feature, $provider, $model,
-            send: fn (PendingRequest $http) => ($provider->key() !== '' ? $http->withToken($provider->key()) : $http)
-                ->post($provider->baseUrl().'/api/chat', $request),
+        return $this->call->run($capability, $engine, $model,
+            send: fn (PendingRequest $http) => ($engine->key !== '' ? $http->withToken($engine->key) : $http)
+                ->post($engine->baseUrl.'/api/chat', $request),
             read: fn (array $body) => self::read($body, $model),
             usage: fn (array $body) => self::usage($body),
             fault: fn (int $status, mixed $body) => OllamaFaults::of($status, $body),

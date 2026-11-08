@@ -6,6 +6,9 @@ use Anthropic\Beta\Messages\BetaMessage;
 use Anthropic\Client;
 use Anthropic\Lib\Streaming\MessageAccumulator;
 use GuzzleHttp\Client as Guzzle;
+use Modules\Platform\Ai\Engines\EngineKind;
+use Modules\Platform\Ai\Engines\EngineSpec;
+use Modules\Platform\Ai\Engines\TextEngine;
 use Modules\Platform\Ai\Faults\AnthropicFaults;
 use Modules\Platform\Games\Designer\ClaudeGameDesigner;
 use Modules\Platform\Models\AiUsage;
@@ -13,6 +16,7 @@ use Modules\SharedKernel\Ai\AiAnswer;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Ai\AiPrompt;
+use Modules\SharedKernel\Ai\Capabilities;
 use Modules\SharedKernel\Ai\LanguageModel;
 use Modules\SharedKernel\Health\ServiceHealth;
 use Modules\SharedKernel\Health\ServiceProblem;
@@ -28,30 +32,37 @@ use Throwable;
  * logged: only the tokens it took, in ai_usage, and how Anthropic answered
  * (ServiceHealth: why it would not, in our words, never its message).
  */
-final class ClaudeLanguageModel implements LanguageModel
+final class ClaudeLanguageModel implements LanguageModel, TextEngine
 {
     public function __construct(private readonly AiSlots $slots) {}
 
-    public function json(AiFeature $feature, AiPrompt $prompt): AiAnswer
+    public function json(AiFeature|string $capability, AiPrompt $prompt): AiAnswer
     {
-        $config = config('platform.ai');
-        $key = (string) ($config['key'] ?? '');
-        $model = AiProvider::Claude->model($prompt->tier);
+        return $this->ask(EngineSpec::legacyText(AiProvider::Claude), Capabilities::key($capability), $prompt, $prompt->tier);
+    }
+
+    public function ask(EngineSpec $engine, string $capability, AiPrompt $prompt, string $tier): AiAnswer
+    {
+        $key = $engine->key;
+        $model = $engine->model($tier);
         if ($key === '' || $model === '') {
             throw new AiFailed('not_configured');
         }
 
         $waiting = $this->slots->waiting();
-        $timeout = (float) ($waiting ? $config['timeout'] : $config['job_timeout']);
+        $timeout = (float) $engine->seconds($waiting);
         $http = new Guzzle(['timeout' => $timeout, 'connect_timeout' => 10]);
+        $base = $engine->baseUrl;
         $client = new Client(
             apiKey: $key,
-            baseUrl: ($config['base_url'] ?? null) ?: null,
+            baseUrl: $base !== '' && $base !== EngineKind::Anthropic->defaultBase() ? $base : null,
             requestOptions: ['maxRetries' => $waiting ? 0 : 2, 'timeout' => $timeout, 'transporter' => $http, 'streamingTransporter' => $http],
         );
-        $request = self::request($prompt, $model, (array) ($config['fallbacks'] ?? []));
+        $request = self::request($prompt, $model, (array) config('platform.ai.fallbacks', []));
+        $service = $engine->service;
+        $feature = $capability;
 
-        return $this->slots->hold(function () use ($client, $request, $feature, $model) {
+        return $this->slots->hold(function () use ($client, $request, $feature, $model, $service, $engine) {
             try {
                 $stream = $client->beta->messages->createStream(...$request);
                 $accumulator = MessageAccumulator::forBetaMessages();
@@ -61,20 +72,20 @@ final class ClaudeLanguageModel implements LanguageModel
                 $message = $accumulator->message();
             } catch (Throwable $e) {
                 $fault = AnthropicFaults::of($e);
-                AiUsage::note($feature, 'anthropic', $model, [], 'unavailable');
-                ServiceHealth::fault('anthropic', $fault, $fault->problem === ServiceProblem::Model ? $model : '');
+                AiUsage::note($feature, $engine->provider, $model, [], 'unavailable');
+                ServiceHealth::fault($service, $fault, $fault->problem === ServiceProblem::Model ? $model : '');
                 throw new AiFailed('unavailable', __('shared::ai.failed.unavailable'));
             }
             assert($message instanceof BetaMessage);
-            ServiceHealth::ok('anthropic', $model);
+            ServiceHealth::ok($service, $model);
 
             try {
                 $answer = self::read($message);
             } catch (AiFailed $e) {
-                AiUsage::note($feature, 'anthropic', $message->model, self::usage($message), $e->reason);
+                AiUsage::note($feature, $engine->provider, $message->model, self::usage($message), $e->reason);
                 throw $e;
             }
-            AiUsage::note($feature, 'anthropic', $answer->model, $answer->usage, 'ok');
+            AiUsage::note($feature, $engine->provider, $answer->model, $answer->usage, 'ok');
 
             return $answer;
         });

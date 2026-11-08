@@ -70,7 +70,7 @@ function fakeModel(array $answer): object
 
         public function __construct(private array $answer) {}
 
-        public function json(AiFeature $feature, AiPrompt $prompt): AiAnswer
+        public function json(AiFeature|string $feature, AiPrompt $prompt): AiAnswer
         {
             $this->prompt = $prompt;
 

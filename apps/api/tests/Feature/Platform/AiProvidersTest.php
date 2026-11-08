@@ -8,8 +8,10 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Modules\Platform\Ai\AiProvider;
-use Modules\Platform\Ai\ClaudeLanguageModel;
+use Modules\Platform\Ai\Engines\EngineKind;
 use Modules\Platform\Ai\Faults\OpenAiFaults;
+use Modules\Platform\Ai\Gateway\GatewayLanguageModel;
+use Modules\Platform\Ai\Gateway\Routes;
 use Modules\Platform\Ai\GeminiLanguageModel;
 use Modules\Platform\Ai\OllamaLanguageModel;
 use Modules\Platform\Ai\OpenAiLanguageModel;
@@ -183,9 +185,14 @@ it('asks the platform\'s own Ollama server, with a key only when one is set', fu
 });
 
 it('takes the words from the provider chosen, and calls a provider without its key or model not set up', function () {
-    foreach (['claude' => ClaudeLanguageModel::class, 'openai' => OpenAiLanguageModel::class, 'gemini' => GeminiLanguageModel::class, 'ollama' => OllamaLanguageModel::class] as $driver => $class) {
+    // With no engines set up in the console, the gateway asks the provider the server's settings choose.
+    foreach (['claude' => EngineKind::Anthropic, 'openai' => EngineKind::OpenAiCompatible, 'gemini' => EngineKind::Gemini, 'ollama' => EngineKind::Ollama] as $driver => $kind) {
         config(['platform.ai.driver' => $driver]);
-        expect(app(LanguageModel::class))->toBeInstanceOf($class)
+        $route = app(Routes::class)->resolve('practice_items', 'text');
+        expect(app(LanguageModel::class))->toBeInstanceOf(GatewayLanguageModel::class)
+            ->and($route->scope)->toBe('settings')
+            ->and($route->steps[0]->engine->kind)->toBe($kind)
+            ->and($route->steps[0]->engine->kind->textAdapter())->toBe(AiProvider::from($driver)->languageModel())
             ->and(AiProvider::current()->configured())->toBeTrue();
     }
 

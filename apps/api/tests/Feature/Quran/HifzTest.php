@@ -70,7 +70,7 @@ function hifzEars(string $text): void
     {
         public function __construct(public string $text) {}
 
-        public function transcribe(AiFeature $feature, AudioClip $clip, string $language = 'ara'): Transcript
+        public function transcribe(AiFeature|string $feature, AudioClip $clip, string $language = 'ara'): Transcript
         {
             return new Transcript($this->text, array_map(fn ($w) => new HeardWord($w, 0, 0), explode(' ', $this->text)), 4.0, 'the-ears');
         }

@@ -2,7 +2,10 @@
 
 namespace Modules\Platform\Health;
 
+use Modules\Platform\Ai\Engines\EngineKind;
 use Modules\Platform\Ai\PlatformAcademyAi;
+use Modules\Platform\Models\Ai\AiEngine;
+use Throwable;
 
 /**
  * The outside services this server is set to use (their keys in Platform
@@ -54,6 +57,35 @@ final class OutsideServices
             'stripe' => self::set('billing.payments.stripe.platform_secret'),
             default => false,
         };
+    }
+
+    /**
+     * The AI engines the console set up (console › AI engines), enabled and not
+     * the demo: each its own check (service_ai_engine_{id}) and its own try in
+     * `platform:services`, by the name it was given.
+     *
+     * @return array<string, string> service name => the engine's name
+     */
+    public static function engines(): array
+    {
+        try {
+            return AiEngine::query()->where('enabled', true)->where('kind', '!=', EngineKind::Demo->value)->orderBy('name')->get()
+                ->mapWithKeys(fn (AiEngine $e) => [$e->service() => $e->name])->all();
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    /** A service's name for people: an engine's own, else the service's. */
+    public static function name(string $service, ?string $locale = null): string
+    {
+        if (str_starts_with($service, 'ai_engine_')) {
+            $name = self::engines()[$service] ?? null;
+
+            return $name !== null ? __('platform::engines.health_name', ['name' => $name], $locale) : $service;
+        }
+
+        return __('platform::services.names.'.$service, [], $locale);
     }
 
     public static function group(string $service): string

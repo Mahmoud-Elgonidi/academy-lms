@@ -12,5 +12,5 @@ namespace Modules\SharedKernel\Ai;
  */
 interface RecitationEngine
 {
-    public function check(AiFeature $feature, AudioClip $clip, ExpectedText $expected): RecitationResult;
+    public function check(AiFeature|string $capability, AudioClip $clip, ExpectedText $expected): RecitationResult;
 }

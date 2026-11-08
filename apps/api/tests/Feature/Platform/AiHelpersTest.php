@@ -17,9 +17,9 @@ use Modules\Platform\Actions\Plans\ChangeAcademyPlan;
 use Modules\Platform\Actions\SaveAiSettings;
 use Modules\Platform\Ai\AiSlots;
 use Modules\Platform\Ai\ClaudeLanguageModel;
-use Modules\Platform\Ai\DemoLanguageModel;
-use Modules\Platform\Ai\DemoSpeechToText;
 use Modules\Platform\Ai\ElevenLabsSpeechToText;
+use Modules\Platform\Ai\Gateway\GatewayLanguageModel;
+use Modules\Platform\Ai\Gateway\GatewaySpeechToText;
 use Modules\Platform\Ai\PlatformAcademyAi;
 use Modules\Platform\Filament\Pages\AiSettingsPage;
 use Modules\Platform\Health\AssistBeat;
@@ -119,13 +119,16 @@ it('lets a helper run only when the academy turned it on, its plan has the area,
 
     // The demo's fixed answers need no key, and never run in production.
     config(['platform.ai.driver' => 'demo']);
+    // Every helper asks the gateway, which answers from the demo's fixed answers.
     expect($ai->on(AiFeature::ReportDraft))->toBeTrue()
-        ->and(app(LanguageModel::class))->toBeInstanceOf(DemoLanguageModel::class)
-        ->and(app(SpeechToText::class))->toBeInstanceOf(DemoSpeechToText::class);
+        ->and(app(LanguageModel::class))->toBeInstanceOf(GatewayLanguageModel::class)
+        ->and(app(SpeechToText::class))->toBeInstanceOf(GatewaySpeechToText::class)
+        ->and(app(LanguageModel::class)->json(AiFeature::PracticeItems, new AiPrompt('s', 'u', [], demo: ['items' => []]))->model)->toBe('demo')
+        ->and(app(SpeechToText::class)->transcribe(AiFeature::ReportDraft, aiClip())->model)->toBe('demo');
     app()['env'] = 'production';
     try {
         expect($ai->why(AiFeature::PracticeItems))->toBe('not_configured')
-            ->and(app(LanguageModel::class))->toBeInstanceOf(ClaudeLanguageModel::class);
+            ->and(aiReason(fn () => app(LanguageModel::class)->json(AiFeature::PracticeItems, new AiPrompt('s', 'u', [], demo: ['items' => []]))))->toBe('not_configured');
     } finally {
         app()['env'] = 'testing';
     }
@@ -198,7 +201,7 @@ it('keeps only how many calls and how they went, never who asked or what was sai
     AiUsage::note(AiFeature::ReportDraft, 'elevenlabs', 'scribe', ['audio_seconds' => 42], 'ok');
     $row = DB::table('ai_usage')->sole();
 
-    expect(array_keys((array) $row))->toEqualCanonicalizing(['id', 'academy_id', 'feature', 'provider', 'model', 'input_tokens', 'output_tokens', 'cache_read_tokens', 'audio_seconds', 'outcome', 'created_at'])
+    expect(array_keys((array) $row))->toEqualCanonicalizing(['id', 'academy_id', 'feature', 'provider', 'model', 'input_tokens', 'output_tokens', 'cache_read_tokens', 'audio_seconds', 'outcome', 'created_at', 'engine_id', 'latency_ms', 'fallback_from'])
         ->and($row->audio_seconds)->toBe(42)
         ->and(fn () => DB::table('ai_usage')->where('id', $row->id)->update(['outcome' => 'x']))->toThrow(QueryException::class)
         ->and(fn () => DB::table('ai_usage')->where('id', $row->id)->delete())->toThrow(QueryException::class);

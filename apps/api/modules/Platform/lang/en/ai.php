@@ -14,6 +14,7 @@ return [
         'subtitle' => 'Helpers that write drafts and save time. Each is off until you turn it on.',
         'promise' => 'A helper writes a draft or a note; someone at the academy reads it and decides. No grade or message leaves on its own, and what is sent is processed under contract and never used to train any model.',
         'on' => 'On',
+        'other_data' => 'Only the words this helper needs go to the AI engine the platform chooses, with no names or contact details, and nothing sent or answered is kept.',
         'not_configured' => 'This helper is not set up on the platform yet: the platform team must add its key first.',
         'saved' => 'Saved.',
         'usage' => 'Used today: :today of :cap.',

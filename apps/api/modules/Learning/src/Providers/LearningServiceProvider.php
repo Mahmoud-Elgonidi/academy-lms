@@ -44,6 +44,9 @@ use Modules\Learning\Privacy\LearningData;
 use Modules\Learning\Queries\Journey\NoJourneyGames;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
+use Modules\SharedKernel\Ai\AiFeature;
+use Modules\SharedKernel\Ai\Capabilities;
+use Modules\SharedKernel\Ai\Capability;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Privacy\PersonalData;
@@ -67,6 +70,9 @@ final class LearningServiceProvider extends ServiceProvider
     {
         // A learner's homework, reports, challenges and cheers, for their copy and erasure (Privacy).
         $this->app->make(PersonalData::class)->add(LearningData::class);
+        // Its AI capabilities (the gateway routes, meters and switches them): the report from a voice note, the weekly note's wording.
+        $this->app->make(Capabilities::class)->add(Capability::of(AiFeature::ReportDraft, tier: 'fast', credits: 2, module: 'learning'));
+        $this->app->make(Capabilities::class)->add(Capability::of(AiFeature::DigestWording, tier: 'fast', credits: 1, module: 'learning'));
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'learning');
         // The plan's storage counts the handed-in homework (recordings and files) kept for the academy.

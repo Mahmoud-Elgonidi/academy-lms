@@ -5,7 +5,10 @@ namespace Modules\Platform\Models;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Platform\Ai\Gateway\CallContext;
 use Modules\SharedKernel\Ai\AiFeature;
+use Modules\SharedKernel\Ai\Capabilities;
+use Modules\SharedKernel\Ai\Capability;
 use Modules\SharedKernel\Plans\UsagePeriod;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -13,7 +16,8 @@ use Throwable;
 
 /**
  * One request an academy's helper made to a provider: which helper, which
- * provider and model, the tokens or seconds of audio it took, and how it
+ * provider, engine (none: the server's settings) and model, how long it took,
+ * which engine it fell back from, the tokens or seconds of audio it took, and how it
  * went. Nothing about who asked and nothing that was said. Never changed
  * (the grants are revoked); it is how the platform sees cost and the daily cap.
  *
@@ -25,6 +29,9 @@ use Throwable;
  * @property int $cache_read_tokens
  * @property int $audio_seconds
  * @property string $outcome
+ * @property ?string $engine_id
+ * @property ?int $latency_ms
+ * @property ?string $fallback_from
  * @property CarbonImmutable $created_at
  */
 final class AiUsage extends Model
@@ -47,14 +54,14 @@ final class AiUsage extends Model
      *
      * @param  array{input?: int, output?: int, cache_read?: int, cache_write?: int, audio_seconds?: int}  $usage
      */
-    public static function note(AiFeature $feature, string $provider, string $model, array $usage, string $outcome): void
+    public static function note(AiFeature|string $feature, string $provider, string $model, array $usage, string $outcome): void
     {
         if (app(TenantContext::class)->id() === null) {
             return;
         }
         try {
-            self::query()->create([
-                'feature' => $feature->value,
+            self::query()->create(app(CallContext::class)->line() + [
+                'feature' => Capabilities::key($feature),
                 'provider' => $provider,
                 'model' => mb_substr($model, 0, 80),
                 'input_tokens' => (int) ($usage['input'] ?? 0) + (int) ($usage['cache_write'] ?? 0),
@@ -77,8 +84,8 @@ final class AiUsage extends Model
      */
     public static function usesIn(UsagePeriod $period): int
     {
-        $writesAfterListening = array_values(array_map(fn (AiFeature $f) => $f->value,
-            array_filter(AiFeature::cases(), fn (AiFeature $f) => $f->needsSpeech() && $f->needsLanguage())));
+        $writesAfterListening = array_values(array_map(fn (Capability $c) => $c->key,
+            array_filter(app(Capabilities::class)->all(), fn (Capability $c) => $c->needsSpeech() && $c->needsLanguage())));
 
         return self::query()->where('outcome', 'ok')->where('created_at', '>=', $period->from)->where('created_at', '<', $period->to)
             ->where(fn ($q) => $q->where('audio_seconds', 0)->orWhereNotIn('feature', $writesAfterListening))

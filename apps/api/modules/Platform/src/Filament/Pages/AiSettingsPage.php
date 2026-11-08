@@ -16,7 +16,8 @@ use Modules\Platform\Ai\AiProvider;
 use Modules\Platform\Ai\PlatformAcademyAi;
 use Modules\Platform\Models\AiSettings;
 use Modules\Platform\Models\AiUsage;
-use Modules\SharedKernel\Ai\AiFeature;
+use Modules\SharedKernel\Ai\Capabilities;
+use Modules\SharedKernel\Ai\Capability;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Filament\NavGroup;
 use UnitEnum;
@@ -68,7 +69,7 @@ final class AiSettingsPage extends Page
     public function mount(): void
     {
         $settings = AiSettings::current();
-        $this->form->fill(collect(AiFeature::cases())->mapWithKeys(fn (AiFeature $f) => [$f->value => $settings->isOn($f)])->all());
+        $this->form->fill(collect(app(Capabilities::class)->all())->map(fn (Capability $c) => $settings->isOn($c))->all());
     }
 
     public function form(Schema $schema): Schema
@@ -76,12 +77,17 @@ final class AiSettingsPage extends Page
         $s = 'platform::ai.settings.';
         $provider = __('platform::ai.providers.'.(AiProvider::current()?->value ?? 'claude'));
 
-        return $schema->statePath('data')->components(array_map(fn (AiFeature $f) => Section::make($f->label())
-            ->description(__($s.'helpers.'.$f->value.'.what'))
+        // Every capability a module registered: the first five with their own words, any other with its module's.
+        return $schema->statePath('data')->components(array_values(array_map(fn (Capability $c) => Section::make($c->label())
+            ->description($c->feature() !== null ? __($s.'helpers.'.$c->key.'.what') : $c->description())
             ->schema([
-                Toggle::make($f->value)->label(__($s.'on'))
-                    ->helperText(PlatformAcademyAi::configured($f) ? __($s.'helpers.'.$f->value.'.data', ['provider' => $provider]) : __($s.'not_configured')),
-            ]), AiFeature::cases()));
+                Toggle::make($c->key)->label(__($s.'on'))
+                    ->helperText(match (true) {
+                        ! PlatformAcademyAi::configured($c) => __($s.'not_configured'),
+                        $c->feature() !== null => __($s.'helpers.'.$c->key.'.data', ['provider' => $provider]),
+                        default => __($s.'other_data'),
+                    }),
+            ]), app(Capabilities::class)->all())));
     }
 
     /** @return array{today: int, cap: int} */

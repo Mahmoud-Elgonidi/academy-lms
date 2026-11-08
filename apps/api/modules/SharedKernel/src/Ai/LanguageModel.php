@@ -9,6 +9,10 @@ namespace Modules\SharedKernel\Ai;
  */
 interface LanguageModel
 {
-    /** @throws AiFailed */
-    public function json(AiFeature $feature, AiPrompt $prompt): AiAnswer;
+    /**
+     * @param  AiFeature|string  $capability  the helper, or a registered capability's key: the gateway routes by it
+     *
+     * @throws AiFailed
+     */
+    public function json(AiFeature|string $capability, AiPrompt $prompt): AiAnswer;
 }

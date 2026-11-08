@@ -55,6 +55,10 @@ class SystemHealth
         foreach (OutsideServices::configured() as $service) {
             $checks['service_'.$service] = $this->run(fn () => $this->service($service));
         }
+        // Each AI engine set up in the console (a server of the platform's own too): how it answered lately.
+        foreach (array_keys(OutsideServices::engines()) as $service) {
+            $checks['service_'.$service] = $this->run(fn () => $this->service($service));
+        }
 
         return $checks;
     }
@@ -75,7 +79,7 @@ class SystemHealth
     public function service(string $service): array
     {
         $last = ServiceHealth::last($service);
-        $name = __('platform::services.names.'.$service);
+        $name = OutsideServices::name($service);
         $problem = ServiceHealth::problem($service);
         $now = now()->getTimestamp();
 
@@ -107,6 +111,14 @@ class SystemHealth
         return $this->check('ok', $seen > 0
             ? __('platform::services.used.ok', ['when' => CarbonImmutable::createFromTimestamp($seen)->diffForHumans()])
             : __('platform::services.used.never'));
+    }
+
+    /** A check's name for people, in a language: an engine's by its own name. */
+    public static function label(string $check, ?string $locale = null): string
+    {
+        return str_starts_with($check, 'service_ai_engine_')
+            ? OutsideServices::name(substr($check, strlen('service_')), $locale)
+            : __('platform::health.checks.'.$check, [], $locale);
     }
 
     /** @param  callable(): array{status: string, value: string, hint: ?string}  $check */

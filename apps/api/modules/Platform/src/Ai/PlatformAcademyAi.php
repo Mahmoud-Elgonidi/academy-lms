@@ -3,12 +3,15 @@
 namespace Modules\Platform\Ai;
 
 use Carbon\CarbonImmutable;
+use Modules\Platform\Ai\Gateway\Routes;
 use Modules\Platform\Models\AiSettings;
 use Modules\Platform\Models\AiUsage;
 use Modules\Platform\Plans\Extras;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
+use Modules\SharedKernel\Ai\Capabilities;
+use Modules\SharedKernel\Ai\Capability;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Plans\Limit;
@@ -19,8 +22,9 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * Whether the current academy may use a helper now: the platform has not
  * switched the helpers off (AI_DRIVER=off), the academy's plan has the AI
  * area, the academy turned this helper on (Settings › AI, off by default),
- * the chosen provider has its key and model (Ollama: its address) and the
- * speech key is set where it listens, the month's uses are under the plan's
+ * its route has a ready engine for each kind of work (console › AI routing;
+ * with no route, the chosen provider has its key and model and the speech
+ * key is set where it listens), the month's uses are under the plan's
  * ai_uses (with the month's active extra packs; else quota, and the work
  * goes on by hand), and today's requests are under AI_DAILY_CAP.
  */
@@ -31,29 +35,30 @@ final class PlatformAcademyAi implements AcademyAi
         private readonly TenantContext $tenants,
     ) {}
 
-    public function on(AiFeature $feature): bool
+    public function on(AiFeature|string $capability): bool
     {
-        return $this->why($feature) === null;
+        return $this->why($capability) === null;
     }
 
-    public function require(AiFeature $feature): void
+    public function require(AiFeature|string $capability): void
     {
-        $why = $this->why($feature);
+        $why = $this->why($capability);
         if ($why !== null) {
             throw new AiFailed($why);
         }
     }
 
     /** Why the helper cannot run now (an AiFailed reason), or null. */
-    public function why(AiFeature $feature): ?string
+    public function why(AiFeature|string $capability): ?string
     {
-        if ($this->driver() === 'off' || $this->tenants->id() === null || ! $this->plan->has(Feature::Ai)) {
+        $known = app(Capabilities::class)->get($capability);
+        if ($known === null || $this->driver() === 'off' || $this->tenants->id() === null || ! $this->plan->has(Feature::Ai)) {
             return 'off';
         }
-        if (! AiSettings::current()->isOn($feature)) {
+        if (! AiSettings::current()->isOn($known)) {
             return 'off';
         }
-        if (! self::configured($feature)) {
+        if (! self::configured($known)) {
             return 'not_configured';
         }
         if ($this->monthUsedUp()) {
@@ -79,17 +84,29 @@ final class PlatformAcademyAi implements AcademyAi
         return AiUsage::usesIn($month) >= $max + Extras::amount($academy->id, Limit::AiUses, $month->key($academy->defaultTimezone));
     }
 
-    /** The platform has what this helper needs: the demo driver needs nothing. */
-    public static function configured(AiFeature $feature): bool
+    /**
+     * The platform has what this helper needs, for this academy: an engine
+     * ready on its route for each kind of work it does (console › AI routing),
+     * else the server's settings (the provider in AI_DRIVER, the speech key).
+     * The demo driver needs nothing.
+     */
+    public static function configured(AiFeature|string|Capability $capability): bool
     {
         if (self::demo()) {
             return true;
         }
-        if ($feature->needsLanguage() && ! (AiProvider::current()?->configured() ?? false)) {
+        $known = $capability instanceof Capability ? $capability : app(Capabilities::class)->get($capability);
+        if ($known === null) {
             return false;
         }
+        $routes = app(Routes::class);
+        foreach ($known->kinds as $kind) {
+            if (! $routes->usable($known->key, $kind)) {
+                return false;
+            }
+        }
 
-        return ! $feature->needsSpeech() || (string) config('platform.ai.speech.key') !== '';
+        return true;
     }
 
     /** Fixed answers instead of the providers: never in production. */

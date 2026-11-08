@@ -14,12 +14,12 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Modules\Platform\Actions\SavePlatformAdminTimezone;
-use Modules\Platform\Ai\AiProvider;
 use Modules\Platform\Ai\AiSlots;
-use Modules\Platform\Ai\ClaudeLanguageModel;
-use Modules\Platform\Ai\DemoLanguageModel;
-use Modules\Platform\Ai\DemoSpeechToText;
-use Modules\Platform\Ai\ElevenLabsSpeechToText;
+use Modules\Platform\Ai\Gateway\CallContext;
+use Modules\Platform\Ai\Gateway\Gateway;
+use Modules\Platform\Ai\Gateway\GatewayLanguageModel;
+use Modules\Platform\Ai\Gateway\GatewaySpeechToText;
+use Modules\Platform\Ai\Gateway\Routes;
 use Modules\Platform\Ai\PlatformAcademyAi;
 use Modules\Platform\Branding\BrandingService;
 use Modules\Platform\Commands\CreatePlatformAdmin;
@@ -100,14 +100,18 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->bind(GameDesigner::class, fn () => config('platform.games.designer.driver') === 'demo' && ! $this->app->isProduction()
             ? new DemoGameDesigner : new ClaudeGameDesigner);
 
-        // The academies' AI helpers (Settings › AI): the chosen provider for words (Claude, GPT, Gemini, Ollama), ElevenLabs for recordings, fixed answers for the demo.
+        // The academies' AI helpers (Settings › AI).
         $this->app->singleton(AiSlots::class);
         $this->app->singleton(PlatformSettings::class);
         $this->app->scoped(PlatformAcademyAi::class);
         $this->app->alias(PlatformAcademyAi::class, AcademyAi::class);
-        $this->app->bind(LanguageModel::class, fn ($app) => PlatformAcademyAi::demo() ? new DemoLanguageModel
-            : $app->make(AiProvider::current()?->languageModel() ?? ClaudeLanguageModel::class));
-        $this->app->bind(SpeechToText::class, fn ($app) => PlatformAcademyAi::demo() ? new DemoSpeechToText : $app->make(ElevenLabsSpeechToText::class));
+        // Every model call goes through the gateway (Ai\Gateway): the capability's route of engines (console › AI
+        // engines and AI routing), else the server's settings; fixed answers for the demo. The modules see only these.
+        $this->app->scoped(CallContext::class);
+        $this->app->scoped(Routes::class);
+        $this->app->scoped(Gateway::class);
+        $this->app->bind(LanguageModel::class, GatewayLanguageModel::class);
+        $this->app->bind(SpeechToText::class, GatewaySpeechToText::class);
     }
 
     public function boot(): void

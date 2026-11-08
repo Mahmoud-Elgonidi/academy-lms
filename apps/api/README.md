@@ -105,6 +105,35 @@ curl -X POST localhost:8000/api/v1/auth/code/verify -H 'X-Academy: demo' -H 'Acc
      -d challenge_id=<challenge_id> -d code=<code> -d device_name=curl
 ```
 
+## Adding an AI feature
+
+Every model call goes through Platform's gateway (docs/architecture/02, section 22): a module never talks
+to a provider. A new feature is a registration and a call through the shared kernel's contracts:
+
+```php
+// In the owning module's provider (boot): it appears in console › AI routing and Settings › AI helpers at once.
+$this->app->make(Capabilities::class)->add(new Capability(
+    key: 'lesson_summary',                 // stable, snake_case, ≤ 40 characters (ai_usage.feature)
+    kinds: ['text'],                       // 'text', 'speech', or ['speech', 'text'] in the order it uses them
+    tier: 'fast',                          // the model it is written for (a route may say otherwise)
+    credits: 1,                            // a use's cost in credits (stored and shown now)
+    label: 'learning::ai.lesson_summary',  // the module's own wording (ar + en)
+    description: 'learning::ai.lesson_summary_about',
+    module: 'learning',
+));
+
+// In its Action: ask whether it may run, then the contract with the capability's key.
+$this->ai->require('lesson_summary');                       // AcademyAi: off, not_configured, quota, limit
+$answer = $this->model->json('lesson_summary', new AiPrompt(
+    system: '…', user: '…', schema: [...], demo: [...],     // the demo answer for AI_DRIVER=demo
+));                                                         // SpeechToText::transcribe('…', $clip) for audio
+```
+
+Then: send only what the feature needs (no names: a child is `{child}`, never a lesson's recording), check
+every value of the answer again, keep it a draft a person reviews, add a line to the privacy notice (raise
+`LegalController::VERSION`), and test with a fake `LanguageModel` bound in the container. A capability is on
+in every academy until the academy switches it off; the console's owners choose its engines.
+
 ## The API and its OpenAPI document
 
 The family and teacher apps' API is `/api/v1` (55 routes; every module mounts its own `routes/api.php`).

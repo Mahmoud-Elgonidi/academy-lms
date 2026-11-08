@@ -8,19 +8,18 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
-use Modules\Platform\Ai\AiProvider;
 use Modules\Platform\Ai\AiSlots;
+use Modules\Platform\Ai\Engines\EngineSpec;
 use Modules\Platform\Models\AiUsage;
 use Modules\SharedKernel\Ai\AiAnswer;
 use Modules\SharedKernel\Ai\AiFailed;
-use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Health\ServiceFault;
 use Modules\SharedKernel\Health\ServiceHealth;
 use Modules\SharedKernel\Health\ServiceProblem;
 use Throwable;
 
 /**
- * One request to a provider over HTTP (GPT, Gemini, Ollama), as Claude's
+ * One request to an engine over HTTP (an OpenAI-compatible server, Gemini, Ollama), as Claude's
  * goes: while someone waits on a screen, one try within AI_TIMEOUT and one
  * of the few slots; in the background, AI_JOB_TIMEOUT and two more tries
  * for a moment's trouble (never for a credit that ran out). What it took
@@ -38,13 +37,14 @@ final class ModelCall
      * @param  Closure(array<string, mixed>): array<string, int>  $usage
      * @param  Closure(int, mixed): (ServiceFault|string)  $fault  why the service would not, or an AiFailed reason about this request alone
      */
-    public function run(AiFeature $feature, AiProvider $provider, string $model, Closure $send, Closure $read, Closure $usage, Closure $fault): AiAnswer
+    public function run(string $feature, EngineSpec $engine, string $model, Closure $send, Closure $read, Closure $usage, Closure $fault): AiAnswer
     {
         $waiting = $this->slots->waiting();
-        $timeout = (int) config($waiting ? 'platform.ai.timeout' : 'platform.ai.job_timeout');
-        $service = $provider->service();
+        $timeout = $engine->seconds($waiting);
+        $service = $engine->service;
+        $provider = $engine->provider;
 
-        return $this->slots->hold(function () use ($feature, $model, $send, $read, $usage, $fault, $waiting, $timeout, $service): AiAnswer {
+        return $this->slots->hold(function () use ($feature, $model, $send, $read, $usage, $fault, $waiting, $timeout, $service, $provider): AiAnswer {
             $http = Http::acceptJson()->timeout($timeout)->connectTimeout(10);
             if (! $waiting) {
                 $http = $http->retry([1000, 3000], when: fn (Throwable $e) => self::passing($e, $fault), throw: false);
@@ -53,7 +53,7 @@ final class ModelCall
             try {
                 $response = $send($http);
             } catch (ConnectionException) {
-                AiUsage::note($feature, $service, $model, [], 'unavailable');
+                AiUsage::note($feature, $provider, $model, [], 'unavailable');
                 ServiceHealth::fault($service, ServiceFault::unreachable());
                 throw new AiFailed('unavailable', __('shared::ai.failed.unavailable'));
             }
@@ -61,10 +61,10 @@ final class ModelCall
             if ($response->failed()) {
                 $why = $fault($response->status(), $response->json());
                 if (is_string($why)) {
-                    AiUsage::note($feature, $service, $model, [], $why);
+                    AiUsage::note($feature, $provider, $model, [], $why);
                     throw new AiFailed($why);
                 }
-                AiUsage::note($feature, $service, $model, [], 'unavailable');
+                AiUsage::note($feature, $provider, $model, [], 'unavailable');
                 ServiceHealth::fault($service, $why, $why->problem === ServiceProblem::Model ? $model : '');
                 throw new AiFailed('unavailable', __('shared::ai.failed.unavailable'));
             }
@@ -74,10 +74,10 @@ final class ModelCall
             try {
                 $answer = $read($body);
             } catch (AiFailed $e) {
-                AiUsage::note($feature, $service, $model, $usage($body), $e->reason);
+                AiUsage::note($feature, $provider, $model, $usage($body), $e->reason);
                 throw $e;
             }
-            AiUsage::note($feature, $service, $answer->model, $answer->usage, 'ok');
+            AiUsage::note($feature, $provider, $answer->model, $answer->usage, 'ok');
 
             return $answer;
         });

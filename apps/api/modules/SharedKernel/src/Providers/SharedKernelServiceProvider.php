@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Modules\SharedKernel\Ai\AcademyAi;
+use Modules\SharedKernel\Ai\Capabilities;
 use Modules\SharedKernel\Ai\LanguageModel;
 use Modules\SharedKernel\Ai\NoAi;
 use Modules\SharedKernel\Ai\RecitationEngine;
@@ -85,7 +86,8 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->singleton(ModulesInUse::class);
         // The platform's games: none until Platform binds its catalog.
         $this->app->singletonIf(GameCatalog::class, NoGames::class);
-        // The AI helpers: all off until Platform binds them.
+        // The AI capabilities each module registers (Capabilities::add), and the helpers: all off until Platform binds them.
+        $this->app->singleton(Capabilities::class);
         $this->app->scopedIf(AcademyAi::class, NoAi::class);
         $this->app->singletonIf(LanguageModel::class, NoAi::class);
         $this->app->singletonIf(SpeechToText::class, NoAi::class);

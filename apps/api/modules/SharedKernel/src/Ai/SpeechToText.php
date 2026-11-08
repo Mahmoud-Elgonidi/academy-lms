@@ -8,6 +8,10 @@ namespace Modules\SharedKernel\Ai;
  */
 interface SpeechToText
 {
-    /** @throws AiFailed */
-    public function transcribe(AiFeature $feature, AudioClip $clip, string $language = 'ara'): Transcript;
+    /**
+     * @param  AiFeature|string  $capability  the helper, or a registered capability's key: the gateway routes by it
+     *
+     * @throws AiFailed
+     */
+    public function transcribe(AiFeature|string $capability, AudioClip $clip, string $language = 'ara'): Transcript;
 }

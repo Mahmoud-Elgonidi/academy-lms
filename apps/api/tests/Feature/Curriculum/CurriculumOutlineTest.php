@@ -68,7 +68,7 @@ function oModel(array $answer): object
 
         public function __construct(private array $answer) {}
 
-        public function json(AiFeature $feature, AiPrompt $prompt): AiAnswer
+        public function json(AiFeature|string $feature, AiPrompt $prompt): AiAnswer
         {
             $this->prompt = $prompt;
 
@@ -341,7 +341,7 @@ it('starts from the helper\'s outline when it is on, says why when it is off, an
     // A failing helper says so and keeps the form.
     $failing = new class implements LanguageModel
     {
-        public function json(AiFeature $feature, AiPrompt $prompt): AiAnswer
+        public function json(AiFeature|string $feature, AiPrompt $prompt): AiAnswer
         {
             throw new AiFailed('unavailable');
         }

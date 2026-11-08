@@ -46,7 +46,7 @@
             @foreach ($this->checks as $name => $check)
                 <article class="pc-base ph-check" data-status="{{ $check['status'] }}" wire:key="check-{{ $name }}">
                     <header>
-                        <h3><span class="ph-dot" data-status="{{ $check['status'] }}"></span>{{ __($l.'checks.'.$name) }}</h3>
+                        <h3><span class="ph-dot" data-status="{{ $check['status'] }}"></span>{{ \Modules\Platform\Health\SystemHealth::label($name) }}</h3>
                         <span class="ph-chip" data-status="{{ $check['status'] }}">{{ __($l.'status.'.$check['status']) }}</span>
                     </header>
                     <p>{{ $check['value'] }}</p>

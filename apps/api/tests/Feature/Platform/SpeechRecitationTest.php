@@ -27,7 +27,7 @@ it('hears with speech to text, never telling it the text, and gives each verse i
 
         public int $calls = 0;
 
-        public function transcribe(AiFeature $feature, AudioClip $clip, string $language = 'ara'): Transcript
+        public function transcribe(AiFeature|string $feature, AudioClip $clip, string $language = 'ara'): Transcript
         {
             $this->calls++;
             $this->language = $language;

@@ -3,11 +3,11 @@
 {{ $failing === [] ? $ar('mail.well') : ($reminder ? $ar('mail.still') : $ar('mail.intro')) }}
 
 @foreach ($failing as $name => $check)
-- {{ $ar('checks.'.$name) }}: {{ $check['value'] }}@if ($check['hint']) — {{ $check['hint'] }}@endif
+- {{ \Modules\Platform\Health\SystemHealth::label($name, 'ar') }}: {{ $check['value'] }}@if ($check['hint']) — {{ $check['hint'] }}@endif
 
 @endforeach
 @foreach ($recovered as $name)
-- {{ $ar('checks.'.$name) }}: {{ $ar('mail.recovered') }}
+- {{ \Modules\Platform\Health\SystemHealth::label($name, 'ar') }}: {{ $ar('mail.recovered') }}
 @endforeach
 
 {{ $ar('mail.look') }} {{ $url }}
@@ -17,10 +17,10 @@
 {{ $failing === [] ? $en('mail.well') : ($reminder ? $en('mail.still') : $en('mail.intro')) }}
 
 @foreach ($failing as $name => $check)
-- {{ $en('checks.'.$name) }}: {{ $check['status'] }}
+- {{ \Modules\Platform\Health\SystemHealth::label($name, 'en') }}: {{ $check['status'] }}
 @endforeach
 @foreach ($recovered as $name)
-- {{ $en('checks.'.$name) }}: {{ $en('mail.recovered') }}
+- {{ \Modules\Platform\Health\SystemHealth::label($name, 'en') }}: {{ $en('mail.recovered') }}
 @endforeach
 
 {{ $en('mail.look') }} {{ $url }}

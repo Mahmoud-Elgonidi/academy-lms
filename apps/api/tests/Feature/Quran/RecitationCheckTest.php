@@ -76,7 +76,7 @@ function recitationEars(string $text, ?AiFailed $fails = null): object
 
         public function __construct(public string $text, public ?AiFailed $fails) {}
 
-        public function transcribe(AiFeature $feature, AudioClip $clip, string $language = 'ara'): Transcript
+        public function transcribe(AiFeature|string $feature, AudioClip $clip, string $language = 'ara'): Transcript
         {
             $this->calls[] = ['feature' => $feature, 'language' => $language, 'exists' => is_file($clip->path), 'mime' => $clip->mime];
             if ($this->fails !== null) {

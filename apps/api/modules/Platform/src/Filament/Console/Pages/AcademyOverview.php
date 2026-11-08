@@ -94,6 +94,11 @@ final class AcademyOverview extends Page
             $actions[] = Action::make('support')->label(__('platform::console.overview.support'))->icon(Heroicon::OutlinedLifebuoy)
                 ->url(route('filament.console.pages.support-sign-in', ['academy' => $record->id]));
         }
+        // The academy's own AI routes (owners: console › AI routing, for this academy).
+        if (AiRoutesPage::canAccess()) {
+            $actions[] = Action::make('aiRoutes')->label(__('platform::routes.from_academy'))->icon(Heroicon::OutlinedArrowsRightLeft)->color('gray')
+                ->url(AiRoutesPage::getUrl(['academy' => $record->id]));
+        }
         if ($active) {
             $actions[] = Action::make('open')->label(__('platform::console.overview.open_site'))->icon(Heroicon::OutlinedArrowTopRightOnSquare)->color('gray')
                 ->url(app(TenantDirectory::class)->baseUrl($record->toTenantRef()).'/admin', shouldOpenInNewTab: true);
