@@ -26,6 +26,8 @@ final class LessonJoinController
 
         return response()->json([
             'data' => $ticket->toArray(),
+            /** Why this lesson opens on the teacher's own link instead of the academy's video (its video minutes ran out), to show before going; null: nothing to say. */
+            'notice' => $ticket->notice !== null ? (string) $ticket->notice : null,
             'recording' => [
                 /** off | manual | auto */
                 'mode' => (string) $state['mode'],

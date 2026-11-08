@@ -365,7 +365,7 @@ it('opens a new lesson on the teacher\'s link with a notice under the hard limit
     app(SetVideoHardLimit::class)->handle($this->platformOwner, $this->academy->id, true, 'Agreed with them');
     $ticket = app(JoinLesson::class)->handle($lesson->id, $this->teacher->id, $at);
     expect($ticket->provider)->toBe('external')->and($ticket->url)->toBe('https://meet.example.com/abc')
-        ->and($ticket->toArray()['notice'])->toBe(__('classroom::classroom.video_held'));
+        ->and($ticket->notice)->toBe(__('classroom::classroom.video_held'));
 
     // A lesson already under way on our video stays there.
     $other = Session::query()->where('enrollment_id', $this->booked->enrollmentId)->orderBy('starts_at')->skip(1)->first();

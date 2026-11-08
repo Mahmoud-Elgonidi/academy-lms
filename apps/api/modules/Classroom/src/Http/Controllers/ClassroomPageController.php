@@ -83,7 +83,9 @@ final class ClassroomPageController
     {
         $viewer = $this->viewer($request, $session) ?? abort(403);
 
-        return response()->json(['data' => $join->handle($session, $viewer)->toArray()]);
+        $ticket = $join->handle($session, $viewer);
+
+        return response()->json(['data' => $ticket->toArray() + ['notice' => $ticket->notice]]);
     }
 
     /** An outside link: the join is recorded here, then the browser goes on to Zoom or Meet. */

@@ -44,8 +44,6 @@ final readonly class JoinTicket
             /** Come in with the camera on; false: the academy has this student start with it off (they may switch it on). */
             'camera' => (bool) ($this->seat->publishes() && $this->camera),
             'expires_at' => $this->expiresAt->utc()->toIso8601ZuluString(),
-            /** Why this lesson opens on the teacher's own link instead of the academy's video (its video minutes ran out), to show before going; null: nothing to say. */
-            'notice' => $this->notice !== null ? (string) $this->notice : null,
         ];
     }
 }

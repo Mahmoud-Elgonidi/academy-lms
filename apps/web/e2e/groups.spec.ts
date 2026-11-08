@@ -129,16 +129,19 @@ test.describe('the group’s teacher', () => {
     await noRawKeys(page);
 
     // The shared part: what happened with each lesson of the plan, and the subject's own questions.
+    // Sent with the rows empty: each row says what it is missing. The page is opened directly, so a choice
+    // made before the form has hydrated can be lost (it then asks for the plan instead); the form refuses
+    // in the browser before anything is sent, so choosing and sending again until the rows answer is safe.
     const plans = page.getByRole('radiogroup').filter({ has: page.getByRole('radio', { name: 'أتقنه' }) });
-    for (let i = 0; i < (await plans.count()); i++) await plans.nth(i).getByRole('radio', { name: 'تدرّب عليه' }).click();
-    if ((await page.getByRole('heading', { name: 'أسئلة الأكاديمية' }).count()) > 0) {
-      await page.getByRole('radiogroup', { name: 'الإعراب' }).getByRole('radio', { name: '4 من 5' }).click();
-      await page.getByLabel('الكلمات الجديدة').fill('6');
-    }
-
-    // Sent with the rows empty: each row says what it is missing.
-    await page.getByRole('button', { name: /أرسل التقرير|حدّث التقرير/ }).click();
-    await expect(page.getByText(/ينقص/)).toBeVisible();
+    await expect(async () => {
+      for (let i = 0; i < (await plans.count()); i++) await plans.nth(i).getByRole('radio', { name: 'تدرّب عليه' }).click();
+      if ((await page.getByRole('heading', { name: 'أسئلة الأكاديمية' }).count()) > 0) {
+        await page.getByRole('radiogroup', { name: 'الإعراب' }).getByRole('radio', { name: '4 من 5' }).click();
+        await page.getByLabel('الكلمات الجديدة').fill('6');
+      }
+      await page.getByRole('button', { name: /أرسل التقرير|حدّث التقرير/ }).click();
+      await expect(page.getByText(/ينقص/)).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
     await expect(page.locator('li[data-student][data-invalid="true"]').first()).toBeVisible();
     await expect(page).toHaveURL(/\/ar\/teach\/reports\/[\w-]+$/);
 

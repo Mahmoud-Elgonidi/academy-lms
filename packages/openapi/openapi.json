@@ -3703,13 +3703,6 @@
                                                         },
                                                         "expires_at": {
                                                             "type": "string"
-                                                        },
-                                                        "notice": {
-                                                            "type": [
-                                                                "string",
-                                                                "null"
-                                                            ],
-                                                            "description": "Why this lesson opens on the teacher's own link instead of the academy's video (its video minutes ran out), to show before going; null: nothing to say."
                                                         }
                                                     },
                                                     "required": [
@@ -3722,8 +3715,7 @@
                                                         "role",
                                                         "can_publish",
                                                         "camera",
-                                                        "expires_at",
-                                                        "notice"
+                                                        "expires_at"
                                                     ]
                                                 },
                                                 {
@@ -3758,13 +3750,6 @@
                                                         },
                                                         "expires_at": {
                                                             "type": "string"
-                                                        },
-                                                        "notice": {
-                                                            "type": [
-                                                                "string",
-                                                                "null"
-                                                            ],
-                                                            "description": "Why this lesson opens on the teacher's own link instead of the academy's video (its video minutes ran out), to show before going; null: nothing to say."
                                                         }
                                                     },
                                                     "required": [
@@ -3777,11 +3762,17 @@
                                                         "role",
                                                         "can_publish",
                                                         "camera",
-                                                        "expires_at",
-                                                        "notice"
+                                                        "expires_at"
                                                     ]
                                                 }
                                             ]
+                                        },
+                                        "notice": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ],
+                                            "description": "Why this lesson opens on the teacher's own link instead of the academy's video (its video minutes ran out), to show before going; null: nothing to say."
                                         },
                                         "recording": {
                                             "type": "object",
@@ -3812,6 +3803,7 @@
                                     },
                                     "required": [
                                         "data",
+                                        "notice",
                                         "recording"
                                     ]
                                 }
