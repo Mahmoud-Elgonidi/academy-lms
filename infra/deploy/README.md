@@ -46,6 +46,11 @@ Repository → Settings → Secrets and variables → Actions:
 | `DEPLOY_HOST`, `DEPLOY_USER` | only to deploy somewhere else: the workflow defaults to `145.223.99.175` and `lukas-demo` |
 | `CONSOLE_ADMIN_PASSWORD` | only to add someone to the console's team from GitHub (`console-owner.yml` with a name): their first password, 12 characters or more |
 
+Two workflows run the platform team's steps on the server by hand (Actions tab, `main` only, through
+`console.sh`): `console-owner.yml` (a console admin made an owner, or someone added as one) and
+`academy-new.yml` (a client academy opened with its owner, who gets the welcome by email:
+[`RUNBOOKS.md`](RUNBOOKS.md), "Open a client academy from GitHub").
+
 The key or the password lives in GitHub's secrets only, never in a file of the repository.
 
 Optional variables: `DEPLOY_DOMAIN` (default `progma.store`), `DEPLOY_DIR` (default `academy-lms`, under the
@@ -204,5 +209,6 @@ alert mail says when one needs someone (`RUNBOOKS.md`, "An outside service needs
 | `offsite.sh` | the offsite part (on the app's image, with `age`, `rclone` and `psql`): each backup and WAL segment and the settings sent, encrypted, to a bucket elsewhere; retention there; fetching back with the private key |
 | `restore.sh` | on the server: `list`, `now`, `check [TIME]`, `to TIME\|latest [offsite]`, `back VOLUME`, and from the off-site copy `offsite`, `check offsite KEYFILE`, `fetch KEYFILE [TIME]` |
 | `RUNBOOKS.md` | what to do when something is wrong, and how to restore |
+| `console.sh` | the platform team's steps on the server, from GitHub or by hand: `owner` (a console admin made an owner; `console-owner.yml`) and `academy` (a client academy opened from one JSON object on stdin; `academy-new.yml`) |
 | `deploy.sh` | runs on the server: checks, first-run settings (and settings added since), migrations, start, health check, way back |
 | `setup-nginx.sh`, `nginx/academy-lms.conf` | the server's nginx site, once |

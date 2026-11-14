@@ -1,0 +1,180 @@
+name: academy-new
+
+# Opens a client academy on the server, as the console's "New academy" does, for when
+# nobody on the platform team can sign in to the console: infra/deploy/console.sh runs
+# `php artisan platform:onboard` in the deployed version, which checks everything before
+# making anything (a taken address, a bad email, an unknown plan: nothing is made), then
+# makes the academy and its owner (owner and admin, no password yet), puts it on the plan
+# with the areas taken away, hides the optional areas named, and emails the owner their
+# own welcome link to choose a password. The link is never printed; everything is audited.
+# By hand only, from the Actions tab; the details go to the server as one JSON object on
+# stdin, never on a command line (infra/deploy/RUNBOOKS.md, "Open a client academy from GitHub").
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: The address, <slug>.<platform domain> (a-z, 0-9 and dashes, 3 to 40)
+        required: true
+        type: string
+      name_ar:
+        description: The academy's name in Arabic
+        required: true
+        type: string
+      name_en:
+        description: The academy's name in English
+        required: true
+        type: string
+      country:
+        description: Country (ISO code)
+        required: true
+        type: string
+        default: QA
+      currency:
+        description: Currency (ISO code, one the billing handles)
+        required: true
+        type: string
+        default: QAR
+      timezone:
+        description: Time zone (IANA)
+        required: true
+        type: string
+        default: Asia/Qatar
+      locale:
+        description: Language (ar or en)
+        required: true
+        type: choice
+        options: [ar, en]
+        default: ar
+      owner_name:
+        description: The owner's name
+        required: true
+        type: string
+      owner_email:
+        description: The owner's email (the welcome goes there)
+        required: true
+        type: string
+      owner_phone:
+        description: The owner's mobile (optional; without +, the country's code is added)
+        required: false
+        type: string
+        default: ''
+      plan:
+        description: The plan's code (starter, growth, pro, unlimited…)
+        required: true
+        type: string
+        default: growth
+      features_off:
+        description: Areas of the plan taken away, comma-separated (e.g. quran,ai); optional
+        required: false
+        type: string
+        default: ''
+      hidden:
+        description: Optional areas hidden at first, comma-separated (groups, curriculum, games, messaging, announcements, support, evaluation, site); optional
+        required: false
+        type: string
+        default: ''
+      reason:
+        description: Why (the contract, the request…); kept with the plan
+        required: true
+        type: string
+
+concurrency:
+  group: academy-new
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  academy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      HOST: ${{ secrets.DEPLOY_HOST || vars.DEPLOY_HOST || '145.223.99.175' }}
+      SSH_USER: ${{ secrets.DEPLOY_USER || vars.DEPLOY_USER || 'lukas-demo' }}
+      SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      SSH_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+      KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DEPLOY_SSH_PORT || '22' }}
+      DIR: ${{ vars.DEPLOY_DIR || 'academy-lms' }}
+      SLUG: ${{ inputs.slug }}
+      NAME_AR: ${{ inputs.name_ar }}
+      NAME_EN: ${{ inputs.name_en }}
+      COUNTRY: ${{ inputs.country }}
+      CURRENCY: ${{ inputs.currency }}
+      TIMEZONE: ${{ inputs.timezone }}
+      LOCALE: ${{ inputs.locale }}
+      OWNER_NAME: ${{ inputs.owner_name }}
+      OWNER_EMAIL: ${{ inputs.owner_email }}
+      OWNER_PHONE: ${{ inputs.owner_phone }}
+      PLAN: ${{ inputs.plan }}
+      FEATURES_OFF: ${{ inputs.features_off }}
+      HIDDEN: ${{ inputs.hidden }}
+      REASON: ${{ inputs.reason }}
+    steps:
+      - name: The academy's details, and the server's settings
+        run: |
+          set -euo pipefail
+          bad() { echo "::error::$*"; exit 1; }
+          line() { [ "${#2}" -le "$3" ] && [[ ! "$2" =~ [[:cntrl:]] ]] || bad "$1: $3 characters at most, on one line."; }
+          [[ "$SLUG" =~ ^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$ ]] || bad "The address: a-z, 0-9 and dashes, 3 to 40, not starting or ending with a dash."
+          [ -n "$NAME_AR" ] && [ -n "$NAME_EN" ] || bad "Both names, please."
+          line "The Arabic name" "$NAME_AR" 120; line "The English name" "$NAME_EN" 120
+          [[ "$COUNTRY" =~ ^[A-Za-z]{2}$ ]] || bad "The country as a two-letter code (QA)."
+          [[ "$CURRENCY" =~ ^[A-Za-z]{3}$ ]] || bad "The currency as a three-letter code (QAR)."
+          [[ "$TIMEZONE" =~ ^[A-Za-z_]+(/[A-Za-z0-9_+-]+)*$ ]] || bad "The time zone as an IANA name (Asia/Qatar)."
+          [[ "$LOCALE" =~ ^(ar|en)$ ]] || bad "The language: ar or en."
+          [ -n "$OWNER_NAME" ] || bad "The owner's name, please."
+          line "The owner's name" "$OWNER_NAME" 255
+          [[ "$OWNER_EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]] || bad "The owner's email is not an email."
+          [ -z "$OWNER_PHONE" ] || [[ "$OWNER_PHONE" =~ ^\+?[0-9\ ]{6,20}$ ]] || bad "The owner's mobile: digits, with + and the country's code or without."
+          [[ "$PLAN" =~ ^[a-z0-9_-]{1,40}$ ]] || bad "The plan's code (growth)."
+          [[ "$FEATURES_OFF" =~ ^[a-z_,\ ]*$ ]] || bad "Areas taken away: names separated by commas (quran,ai)."
+          [[ "$HIDDEN" =~ ^[a-z_,\ ]*$ ]] || bad "Hidden areas: names separated by commas (games,messaging)."
+          [ "${#REASON}" -ge 5 ] || bad "A reason of 5 characters or more."
+          line "The reason" "$REASON" 300
+          if [ -z "$SSH_KEY" ] && [ -z "$SSH_PASSWORD" ]; then
+            bad "Add the repository secret DEPLOY_SSH_KEY (or DEPLOY_PASSWORD), as for the deploy."
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Open the academy on the server
+        run: |
+          set -euo pipefail
+          list() { jq -cn --arg s "$1" '$s | split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(. != ""))'; }
+          json="$(jq -cn \
+            --arg slug "$SLUG" --arg name_ar "$NAME_AR" --arg name_en "$NAME_EN" \
+            --arg country "$COUNTRY" --arg currency "$CURRENCY" --arg timezone "$TIMEZONE" --arg locale "$LOCALE" \
+            --arg owner_name "$OWNER_NAME" --arg owner_email "$OWNER_EMAIL" --arg owner_phone "$OWNER_PHONE" \
+            --arg plan "$PLAN" --argjson features_off "$(list "$FEATURES_OFF")" --argjson hidden "$(list "$HIDDEN")" \
+            --arg reason "$REASON" \
+            '{slug: $slug, name_ar: $name_ar, name_en: $name_en, country: ($country | ascii_upcase),
+              currency: ($currency | ascii_upcase), timezone: $timezone, locale: $locale,
+              owner_name: $owner_name, owner_email: $owner_email,
+              owner_phone: (if $owner_phone == "" then null else $owner_phone end),
+              plan: $plan, features_off: $features_off, hidden: $hidden, reason: $reason}')"
+
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          if [ -n "$KNOWN_HOSTS" ]; then
+            printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            echo "::warning::DEPLOY_KNOWN_HOSTS is not set: the server's key is trusted as first seen (infra/deploy/README.md)."
+            ssh-keyscan -p "$SSH_PORT" -H "$HOST" > ~/.ssh/known_hosts 2>/dev/null
+          fi
+          if [ -n "$SSH_KEY" ]; then
+            printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+            ssh_cmd=(ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -p "$SSH_PORT")
+            scp_cmd=(scp -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -P "$SSH_PORT")
+          else
+            sudo apt-get install -y -qq sshpass >/dev/null
+            export SSHPASS="$SSH_PASSWORD"
+            ssh_cmd=(sshpass -e ssh -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -p "$SSH_PORT")
+            scp_cmd=(sshpass -e scp -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -P "$SSH_PORT")
+          fi
+          target="$SSH_USER@$HOST"
+          # The script as this commit has it, next to the deployed stack's own files.
+          "${scp_cmd[@]}" infra/deploy/console.sh "$target:$DIR/"
+          printf '%s\n' "$json" | "${ssh_cmd[@]}" "$target" "cd '$DIR' && bash console.sh academy"

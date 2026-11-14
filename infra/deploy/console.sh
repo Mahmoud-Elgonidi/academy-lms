@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# The platform team's steps on this server, from GitHub (.github/workflows/console-owner.yml)
-# or by hand from this folder. It runs the deployed version's own commands, nothing else:
+# The platform team's steps on this server, from GitHub (.github/workflows/console-owner.yml,
+# .github/workflows/academy-new.yml) or by hand from this folder. It runs the deployed
+# version's own commands, nothing else:
 #
 #   bash console.sh owner    the email on stdin: that console admin becomes an owner (the
 #                            platform settings are theirs to change); audited, as
@@ -9,6 +10,11 @@
 #                            yet is added as an owner (they set up the authenticator app on
 #                            first sign-in); the password goes to the command on its stdin,
 #                            never on a command line, and is never printed.
+#   bash console.sh academy  one JSON object on stdin (infra/deploy/RUNBOOKS.md, "Open a client
+#                            academy from GitHub"): `php artisan platform:onboard` opens the
+#                            academy with its owner, plan, areas off and hidden, and emails the
+#                            owner their welcome link (never printed). Checked whole first: a
+#                            refusal makes nothing.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -42,7 +48,14 @@ case "${1:-}" in
             printf '%s\n' "$password" | compose run --rm --no-deps -T web php artisan platform:admin "$email" "$name" --owner --password-stdin
         fi
         ;;
+    academy)
+        json="$(head -c 16385)"
+        [ "${#json}" -le 16384 ] || fail "The JSON is too long (16 KB at most)."
+        [[ "$json" =~ ^[[:space:]]*\{ ]] || fail "One JSON object on stdin, please."
+        printf '%s' "$json" | compose run --rm --no-deps -T web php artisan platform:onboard
+        ;;
     *)
-        fail "Usage: bash console.sh owner   (the console admin's email on stdin; to add someone, their name and password on the next lines)"
+        fail "Usage: bash console.sh owner     (the console admin's email on stdin; to add someone, their name and password on the next lines)
+       bash console.sh academy   (one JSON object on stdin: the academy, its owner and plan; see RUNBOOKS.md)"
         ;;
 esac

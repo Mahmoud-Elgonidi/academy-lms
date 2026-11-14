@@ -11,6 +11,7 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
 use Modules\Identity\Actions\SaveOwnTimezone;
 use Modules\Identity\Authorization\AbilityMatrix;
+use Modules\Identity\Commands\OnboardAcademyCommand;
 use Modules\Identity\Commands\RotateDemoSecrets;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Contracts\OtpSender;
@@ -91,7 +92,7 @@ final class IdentityServiceProvider extends ServiceProvider
         });
 
         if ($this->app->runningInConsole()) {
-            $this->commands([RotateDemoSecrets::class]);
+            $this->commands([RotateDemoSecrets::class, OnboardAcademyCommand::class]);
         }
     }
 }

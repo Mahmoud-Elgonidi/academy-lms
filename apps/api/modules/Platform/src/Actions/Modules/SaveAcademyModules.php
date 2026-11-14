@@ -41,6 +41,38 @@ final class SaveAcademyModules
     {
         $this->authorize();
 
+        return $this->save($on, $actorId);
+    }
+
+    /**
+     * The platform team sets up a new academy's areas from the server
+     * (platform:onboard, from GitHub): nobody of the academy is signed in, so
+     * there is no ability to ask. The same rules hold; refused to anyone
+     * signed in on the web and while the platform team is signed in as
+     * someone, so no screen comes this way.
+     *
+     * @param  array<string, bool>  $on  Feature value => on; areas not named stay as they are
+     * @return list<Feature> the areas hidden now
+     */
+    public function byPlatform(array $on): array
+    {
+        $actor = AuditActor::current();
+        if (! in_array($actor->type, ['system', 'platform'], true) || auth()->guard('web')->check()) {
+            throw new AuthorizationException;
+        }
+        if ($actor->onBehalfOf !== null) {
+            throw ValidationException::withMessages(['modules' => __('platform::modules.errors.impersonating')]);
+        }
+
+        return $this->save($on, null);
+    }
+
+    /**
+     * @param  array<string, bool>  $on
+     * @return list<Feature>
+     */
+    private function save(array $on, ?string $actorId): array
+    {
         $hidden = DB::transaction(function () use ($on, $actorId) {
             $row = AcademyModules::query()->lockForUpdate()->first() ?? new AcademyModules;
             $before = $row->hiddenFeatures();

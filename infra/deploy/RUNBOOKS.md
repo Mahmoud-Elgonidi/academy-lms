@@ -543,3 +543,34 @@ Someone who leaves the team is locked the same way.
 **The console on its own host**: set `PLATFORM_CONSOLE_DOMAIN=console.<domain>` and
 `PLATFORM_CONSOLE_URL=https://console.<domain>/console` in `.env`, add the name to the certificate, then
 `docker compose up -d`: the console and its sign-in answer there alone, and 404 on every academy's host.
+
+## Open a client academy from GitHub
+
+The console's **New academy** does it on screen; when nobody on the platform team can sign in to the
+console yet, GitHub does it: **Actions › academy-new › Run workflow** (from `main`, in the `production`
+environment, with the deploy's SSH secrets). Give the address (`<slug>.<domain>`), both names, country,
+currency, time zone and language (Qatar's by default), the owner's name, email and (optionally) mobile, the
+plan's code (`growth` by default), the plan's areas to take away (`features_off`, e.g. `quran`), the optional
+areas it starts with hidden (`hidden`: `groups`, `curriculum`, `games`, `messaging`, `announcements`,
+`support`, `evaluation`, `site`; the academy can show them again in Settings › Academy modules) and the
+reason (kept with the plan). The details reach the server as one JSON object on stdin (never on a command
+line) for `bash console.sh academy`, which runs `php artisan platform:onboard`:
+
+1. everything is checked first (the address free, the email, the plan offered, the areas known, an
+   optional area for each hidden one): a refusal prints why and makes nothing;
+2. the academy and its owner (owner and admin, no password yet), on the plan, as the console makes them;
+3. the plan's terms with the areas taken away (`ChangeAcademyPlan`, with the reason);
+4. the optional areas hidden (`SaveAcademyModules`, as the platform);
+5. the owner's welcome by email (and WhatsApp with a mobile), in the staff's words, with their own link to
+   choose a password (valid for the welcome link's days). The link is never printed.
+
+Each step is in the audit log. The run prints the address, the academy's id, the plan, what is off and hidden,
+and who the welcome went to. If a step after the academy is made fails, it says which, and the rest is
+finished in the console (Academies › the academy). By hand, as the deploy user in `~/academy-lms`:
+
+```bash
+printf '%s' '{"slug":"nibras","name_ar":"أكاديمية نبراس","name_en":"Nibras Academy","country":"QA","currency":"QAR","timezone":"Asia/Qatar","locale":"ar","owner_name":"Khaled","owner_email":"khaled@example.com","owner_phone":null,"plan":"growth","features_off":["quran"],"hidden":["games"],"reason":"Signed contract"}' | bash console.sh academy
+```
+
+Set mail up first (**Email** above): the welcome goes out once, when the academy is made (a `.test` address
+never reaches a real mailer).

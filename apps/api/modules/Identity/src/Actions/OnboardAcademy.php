@@ -4,6 +4,7 @@ namespace Modules\Identity\Actions;
 
 use Illuminate\Support\Facades\Validator;
 use Modules\Identity\Contracts\DTOs\NewUser;
+use Modules\Identity\Contracts\Events\UserInvited;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Enums\Role;
 use Modules\Platform\Contracts\DTOs\NewAcademy;
@@ -18,7 +19,9 @@ use Modules\SharedKernel\Tenancy\TenantRef;
  * "إنشاء أكاديمية"): the academy and its address through Platform, then its
  * owner (owner and admin) with no password yet, and the owner's own welcome
  * link to choose one. The owner's details are checked before the academy is
- * made, so a bad email does not leave an academy without an owner.
+ * made, so a bad email does not leave an academy without an owner. The
+ * console shows the link to pass on; from the server (platform:onboard) the
+ * owner gets it by email instead (welcome()).
  */
 final class OnboardAcademy
 {
@@ -56,5 +59,16 @@ final class OnboardAcademy
 
             return ['academy' => $tenant, 'owner_id' => $ownerId, 'link' => $this->identity->welcomeLink($ownerId)];
         });
+    }
+
+    /**
+     * The owner's welcome with their own link to choose a password, as a new
+     * member of the team gets it (People's SendWelcome hears UserInvited,
+     * after commit, in the staff's words); nothing for an owner who already
+     * chose one. Called once the academy is set up, outside a transaction.
+     */
+    public function welcome(TenantRef $academy, string $ownerId): void
+    {
+        $this->tenants->run($academy, fn () => event(new UserInvited($ownerId)));
     }
 }
