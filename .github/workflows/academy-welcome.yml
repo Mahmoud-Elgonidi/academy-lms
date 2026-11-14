@@ -1,0 +1,97 @@
+name: academy-welcome
+
+# Sends an academy owner's welcome again (a fresh link to choose the password), with copies to the
+# addresses given, when the first one did not arrive: infra/deploy/console.sh welcome runs
+# `php artisan platform:welcome`, which sends it at once and says whether the mailer took it, or why
+# not; the link is never printed. Only for an owner or admin who has no password yet. Whoever opens
+# the link first sets the password, so copy only people the owner trusts.
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: The academy's address (hmtrust)
+        required: true
+        type: string
+      email:
+        description: The owner's email
+        required: true
+        type: string
+      cc:
+        description: Copies, separated by commas (at most 5)
+        required: false
+        type: string
+        default: ''
+      reason:
+        description: Why it is sent again (kept in the audit log)
+        required: true
+        type: string
+
+concurrency:
+  group: academy-welcome
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  welcome:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      HOST: ${{ secrets.DEPLOY_HOST || vars.DEPLOY_HOST || '145.223.99.175' }}
+      SSH_USER: ${{ secrets.DEPLOY_USER || vars.DEPLOY_USER || 'lukas-demo' }}
+      SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      SSH_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+      KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DEPLOY_SSH_PORT || '22' }}
+      DIR: ${{ vars.DEPLOY_DIR || 'academy-lms' }}
+      SLUG: ${{ inputs.slug }}
+      EMAIL: ${{ inputs.email }}
+      CC: ${{ inputs.cc }}
+      REASON: ${{ inputs.reason }}
+    steps:
+      - name: The owner and the copies
+        run: |
+          set -euo pipefail
+          bad() { echo "::error::$*"; exit 1; }
+          mail='^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+          [[ "$SLUG" =~ ^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$ ]] || bad "The academy's address (its slug)."
+          [[ "$EMAIL" =~ $mail ]] || bad "The owner's email is not an email."
+          IFS=',' read -ra copies <<< "$CC"
+          [ "${#copies[@]}" -le 5 ] || bad "At most 5 copies."
+          for c in "${copies[@]}"; do c="$(echo "$c" | xargs)"; [ -z "$c" ] || [[ "$c" =~ $mail ]] || bad "Not an email: $c"; done
+          [ "${#REASON}" -ge 5 ] && [ "${#REASON}" -le 300 ] && [[ ! "$REASON" =~ [[:cntrl:]] ]] || bad "A reason of 5 to 300 characters, on one line."
+          if [ -z "$SSH_KEY" ] && [ -z "$SSH_PASSWORD" ]; then
+            bad "Add the repository secret DEPLOY_SSH_KEY (or DEPLOY_PASSWORD), as for the deploy."
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Send it again from the server
+        run: |
+          set -euo pipefail
+          json="$(jq -cn --arg slug "$SLUG" --arg email "$EMAIL" --arg cc "$CC" --arg reason "$REASON" \
+            '{slug: $slug, email: $email, reason: $reason,
+              cc: ($cc | split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(. != "")))}')"
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          if [ -n "$KNOWN_HOSTS" ]; then
+            printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            echo "::warning::DEPLOY_KNOWN_HOSTS is not set: the server's key is trusted as first seen (infra/deploy/README.md)."
+            ssh-keyscan -p "$SSH_PORT" -H "$HOST" > ~/.ssh/known_hosts 2>/dev/null
+          fi
+          if [ -n "$SSH_KEY" ]; then
+            printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+            ssh_cmd=(ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -p "$SSH_PORT")
+            scp_cmd=(scp -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -P "$SSH_PORT")
+          else
+            sudo apt-get install -y -qq sshpass >/dev/null
+            export SSHPASS="$SSH_PASSWORD"
+            ssh_cmd=(sshpass -e ssh -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -p "$SSH_PORT")
+            scp_cmd=(sshpass -e scp -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -P "$SSH_PORT")
+          fi
+          target="$SSH_USER@$HOST"
+          "${scp_cmd[@]}" infra/deploy/console.sh "$target:$DIR/"
+          printf '%s\n' "$json" | "${ssh_cmd[@]}" "$target" "cd '$DIR' && bash console.sh welcome"

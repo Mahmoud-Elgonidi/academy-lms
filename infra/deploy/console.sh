@@ -54,6 +54,12 @@ case "${1:-}" in
         [[ "$json" =~ ^[[:space:]]*\{ ]] || fail "One JSON object on stdin, please."
         printf '%s' "$json" | compose run --rm --no-deps -T web php artisan platform:onboard
         ;;
+    welcome)
+        json="$(head -c 8193)"
+        [ "${#json}" -le 8192 ] || fail "The JSON is too long (8 KB at most)."
+        [[ "$json" =~ ^[[:space:]]*\{ ]] || fail "One JSON object on stdin, please."
+        printf '%s' "$json" | compose run --rm --no-deps -T web php artisan platform:welcome
+        ;;
     https)
         # An academy's address on the server's certificate (nginx and certbot hold HTTPS; README.md): the
         # certificate that already covers this platform's names is expanded with the new one, keeping
@@ -84,6 +90,7 @@ case "${1:-}" in
     *)
         fail "Usage: bash console.sh owner     (the console admin's email on stdin; to add someone, their name and password on the next lines)
        bash console.sh academy   (one JSON object on stdin: the academy, its owner and plan; see RUNBOOKS.md)
-       bash console.sh https     (an academy's slug or address on stdin: added to the server's certificate)"
+       bash console.sh https     (an academy's slug or address on stdin: added to the server's certificate)
+       bash console.sh welcome   (one JSON object on stdin: an owner's welcome sent again, with copies; see RUNBOOKS.md)"
         ;;
 esac

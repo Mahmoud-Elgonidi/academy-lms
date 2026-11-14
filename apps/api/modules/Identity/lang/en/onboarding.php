@@ -61,4 +61,13 @@ return [
         'owner_email' => 'Write a valid email for the owner.',
         'owner_phone' => 'That is not a valid mobile number for the country code chosen. Write it without its leading zero, or with its own country code such as +966501234567.',
     ],
+    'welcome_mail' => [
+        'subject' => 'Your account at :academy is ready',
+        'hello' => 'Hello :name,',
+        'intro' => ':academy has been opened on the platform, and you are its owner. Choose your password with the button below, then sign in to the back office.',
+        'button' => 'Choose your password',
+        'lasts' => 'The link works for :days days and once: whoever chooses the password first signs in with it.',
+        'two_factor' => 'At the first sign-in the back office asks you to set up two-step sign-in with an app such as Google Authenticator.',
+        'address' => 'The back office: :url',
+    ],
 ];
