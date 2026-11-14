@@ -54,8 +54,36 @@ case "${1:-}" in
         [[ "$json" =~ ^[[:space:]]*\{ ]] || fail "One JSON object on stdin, please."
         printf '%s' "$json" | compose run --rm --no-deps -T web php artisan platform:onboard
         ;;
+    https)
+        # An academy's address on the server's certificate (nginx and certbot hold HTTPS; README.md): the
+        # certificate that already covers this platform's names is expanded with the new one, keeping
+        # every name it had. Needs certbot through sudo without a password; otherwise it says what to type.
+        IFS= read -r host || true
+        host="$(printf '%s' "$host" | tr 'A-Z' 'a-z')"
+        domain="$(grep -E '^PLATFORM_DOMAIN=' "$HERE/.env" | tail -n1 | cut -d= -f2- | tr -d '"'"'"' ')"
+        [ -n "$domain" ] || fail "No PLATFORM_DOMAIN in .env."
+        [[ "$host" =~ ^[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$ ]] && host="$host.$domain"
+        [[ "$host" =~ ^[a-z0-9]([a-z0-9-]*[a-z0-9])?\.$(printf '%s' "$domain" | sed 's/\./\\./g')$ ]] \
+            || fail "An academy's name under $domain on stdin (its slug, or slug.$domain)."
+        manual="sudo certbot certificates   # then: sudo certbot --nginx --cert-name <name> --expand -d <every name it has> -d $host"
+        sudo -n certbot --version >/dev/null 2>&1 || fail "This user cannot run certbot through sudo without a password. On the server: $manual"
+        listing="$(sudo -n certbot certificates 2>/dev/null)"
+        # Each certificate as "name<TAB>its names"; the one that holds this platform's names.
+        certs="$(printf '%s\n' "$listing" | awk '/Certificate Name:/{n=$3} /Domains:/{sub(/^ *Domains: */,""); print n "\t" $0}')"
+        line="$(printf '%s\n' "$certs" | awk -F'\t' -v d="$domain" '{split($2,a," "); for(i in a){ if(a[i]==d || a[i]=="*." d || a[i] ~ ("\\." d "$")){print; exit} }}')"
+        [ -n "$line" ] || fail "No certificate here covers $domain yet. On the server: $manual"
+        name="${line%%$'\t'*}"; names="${line#*$'\t'}"
+        for n in $names; do
+            if [ "$n" = "$host" ] || [ "$n" = "*.$domain" ]; then echo "Already covered: https://$host (certificate $name)"; exit 0; fi
+        done
+        args=(); for n in $names; do args+=(-d "$n"); done
+        sudo -n certbot --nginx --non-interactive --cert-name "$name" --expand "${args[@]}" -d "$host" \
+            || fail "certbot did not add $host (does its DNS point at this server?). Nothing else changed."
+        echo "Added to the certificate $name: https://$host"
+        ;;
     *)
         fail "Usage: bash console.sh owner     (the console admin's email on stdin; to add someone, their name and password on the next lines)
-       bash console.sh academy   (one JSON object on stdin: the academy, its owner and plan; see RUNBOOKS.md)"
+       bash console.sh academy   (one JSON object on stdin: the academy, its owner and plan; see RUNBOOKS.md)
+       bash console.sh https     (an academy's slug or address on stdin: added to the server's certificate)"
         ;;
 esac

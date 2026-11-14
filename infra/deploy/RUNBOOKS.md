@@ -574,3 +574,15 @@ printf '%s' '{"slug":"nibras","name_ar":"أكاديمية نبراس","name_en":
 
 Set mail up first (**Email** above): the welcome goes out once, when the academy is made (a `.test` address
 never reaches a real mailer).
+
+### Its address on the certificate (HTTPS)
+
+nginx on the server holds the certificates (certbot, README.md), and a browser refuses an academy's page
+("Your connection is not private") until its name is on one. After opening the academy, `academy-new` runs
+`bash console.sh https` with the slug: it finds the certificate that covers the platform's names and expands
+it with `<slug>.<domain>`, keeping every name it had (nothing to do under a `*.<domain>` certificate). That
+needs certbot through sudo without a password for the deploy user; without it the run warns and prints what to
+type. For an academy opened before, or after fixing sudo or DNS: **Actions › academy-https › Run workflow**
+with the slug, or on the server `printf 'hmtrust\n' | bash console.sh https`. One wildcard certificate
+(`certbot certonly --manual --preferred-challenges dns -d <domain> -d '*.<domain>'`) makes this step
+unnecessary for every academy to come.

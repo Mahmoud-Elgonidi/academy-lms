@@ -178,3 +178,6 @@ jobs:
           # The script as this commit has it, next to the deployed stack's own files.
           "${scp_cmd[@]}" infra/deploy/console.sh "$target:$DIR/"
           printf '%s\n' "$json" | "${ssh_cmd[@]}" "$target" "cd '$DIR' && bash console.sh academy"
+          # Its address on the server's certificate, so the welcome link opens over HTTPS.
+          printf '%s\n' "$SLUG" | "${ssh_cmd[@]}" "$target" "cd '$DIR' && bash console.sh https" \
+            || echo "::warning::The academy is open, but its address is not on the certificate yet: run academy-https.yml (or the commands it printed above)."

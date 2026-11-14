@@ -1,0 +1,71 @@
+name: academy-https
+
+# Puts an academy's address on the server's certificate, so its page opens over HTTPS: the server's
+# nginx holds the certificates (certbot, infra/deploy/README.md), and infra/deploy/console.sh https
+# expands the one that covers the platform's names with the new name, keeping every name it had.
+# academy-new.yml does the same after opening an academy; this one is for an academy opened before,
+# or when that step could not. Needs certbot through sudo without a password for the deploy user.
+
+on:
+  workflow_dispatch:
+    inputs:
+      host:
+        description: The academy's slug (hmtrust) or its full address (hmtrust.<platform domain>)
+        required: true
+        type: string
+
+concurrency:
+  group: academy-https
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  https:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      HOST: ${{ secrets.DEPLOY_HOST || vars.DEPLOY_HOST || '145.223.99.175' }}
+      SSH_USER: ${{ secrets.DEPLOY_USER || vars.DEPLOY_USER || 'lukas-demo' }}
+      SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      SSH_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+      KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DEPLOY_SSH_PORT || '22' }}
+      DIR: ${{ vars.DEPLOY_DIR || 'academy-lms' }}
+      NAME: ${{ inputs.host }}
+    steps:
+      - name: An academy's address
+        run: |
+          set -euo pipefail
+          [[ "$NAME" =~ ^[A-Za-z0-9][A-Za-z0-9.-]{1,200}$ ]] || { echo "::error::An academy's slug or address, please."; exit 1; }
+          if [ -z "$SSH_KEY" ] && [ -z "$SSH_PASSWORD" ]; then
+            echo "::error::Add the repository secret DEPLOY_SSH_KEY (or DEPLOY_PASSWORD), as for the deploy."; exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Add it to the server's certificate
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          if [ -n "$KNOWN_HOSTS" ]; then
+            printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            echo "::warning::DEPLOY_KNOWN_HOSTS is not set: the server's key is trusted as first seen (infra/deploy/README.md)."
+            ssh-keyscan -p "$SSH_PORT" -H "$HOST" > ~/.ssh/known_hosts 2>/dev/null
+          fi
+          if [ -n "$SSH_KEY" ]; then
+            printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+            ssh_cmd=(ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -p "$SSH_PORT")
+            scp_cmd=(scp -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -P "$SSH_PORT")
+          else
+            sudo apt-get install -y -qq sshpass >/dev/null
+            export SSHPASS="$SSH_PASSWORD"
+            ssh_cmd=(sshpass -e ssh -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -p "$SSH_PORT")
+            scp_cmd=(sshpass -e scp -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -P "$SSH_PORT")
+          fi
+          target="$SSH_USER@$HOST"
+          "${scp_cmd[@]}" infra/deploy/console.sh "$target:$DIR/"
+          printf '%s\n' "$NAME" | "${ssh_cmd[@]}" "$target" "cd '$DIR' && bash console.sh https"
