@@ -276,6 +276,29 @@ online checkouts are checked again every five minutes (`billing:sweep`) until th
 While it is down, the academy can take transfers: on the invoice, the payer sends a proof
 ("I paid by transfer") and the academy approves it. Nothing in the app needs changing.
 
+## Academies buying packs online (the platform's Stripe account)
+
+The platform sells academies packs of video minutes and AI credits on its own Stripe account (the
+platform is the merchant). To set it up, as an owner in the console:
+
+1. **Platform settings › Stripe**: the platform's secret key (`sk_live_…`, or a restricted key that may
+   create customers, Checkout Sessions and PaymentIntents, and detach payment methods).
+2. In Stripe's dashboard, **Developers › Webhooks › Add endpoint**: `https://<your domain>/webhooks/platform/stripe`
+   with the events `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+   `checkout.session.expired`, `payment_intent.succeeded` and `payment_intent.payment_failed`. Copy its
+   signing secret (`whsec_…`) into **Platform settings › Stripe › Platform webhook signing secret** (or
+   `STRIPE_PLATFORM_WEBHOOK_SECRET` in the server's `.env`). "Try it" says when it is missing.
+3. **Plans › Extra packs**: give each pack a price in each currency academies pay in. A pack with no price in
+   an academy's currency is asked for by transfer only (Plan requests, as before).
+
+An unsigned delivery is answered 401 and kept nowhere. A paid pack is added only once Stripe itself says it
+was paid (the webhook, the academy coming back from the payment page, or the hourly `platform:metering`);
+each purchase adds one lot and gets one receipt, however often Stripe repeats itself. If a payment shows in
+Stripe but not in **Usage and revenue**, run `php artisan platform:metering` (it asks Stripe about open
+purchases) and look at `platform_webhook_inbox.error` for that event. Automatic recharges that were declined
+are listed there too; after a second soft decline (or one hard decline) automatic recharge turns itself off
+and the academy's owner and admins are told.
+
 ## Live lessons through LiveKit are down
 
 An academy can switch its lessons to an outside link (Zoom, Meet) at once: back office →
@@ -494,7 +517,7 @@ invoice), it goes back to the academy's "Data requests" page with the reason, an
 ## Changing a secret
 
 **An outside service's key** (Anthropic, ElevenLabs, SMTP, WhatsApp, Twilio, Firebase's file, LiveKit,
-Stripe Connect, Google and Apple): in the console, **Platform settings** (an owner of the platform team).
+Stripe and its webhook secrets, Google and Apple): in the console, **Platform settings** (an owner of the platform team).
 Someone on the console's team who does not see it is not an owner yet: on GitHub, **Actions › console-owner
 › Run workflow** with their email (it runs `platform:admin <email> --owner` on the server, audited), or here,
 as the deploy user in `~/academy-lms`: `printf '%s\n' someone@example.com | bash console.sh owner`.
@@ -574,6 +597,15 @@ printf '%s' '{"slug":"nibras","name_ar":"أكاديمية نبراس","name_en":
 
 Set mail up first (**Email** above): the welcome goes out once, when the academy is made (a `.test` address
 never reaches a real mailer).
+
+### The welcome did not arrive
+
+**Actions › academy-welcome › Run workflow** (or `bash console.sh welcome` with `{"slug", "email", "cc": [], "reason"}`
+on stdin) runs `php artisan platform:welcome`: one email at once with a fresh link to choose the password, to the
+owner (an owner or admin with no password yet) and copied to up to five addresses. Whoever opens the link first
+sets the password, so copy only people the owner trusts. The run says which mailer is in use and whether it took
+the email, or why not (mail not set up: **Email** above; `php artisan platform:mail-test` tries it); the link
+is never printed, and the audit keeps the reason and the number of copies.
 
 ### Its address on the certificate (HTTPS)
 

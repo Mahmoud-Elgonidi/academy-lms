@@ -1,9 +1,18 @@
-@php $l = 'platform::metering.'; $cards = $this->cards; $charts = $this->charts; $statement = $this->statement; @endphp
+@php $l = 'platform::metering.'; $r = 'platform::recharge.'; $cards = $this->cards; $charts = $this->charts; $statement = $this->statement; $recharge = $this->recharge; @endphp
 <x-filament-panels::page>
     @include('platform::console.styles')
     @include('platform::plans.styles')
     @include('platform::plans.usage-styles')
     <div class="pc-stack">
+        <div data-live-channel="{{ $this->liveChannel() }}" hidden></div>
+
+        {{-- Back from Stripe's page: where the payment stands, calmly, until Stripe's answer adds it. --}}
+        @if ($recharge['returned'])
+            <section class="pc-base mu-back" data-tone="{{ $recharge['returned']['tone'] }}" role="status">
+                <strong>{{ $recharge['returned']['title'] }}</strong>
+                <p>{{ $recharge['returned']['body'] }}</p>
+            </section>
+        @endif
         {{-- One card for each meter: this month's allowance, the bought balance and its lots, what is left and for how long. --}}
         <div class="mu-cards lms-stagger">
             @foreach ($cards as $c)
@@ -50,8 +59,13 @@
 
                     @if ($c['limited'])
                         <footer class="mu-actions">
+                            @if ($c['buy_online'])
+                                {{ ($this->buyOnlineAction)(['meter' => $c['key']]) }}
+                            @endif
                             @if ($c['waiting'])
                                 <small class="pp-waiting">{{ __('platform::topups.buy.waiting') }}</small>
+                            @elseif ($c['buy_online'])
+                                <a class="mu-button" href="{{ $c['buy_url'] }}" wire:navigate>{{ __($r.'buy.transfer') }}</a>
                             @else
                                 <a class="mu-button" data-primary href="{{ $c['buy_url'] }}" wire:navigate>{{ __($l.'card.buy') }}</a>
                             @endif
@@ -61,6 +75,67 @@
                 </section>
             @endforeach
         </div>
+
+        {{-- Automatic recharge, Twilio's way: the saved card, and for each meter when to buy which pack. --}}
+        @if ($recharge['online'])
+            <section class="pc-base pc-box">
+                <h3><span>{{ __($r.'auto.title') }}</span></h3>
+                <p class="pp-sub">{{ __($r.'auto.subtitle') }}</p>
+                <div class="mu-card-line">
+                    @if ($recharge['card'])
+                        <span class="mu-saved">
+                            {{ \Filament\Support\generate_icon_html(\Filament\Support\Icons\Heroicon::OutlinedCreditCard) }}
+                            <strong>{{ $recharge['card']['brand'] }} •••• <span dir="ltr">{{ $recharge['card']['last4'] }}</span></strong>
+                            <small>{{ __($r.'card.expires', ['date' => $recharge['card']['expiry']]) }}</small>
+                            @if ($recharge['card']['expired'])<span class="pp-tag" data-tone="danger">{{ __($r.'card.expired') }}</span>@endif
+                        </span>
+                        {{ $this->removeCardAction }}
+                    @else
+                        <small>{{ __($r.'card.none') }}</small>
+                    @endif
+                </div>
+                <ul class="mu-auto">
+                    @foreach ($recharge['auto'] as $a)
+                        <li wire:key="auto-{{ $a['key'] }}">
+                            <div>
+                                <strong>{{ $a['label'] }}</strong>
+                                <span class="pp-tag" data-tone="{{ ['on' => 'brand', 'off' => 'gray', 'stopped' => 'warn'][$a['state']] }}">{{ __($r.'auto.state.'.$a['state']) }}</span>
+                                <p>{{ $a['text'] }}</p>
+                            </div>
+                            @if ($a['can'])
+                                {{ ($this->autoRechargeAction)(['meter' => $a['key']]) }}
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
+        {{-- What the academy bought, each with the platform's numbered receipt. --}}
+        <section class="pc-base pc-box">
+            <h3><span>{{ __($r.'purchases.title') }}</span></h3>
+            <p class="pp-sub">{{ __($r.'purchases.subtitle') }}</p>
+            @if ($recharge['purchases'] === [])
+                <p class="pp-sub">{{ __($r.'purchases.empty') }}</p>
+            @else
+                <div class="mu-table-wrap">
+                    <table class="mu-table">
+                        <thead><tr><th>{{ __($r.'purchases.number') }}</th><th>{{ __($r.'purchases.date') }}</th><th>{{ __($r.'purchases.pack') }}</th><th>{{ __($r.'purchases.method') }}</th><th>{{ __($r.'purchases.amount') }}</th></tr></thead>
+                        <tbody>
+                            @foreach ($recharge['purchases'] as $p)
+                                <tr wire:key="receipt-{{ $p['id'] }}">
+                                    <td><a class="pp-link" href="{{ $p['url'] }}" target="_blank" rel="noopener" dir="ltr">{{ $p['number'] }}</a></td>
+                                    <td>{{ $p['date'] }}</td>
+                                    <td>{{ $p['pack'] }} <small>{{ $p['what'] }}</small></td>
+                                    <td>{{ $p['method'] }}</td>
+                                    <td class="mu-num" dir="ltr">{{ $p['amount'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </section>
 
         {{-- The month day by day beside the month before, and who used it. --}}
         @foreach ($charts as $key => $chart)
@@ -151,3 +226,13 @@
         </section>
     </div>
 </x-filament-panels::page>
+
+@script
+<script>
+    // A purchase moves when Stripe answers (the webhook, the hourly check): the page follows the academy's recharge channel (LmsLive).
+    const el = $wire.$el.querySelector('[data-live-channel]');
+    if (el && window.LmsLive) {
+        window.LmsLive.watch({ el, channel: el.dataset.liveChannel, event: '.changed', refresh: () => $wire.$refresh(), every: 120000 });
+    }
+</script>
+@endscript

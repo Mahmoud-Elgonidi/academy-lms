@@ -16,6 +16,7 @@ use Modules\Communication\Console\SweepCommunicationCommand;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Communication\Filament\NotificationBell;
+use Modules\Communication\Listeners\TellStaffAboutRecharges;
 use Modules\Communication\Listeners\TellStaffAboutUsage;
 use Modules\Communication\Live\InboxChanged;
 use Modules\Communication\NotificationPreferences;
@@ -25,8 +26,11 @@ use Modules\Communication\Templates\LinkRegistry;
 use Modules\Communication\Templates\TemplateRegistry;
 use Modules\Identity\Contracts\OtpSender;
 use Modules\Platform\Contracts\TenantDirectory;
+use Modules\SharedKernel\Plans\Events\AutoRechargeTurnedOff;
 use Modules\SharedKernel\Plans\Events\BalanceRunningOut;
 use Modules\SharedKernel\Plans\Events\LotExpiringSoon;
+use Modules\SharedKernel\Plans\Events\RechargeFailed;
+use Modules\SharedKernel\Plans\Events\RechargeSucceeded;
 use Modules\SharedKernel\Plans\Events\UsageThresholdReached;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\LiveSignals;
@@ -66,6 +70,11 @@ final class CommunicationServiceProvider extends ServiceProvider
         Event::listen(UsageThresholdReached::class, [TellStaffAboutUsage::class, 'threshold']);
         Event::listen(LotExpiringSoon::class, [TellStaffAboutUsage::class, 'expiring']);
         Event::listen(BalanceRunningOut::class, [TellStaffAboutUsage::class, 'runningOut']);
+        // Its recharges: a pack added, an automatic recharge declined or turned off.
+        TellStaffAboutRecharges::define($this->app->make(NotificationsApi::class));
+        Event::listen(RechargeSucceeded::class, [TellStaffAboutRecharges::class, 'succeeded']);
+        Event::listen(RechargeFailed::class, [TellStaffAboutRecharges::class, 'failed']);
+        Event::listen(AutoRechargeTurnedOff::class, [TellStaffAboutRecharges::class, 'turnedOff']);
         $links = $this->app->make(NotificationLinks::class);
         $links->register('usage', fn (array $action, string $panel) => $panel === 'academy' && Route::has(self::USAGE_PAGE) ? route(self::USAGE_PAGE) : null);
         $links->registerPersonal('usage', fn (array $action, string $userId) => Route::has(self::USAGE_PAGE) && $this->app->make(TenantContext::class)->check()

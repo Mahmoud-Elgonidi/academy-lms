@@ -18,6 +18,7 @@ use Modules\Platform\Actions\Plans\CancelPlanUpgrade;
 use Modules\Platform\Actions\Plans\RequestPlanUpgrade;
 use Modules\Platform\Actions\TopUps\CancelTopUpRequest;
 use Modules\Platform\Actions\TopUps\RequestTopUp;
+use Modules\Platform\Models\Academy;
 use Modules\Platform\Models\Plans\PlanUpgradeRequest;
 use Modules\Platform\Models\Plans\TopUpPack;
 use Modules\Platform\Models\Plans\UsageTopUp;
@@ -29,7 +30,6 @@ use Modules\Platform\Plans\PlanUsage;
 use Modules\Platform\Plans\Requests\PlanRequests;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Filament\NavGroup;
-use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use UnitEnum;
@@ -234,7 +234,7 @@ final class AcademyPlanPage extends Page
         return TopUpPack::query()->offered()->where('limit', $limit->value)->orderBy('sort')->orderBy('amount')->get()
             ->mapWithKeys(fn (TopUpPack $p) => [$p->id => implode(' · ', array_filter([
                 $p->name(), '+'.PlanFormat::amount($limit, $p->amount),
-                $p->price_minor !== null && $p->currency !== null ? Money::of($p->price_minor, $p->currency)->format() : null,
+                $p->priceIn((string) Academy::query()->whereKey(app(TenantContext::class)->require()->id)->value('base_currency'))?->format(),
             ]))])->all();
     }
 

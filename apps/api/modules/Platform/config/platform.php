@@ -27,6 +27,16 @@ return [
         'ios_url' => env('APP_IOS_URL'),
     ],
 
+    // Recharging (docs/architecture/02, section 11): the platform sells packs of video minutes and AI
+    // credits on its own Stripe account (billing.payments.stripe.platform_secret, the same key as
+    // Stripe Connect); Stripe's events for it come to /webhooks/platform/stripe, signed with this
+    // endpoint's own secret (whsec_…). Usually set in console › Platform settings › Stripe instead.
+    'payments' => [
+        'stripe' => [
+            'webhook_secret' => env('STRIPE_PLATFORM_WEBHOOK_SECRET'),
+        ],
+    ],
+
     // The stack's health (docs/architecture/03, section 12): the token an
     // uptime monitor sends to GET /health (empty: no such page), whether this
     // server has the backup part (then a missing backup or WAL archive is a

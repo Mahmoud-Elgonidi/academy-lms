@@ -5,6 +5,7 @@ namespace Modules\Platform\Filament\Console\Pages;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -89,7 +90,7 @@ final class Plans extends Page
                 'id' => $p->id,
                 'name' => $p->name(),
                 'amount' => '+'.PlanFormat::amount($p->limitKind(), $p->amount),
-                'price' => $p->price_minor !== null && $p->currency !== null ? Money::of($p->price_minor, $p->currency)->format() : null,
+                'price' => $p->pricesText() ?? __('platform::recharge.packs.no_price'),
                 'archived' => $p->archived_at !== null,
             ];
         }
@@ -114,8 +115,8 @@ final class Plans extends Page
             ->fillForm(function (array $arguments) {
                 $pack = TopUpPack::query()->findOrFail($arguments['pack']);
 
-                return $pack->only(['limit', 'amount', 'name_ar', 'name_en', 'currency', 'sort']) + [
-                    'price' => $pack->price_minor === null ? null : Money::of($pack->price_minor, (string) $pack->currency)->decimal(),
+                return $pack->only(['limit', 'amount', 'name_ar', 'name_en', 'sort']) + [
+                    'prices' => array_map(fn (Money $m) => ['currency' => $m->currency, 'price' => $m->decimal()], $pack->priceList()),
                     'archived' => $pack->archived_at !== null,
                 ];
             })
@@ -134,10 +135,17 @@ final class Plans extends Page
                 TextInput::make('amount')->label(__($l.'amount'))->helperText(__($l.'amount_hint'))->required()->numeric()->integer()->minValue(1),
                 TextInput::make('name_ar')->label(__('platform::plans.catalog.form.name_ar'))->required()->maxLength(80),
                 TextInput::make('name_en')->label(__('platform::plans.catalog.form.name_en'))->required()->maxLength(80),
-                TextInput::make('price')->label(__($l.'price'))->helperText(__($l.'price_hint'))->numeric()->minValue(0)->requiredWith('currency'),
-                Select::make('currency')->label(__('platform::plans.catalog.form.currency'))->options(['SAR' => 'SAR', 'USD' => 'USD', 'EGP' => 'EGP', 'AED' => 'AED', 'KWD' => 'KWD', 'EUR' => 'EUR'])->requiredWith('price')->native(false),
                 TextInput::make('sort')->label(__('platform::plans.catalog.form.sort'))->numeric()->integer()->minValue(0),
             ]),
+            // A price per currency (none: an academy in that currency asks for the pack by transfer).
+            Repeater::make('prices')->label(__('platform::recharge.packs.prices'))->helperText(__('platform::recharge.packs.prices_hint'))
+                ->addActionLabel(__('platform::recharge.packs.add_price'))->defaultItems(0)->reorderable(false)->columns(2)
+                ->maxItems(count(SaveTopUpPack::CURRENCIES))
+                ->schema([
+                    Select::make('currency')->label(__('platform::recharge.packs.currency'))->options(array_combine(SaveTopUpPack::CURRENCIES, SaveTopUpPack::CURRENCIES))
+                        ->required()->native(false)->distinct(),
+                    TextInput::make('price')->label(__('platform::recharge.packs.price'))->required()->numeric()->minValue(0.01),
+                ]),
             Toggle::make('archived')->label(__($l.'archived'))->helperText(__($l.'archived_hint')),
         ];
     }
@@ -145,15 +153,18 @@ final class Plans extends Page
     /** @param  array<string, mixed>  $data */
     private function savePack(?string $packId, array $data): void
     {
-        $price = $data['price'] ?? null;
-        $priced = $price !== null && $price !== '' && ! empty($data['currency']);
+        $prices = [];
+        foreach ((array) ($data['prices'] ?? []) as $row) {
+            if (! empty($row['currency']) && ($row['price'] ?? '') !== '' && $row['price'] !== null) {
+                $prices[(string) $row['currency']] = Money::parse((string) $row['price'], (string) $row['currency'])->minor;
+            }
+        }
         app(SaveTopUpPack::class)->handle($packId, [
             'limit' => $data['limit'],
             'amount' => (int) $data['amount'],
             'name_ar' => $data['name_ar'],
             'name_en' => $data['name_en'],
-            'price_minor' => $priced ? Money::parse((string) $price, (string) $data['currency'])->minor : null,
-            'currency' => $priced ? $data['currency'] : null,
+            'prices' => $prices,
             'sort' => $data['sort'] === null || $data['sort'] === '' ? null : (int) $data['sort'],
             'archived' => (bool) ($data['archived'] ?? false),
         ]);

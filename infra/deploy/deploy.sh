@@ -208,10 +208,14 @@ AWS_BUCKET=
 AWS_ENDPOINT=
 AWS_USE_PATH_STYLE_ENDPOINT=false
 
-# Academies paid through their own Stripe account connected to the platform's
-# (Stripe Connect): the platform's secret key, Connect client id and Connect
-# webhook's signing secret, and the platform's fee in basis points (0: none).
+# The platform's Stripe account: academies buy packs of video minutes and AI
+# credits on it (its webhook https://$DOMAIN/webhooks/platform/stripe and that
+# webhook's signing secret), and academies paid through their own Stripe account
+# connect to it (Stripe Connect): the platform's secret key, Connect client id and
+# Connect webhook's signing secret, and the platform's fee in basis points (0: none).
+# Usually set in console › Platform settings › Stripe instead.
 STRIPE_PLATFORM_SECRET=
+STRIPE_PLATFORM_WEBHOOK_SECRET=
 STRIPE_CONNECT_CLIENT_ID=
 STRIPE_CONNECT_WEBHOOK_SECRET=
 STRIPE_APPLICATION_FEE_BP=0

@@ -5,15 +5,19 @@ namespace Modules\Platform\Filament\Console\Pages;
 use BackedEnum;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\Platform\Actions\Plans\HandlePlanUpgrade;
+use Modules\Platform\Actions\Plans\SaveTopUpPack;
 use Modules\Platform\Actions\TopUps\ActivateTopUp;
 use Modules\Platform\Actions\TopUps\DeclineTopUp;
 use Modules\Platform\Filament\Console\ConsoleView;
@@ -103,7 +107,7 @@ final class PlanRequests extends Page
             $rows[] = $common($t) + [
                 'kind' => 'topup',
                 'what' => __('shared::plans.limits.'.$t->limit).': +'.PlanFormat::amount($t->limitKind(), $t->amount)
-                    .($t->pack ? ' · '.$t->pack->name().($t->pack->price_minor !== null && $t->pack->currency ? ' · '.Money::of($t->pack->price_minor, $t->pack->currency)->format() : '') : ''),
+                    .($t->pack ? ' · '.$t->pack->name().(($price = $t->pack->priceIn($academies[$t->academy_id]->base_currency ?? '')) ? ' · '.$price->format() : '') : ''),
                 'answer' => match ($t->status) {
                     'active' => __('platform::topups.console.activated', ['name' => $admins[$t->decided_by] ?? '—', 'month' => CarbonImmutable::parse($t->period)->locale(app()->getLocale())->translatedFormat('F Y')]),
                     'declined' => __('platform::topups.console.declined', ['name' => $admins[$t->decided_by] ?? '—', 'reason' => (string) $t->reason]),
@@ -126,11 +130,26 @@ final class PlanRequests extends Page
     public function activateAction(): Action
     {
         return Action::make('activate')->label(__('platform::topups.console.activate'))->icon(Heroicon::OutlinedCheckCircle)->color('success')->size('sm')
-            ->requiresConfirmation()
             ->modalHeading(__('platform::topups.console.activate'))
             ->modalDescription(__('platform::topups.console.activate_body'))
-            ->action(function (array $arguments): void {
-                app(ActivateTopUp::class)->handle($this->admin(), (string) $arguments['topup']);
+            ->modalSubmitActionLabel(__('platform::topups.console.activate'))
+            // What arrived goes on the academy's receipt; the pack's price in its currency is offered.
+            ->fillForm(function (array $arguments): array {
+                $topUp = UsageTopUp::query()->with('pack')->find($arguments['topup'] ?? null);
+                $currency = (string) (Academy::query()->whereKey($topUp?->academy_id)->value('base_currency') ?? 'SAR');
+                $price = $topUp?->pack?->priceIn($currency);
+
+                return ['received' => $price?->decimal(), 'currency' => $currency];
+            })
+            ->schema([
+                Grid::make(2)->schema([
+                    TextInput::make('received')->label(__('platform::recharge.transfer.received'))->helperText(__('platform::recharge.transfer.received_hint'))->numeric()->minValue(0),
+                    Select::make('currency')->label(__('platform::recharge.transfer.currency'))->options(array_combine(SaveTopUpPack::CURRENCIES, SaveTopUpPack::CURRENCIES))->native(false)->required(),
+                ]),
+            ])
+            ->action(function (array $data, array $arguments): void {
+                $received = ($data['received'] ?? null) === null || $data['received'] === '' ? null : Money::parse((string) $data['received'], (string) $data['currency']);
+                app(ActivateTopUp::class)->handle($this->admin(), (string) $arguments['topup'], $received);
                 $this->answered();
             });
     }

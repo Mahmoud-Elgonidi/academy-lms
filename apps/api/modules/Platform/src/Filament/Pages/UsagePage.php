@@ -5,25 +5,42 @@ namespace Modules\Platform\Filament\Pages;
 use BackedEnum;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\Platform\Actions\Metering\SaveUsageAlerts;
+use Modules\Platform\Actions\Recharging\RemovePlatformCard;
+use Modules\Platform\Actions\Recharging\SaveAutoRecharge;
+use Modules\Platform\Actions\Recharging\SettleTopUpPayment;
+use Modules\Platform\Actions\Recharging\StartTopUpCheckout;
 use Modules\Platform\Domain\Metering\Burn;
+use Modules\Platform\Domain\Recharging\AutoRechargeRules;
+use Modules\Platform\Live\RechargeChanged;
 use Modules\Platform\Metering\AiCreditRates;
 use Modules\Platform\Metering\ExportLedger;
 use Modules\Platform\Metering\MeterFormat;
 use Modules\Platform\Metering\Meters;
 use Modules\Platform\Metering\UsageAlerts;
 use Modules\Platform\Metering\UsageReport;
+use Modules\Platform\Models\Academy;
 use Modules\Platform\Models\Metering\AcademyMetering;
 use Modules\Platform\Models\Plans\UsageTopUp;
+use Modules\Platform\Models\Recharging\AutoRecharge;
+use Modules\Platform\Models\Recharging\TopUpPurchase;
 use Modules\Platform\Models\SaasSubscription;
+use Modules\Platform\Payments\StripeClient;
 use Modules\Platform\Plans\PlatformAcademyPlan;
+use Modules\Platform\Recharging\RechargeOffer;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Plans\Feature;
@@ -33,6 +50,7 @@ use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Plans\UsagePeriod;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Clock;
+use Throwable;
 use UnitEnum;
 
 /**
@@ -44,6 +62,13 @@ use UnitEnum;
  * daily use this month beside last month's, AI credits by helper and by
  * person, video minutes by teacher; and the ledger as a statement with its
  * spreadsheet. Everything is read from the usage ledger each time.
+ *
+ * Recharging (the platform is the merchant): a pack priced in the academy's
+ * currency is bought here on Stripe's page (StartTopUpCheckout), optionally
+ * keeping the card; with it, automatic recharge per meter (SaveAutoRecharge)
+ * and the card's removal (RemovePlatformCard); the purchases with their
+ * receipts. Back from Stripe (?purchase=) the page says calmly where the
+ * payment stands and follows it live (recharge:{academy}) until it is added.
  */
 final class UsagePage extends Page
 {
@@ -60,6 +85,13 @@ final class UsagePage extends Page
     public string $meter = 'video_minutes';
 
     public int $lines = 25;
+
+    /** Back from Stripe's page: the purchase to say where it stands. */
+    #[Url(except: '')]
+    public string $purchase = '';
+
+    #[Url(except: '')]
+    public string $cancelled = '';
 
     public static function canAccess(): bool
     {
@@ -92,6 +124,90 @@ final class UsagePage extends Page
         if (! in_array($this->meter, array_map(fn (Meter $m) => $m->value, $this->shownMeters()), true)) {
             $this->meter = Meter::VideoMinutes->value;
         }
+        // Back from Stripe: ask it once now, so a payment that went through is added without waiting for its webhook.
+        $back = $this->returnedPurchase();
+        if ($back !== null && $back->isOpen() && $back->method === TopUpPurchase::CARD && $this->cancelled === '') {
+            try {
+                app(SettleTopUpPayment::class)->handle($back);
+            } catch (Throwable $e) {
+                report($e);
+            }
+        }
+    }
+
+    /** The academy's purchases follow Stripe's answers live. */
+    public function liveChannel(): string
+    {
+        return RechargeChanged::channel($this->academyId());
+    }
+
+    public function buyOnlineAction(): Action
+    {
+        $l = 'platform::recharge.buy.';
+
+        return Action::make('buyOnline')->label(__($l.'label'))->icon(Heroicon::OutlinedCreditCard)->size('sm')
+            ->modalHeading(fn (array $arguments) => __($l.'heading', ['meter' => self::meterOf($arguments)->label()]))
+            ->modalDescription(__($l.'description'))
+            ->modalSubmitActionLabel(__($l.'submit'))
+            ->schema(fn (array $arguments) => [
+                Radio::make('pack')->label(__($l.'pack'))->required()->options(RechargeOffer::packOptions(self::meterOf($arguments), $this->currency())),
+                Checkbox::make('save_card')->label(__($l.'save_card'))->helperText(__($l.'save_card_hint')),
+            ])
+            ->action(function (array $data): void {
+                $started = app(StartTopUpCheckout::class)->handle((string) $data['pack'], (bool) ($data['save_card'] ?? false), (string) auth()->id());
+                $this->redirect($started['url']);
+            });
+    }
+
+    public function autoRechargeAction(): Action
+    {
+        $l = 'platform::recharge.auto.';
+
+        return Action::make('autoRecharge')->label(__($l.'edit'))->icon(Heroicon::OutlinedArrowPath)->size('sm')->color('gray')
+            ->modalHeading(fn (array $arguments) => __($l.'heading', ['meter' => self::meterOf($arguments)->label()]))
+            ->modalDescription(__($l.'description'))
+            ->modalSubmitActionLabel(__($l.'save'))
+            ->fillForm(function (array $arguments): array {
+                $setting = AutoRecharge::for($this->academyId(), self::meterOf($arguments));
+
+                return $setting === null ? ['enabled' => true, 'monthly_cap' => 3, 'threshold' => self::meterOf($arguments) === Meter::VideoMinutes ? 100 : 50]
+                    : ['enabled' => $setting->enabled, 'pack_id' => $setting->pack_id, 'threshold' => $setting->threshold, 'monthly_cap' => $setting->monthly_cap];
+            })
+            ->schema(fn (array $arguments) => [
+                Toggle::make('enabled')->label(__($l.'enabled')),
+                Select::make('pack_id')->label(__($l.'pack'))->required()->native(false)->options(RechargeOffer::packOptions(self::meterOf($arguments), $this->currency())),
+                TextInput::make('threshold')->label(__($l.'threshold'))->helperText(__($l.'threshold_hint'))->required()->numeric()->integer()->minValue(0)
+                    ->suffix(__('platform::metering.units_name.'.self::meterOf($arguments)->value)),
+                TextInput::make('monthly_cap')->label(__($l.'cap'))->helperText(__($l.'cap_hint'))->required()->numeric()->integer()->minValue(1)->maxValue(AutoRechargeRules::CAP_MAX),
+            ])
+            ->action(function (array $data, array $arguments): void {
+                app(SaveAutoRecharge::class)->handle(self::meterOf($arguments), [
+                    'enabled' => (bool) ($data['enabled'] ?? false), 'pack_id' => (string) ($data['pack_id'] ?? ''),
+                    'threshold' => (int) ($data['threshold'] ?? 0), 'monthly_cap' => (int) ($data['monthly_cap'] ?? 1),
+                ], (string) auth()->id());
+                Notification::make()->success()->title(__('platform::recharge.auto.saved'))->send();
+                unset($this->recharge);
+            });
+    }
+
+    public function removeCardAction(): Action
+    {
+        $l = 'platform::recharge.card.';
+
+        return Action::make('removeCard')->label(__($l.'remove'))->icon(Heroicon::OutlinedTrash)->color('danger')->size('sm')->link()
+            ->requiresConfirmation()->modalHeading(__($l.'remove_heading'))->modalDescription(__($l.'remove_body'))
+            ->action(function () use ($l): void {
+                app(RemovePlatformCard::class)->handle();
+                Notification::make()->success()->title(__($l.'removed'))->send();
+                unset($this->recharge);
+            });
+    }
+
+    /** @return array<string, mixed> buying online, the saved card, automatic recharge, the purchases and the way back */
+    #[Computed]
+    public function recharge(): array
+    {
+        return app(RechargeOffer::class)->forAcademy($this->academyId(), $this->currency(), $this->shownMeters(), $this->returnedPurchase(), $this->cancelled !== '');
     }
 
     protected function getHeaderActions(): array
@@ -176,6 +292,7 @@ final class UsagePage extends Page
                 'hard' => $meter === Meter::VideoMinutes && $hard,
                 'waiting' => in_array($meter->limit()->value, $waiting, true),
                 'buy_url' => AcademyPlanPage::getUrl(['buy' => $meter->limit()->value]),
+                'buy_online' => StripeClient::configured() && RechargeOffer::packOptions($meter, $this->currency()) !== [],
                 'upgrade_url' => AcademyPlanPage::getUrl(['upgrade' => 1]),
             ];
         }
@@ -293,5 +410,22 @@ final class UsagePage extends Page
     private function academyId(): string
     {
         return app(TenantContext::class)->require()->id;
+    }
+
+    /** The academy's currency: packs are bought online in it. */
+    private function currency(): string
+    {
+        return (string) (Academy::query()->whereKey($this->academyId())->value('base_currency') ?? 'USD');
+    }
+
+    private function returnedPurchase(): ?TopUpPurchase
+    {
+        return Str::isUuid($this->purchase) ? TopUpPurchase::query()->where('academy_id', $this->academyId())->find($this->purchase) : null;
+    }
+
+    /** @param  array<string, mixed>  $arguments */
+    private static function meterOf(array $arguments): Meter
+    {
+        return Meter::tryFrom((string) ($arguments['meter'] ?? '')) ?? Meter::VideoMinutes;
     }
 }

@@ -287,7 +287,7 @@ it('tries each service with the keys in force, in its own words', function () {
     Filament::setCurrentPanel('console');
     $this->actingAs($this->owner, 'platform');
     Livewire::test(PlatformSettingsPage::class)->call('check', 'stripe')
-        ->assertNotified('Stripe Connect')
+        ->assertNotified('Stripe')
         ->assertSee('Stripe refused the key: it is wrong, revoked or expired.')
         ->assertSee('just now by سلمى')
         ->assertDontSee('sk_test_try_platform');

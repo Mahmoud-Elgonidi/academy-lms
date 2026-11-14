@@ -95,8 +95,10 @@ final class SettingCatalog
             new SettingDefinition('livekit_secret', 'classroom', 'secret', ['classroom.livekit.secret'], 'LIVEKIT_API_SECRET', rules: [...self::KEY, 'min:32']),
             new SettingDefinition('livekit_egress_url', 'classroom', 'url', ['classroom.livekit.egress_url'], 'LIVEKIT_EGRESS_URL', rules: ['url:https,http', 'max:300']),
 
-            // Stripe Connect: academies connect their own Stripe account to the platform.
+            // Stripe: the platform's own account sells academies their packs (recharging), and academies connect
+            // their own Stripe account to it (Connect).
             new SettingDefinition('stripe_platform_secret', 'stripe', 'secret', ['billing.payments.stripe.platform_secret'], 'STRIPE_PLATFORM_SECRET', rules: ['regex:/^(sk|rk)_(live|test)_\S+$/', 'max:300']),
+            new SettingDefinition('stripe_platform_webhook_secret', 'stripe', 'secret', ['platform.payments.stripe.webhook_secret'], 'STRIPE_PLATFORM_WEBHOOK_SECRET', rules: ['regex:/^whsec_\S+$/', 'max:300']),
             new SettingDefinition('stripe_connect_client_id', 'stripe', 'text', ['billing.payments.stripe.connect_client_id'], 'STRIPE_CONNECT_CLIENT_ID', rules: ['regex:/^ca_[A-Za-z0-9]+$/', 'max:100']),
             new SettingDefinition('stripe_connect_webhook_secret', 'stripe', 'secret', ['billing.payments.stripe.connect_webhook_secret'], 'STRIPE_CONNECT_WEBHOOK_SECRET', rules: ['regex:/^whsec_\S+$/', 'max:300']),
             new SettingDefinition('stripe_connect_redirect', 'stripe', 'url', ['billing.payments.stripe.connect_redirect'], 'STRIPE_CONNECT_REDIRECT', rules: ['url:https', 'max:300']),

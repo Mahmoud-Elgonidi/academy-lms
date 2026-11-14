@@ -9,7 +9,9 @@ use Illuminate\Testing\TestResponse;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
 use Modules\People\Contracts\PeopleApi;
+use Modules\Platform\Models\Recharging\TopUpPurchase;
 use Modules\Platform\Models\SaasPlan;
+use Modules\Platform\Recharging\Receipts;
 
 /*
  * Tenant isolation, swept (docs/architecture/03, section 11, "عزل المستأجرين"):
@@ -38,6 +40,12 @@ beforeEach(function () {
     $this->demo = (string) $platform->table('academies')->where('slug', 'demo')->value('id');
     $one = fn (string $table, ?Closure $where = null) => (string) $platform->table($table)->where('academy_id', $this->demo)->when($where, $where)->orderBy('id')->value('id');
     $user = fn (string $email) => (string) $platform->table('users')->where('academy_id', $this->demo)->where('email', $email)->value('id');
+
+    // A pack the demo bought by transfer, with the platform's receipt (its seeded plan has no monthly limits to buy over).
+    if (! $platform->table('platform_receipts')->where('academy_id', $this->demo)->exists()) {
+        app(Receipts::class)->issue(TopUpPurchase::query()->create(['academy_id' => $this->demo, 'limit' => 'video_minutes', 'amount' => 600,
+            'price_minor' => 5000, 'currency' => 'SAR', 'method' => 'transfer', 'status' => 'paid', 'paid_at' => now()]));
+    }
 
     // One record of each kind from the demo academy.
     $this->ids = array_filter([
@@ -78,6 +86,8 @@ beforeEach(function () {
         'exam' => $one('quran_exams'),
         'code' => (string) $platform->table('quran_certificates')->where('academy_id', $this->demo)->orderBy('id')->value('code'),
         'certificate' => $one('quran_certificates'),
+        // A receipt of the platform's for a pack the demo bought (recharging).
+        'receipt' => $one('platform_receipts'),
     ]);
     $this->game = (string) $platform->table('games')->orderBy('key')->value('key');
     // A message and its own ticket.
@@ -226,8 +236,10 @@ it('keeps every record of one academy out of reach of another academy\'s people'
             // The academy's page and its requests: this academy's own words, cards and requests.
             'admin/settings/site', 'admin/site/requests',
             // The academy's hifz: its own courses only; the demo's student, asked for by course, is not found.
-            'admin/hifz', 'admin/hifz/{enrollment}'],
-        'accountant' => ['admin/invoices/{invoice}', 'admin/payroll/{teacher}', 'billing/proofs/{proof}/file'],
+            'admin/hifz', 'admin/hifz/{enrollment}',
+            // The platform's receipts and the usage page: this academy's own purchases only.
+            'platform/receipts/{receipt}', 'admin/settings/usage'],
+        'accountant' => ['admin/invoices/{invoice}', 'admin/payroll/{teacher}', 'billing/proofs/{proof}/file', 'platform/receipts/{receipt}'],
         'teacher' => ['teach/reports/{report}', 'teach/reports/{report}/game', 'teach/students/{enrollment}', 'teach/students/{enrollment}/hifz', 'class/{session}', 'class/{session}/go', 'class/{session}/mushaf',
             'learning/files/{submission}', 'support/files/{message}', 'people/checks/{check}/file'],
         'guardian' => ['my', 'class/{session}', 'class/{session}/mushaf', 'learning/files/{submission}', 'support/files/{message}', 'billing/proofs/{proof}/file'],

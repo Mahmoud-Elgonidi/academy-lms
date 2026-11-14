@@ -29,6 +29,8 @@ const TIGHT_DOORS = [
     'family.courses.balance', 'family.children.add',
     // Saved cards and automatic renewal (J5b), and its signed page.
     'family.cards', 'family.cards.auto-renew', 'family.cards.revoke', 'billing.auto-renew.off',
+    // Recharging: Stripe's events for the platform's own account, and the platform's receipts.
+    'platform.webhooks.stripe', 'platform.receipt', 'console.receipt',
 ];
 
 it('gives each newer door a limit of its own', function () {

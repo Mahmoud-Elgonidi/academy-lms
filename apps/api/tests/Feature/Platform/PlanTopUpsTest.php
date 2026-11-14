@@ -369,11 +369,11 @@ it('sets AI uses per plan and per academy, and the extra packs, from the console
     topUpPack(Limit::AiUses, 1000);
     Livewire::test(Plans::class)->assertSee(__('platform::topups.packs.title'))->assertSee('+'.PlanFormat::amount(Limit::AiUses, 1000))
         ->callAction('new', ['code' => 'bb', 'name_ar' => 'ب', 'name_en' => 'B', 'ai_uses' => '75', 'features' => ['ai']])->assertHasNoActionErrors()
-        ->callAction('newPack', ['limit' => 'ai_uses', 'amount' => '2000', 'name_ar' => 'ضخمة', 'name_en' => 'Huge', 'price' => '99', 'currency' => 'SAR'], ['limit' => 'ai_uses'])->assertHasNoActionErrors()
+        ->callAction('newPack', ['limit' => 'ai_uses', 'amount' => '2000', 'name_ar' => 'ضخمة', 'name_en' => 'Huge', 'prices' => [['currency' => 'SAR', 'price' => '99'], ['currency' => 'USD', 'price' => '26.5']]], ['limit' => 'ai_uses'])->assertHasNoActionErrors()
         ->assertSee('ضخمة');
     expect(SaasPlan::query()->where('code', 'bb')->sole()->ai_uses)->toBe(75);
     $huge = TopUpPack::query()->where('name_en', 'Huge')->sole();
-    expect($huge->amount)->toBe(2000)->and($huge->price_minor)->toBe(9900);
+    expect($huge->amount)->toBe(2000)->and($huge->prices)->toBe(['SAR' => 9900, 'USD' => 2650]);
 
     Livewire::test(Plans::class)
         ->callAction('editPack', ['limit' => 'ai_uses', 'amount' => '2500', 'name_ar' => 'ضخمة', 'name_en' => 'Huge', 'archived' => true], ['pack' => $huge->id])->assertHasNoActionErrors();

@@ -41,6 +41,7 @@ use Modules\Platform\Database\Seeders\DemoBrandingSeeder;
 use Modules\Platform\Database\Seeders\DemoModulesSeeder;
 use Modules\Platform\Database\Seeders\DemoPlansSeeder;
 use Modules\Platform\Database\Seeders\DemoPlatformSeeder;
+use Modules\Platform\Database\Seeders\DemoRechargeSeeder;
 use Modules\Platform\Database\Seeders\DemoUsageSeeder;
 use Modules\Platform\Models\PlatformAdmin;
 use Modules\Privacy\Database\Seeders\DemoPrivacySeeder;
@@ -151,6 +152,8 @@ class DatabaseSeeder extends Seeder
         $this->callWith(DemoPlansSeeder::class, ['adminId' => $admin->id, 'adminName' => $admin->name]);
         // The demo's usage ledger: last month, this month's allowance, a pack bought, the days so far.
         $this->call(DemoUsageSeeder::class);
+        // Its purchases of those packs, each with the platform's receipt.
+        $this->call(DemoRechargeSeeder::class);
 
         $this->command?->info('Seeded academy "demo". Sign in as owner@demo.test with the demo password.');
         $this->command?->info('Platform console: admin@platform.test at /console; the code: php artisan platform:code admin@platform.test');

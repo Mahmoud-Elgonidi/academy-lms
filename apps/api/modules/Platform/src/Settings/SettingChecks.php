@@ -441,6 +441,9 @@ final class SettingChecks
                 $this->line('stripe', 'warn', $deadline > 0 ? 'stripe_due_by' : 'stripe_due', ['when' => $this->day($deadline)]);
             }
         });
+        if (blank(config('platform.payments.stripe.webhook_secret'))) {
+            $this->line(null, 'info', 'stripe_no_platform_webhook');
+        }
         if (blank(config('billing.payments.stripe.connect_client_id'))) {
             $this->line(null, 'info', 'stripe_no_connect');
         }

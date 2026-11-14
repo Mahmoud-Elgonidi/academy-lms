@@ -6,12 +6,14 @@ use Filament\Notifications\Notification;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
@@ -48,9 +50,12 @@ use Modules\Platform\Health\AssistBeat;
 use Modules\Platform\Health\WorkerBeat;
 use Modules\Platform\Http\Controllers\GamePageController;
 use Modules\Platform\Http\Controllers\HealthController;
+use Modules\Platform\Http\Controllers\PlatformStripeWebhookController;
+use Modules\Platform\Http\Controllers\ReceiptController;
 use Modules\Platform\Http\Middleware\ConsoleHost;
 use Modules\Platform\Listeners\RecordConsoleSignIn;
 use Modules\Platform\Live\GameStudioChanged;
+use Modules\Platform\Live\RechargeChanged;
 use Modules\Platform\Metering\AiCharges;
 use Modules\Platform\Metering\AiCreditRates;
 use Modules\Platform\Metering\Meters;
@@ -59,6 +64,7 @@ use Modules\Platform\Metering\PlatformVideoMeter;
 use Modules\Platform\Metering\UsageAlerts;
 use Modules\Platform\Models\AcademyBranding;
 use Modules\Platform\Models\PlatformAdmin;
+use Modules\Platform\Payments\StripeClient;
 use Modules\Platform\Plans\PlanUsage;
 use Modules\Platform\Plans\PlatformAcademyPlan;
 use Modules\Platform\PlatformService;
@@ -68,6 +74,7 @@ use Modules\Platform\Setup\ModulesStep;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\LanguageModel;
 use Modules\SharedKernel\Ai\SpeechToText;
+use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Games\GameCatalog;
 use Modules\SharedKernel\Health\Heartbeats;
 use Modules\SharedKernel\Plans\AcademyPlan;
@@ -78,6 +85,7 @@ use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Plans\VideoMeter;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Setup\SetupChecklist;
+use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantResolver;
 use Modules\SharedKernel\Time\OwnTimezones;
 
@@ -130,6 +138,8 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->scoped(AiCharges::class);
         $this->app->scoped(PlatformVideoMeter::class);
         $this->app->alias(PlatformVideoMeter::class, VideoMeter::class);
+        // Recharging: the platform's own Stripe client (the platform is the merchant of the packs).
+        $this->app->singleton(StripeClient::class);
     }
 
     public function boot(): void
@@ -196,6 +206,18 @@ final class PlatformServiceProvider extends ServiceProvider
             ->name('console.broadcasting.auth');
         Broadcast::channel(GameStudioChanged::CHANNEL, fn ($user) => $user instanceof PlatformAdmin && $user->is_active, ['guards' => ['platform']]);
         $this->app->make(LiveSignals::class)->on('game-studio', fn (string $draftId) => new GameStudioChanged($draftId));
+
+        // Recharging: Stripe's events for the platform's own account (signed; no academy, no session), the
+        // receipts (the academy's owner and admins on its panel, the platform team in the console), and the
+        // usage page following its purchases.
+        Route::post('webhooks/platform/stripe', PlatformStripeWebhookController::class)
+            ->middleware(['api', 'throttle:240,1'])->name('platform.webhooks.stripe');
+        Route::middleware(['web', 'tenant', 'locale', 'throttle:60,1'])->get('platform/receipts/{receipt}', [ReceiptController::class, 'academy'])->name('platform.receipt');
+        Route::middleware([ConsoleHost::class, 'web', 'auth:platform', 'locale', 'throttle:120,1'])->get('console/receipts/{receipt}', [ReceiptController::class, 'console'])
+            ->name('console.receipt');
+        $this->app->make(LiveSignals::class)->on('recharge', fn (string $academyId) => new RechargeChanged($academyId));
+        Broadcast::channel(RechargeChanged::CHANNEL, fn (Authenticatable $user, string $academyId) => $academyId === $this->app->make(TenantContext::class)->id()
+            && Gate::forUser($user)->allows(Ability::ViewPlan->value));
 
         Route::prefix('api/v1')
             ->middleware(['api', 'tenant', 'locale'])

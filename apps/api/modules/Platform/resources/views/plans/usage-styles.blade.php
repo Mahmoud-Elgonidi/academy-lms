@@ -57,6 +57,22 @@
     .mu-reason { display: block; }
     .mu-num { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .mu-num[data-sign="in"] { color: var(--success-700); font-weight: 600; }
+    .mu-back { padding: .85rem 1rem; display: flex; flex-direction: column; gap: .2rem; border-inline-start: 4px solid var(--gray-300); }
+    .mu-back p { margin: 0; font-size: .86rem; color: var(--gray-600); }
+    .mu-back[data-tone="success"] { border-inline-start-color: var(--success-500); background: var(--success-50); }
+    .mu-back[data-tone="info"] { border-inline-start-color: var(--primary-500); background: var(--primary-50); }
+    .mu-back[data-tone="warning"] { border-inline-start-color: var(--warning-500); background: var(--warning-50); }
+    .mu-card-line { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; padding: .6rem 0; border-bottom: 1px solid var(--gray-100); font-size: .86rem; }
+    .mu-card-line small { color: var(--gray-500); }
+    .mu-saved { display: inline-flex; align-items: center; gap: .5rem; }
+    .mu-saved svg { width: 1.25rem; height: 1.25rem; color: var(--gray-500); }
+    .mu-auto { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+    .mu-auto li { display: flex; justify-content: space-between; align-items: flex-start; gap: .75rem; padding: .7rem 0; border-bottom: 1px solid var(--gray-100); }
+    .mu-auto li > div { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+    .mu-auto p { flex-basis: 100%; margin: 0; font-size: .82rem; color: var(--gray-600); }
+    .dark .mu-back p, .dark .mu-auto p { color: var(--gray-300); }
+    .dark .mu-back[data-tone="success"], .dark .mu-back[data-tone="info"], .dark .mu-back[data-tone="warning"] { background: transparent; }
+    .dark .mu-card-line, .dark .mu-auto li { border-color: var(--gray-800); }
     .dark .mu-part, .dark .mu-actions, .dark .mu-table td, .dark .mu-rates li { border-color: var(--gray-800); }
     .dark .mu-headline strong { color: white; }
     .dark .mu-tabs, .dark .mu-bar-track { background: var(--gray-800); }

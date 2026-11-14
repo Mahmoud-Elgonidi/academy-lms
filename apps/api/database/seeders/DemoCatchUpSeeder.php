@@ -15,6 +15,7 @@ use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Platform\Database\Seeders\DemoAiAreaSeeder;
 use Modules\Platform\Database\Seeders\DemoModulesSeeder;
 use Modules\Platform\Database\Seeders\DemoQuranAreaSeeder;
+use Modules\Platform\Database\Seeders\DemoRechargeSeeder;
 use Modules\Platform\Database\Seeders\DemoUsageSeeder;
 use Modules\Quran\Database\Seeders\DemoHifzSeeder;
 use Modules\Quran\Database\Seeders\DemoMistakesSeeder;
@@ -47,7 +48,8 @@ use Modules\Site\Database\Seeders\DemoSiteSeeder;
  * and the CRM's learners and parents with their lead's country, where they had
  * none, so a family is priced where it lives (FillLearnerCountries); and its
  * modules chosen, every optional one on (DemoModulesSeeder); and its usage
- * ledger, last month and this month so far with a pack bought (DemoUsageSeeder).
+ * ledger, last month and this month so far with a pack bought (DemoUsageSeeder),
+ * and those packs' purchases with the platform's receipts (DemoRechargeSeeder).
  * Nothing without the demo academy (an academy's own server), and each step
  * only once.
  */
@@ -81,6 +83,8 @@ final class DemoCatchUpSeeder extends Seeder
         $this->call(DemoAiAreaSeeder::class);
         // The usage ledger (video minutes, AI credits) with last month, this month so far and a pack bought.
         $this->call(DemoUsageSeeder::class);
+        // Its purchases of those packs, each with the platform's numbered receipt.
+        $this->call(DemoRechargeSeeder::class);
         $this->command?->info(vsprintf('Demo: %d lessons with their passage of the Quran, %d learners with a hifz map, %d marked words, %d groups, %d Quran plans, %d Quran certificates, %d trial offers.', $counts));
     }
 }

@@ -252,7 +252,7 @@ it('says when the Twilio account is suspended, out of money, low or a trial', fu
 });
 
 it('says when Stripe stopped the platform account or asks for details', function () {
-    config(['billing.payments.stripe.platform_secret' => 'sk_test_platform', 'billing.payments.stripe.connect_client_id' => 'ca_1']);
+    config(['billing.payments.stripe.platform_secret' => 'sk_test_platform', 'billing.payments.stripe.connect_client_id' => 'ca_1', 'platform.payments.stripe.webhook_secret' => 'whsec_1']);
     $account = ['charges_enabled' => false, 'requirements' => ['disabled_reason' => 'rejected.fraud', 'currently_due' => []]];
     checksAnswering(['api.stripe.com/v1/account' => function () use (&$account) {
         return Http::response($account);
@@ -312,7 +312,7 @@ it('tries what is typed before it is saved, never marking the saved key broken, 
     Livewire::test(PlatformSettingsPage::class)
         ->fillForm(['stripe_platform_secret' => 'sk_test_typed_one'])
         ->call('check', 'stripe')
-        ->assertNotified('Stripe Connect')
+        ->assertNotified('Stripe')
         ->assertSeeHtml('<bdi>Stripe</bdi> refused the key')
         ->assertSee('with what is typed here and not saved yet')
         ->assertDontSee('sk_test_typed_one');
@@ -357,7 +357,7 @@ it('takes a few tries a minute at most', function () {
     $this->actingAs($this->owner, 'platform');
     $page = Livewire::test(PlatformSettingsPage::class);
     foreach (range(1, 6) as $try) {
-        $page->call('check', 'stripe')->assertNotified('Stripe Connect');
+        $page->call('check', 'stripe')->assertNotified('Stripe');
     }
     $page->call('check', 'stripe')->assertNotified('A few tries a minute at most: wait a moment, then try again.');
 });
