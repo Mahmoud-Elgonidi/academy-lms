@@ -3,8 +3,11 @@
 namespace Modules\Identity\Filament\Console\Pages;
 
 use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Validation\ValidationException;
@@ -12,7 +15,9 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\Identity\Actions\Impersonation\EndImpersonation;
 use Modules\Identity\Actions\Impersonation\StartImpersonation;
+use Modules\Identity\Actions\Support\ResetAccess;
 use Modules\Identity\Actions\TwoFactor\ResetTwoFactor;
+use Modules\Identity\Domain\Staff\StaffRules;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\Impersonation;
 use Modules\Identity\Models\User;
@@ -115,7 +120,7 @@ final class SupportSignIn extends Page
         });
     }
 
-    /** @return ?array{id: string, name: string, contact: ?string, roles: list<string>, two_factor: bool} */
+    /** @return ?array{id: string, name: string, contact: ?string, email: ?string, roles: list<string>, two_factor: bool, staff: bool} */
     #[Computed]
     public function chosen(): ?array
     {
@@ -127,8 +132,8 @@ final class SupportSignIn extends Page
         return app(TenantContext::class)->run($tenant, function () {
             $u = User::query()->with('roleRecords')->where('status', 'active')->find($this->person);
 
-            return $u === null ? null : ['id' => $u->id, 'name' => $u->name, 'contact' => $u->email ?? $u->phone_e164 ?? $u->username, 'roles' => array_map(fn (Role $r) => $r->value, $u->roles()),
-                'two_factor' => TwoFactor::enabledFor($u)];
+            return $u === null ? null : ['id' => $u->id, 'name' => $u->name, 'contact' => $u->email ?? $u->phone_e164 ?? $u->username, 'email' => $u->email, 'roles' => array_map(fn (Role $r) => $r->value, $u->roles()),
+                'two_factor' => TwoFactor::enabledFor($u), 'staff' => ! $u->is_managed_minor && StaffRules::staffOf($u->roles()) !== []];
         });
     }
 
@@ -221,6 +226,57 @@ final class SupportSignIn extends Page
         $this->reason = '';
         unset($this->chosen);
         Notification::make()->title(__('identity::two_factor.console.reset_done'))->success()->send();
+    }
+
+    /**
+     * Someone of the back office forgot their password (and maybe lost their second step): their
+     * password and two-step sign-in are cleared, their sessions end, and one email goes to them at
+     * once, copied to the addresses given, with a fresh link to choose a new password.
+     */
+    public function resetAccessAction(): Action
+    {
+        $l = 'identity::impersonation.console.reset_access.';
+
+        return Action::make('resetAccess')->label(__($l.'button'))
+            ->icon(Heroicon::OutlinedEnvelope)->color('danger')->outlined()->size('sm')
+            ->visible(fn () => ($this->chosen['staff'] ?? false) === true)
+            // The reason is on the page: checked before asking, so its error shows under it.
+            ->mountUsing(function (?Schema $schema = null) {
+                if (mb_strlen(trim($this->reason)) < StartImpersonation::REASON_MIN) {
+                    throw ValidationException::withMessages(['reason' => __('identity::two_factor.errors.reason', ['min' => StartImpersonation::REASON_MIN])]);
+                }
+                $schema?->fill();
+            })
+            ->requiresConfirmation()->modalIcon(Heroicon::OutlinedKey)
+            ->modalHeading(__($l.'heading'))
+            ->modalDescription(fn () => __($l.'description', ['name' => $this->chosen['name'] ?? '', 'email' => $this->chosen['email'] ?? '']))
+            ->schema([
+                Textarea::make('cc')->label(__($l.'cc'))->helperText(__($l.'cc_hint', ['max' => ResetAccess::MAX_COPIES]))
+                    ->rows(3)->maxLength(1000)->extraInputAttributes(['dir' => 'ltr']),
+            ])
+            ->modalSubmitActionLabel(__($l.'submit'))
+            ->action(fn (array $data) => $this->resetAccess((string) ($data['cc'] ?? '')));
+    }
+
+    private function resetAccess(string $cc): void
+    {
+        $tenant = $this->tenant();
+        $admin = app(ConsoleApi::class)->currentAdmin();
+        if ($tenant === null || $this->person === null || $admin === null) {
+            return;
+        }
+        $this->resetErrorBag();
+        $copies = array_values(array_filter(array_map('trim', preg_split('/[\r\n,;]+/', $cc) ?: []), fn ($c) => $c !== ''));
+
+        // A refusal (a copy that is not an email, mail not set up, the mailer refused) shows through ShowRefusals.
+        $done = app(ResetAccess::class)->handle($tenant, $this->person, $admin, $this->reason, $copies);
+
+        $this->reason = '';
+        unset($this->chosen);
+        Notification::make()->success()
+            ->title(__('identity::impersonation.console.reset_access.done', ['email' => $done['email']]))
+            ->body($done['copies'] > 0 ? __('identity::impersonation.console.reset_access.done_copies', ['count' => $done['copies']]) : null)
+            ->send();
     }
 
     public function end(string $id): void

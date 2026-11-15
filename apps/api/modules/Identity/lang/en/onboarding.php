@@ -70,4 +70,28 @@ return [
         'two_factor' => 'At the first sign-in the back office asks you to set up two-step sign-in with an app such as Google Authenticator.',
         'address' => 'The back office: :url',
     ],
+    'reset_mail' => [
+        'subject' => 'Your access to :academy was reset',
+        'hello' => 'Hello :name,',
+        'intro' => 'The platform team reset your access to the back office of :academy: your old password and two-step sign-in no longer work. Choose a new password with the button below.',
+        'button' => 'Choose a new password',
+        'lasts' => 'The link works for :days days and once: whoever chooses the password first signs in with it.',
+        'two_factor' => 'After you sign in, the back office asks you to set up two-step sign-in again with an app such as Google Authenticator.',
+        'address' => 'The back office: :url',
+    ],
+    'access_mail' => [
+        'not_set_up' => 'No email can leave this server until mail is set up (RUNBOOKS.md, «Email»; console › Platform settings › Email). Nothing was sent or changed.',
+        'refused' => 'The mailer did not take the email (:error). Check the mail settings (RUNBOOKS.md, «Email»); `php artisan platform:mail-test` tries them.',
+    ],
+    'access' => [
+        'errors' => [
+            'not_found' => 'This person is not in the academy, or their account is turned off.',
+            'not_staff' => 'Only an account of the academy\'s back office (owner, admin, supervisor, scheduler, accountant, sales) can be reset here.',
+            'no_email' => 'This account has no email, so a new link cannot reach it.',
+            'cc_many' => 'At most :max copies.',
+            'cc_bad' => 'Each copy must be a valid email.',
+            'cc_twice' => 'The same email is written twice in the copies.',
+            'mail_after_reset' => 'The access was reset, but the email did not leave: :why Send it again with the same step once mail works.',
+        ],
+    ],
 ];

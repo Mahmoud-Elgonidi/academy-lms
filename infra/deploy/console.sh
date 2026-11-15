@@ -91,6 +91,6 @@ case "${1:-}" in
         fail "Usage: bash console.sh owner     (the console admin's email on stdin; to add someone, their name and password on the next lines)
        bash console.sh academy   (one JSON object on stdin: the academy, its owner and plan; see RUNBOOKS.md)
        bash console.sh https     (an academy's slug or address on stdin: added to the server's certificate)
-       bash console.sh welcome   (one JSON object on stdin: an owner's welcome sent again, with copies; see RUNBOOKS.md)"
+       bash console.sh welcome   (one JSON object on stdin: an owner's welcome sent again, with copies, or \"reset\": true to reset an account's access first; see RUNBOOKS.md)"
         ;;
 esac

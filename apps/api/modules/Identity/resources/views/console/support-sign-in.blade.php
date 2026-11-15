@@ -140,6 +140,12 @@
                             <x-filament::button size="sm" color="danger" outlined wire:click="resetTwoFactor" icon="heroicon-o-arrow-path" wire:confirm="{{ __('identity::two_factor.console.reset') }}?">{{ __('identity::two_factor.console.reset') }}</x-filament::button>
                         </div>
                     @endif
+                    @if ($chosen['staff'] ?? false)
+                        <div class="ss-tf" wire:key="reset-access">
+                            <span>{{ __($l.'reset_access.hint') }}</span>
+                            {{ $this->resetAccessAction }}
+                        </div>
+                    @endif
                 @endif
             @endif
         </section>

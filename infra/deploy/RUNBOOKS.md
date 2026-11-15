@@ -607,6 +607,13 @@ sets the password, so copy only people the owner trusts. The run says which mail
 the email, or why not (mail not set up: **Email** above; `php artisan platform:mail-test` tries it); the link
 is never printed, and the audit keeps the reason and the number of copies.
 
+Someone of an academy's back office forgot their password (or lost their two-step phone): tick **reset**
+(`"reset": true`, a reason of at least 10 characters) and the same run first resets the account's access
+(`ResetAccess`: password and two-step sign-in cleared, every session and token ended, audited as
+`identity.access_reset`), then sends the link to choose a new one; they set up two-step sign-in again after.
+Mail is checked first, so a server that cannot send changes nothing; if the mailer refuses after the reset,
+run it again. The console does the same from **Sign in as someone** › «إعادة ضبط الدخول وإرسال رابط جديد».
+
 ### Its address on the certificate (HTTPS)
 
 nginx on the server holds the certificates (certbot, README.md), and a browser refuses an academy's page

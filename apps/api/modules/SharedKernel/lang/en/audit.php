@@ -76,6 +76,7 @@ return [
             'recovery_code_used' => ':name signed in with a recovery code',
             'recovery_codes_renewed' => ':name made new recovery codes',
             'two_factor_reset' => 'Two-step sign-in of :name reset by the platform team: :reason',
+            'access_reset' => 'Access of :name reset by the platform team, with a new link by email: :reason',
             'social_linked' => ':name linked a :provider account (:via)',
             'social_unlinked' => ':name unlinked a :provider account',
             'demo_passwords_reset' => ":count demo accounts took the server's new demo password",

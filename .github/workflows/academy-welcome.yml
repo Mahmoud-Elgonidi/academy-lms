@@ -3,8 +3,11 @@ name: academy-welcome
 # Sends an academy owner's welcome again (a fresh link to choose the password), with copies to the
 # addresses given, when the first one did not arrive: infra/deploy/console.sh welcome runs
 # `php artisan platform:welcome`, which sends it at once and says whether the mailer took it, or why
-# not; the link is never printed. Only for an owner or admin who has no password yet. Whoever opens
-# the link first sets the password, so copy only people the owner trusts.
+# not; the link is never printed. Only for an owner or admin who has no password yet, unless `reset`
+# is ticked: then the account's access is reset first (any back-office account: its password and
+# two-step sign-in cleared, its sessions ended, a reason of at least 10 characters) for someone who
+# forgot their password. Whoever opens the link first sets the password, so copy only people the
+# owner trusts.
 
 on:
   workflow_dispatch:
@@ -26,6 +29,11 @@ on:
         description: Why it is sent again (kept in the audit log)
         required: true
         type: string
+      reset:
+        description: Reset the account's access first (password and two-step sign-in cleared), for someone who forgot their password
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: academy-welcome
@@ -51,6 +59,7 @@ jobs:
       EMAIL: ${{ inputs.email }}
       CC: ${{ inputs.cc }}
       REASON: ${{ inputs.reason }}
+      RESET: ${{ inputs.reset && 'true' || 'false' }}
     steps:
       - name: The owner and the copies
         run: |
@@ -63,6 +72,7 @@ jobs:
           [ "${#copies[@]}" -le 5 ] || bad "At most 5 copies."
           for c in "${copies[@]}"; do c="$(echo "$c" | xargs)"; [ -z "$c" ] || [[ "$c" =~ $mail ]] || bad "Not an email: $c"; done
           [ "${#REASON}" -ge 5 ] && [ "${#REASON}" -le 300 ] && [[ ! "$REASON" =~ [[:cntrl:]] ]] || bad "A reason of 5 to 300 characters, on one line."
+          [ "$RESET" != true ] || [ "${#REASON}" -ge 10 ] || bad "Resetting access needs a reason of at least 10 characters."
           if [ -z "$SSH_KEY" ] && [ -z "$SSH_PASSWORD" ]; then
             bad "Add the repository secret DEPLOY_SSH_KEY (or DEPLOY_PASSWORD), as for the deploy."
           fi
@@ -72,8 +82,8 @@ jobs:
       - name: Send it again from the server
         run: |
           set -euo pipefail
-          json="$(jq -cn --arg slug "$SLUG" --arg email "$EMAIL" --arg cc "$CC" --arg reason "$REASON" \
-            '{slug: $slug, email: $email, reason: $reason,
+          json="$(jq -cn --arg slug "$SLUG" --arg email "$EMAIL" --arg cc "$CC" --arg reason "$REASON" --argjson reset "$RESET" \
+            '{slug: $slug, email: $email, reason: $reason, reset: $reset,
               cc: ($cc | split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(. != "")))}')"
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           if [ -n "$KNOWN_HOSTS" ]; then

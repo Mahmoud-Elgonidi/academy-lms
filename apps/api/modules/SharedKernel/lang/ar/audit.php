@@ -76,6 +76,7 @@ return [
             'recovery_code_used' => 'دخل :name برمز استرداد',
             'recovery_codes_renewed' => 'أنشأ :name رموز استرداد جديدة',
             'two_factor_reset' => 'أعاد فريق المنصة ضبط الدخول بخطوتين لـ :name: :reason',
+            'access_reset' => 'أعاد فريق المنصة ضبط دخول :name وأرسل رابطًا جديدًا بالبريد: :reason',
             'social_linked' => 'ربط :name حساب :provider (:via)',
             'social_unlinked' => 'فصل :name حساب :provider',
             'demo_passwords_reset' => 'حصل :count من الحسابات التجريبية على كلمة المرور التجريبية الجديدة للخادم',

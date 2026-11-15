@@ -55,6 +55,17 @@ return [
             'ended' => 'Ended',
             'unused' => 'Link never opened',
         ],
+        'reset_access' => [
+            'button' => 'Reset access and send a new link',
+            'hint' => 'For someone who forgot their password: their password and two-step sign-in are cleared, they are signed out everywhere, and an email takes them a new link to choose a password. Write why in the reason above.',
+            'heading' => 'Reset access and send a new link?',
+            'description' => ':name\'s password and two-step sign-in are cleared now and every session of theirs ends. One email goes at once to :email with a link to choose a new password; whoever opens it first chooses it, so copy only people they trust.',
+            'cc' => 'Copies (optional)',
+            'cc_hint' => 'One email per line, at most :max.',
+            'submit' => 'Reset and send',
+            'done' => 'Access reset; the new link went to :email.',
+            'done_copies' => 'Copies sent: :count.',
+        ],
         'ended_how' => ['exit' => 'left', 'expired' => 'time ran out', 'ended' => 'ended from the console'],
     ],
     'mine' => [
