@@ -235,7 +235,11 @@ final class SiteController
             'page' => [
                 'revision' => $revision,
                 'settings' => $localized['settings'],
-                /** @var list<array<string, mixed>> */
+                /**
+                 * The visible blocks in order; each block's `data` is its type's own shape (site-builder.md, 8.3).
+                 *
+                 * @var list<array{id: string, type: 'hero'|'features'|'subjects'|'teachers'|'pricing'|'steps'|'app'|'testimonials'|'faq'|'stats'|'rich_text'|'image_text'|'gallery'|'video'|'logos'|'cta'|'form'|'contact'|'spacer', variant: string, anchor: string, nav: string|null, style: array{tone: 'paper'|'white'|'tint'|'brand'|'night', align: 'start'|'center', space: 'compact'|'normal'|'roomy', width: 'narrow'|'normal'|'wide'|'full', eyebrow: bool}, data: array<string, mixed>}>
+                 */
                 'blocks' => $localized['blocks'],
             ],
             /** Deprecated: the old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`. */

@@ -37596,7 +37596,7 @@
         "/v1/site": {
             "get": {
                 "operationId": "site.show",
-                "description": "In the request's language (Accept-Language). Not found while the academy keeps its page off.",
+                "description": "In the request's language (Accept-Language): the published page the academy built (`page`: its settings and its visible\nblocks in order), and the live lists its blocks read. Not found while the academy keeps its page off.",
                 "summary": "The academy's page",
                 "tags": [
                     "Site"
@@ -37658,9 +37658,426 @@
                                                         "code"
                                                     ]
                                                 },
+                                                "page": {
+                                                    "type": "object",
+                                                    "description": "The page the academy built: revision (the published one), settings (audience, fonts, accent, mood, corners,\nmotion, header, footer, whatsapp, floating_whatsapp, seo) and blocks (visible only, in order: id, type, variant,\nanchor, nav, style, data; see docs/architecture/site-builder.md, sections 3 and 8.3).",
+                                                    "properties": {
+                                                        "revision": {
+                                                            "type": "integer"
+                                                        },
+                                                        "settings": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "audience": {
+                                                                    "type": "string"
+                                                                },
+                                                                "fonts": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "heading": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "body": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "url": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "heading",
+                                                                        "body",
+                                                                        "url"
+                                                                    ]
+                                                                },
+                                                                "accent": {
+                                                                    "type": "string"
+                                                                },
+                                                                "mood": {
+                                                                    "type": "string"
+                                                                },
+                                                                "corners": {
+                                                                    "type": "string"
+                                                                },
+                                                                "motion": {
+                                                                    "type": "string"
+                                                                },
+                                                                "header": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "style": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "cta": {
+                                                                            "type": [
+                                                                                "object",
+                                                                                "null"
+                                                                            ],
+                                                                            "properties": {
+                                                                                "label": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "action": {
+                                                                                    "anyOf": [
+                                                                                        {
+                                                                                            "type": "object",
+                                                                                            "properties": {
+                                                                                                "kind": {
+                                                                                                    "type": "string",
+                                                                                                    "const": "trial"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "kind"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "null"
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "object",
+                                                                                            "properties": {
+                                                                                                "kind": {
+                                                                                                    "type": "string",
+                                                                                                    "const": "teach"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "kind"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "object",
+                                                                                            "properties": {
+                                                                                                "kind": {
+                                                                                                    "type": "string",
+                                                                                                    "const": "sign_in"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "kind"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "object",
+                                                                                            "properties": {
+                                                                                                "kind": {
+                                                                                                    "type": "string",
+                                                                                                    "const": "whatsapp"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "kind"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "object",
+                                                                                            "properties": {
+                                                                                                "kind": {
+                                                                                                    "type": "string",
+                                                                                                    "const": "block"
+                                                                                                },
+                                                                                                "block": {
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "kind",
+                                                                                                "block"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "object",
+                                                                                            "properties": {
+                                                                                                "kind": {
+                                                                                                    "type": "string",
+                                                                                                    "const": "url"
+                                                                                                },
+                                                                                                "url": {
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "kind",
+                                                                                                "url"
+                                                                                            ]
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            },
+                                                                            "required": [
+                                                                                "label",
+                                                                                "action"
+                                                                            ]
+                                                                        },
+                                                                        "sign_in": {
+                                                                            "type": "boolean"
+                                                                        },
+                                                                        "language_switch": {
+                                                                            "type": "boolean"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "style",
+                                                                        "cta",
+                                                                        "sign_in",
+                                                                        "language_switch"
+                                                                    ]
+                                                                },
+                                                                "footer": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "text": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "links": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "object",
+                                                                                "properties": {
+                                                                                    "label": {
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "label",
+                                                                                    "url"
+                                                                                ]
+                                                                            }
+                                                                        },
+                                                                        "social": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "object",
+                                                                                "properties": {
+                                                                                    "network": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "network",
+                                                                                    "url"
+                                                                                ]
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "text",
+                                                                        "links",
+                                                                        "social"
+                                                                    ]
+                                                                },
+                                                                "whatsapp": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "floating_whatsapp": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "seo": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "title": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "description": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "image": {
+                                                                            "type": [
+                                                                                "object",
+                                                                                "null"
+                                                                            ],
+                                                                            "properties": {
+                                                                                "url": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "width": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "height": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "alt": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "mime": {
+                                                                                    "type": "string"
+                                                                                }
+                                                                            },
+                                                                            "required": [
+                                                                                "url",
+                                                                                "width",
+                                                                                "height",
+                                                                                "alt",
+                                                                                "mime"
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "title",
+                                                                        "description",
+                                                                        "image"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "audience",
+                                                                "fonts",
+                                                                "accent",
+                                                                "mood",
+                                                                "corners",
+                                                                "motion",
+                                                                "header",
+                                                                "footer",
+                                                                "whatsapp",
+                                                                "floating_whatsapp",
+                                                                "seo"
+                                                            ]
+                                                        },
+                                                        "blocks": {
+                                                            "type": "array",
+                                                            "description": "The visible blocks in order; each block's `data` is its type's own shape (site-builder.md, 8.3).",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "type": {
+                                                                        "type": "string",
+                                                                        "enum": [
+                                                                            "hero",
+                                                                            "features",
+                                                                            "subjects",
+                                                                            "teachers",
+                                                                            "pricing",
+                                                                            "steps",
+                                                                            "app",
+                                                                            "testimonials",
+                                                                            "faq",
+                                                                            "stats",
+                                                                            "rich_text",
+                                                                            "image_text",
+                                                                            "gallery",
+                                                                            "video",
+                                                                            "logos",
+                                                                            "cta",
+                                                                            "form",
+                                                                            "contact",
+                                                                            "spacer"
+                                                                        ]
+                                                                    },
+                                                                    "variant": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "anchor": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "nav": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ]
+                                                                    },
+                                                                    "style": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "tone": {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                    "paper",
+                                                                                    "white",
+                                                                                    "tint",
+                                                                                    "brand",
+                                                                                    "night"
+                                                                                ]
+                                                                            },
+                                                                            "align": {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                    "start",
+                                                                                    "center"
+                                                                                ]
+                                                                            },
+                                                                            "space": {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                    "compact",
+                                                                                    "normal",
+                                                                                    "roomy"
+                                                                                ]
+                                                                            },
+                                                                            "width": {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                    "narrow",
+                                                                                    "normal",
+                                                                                    "wide",
+                                                                                    "full"
+                                                                                ]
+                                                                            },
+                                                                            "eyebrow": {
+                                                                                "type": "boolean"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "tone",
+                                                                            "align",
+                                                                            "space",
+                                                                            "width",
+                                                                            "eyebrow"
+                                                                        ]
+                                                                    },
+                                                                    "data": {
+                                                                        "type": "object",
+                                                                        "additionalProperties": {}
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "id",
+                                                                    "type",
+                                                                    "variant",
+                                                                    "anchor",
+                                                                    "nav",
+                                                                    "style",
+                                                                    "data"
+                                                                ]
+                                                            }
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "revision",
+                                                        "settings",
+                                                        "blocks"
+                                                    ]
+                                                },
                                                 "content": {
                                                     "type": "object",
-                                                    "description": "The words the academy set: hero, why (the heading over features; empty: the page's own), features, testimonials, faqs, sections shown, whatsapp, seo.",
+                                                    "description": "Deprecated: the old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`.",
                                                     "properties": {
                                                         "hero": {
                                                             "type": "object",
@@ -37678,7 +38095,17 @@
                                                             ]
                                                         },
                                                         "audience": {
-                                                            "type": "string"
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "families"
+                                                                    ]
+                                                                }
+                                                            ]
                                                         },
                                                         "why": {
                                                             "type": "object",
@@ -37855,7 +38282,7 @@
                                                 },
                                                 "teachers": {
                                                     "type": "array",
-                                                    "description": "The teachers who chose to show on the page; empty when the section is off.",
+                                                    "description": "The teachers its teachers block shows, in its order; empty without a visible teachers block.",
                                                     "items": {
                                                         "type": "object",
                                                         "properties": {
@@ -37954,7 +38381,7 @@
                                                 },
                                                 "plans": {
                                                     "type": "array",
-                                                    "description": "The plans families enrol on, with a price in each region; empty when the section is off.",
+                                                    "description": "The plans its pricing block shows, with a price in each region; empty without a visible pricing block.",
                                                     "items": {
                                                         "type": "object",
                                                         "properties": {
@@ -38137,11 +38564,12 @@
                                                 },
                                                 "form_token": {
                                                     "type": "string",
-                                                    "description": "Sent back with the request form, unchanged."
+                                                    "description": "Sent back with the request form, unchanged (\"\" in the preview: its form does not send)."
                                                 }
                                             },
                                             "required": [
                                                 "academy",
+                                                "page",
                                                 "content",
                                                 "subjects",
                                                 "teachers",
@@ -38160,6 +38588,1045 @@
                                 }
                             }
                         }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/site/preview": {
+            "get": {
+                "operationId": "site.preview",
+                "description": "The same shape as `GET v1/site`, from the draft, even while the page is off, with `preview` added and an empty `form_token`\n(the preview's form does not send). token is the builder's preview token (two hours): another academy's or a forged one is\nnot found; an expired one is gone (410, link-expired).",
+                "summary": "The academy's page as its draft stands: the builder's live preview",
+                "tags": [
+                    "Site"
+                ],
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "academy": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "description": "The academy's name in the request's language."
+                                                        },
+                                                        "code": {
+                                                            "type": "string",
+                                                            "description": "The academy's code: what the app asks for to open it (X-Academy)."
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "name",
+                                                        "code"
+                                                    ]
+                                                },
+                                                "page": {
+                                                    "type": "object",
+                                                    "description": "The page the academy built: revision (the published one), settings (audience, fonts, accent, mood, corners,\nmotion, header, footer, whatsapp, floating_whatsapp, seo) and blocks (visible only, in order: id, type, variant,\nanchor, nav, style, data; see docs/architecture/site-builder.md, sections 3 and 8.3).",
+                                                    "properties": {
+                                                        "revision": {
+                                                            "type": "integer"
+                                                        },
+                                                        "settings": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "audience": {
+                                                                    "type": "string"
+                                                                },
+                                                                "fonts": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "heading": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "body": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "url": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "heading",
+                                                                        "body",
+                                                                        "url"
+                                                                    ]
+                                                                },
+                                                                "accent": {
+                                                                    "type": "string"
+                                                                },
+                                                                "mood": {
+                                                                    "type": "string"
+                                                                },
+                                                                "corners": {
+                                                                    "type": "string"
+                                                                },
+                                                                "motion": {
+                                                                    "type": "string"
+                                                                },
+                                                                "header": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "style": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "cta": {
+                                                                            "type": [
+                                                                                "object",
+                                                                                "null"
+                                                                            ],
+                                                                            "properties": {
+                                                                                "label": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "action": {
+                                                                                    "anyOf": [
+                                                                                        {
+                                                                                            "type": "object",
+                                                                                            "properties": {
+                                                                                                "kind": {
+                                                                                                    "type": "string",
+                                                                                                    "const": "trial"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "kind"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "null"
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "object",
+                                                                                            "properties": {
+                                                                                                "kind": {
+                                                                                                    "type": "string",
+                                                                                                    "const": "teach"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "kind"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "object",
+                                                                                            "properties": {
+                                                                                                "kind": {
+                                                                                                    "type": "string",
+                                                                                                    "const": "sign_in"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "kind"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "object",
+                                                                                            "properties": {
+                                                                                                "kind": {
+                                                                                                    "type": "string",
+                                                                                                    "const": "whatsapp"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "kind"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "object",
+                                                                                            "properties": {
+                                                                                                "kind": {
+                                                                                                    "type": "string",
+                                                                                                    "const": "block"
+                                                                                                },
+                                                                                                "block": {
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "kind",
+                                                                                                "block"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "object",
+                                                                                            "properties": {
+                                                                                                "kind": {
+                                                                                                    "type": "string",
+                                                                                                    "const": "url"
+                                                                                                },
+                                                                                                "url": {
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "kind",
+                                                                                                "url"
+                                                                                            ]
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            },
+                                                                            "required": [
+                                                                                "label",
+                                                                                "action"
+                                                                            ]
+                                                                        },
+                                                                        "sign_in": {
+                                                                            "type": "boolean"
+                                                                        },
+                                                                        "language_switch": {
+                                                                            "type": "boolean"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "style",
+                                                                        "cta",
+                                                                        "sign_in",
+                                                                        "language_switch"
+                                                                    ]
+                                                                },
+                                                                "footer": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "text": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "links": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "object",
+                                                                                "properties": {
+                                                                                    "label": {
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "label",
+                                                                                    "url"
+                                                                                ]
+                                                                            }
+                                                                        },
+                                                                        "social": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "object",
+                                                                                "properties": {
+                                                                                    "network": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "network",
+                                                                                    "url"
+                                                                                ]
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "text",
+                                                                        "links",
+                                                                        "social"
+                                                                    ]
+                                                                },
+                                                                "whatsapp": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "floating_whatsapp": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "seo": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "title": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "description": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "image": {
+                                                                            "type": [
+                                                                                "object",
+                                                                                "null"
+                                                                            ],
+                                                                            "properties": {
+                                                                                "url": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "width": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "height": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "alt": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "mime": {
+                                                                                    "type": "string"
+                                                                                }
+                                                                            },
+                                                                            "required": [
+                                                                                "url",
+                                                                                "width",
+                                                                                "height",
+                                                                                "alt",
+                                                                                "mime"
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "title",
+                                                                        "description",
+                                                                        "image"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "audience",
+                                                                "fonts",
+                                                                "accent",
+                                                                "mood",
+                                                                "corners",
+                                                                "motion",
+                                                                "header",
+                                                                "footer",
+                                                                "whatsapp",
+                                                                "floating_whatsapp",
+                                                                "seo"
+                                                            ]
+                                                        },
+                                                        "blocks": {
+                                                            "type": "array",
+                                                            "description": "The visible blocks in order; each block's `data` is its type's own shape (site-builder.md, 8.3).",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "type": {
+                                                                        "type": "string",
+                                                                        "enum": [
+                                                                            "hero",
+                                                                            "features",
+                                                                            "subjects",
+                                                                            "teachers",
+                                                                            "pricing",
+                                                                            "steps",
+                                                                            "app",
+                                                                            "testimonials",
+                                                                            "faq",
+                                                                            "stats",
+                                                                            "rich_text",
+                                                                            "image_text",
+                                                                            "gallery",
+                                                                            "video",
+                                                                            "logos",
+                                                                            "cta",
+                                                                            "form",
+                                                                            "contact",
+                                                                            "spacer"
+                                                                        ]
+                                                                    },
+                                                                    "variant": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "anchor": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "nav": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ]
+                                                                    },
+                                                                    "style": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "tone": {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                    "paper",
+                                                                                    "white",
+                                                                                    "tint",
+                                                                                    "brand",
+                                                                                    "night"
+                                                                                ]
+                                                                            },
+                                                                            "align": {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                    "start",
+                                                                                    "center"
+                                                                                ]
+                                                                            },
+                                                                            "space": {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                    "compact",
+                                                                                    "normal",
+                                                                                    "roomy"
+                                                                                ]
+                                                                            },
+                                                                            "width": {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                    "narrow",
+                                                                                    "normal",
+                                                                                    "wide",
+                                                                                    "full"
+                                                                                ]
+                                                                            },
+                                                                            "eyebrow": {
+                                                                                "type": "boolean"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "tone",
+                                                                            "align",
+                                                                            "space",
+                                                                            "width",
+                                                                            "eyebrow"
+                                                                        ]
+                                                                    },
+                                                                    "data": {
+                                                                        "type": "object",
+                                                                        "additionalProperties": {}
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "id",
+                                                                    "type",
+                                                                    "variant",
+                                                                    "anchor",
+                                                                    "nav",
+                                                                    "style",
+                                                                    "data"
+                                                                ]
+                                                            }
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "revision",
+                                                        "settings",
+                                                        "blocks"
+                                                    ]
+                                                },
+                                                "content": {
+                                                    "type": "object",
+                                                    "description": "Deprecated: the old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`.",
+                                                    "properties": {
+                                                        "hero": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "title": {
+                                                                    "type": "string"
+                                                                },
+                                                                "lead": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "title",
+                                                                "lead"
+                                                            ]
+                                                        },
+                                                        "audience": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "families"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        "why": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "title": {
+                                                                    "type": "string"
+                                                                },
+                                                                "lead": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "title",
+                                                                "lead"
+                                                            ]
+                                                        },
+                                                        "features": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "title": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "text": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "title",
+                                                                    "text"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "testimonials": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "role": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "quote": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "name",
+                                                                    "role",
+                                                                    "quote"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "faqs": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "q": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "a": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "q",
+                                                                    "a"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "sections": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "whatsapp": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "seo": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "title": {
+                                                                    "type": "string"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "title",
+                                                                "description"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "hero",
+                                                        "audience",
+                                                        "why",
+                                                        "features",
+                                                        "testimonials",
+                                                        "faqs",
+                                                        "sections",
+                                                        "whatsapp",
+                                                        "seo"
+                                                    ]
+                                                },
+                                                "subjects": {
+                                                    "type": "array",
+                                                    "description": "Every subject the academy teaches (the free-trial form picks one).",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "description": "Sent back with the free-trial form as subject_id."
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "levels": {
+                                                                "type": "array",
+                                                                "description": "The subject's levels, in order.",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "categories": {
+                                                                "type": "array",
+                                                                "description": "Its tracks or the curricula it follows.",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "programs": {
+                                                                "type": "array",
+                                                                "description": "Its published programs.",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "name": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "description": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ],
+                                                                            "description": "What the program is, or null."
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "name",
+                                                                        "description"
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "levels",
+                                                            "categories",
+                                                            "programs"
+                                                        ]
+                                                    }
+                                                },
+                                                "teachers": {
+                                                    "type": "array",
+                                                    "description": "The teachers its teachers block shows, in its order; empty without a visible teachers block.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "description": "The card's id (not the teacher's account)."
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "bio": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "photo_url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "gender": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "female or male."
+                                                            },
+                                                            "languages": {
+                                                                "type": "array",
+                                                                "description": "ISO 639-1 codes they explain in.",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "age_groups": {
+                                                                "type": "array",
+                                                                "description": "kids, middle, teen, adults: the ages they teach (none: any age).",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "subjects": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "name": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "level_from": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ],
+                                                                            "description": "The first level they teach, or null (from the start)."
+                                                                        },
+                                                                        "level_to": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ],
+                                                                            "description": "The last level they teach, or null (to the end)."
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "name",
+                                                                        "level_from",
+                                                                        "level_to"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "accepts_trials": {
+                                                                "type": "boolean",
+                                                                "description": "Whether they take free trial lessons."
+                                                            },
+                                                            "accepts_groups": {
+                                                                "type": "boolean",
+                                                                "description": "Whether they teach group lessons."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "bio",
+                                                            "photo_url",
+                                                            "gender",
+                                                            "languages",
+                                                            "age_groups",
+                                                            "subjects",
+                                                            "accepts_trials",
+                                                            "accepts_groups"
+                                                        ]
+                                                    }
+                                                },
+                                                "plans": {
+                                                    "type": "array",
+                                                    "description": "The plans its pricing block shows, with a price in each region; empty without a visible pricing block.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "format": {
+                                                                "type": "string",
+                                                                "description": "private (one student a lesson) or group.",
+                                                                "enum": [
+                                                                    "group",
+                                                                    "private"
+                                                                ]
+                                                            },
+                                                            "max_students": {
+                                                                "type": [
+                                                                    "integer",
+                                                                    "null"
+                                                                ],
+                                                                "description": "A group plan: the most students in one of its lessons (the largest group any of the academy's teachers takes); null for a private plan."
+                                                            },
+                                                            "session_minutes": {
+                                                                "type": "integer"
+                                                            },
+                                                            "sessions_per_week": {
+                                                                "type": "integer"
+                                                            },
+                                                            "sessions_per_block": {
+                                                                "type": "integer",
+                                                                "description": "Lessons in each paid block."
+                                                            },
+                                                            "validity_days": {
+                                                                "type": "integer",
+                                                                "description": "Days a block lasts from payment."
+                                                            },
+                                                            "shared": {
+                                                                "type": "boolean",
+                                                                "description": "One balance for all of a student's courses on it."
+                                                            },
+                                                            "prices": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "region_id": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "price": {
+                                                                            "type": "string",
+                                                                            "description": "The block's price, written out (\"SAR 480\")."
+                                                                        },
+                                                                        "amount_minor": {
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "currency": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "region_id",
+                                                                        "price",
+                                                                        "amount_minor",
+                                                                        "currency"
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "format",
+                                                            "max_students",
+                                                            "session_minutes",
+                                                            "sessions_per_week",
+                                                            "sessions_per_block",
+                                                            "validity_days",
+                                                            "shared",
+                                                            "prices"
+                                                        ]
+                                                    }
+                                                },
+                                                "regions": {
+                                                    "type": "array",
+                                                    "description": "The price regions: the page picks the visitor's by their country, else the default one.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "currency": {
+                                                                "type": "string"
+                                                            },
+                                                            "default": {
+                                                                "type": "boolean",
+                                                                "description": "The region for a visitor whose country no region names."
+                                                            },
+                                                            "countries": {
+                                                                "type": "array",
+                                                                "description": "ISO 3166-1 alpha-2 codes of the countries it serves.",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "currency",
+                                                            "default",
+                                                            "countries"
+                                                        ]
+                                                    }
+                                                },
+                                                "app": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "android_url": {
+                                                            "type": "string",
+                                                            "description": "The store page on Android, or null."
+                                                        },
+                                                        "ios_url": {
+                                                            "type": "string",
+                                                            "description": "The App Store page, or null."
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "android_url",
+                                                        "ios_url"
+                                                    ]
+                                                },
+                                                "whatsapp": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "The academy's WhatsApp number (E.164), or null."
+                                                },
+                                                "trials": {
+                                                    "type": "object",
+                                                    "description": "How the academy takes a free trial asked for on the page.",
+                                                    "properties": {
+                                                        "booking": {
+                                                            "type": "string",
+                                                            "description": "family: the family picks its own time (site/trial-slots, then a code to its number: site/trials); staff: the academy books it after the request."
+                                                        },
+                                                        "response_hours": {
+                                                            "type": "integer",
+                                                            "description": "How many hours the academy promises to answer a request within."
+                                                        },
+                                                        "notice_hours": {
+                                                            "type": "integer",
+                                                            "description": "A family books its own trial at least this many hours ahead."
+                                                        },
+                                                        "help_choose_subject": {
+                                                            "type": "boolean",
+                                                            "description": "Whether a family that asks for help choosing starts with the academy's own trial subject (else sales choose with them)."
+                                                        },
+                                                        "help_choose_subject_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ],
+                                                            "description": "That subject (one of `subjects`), whose times a family that asks for help choosing books from; null when sales choose with them."
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "booking",
+                                                        "response_hours",
+                                                        "notice_hours",
+                                                        "help_choose_subject",
+                                                        "help_choose_subject_id"
+                                                    ]
+                                                },
+                                                "form_token": {
+                                                    "type": "string",
+                                                    "description": "Sent back with the request form, unchanged (\"\" in the preview: its form does not send)."
+                                                },
+                                                "preview": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "revision": {
+                                                            "type": "integer",
+                                                            "description": "The draft's revision shown."
+                                                        },
+                                                        "published_revision": {
+                                                            "type": [
+                                                                "integer",
+                                                                "null"
+                                                            ],
+                                                            "description": "The revision that is live, or null when nothing was published yet."
+                                                        },
+                                                        "enabled": {
+                                                            "type": "boolean",
+                                                            "description": "Whether the page is on (it may be built before it is)."
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "revision",
+                                                        "published_revision",
+                                                        "enabled"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "academy",
+                                                "page",
+                                                "content",
+                                                "subjects",
+                                                "teachers",
+                                                "plans",
+                                                "regions",
+                                                "app",
+                                                "whatsapp",
+                                                "trials",
+                                                "form_token",
+                                                "preview"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "$ref": "#/components/responses/ProblemException"
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
