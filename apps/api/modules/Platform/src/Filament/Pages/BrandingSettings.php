@@ -4,6 +4,7 @@ namespace Modules\Platform\Filament\Pages;
 
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\BaseFileUpload;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -127,6 +128,7 @@ final class BrandingSettings extends Page
                                 ->rules([new CleanFile])
                                 ->maxSize(1024)
                                 ->disk('public')->directory($directory)->visibility('public')
+                                ->getUploadedFileUsing(self::uploadedOnThisHost(...))
                                 ->live(),
                             FileUpload::make('favicon')
                                 ->label(__('platform::branding.fields.favicon'))
@@ -135,7 +137,8 @@ final class BrandingSettings extends Page
                                 ->acceptedFileTypes(['image/png'])
                                 ->rules([new CleanFile])
                                 ->maxSize(256)
-                                ->disk('public')->directory($directory)->visibility('public'),
+                                ->disk('public')->directory($directory)->visibility('public')
+                                ->getUploadedFileUsing(self::uploadedOnThisHost(...)),
                         ]),
                         ToggleButtons::make('time_format')
                             ->label(__('platform::branding.fields.time_format'))
@@ -372,5 +375,27 @@ final class BrandingSettings extends Page
     private function tokens(): BrandTokens
     {
         return BrandTokens::fromArray($this->data ?? []);
+    }
+
+    /**
+     * The saved logo or icon for the upload box, at a path on the page's own
+     * host (/storage/...) rather than the public disk's APP_URL. The back
+     * office runs on each academy's host, and the box fetches the file to show
+     * it; from another host the browser refuses, the box waits forever, and
+     * the file can be neither removed nor replaced.
+     *
+     * @param  string|array<string, string>|null  $storedFileNames
+     * @return array{name: string, size: int, type: ?string, url: ?string}|null
+     */
+    private static function uploadedOnThisHost(BaseFileUpload $component, string $file, string|array|null $storedFileNames): ?array
+    {
+        $uploaded = $component->getUploadedFile($file, $storedFileNames);
+        $path = is_string($uploaded['url'] ?? null) ? parse_url($uploaded['url'], PHP_URL_PATH) : null;
+
+        if ($uploaded !== null && is_string($path) && $path !== '') {
+            $uploaded['url'] = $path;
+        }
+
+        return $uploaded;
     }
 }
