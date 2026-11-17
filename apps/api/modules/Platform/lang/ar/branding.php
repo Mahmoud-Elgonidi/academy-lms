@@ -54,7 +54,7 @@ return [
         'round' => 'دائرية',
     ],
     'logo_hint' => 'PNG أو JPG أو WebP، حتى 1 ميغابايت. يُفضَّل بخلفية شفافة.',
-    'favicon_hint' => 'PNG مربع، 64×64 أو أكبر.',
+    'favicon_hint' => 'PNG مربع، 64×64 أو أكبر، حتى 2 ميغابايت.',
     'actions' => [
         'save' => 'احفظ وطبّق',
         'save_as_template' => 'احفظ قالبًا جديدًا',

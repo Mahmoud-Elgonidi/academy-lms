@@ -54,7 +54,7 @@ return [
         'round' => 'Round',
     ],
     'logo_hint' => 'PNG, JPG or WebP, up to 1 MB. A transparent background works best.',
-    'favicon_hint' => 'Square PNG, 64×64 or larger.',
+    'favicon_hint' => 'Square PNG, 64×64 or larger, up to 2 MB.',
     'actions' => [
         'save' => 'Save and apply',
         'save_as_template' => 'Save as new template',
