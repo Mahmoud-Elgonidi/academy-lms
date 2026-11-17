@@ -891,3 +891,20 @@ Rules both sides keep: the JSON fields named above are always present (null when
 ### 8.5 Not in this work
 
 Per-string `lang` attributes for fallback text; caption tracks for videos; server-side image resizing or srcset (no GD in the image); A/B tests; scheduled publishing; multiple pages per academy (only the home page; the block model allows `/{locale}/p/{slug}` later); custom CSS or HTML (never: security); the platform's own page (Platform's `SiteContent`, unchanged).
+
+---
+
+## 9. Decisions during build
+
+### 9.1 Portal (contract changes for the server marked **contract**)
+
+- **contract: the migrated page keeps its menu and its small labels.** Today's header lists «لماذا نحن», «المواد», «المعلّمون», «الأسعار», «أسئلة», and every section shows its small label (eyebrow) above the heading. For the migrated page to render the same, `LegacyImport` sets on those blocks:
+  - `nav` = the old menu words: features (anchor `why`) «لماذا نحن» / "Why us", subjects «المواد» / "Subjects", teachers «المعلّمون» / "Teachers", pricing «الأسعار» / "Pricing", faq «أسئلة» / "FAQ" (the portal's `site.nav.*` today). Steps, app, testimonials and form get no `nav` (they were not in the menu).
+  - `style.eyebrow = true` on every migrated block except the hero, with the `eyebrow` text left unset (the portal then shows the old label, `site.{section}.eyebrow`, 6.6).
+  The `kids_families` template does the same.
+- The portal draws a block in one of two looks. The legacy variants (`hero.phones`, `features.cards`, `subjects.cards`, `teachers.cards`, `steps.line`, `app.phones`, `pricing.cards`, `testimonials.marquee`, `faq.accordion`, `form.split`) reuse today's markup and `site.css` classes, so a migrated page is pixel-equal. Every other variant is drawn by `components/site/page/page.css` (`sp-*`). A page is **playful** when `motion` is `full` or it has a `phones` hero; otherwise **editorial** (the root carries `data-character`), and the shared legacy parts are toned down under editorial (no gradient icons, no glowing title).
+- The header: `overlay` over a dark first block (night, brand with light ink, or a video hero) is today's header. `overlay` over a light first block keeps dark ink and turns white on scroll. `solid` is a sticky bar in the page's paper. `minimal` is the logo and one button. When the first block is not a hero, `overlay` acts as `solid`.
+- The h1: the hero's title; with no hero, the first block's title; else a visually hidden h1 with the academy's name.
+- The preview's form: the inputs work, sending is stopped in the browser (a capture handler) with a note «المعاينة لا ترسل الطلبات».
+- The JSON-LD script and the preview's scroll script live outside `components/site/page` (`components/site/page-scripts.tsx`), so the "no `dangerouslySetInnerHTML` under `components/site/page`" test stays strict.
+- Pricing per lesson and the plans' wording moved from `academy-page.tsx` into `components/site/plans.ts` (shared by both pages; no change in rendering).
