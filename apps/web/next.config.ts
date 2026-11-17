@@ -26,7 +26,13 @@ const config: NextConfig = {
       // A game's page (/bff/games/…) keeps the API's own headers: its sandbox policy and no referrer (the route sends the rest).
       // The builder's preview (/{locale}/site-preview) may be framed by /admin: its frame rule comes from proxy.ts alone.
       { source: '/:path((?!bff/games/|ar/site-preview|en/site-preview).*)', headers: securityHeaders },
-      { source: '/:locale(ar|en)/site-preview', headers: securityHeaders.filter((h) => h.key !== 'X-Frame-Options' && h.key !== 'Content-Security-Policy') },
+      {
+        source: '/:locale(ar|en)/site-preview',
+        headers: [
+          ...securityHeaders.filter((h) => h.key !== 'X-Frame-Options' && h.key !== 'Content-Security-Policy'),
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
       // Over https (the server's nginx says so): the browser keeps to https on this host for half a year.
       {
         source: '/:path*',
