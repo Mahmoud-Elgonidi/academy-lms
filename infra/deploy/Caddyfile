@@ -53,6 +53,11 @@
 		reverse_proxy portal:3000
 	}
 
+	# The academy's page files (site/{academy}/media/{uuid}.{ext}): their names never
+	# change, so they are cached for good. Videos seek: the file server answers Range.
+	@sitemedia path /storage/site/*/media/*
+	header @sitemedia Cache-Control "public, max-age=31536000, immutable"
+
 	# Everything else: the panels, the API and their assets.
 	handle {
 		root * /app/public

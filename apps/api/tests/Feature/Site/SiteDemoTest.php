@@ -1,6 +1,7 @@
 <?php
 
 use Database\Seeders\DemoCatchUpSeeder;
+use Illuminate\Support\Facades\Storage;
 use Modules\Billing\Models\PriceRegion;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
@@ -18,6 +19,7 @@ use Modules\Site\Models\SiteSettings;
  */
 
 beforeEach(function () {
+    Storage::fake('public');
     $this->demo = $this->actAsTenant($this->createAcademy(['slug' => 'demo']));
     foreach (['nour@demo.test', 'sara@demo.test', 'khaled@demo.test', 'mahmoud@demo.test'] as $email) {
         $teacher = User::factory()->withRole(Role::Teacher)->create(['email' => $email]);

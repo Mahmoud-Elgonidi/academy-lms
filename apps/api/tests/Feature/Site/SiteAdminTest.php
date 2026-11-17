@@ -18,7 +18,6 @@ use Modules\SharedKernel\Setup\SetupChecklist;
 use Modules\Site\Actions\HandleJoinRequest;
 use Modules\Site\Actions\SaveSiteSettings;
 use Modules\Site\Contracts\SiteApi;
-use Modules\Site\Domain\SiteContent;
 use Modules\Site\Filament\Pages\SiteRequests;
 use Modules\Site\Filament\Pages\SiteSettings as SiteSettingsPage;
 use Modules\Site\Models\JoinRequest;
@@ -50,43 +49,34 @@ function siteRequest(string $kind, array $change = []): JoinRequest
     return JoinRequest::query()->create($change + ['kind' => $kind, 'name' => $kind === 'trial' ? 'Marwa Salem' : 'Ahmed Zaki', 'phone' => '+966501234567', 'locale' => 'en']);
 }
 
-it('keeps what the owner saves, cleaned and held to its limits, and audits whether it is on and its sections only', function () {
+it('keeps the page on or off and its free trials, never its words, and audits them', function () {
     $this->actingAs($this->owner);
-    $content = SiteContent::defaults();
-    $content['hero']['title_ar'] = "  أكاديميتك\u{0007} أونلاين  ";
-    $content['hero']['title_en'] = '';
-    $content['features'] = [['title_ar' => 'حصص فردية', 'title_en' => '', 'text_ar' => '', 'text_en' => 'One to one'], ['title_ar' => '', 'title_en' => '', 'text_ar' => '', 'text_en' => '']];
-    $content['sections'] = ['faq', 'nonsense', 'teachers'];
-    $content['whatsapp'] = '00966 50 123 4567';
+    $before = SiteSettings::current()->content;
 
-    $kept = app(SaveSiteSettings::class)->handle(['enabled' => true] + $content);
+    $kept = app(SaveSiteSettings::class)->handle(['enabled' => true, 'trial_booking' => 'staff', 'response_hours' => 6, 'trial_notice_hours' => 12,
+        'hero' => ['title_ar' => 'لا يُحفظ هنا']]);
 
     expect($kept->enabled)->toBeTrue()
-        ->and($kept->content['hero']['title_ar'])->toBe('أكاديميتك أونلاين')
-        ->and($kept->content['features'])->toBe([['title_ar' => 'حصص فردية', 'title_en' => '', 'text_ar' => '', 'text_en' => 'One to one']])
-        ->and($kept->content['sections'])->toBe(['teachers', 'faq'])
-        ->and($kept->content['whatsapp'])->toBe('+966501234567')
+        ->and($kept->trial_booking)->toBe('staff')
+        ->and($kept->response_hours)->toBe(6)
+        ->and($kept->content)->toBe($before)   // the words are the builder's now
         ->and(SiteSettings::isOn())->toBeTrue();
     $audit = DB::table('audit_logs')->where('action', 'site.settings_saved')->sole();
-    expect(json_decode($audit->data, true))->toEqual(['state' => 'on', 'shown' => ['teachers', 'faq'], 'trial_booking' => 'family', 'response_hours' => 4, 'trial_notice_hours' => 3, 'default_trial_subject' => false])
-        ->and(AuditEntries::describe($audit, 'UTC')['title'])->toBe(__('shared::audit.actions.site.settings_saved', ['state' => 'on', 'shown' => 'teachers, questions', 'trial_booking' => 'the family', 'response_hours' => 4, 'trial_notice_hours' => 3]))
+    expect(json_decode($audit->data, true))->toEqual(['state' => 'on', 'trial_booking' => 'staff', 'response_hours' => 6, 'trial_notice_hours' => 12, 'default_trial_subject' => false])
+        ->and(AuditEntries::describe($audit, 'UTC')['title'])->toBe(__('shared::audit.actions.site.settings_saved', ['state' => 'on', 'trial_booking' => 'the academy\'s staff', 'response_hours' => 6, 'trial_notice_hours' => 12]))
         ->and(AuditEntries::group($audit->action))->toBe('site');
 
-    $bad = fn (array $change) => fn () => app(SaveSiteSettings::class)->handle(array_replace_recursive($content, $change));
-    expect($bad(['hero' => ['title_ar' => str_repeat('x', 121)]]))->toThrow(ValidationException::class)
-        ->and($bad(['hero' => ['title_ar' => '', 'title_en' => '']]))->toThrow(ValidationException::class)
-        ->and($bad(['faqs' => [['q_ar' => 'Why?', 'q_en' => '', 'a_ar' => '', 'a_en' => '']]]))->toThrow(ValidationException::class)
-        ->and($bad(['whatsapp' => '0501234567']))->toThrow(ValidationException::class)
-        ->and($bad(['features' => array_fill(0, 7, ['title_en' => 'A', 'text_en' => 'B'])]))->toThrow(ValidationException::class);
+    expect(fn () => app(SaveSiteSettings::class)->handle(['enabled' => true, 'response_hours' => 0]))->toThrow(ValidationException::class)
+        ->and(fn () => app(SaveSiteSettings::class)->handle(['enabled' => true, 'trial_booking' => 'robots']))->toThrow(ValidationException::class);
 
     // Only the owner and admins.
     foreach ([$this->sales, $this->scheduler, $this->teachers['sara']] as $someone) {
         $this->actingAs($someone);
-        expect(fn () => app(SaveSiteSettings::class)->handle($content))->toThrow(AuthorizationException::class);
+        expect(fn () => app(SaveSiteSettings::class)->handle(['enabled' => false]))->toThrow(AuthorizationException::class);
     }
 });
 
-it('opens the settings to the owner and admins, and saves from the screen', function () {
+it('opens the settings to the owner and admins, saves from the screen, and leads to the page design', function () {
     foreach ([$this->sales, $this->scheduler, $this->accountant] as $someone) {
         $this->actingAs($someone);
         expect(SiteSettingsPage::canAccess())->toBeFalse();
@@ -95,51 +85,17 @@ it('opens the settings to the owner and admins, and saves from the screen', func
     Livewire::test(SiteSettingsPage::class)
         ->assertSee(__('site::site.settings.title', [], 'en'))
         ->assertSee('Ms Sara')->assertSee('Ms Huda')->assertSee('Ms Mona')
+        ->assertSee(__('site::site.settings.design_title', [], 'en'))
+        ->assertSee(__('site::site.settings.audiences.families', [], 'en'))
         ->set('data.enabled', true)
-        ->set('data.hero.title_en', 'Learn Quran at home')
+        ->set('data.response_hours', 8)
         ->call('save')
         ->assertNotified(__('site::site.settings.saved', [], 'en'));
 
     expect(SiteSettings::current()->enabled)->toBeTrue()
-        ->and(SiteSettings::current()->content['hero']['title_en'])->toBe('Learn Quran at home')
+        ->and(SiteSettings::current()->response_hours)->toBe(8)
         ->and(SiteSettingsPage::pageUrl('ar'))->toStartWith('http://noor.lms.test')->toEndWith('/ar');
-    $this->get('http://noor.lms.test/admin/settings/site')->assertOk();
-});
-
-it('lets the academy say whom its page is for and word the heading over why families choose it', function () {
-    $this->actingAs($this->owner);
-    $page = function (string $locale) {
-        $content = $this->getJson('http://noor.lms.test/api/v1/site', ['Accept-Language' => $locale])->assertOk()->json('data.content');
-        $this->actAsTenant($this->academy);   // the request leaves the academy behind
-
-        return ['audience' => $content['audience'], 'why' => $content['why']];
-    };
-
-    // At first: for families, and no heading of its own (the page says its own, for its audience).
-    Livewire::test(SiteSettingsPage::class)
-        ->assertSet('data.audience', 'families')
-        ->assertSet('data.why.title_ar', '')
-        ->assertSee('تعليم على مقاس ابنك')
-        ->set('data.audience', 'adults')
-        ->assertSee('تعليم على مقاسك')
-        ->set('data.enabled', true)
-        ->call('save')
-        ->assertNotified(__('site::site.settings.saved', [], 'en'));
-    expect($page('ar'))->toBe(['audience' => 'adults', 'why' => ['title' => '', 'lead' => '']]);
-
-    // Its own heading; English reads the Arabic where it is empty, like every text on the page.
-    Livewire::test(SiteSettingsPage::class)
-        ->set('data.why.title_ar', 'تدريب يناسب فريقك')
-        ->set('data.why.lead_ar', 'معلّم واحد وخطة على قدر مستواك.')
-        ->call('save');
-    expect($page('ar')['why'])->toBe(['title' => 'تدريب يناسب فريقك', 'lead' => 'معلّم واحد وخطة على قدر مستواك.'])
-        ->and($page('en')['why'])->toBe(['title' => 'تدريب يناسب فريقك', 'lead' => 'معلّم واحد وخطة على قدر مستواك.']);
-
-    // An audience it does not know is families; the heading is held to its length.
-    $content = SiteSettings::current()->said();
-    app(SaveSiteSettings::class)->handle(['enabled' => true, 'audience' => 'robots'] + $content);
-    expect($page('ar')['audience'])->toBe('families')
-        ->and(fn () => app(SaveSiteSettings::class)->handle(['why' => ['title_ar' => str_repeat('x', 121)]] + $content))->toThrow(ValidationException::class);
+    $this->get('http://noor.lms.test/admin/settings/site')->assertOk()->assertSee('/admin/site/builder');
 });
 
 it('takes a teacher\'s card off the page and puts it back, the teacher\'s own switch untouched', function () {

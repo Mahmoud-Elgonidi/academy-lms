@@ -50,7 +50,7 @@ final class AcademyPlanPage extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?int $navigationSort = 913;
+    protected static ?int $navigationSort = 914;
 
     protected static ?string $slug = 'settings/plan';
 

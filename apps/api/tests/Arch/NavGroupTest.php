@@ -60,6 +60,7 @@ use Modules\Scheduling\Filament\Pages\ShiftProposals;
 use Modules\Scheduling\Filament\Pages\TimeOffRequests;
 use Modules\Scheduling\Filament\Resources\Enrollments\EnrollmentResource;
 use Modules\SharedKernel\Filament\NavGroup;
+use Modules\Site\Filament\Pages\SiteBuilder;
 use Modules\Site\Filament\Pages\SiteRequests;
 use Modules\Site\Filament\Pages\SiteSettings;
 use Modules\Support\Filament\Pages\Tickets;
@@ -94,7 +95,7 @@ const ACADEMY_MENU = [
     'Protection' => [Safeguarding::class, DataRequests::class, ActivityLog::class],
     'Settings' => [AcademyModulesPage::class, Team::class, SecuritySettings::class, Holidays::class,
         PolicySettings::class, ClassroomSettingsPage::class, GroupSettings::class, PaymentSettings::class,
-        SiteSettings::class, AiSettingsPage::class, WeeklyNoteSettings::class, BrandingSettings::class,
+        SiteBuilder::class, SiteSettings::class, AiSettingsPage::class, WeeklyNoteSettings::class, BrandingSettings::class,
         ImportData::class, AcademyPlanPage::class, UsagePage::class],
 ];
 

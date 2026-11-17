@@ -96,8 +96,12 @@ return [
             'concern_reopened' => 'أُعيد فتح بلاغ الحماية :concern',
         ],
         'site' => [
-            'settings_saved' => 'حُفظت صفحة الأكاديمية (:state؛ الأقسام: :shown؛ حجز الحصة التجريبية: :trial_booking؛ الرد خلال :response_hours ساعات؛ أقرب حجز بعد :trial_notice_hours ساعات)',
+            'settings_saved' => 'حُفظت إعدادات صفحة الأكاديمية (:state؛ حجز الحصة التجريبية: :trial_booking؛ الرد خلال :response_hours ساعات؛ أقرب حجز بعد :trial_notice_hours ساعات)',
             'request_handled' => 'رُدّ على طلب من صفحة الأكاديمية (:request_status)',
+            'page_published' => 'نُشرت صفحة الأكاديمية (النسخة :revision، :blocks أقسام: :types)',
+            'page_discarded' => 'أُعيدت مسودة صفحة الأكاديمية إلى المنشورة',
+            'page_template_applied' => 'بُدئت مسودة صفحة الأكاديمية من قالب: :template',
+            'page_restored' => 'استُرجعت النسخة :revision من صفحة الأكاديمية إلى المسودة',
         ],
         'crm' => [
             'settings_saved' => 'تعديل إعدادات العملاء (التوزيع التلقائي لعملاء الموقع: :assign_website_leads)',
@@ -243,6 +247,8 @@ return [
         ],
     ],
     'values' => [
+        'template' => ['online_courses' => 'أكاديمية دورات أونلاين', 'training' => 'تدريب وتطوير مهني', 'kids_families' => 'مدرسة للأطفال والعائلات', 'language_school' => 'معهد لغات', 'blank' => 'صفحة فارغة'],
+        'types' => ['hero' => 'الواجهة', 'features' => 'لماذا نحن', 'subjects' => 'المواد', 'teachers' => 'المعلّمون', 'pricing' => 'الأسعار', 'steps' => 'كيف نبدأ', 'app' => 'التطبيق', 'testimonials' => 'الآراء', 'faq' => 'الأسئلة', 'stats' => 'أرقام', 'rich_text' => 'نص', 'image_text' => 'صورة ونص', 'gallery' => 'معرض', 'video' => 'فيديو', 'logos' => 'شعارات', 'cta' => 'دعوة', 'form' => 'النموذج', 'contact' => 'تواصل', 'spacer' => 'فاصل'],
         'offer' => ['applied' => 'طُبّق', 'ended' => 'انتهى', 'family_discount_bigger' => 'خصم الإخوة أكبر', 'not_for_plan' => 'لا يشمل الباقة', 'package' => 'باقة مشتركة', 'none' => 'لا يوجد'],
         'trial_booking' => ['family' => 'تحجزها الأسرة', 'staff' => 'يحجزها فريق الأكاديمية'],
         'assign_website_leads' => ['on' => 'مفعّل', 'off' => 'متوقف'],

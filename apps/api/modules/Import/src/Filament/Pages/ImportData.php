@@ -43,7 +43,7 @@ final class ImportData extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowUpTray;
 
-    protected static ?int $navigationSort = 912;
+    protected static ?int $navigationSort = 913;
 
     protected static ?string $slug = 'settings/import';
 

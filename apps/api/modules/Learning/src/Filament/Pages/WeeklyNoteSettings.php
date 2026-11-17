@@ -32,7 +32,7 @@ final class WeeklyNoteSettings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelopeOpen;
 
-    protected static ?int $navigationSort = 910;
+    protected static ?int $navigationSort = 911;
 
     protected static ?string $slug = 'settings/weekly-note';
 
