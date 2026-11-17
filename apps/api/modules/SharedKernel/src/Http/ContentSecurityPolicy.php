@@ -27,10 +27,15 @@ final class ContentSecurityPolicy
         return Vite::useCspNonce();
     }
 
-    /** A page's policy: the base one, and its scripts. */
+    /**
+     * A page's policy: the base one, and its scripts. Workers only from our
+     * origin or a blob: one of those scripts made (the upload box draws an
+     * image's preview in one); without worker-src they would fall under
+     * script-src, which refuses blob:, and the preview stays blank.
+     */
     public static function forPage(string $nonce): string
     {
-        return self::BASE."; script-src 'self' 'nonce-{$nonce}' 'unsafe-eval'";
+        return self::BASE."; script-src 'self' 'nonce-{$nonce}' 'unsafe-eval'; worker-src 'self' blob:";
     }
 
     /** ` nonce="…"` for a <script> tag; nothing outside a request (a mail, a command). */
