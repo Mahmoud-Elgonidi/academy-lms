@@ -72,6 +72,10 @@
 
 .sp-page[data-hero-width='wide'] .sp-header .ls-wrap { inline-size: min(1360px, 100% - 2rem); }
 
+/* A night mood keeps the bar dark too. */
+.sp-page[data-mood='night'] .ls-header.sp-header { background: color-mix(in oklab, var(--sp-night) 90%, transparent); color: white; box-shadow: 0 1px 0 rgb(255 255 255 / 0.08); }
+.sp-page[data-mood='night'] .sp-header :is(.ls-lang, .ls-btn-ghost, .sp-menu summary) { color: white; border-color: rgb(255 255 255 / 0.25); }
+
 /* The menu on narrow screens (not on today's header, which keeps its look). */
 .sp-menu { position: relative; }
 .sp-menu summary { display: grid; place-items: center; inline-size: 2.5rem; block-size: 2.5rem; border-radius: var(--sp-btn-radius); border: 1px solid var(--sp-line); cursor: pointer; list-style: none; }

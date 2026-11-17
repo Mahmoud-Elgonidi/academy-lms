@@ -26,6 +26,8 @@ export type PageCtx = {
   /** The block whose title is the page's one h1 (null: a hidden h1 with the academy's name). */
   h1: string | null;
   preview: boolean;
+  /** The preview's own link token (the language switch keeps it). */
+  previewToken?: string;
   utm: Record<string, string | undefined>;
   chosenSubject?: string;
 };

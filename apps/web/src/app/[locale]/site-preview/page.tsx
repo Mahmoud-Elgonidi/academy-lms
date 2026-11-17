@@ -21,7 +21,8 @@ const one = (value: string | string[] | undefined) => (Array.isArray(value) ? va
  */
 export default async function SitePreview({ searchParams }: Props) {
   const query = await searchParams;
-  const found = await academySitePreview(one(query.t));
+  const token = one(query.t);
+  const found = await academySitePreview(token);
   if (typeof found === 'string' || !found.page) {
     const t = await getTranslations('site.preview');
     return (
@@ -39,6 +40,7 @@ export default async function SitePreview({ searchParams }: Props) {
       page={found.page}
       look={await branding()}
       utm={{}}
+      previewToken={token}
       preview={found.preview ?? { revision: found.page.revision, published_revision: null, enabled: true }}
     />
   );

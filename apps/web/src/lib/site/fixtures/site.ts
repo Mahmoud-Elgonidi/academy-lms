@@ -266,7 +266,17 @@ export function fixtureSite(name: string, locale: string = 'ar'): AcademySite {
   seq = 0;
   const lang: Lang = locale === 'en' ? 'en' : 'ar';
   const l = (p: Pair) => (lang === 'ar' ? p[0] : p[1]);
-  const page = (PAGES[name] ?? everything)(l, lang);
+  // "courses-night-attention": a page, then its mood and accent (for looking at tones and colours).
+  const [key = 'all', mood, accent] = name.split('-');
+  const made = (PAGES[key] ?? everything)(l, lang);
+  const page: SitePageData = {
+    ...made,
+    settings: {
+      ...made.settings,
+      ...(mood === 'light' || mood === 'warm' || mood === 'night' ? { mood } : {}),
+      ...(accent === 'primary' || accent === 'attention' || accent === 'info' ? { accent } : {}),
+    },
+  };
   return {
     academy: { name: l(['أكاديمية المدار', 'Madar Academy']), code: 'MADAR' },
     page,

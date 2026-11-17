@@ -15,13 +15,14 @@ import type { Say } from './context';
  * with the search engines' data. In the builder's preview (`preview`) a bar
  * says so, the form sends nothing and the scroll is kept between reloads.
  */
-export async function SitePage({ site, page, look, utm, chosenSubject, preview = null }: {
+export async function SitePage({ site, page, look, utm, chosenSubject, preview = null, previewToken }: {
   site: AcademySite;
   page: SitePageData;
   look: Branding;
   utm: Record<string, string | undefined>;
   chosenSubject?: string;
   preview?: SitePreviewInfo | null;
+  previewToken?: string;
 }) {
   const [t, all, locale, incoming] = await Promise.all([getTranslations('site'), getTranslations(), getLocale(), headers()]);
   const nonce = incoming.get(NONCE_HEADER) ?? undefined;
@@ -47,6 +48,7 @@ export async function SitePage({ site, page, look, utm, chosenSubject, preview =
         accent={accent}
         accentInk={onAccent(accent)}
         preview={preview}
+        previewToken={previewToken}
         utm={utm}
         chosenSubject={chosenSubject}
       />

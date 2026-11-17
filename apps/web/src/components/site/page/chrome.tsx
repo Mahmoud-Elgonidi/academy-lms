@@ -45,7 +45,7 @@ export function PageHeader({ ctx, mode }: { ctx: PageCtx; mode: HeaderMode }) {
         )}
         <div className="ls-header-actions">
           {header.language_switch ? (
-            <a className="ls-lang" href={ctx.preview ? `/${other}/site-preview` : `/${other}`} hrefLang={other} lang={other} target={ctx.preview ? '_self' : undefined}>{t('nav.language')}</a>
+            <a className="ls-lang" href={ctx.preview ? `/${other}/site-preview${ctx.previewToken ? `?t=${encodeURIComponent(ctx.previewToken)}` : ''}` : `/${other}`} hrefLang={other} lang={other}>{t('nav.language')}</a>
           ) : null}
           {header.sign_in && mode !== 'minimal' ? (
             <PageButton link={{ label: t('nav.signIn'), action: { kind: 'sign_in' } }} ctx={ctx} className="ls-btn ls-btn-ghost ls-btn-small" />

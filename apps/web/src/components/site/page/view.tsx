@@ -41,7 +41,7 @@ export function headerModeOf(page: SitePageData, accentInk: 'light' | 'dark'): H
 const RADII = { sharp: '0px', soft: '0.75rem', round: '1.75rem' } as const;
 
 /** The page itself, from its resolved inputs (SitePage reads them on the server; tests pass their own). */
-export function SitePageView({ site, page, look, locale, t, phones, accent, accentInk, preview, utm, chosenSubject }: {
+export function SitePageView({ site, page, look, locale, t, phones, accent, accentInk, preview, previewToken, utm, chosenSubject }: {
   site: AcademySite;
   page: SitePageData;
   look: Branding;
@@ -51,6 +51,7 @@ export function SitePageView({ site, page, look, locale, t, phones, accent, acce
   accent: string;
   accentInk: 'light' | 'dark';
   preview: SitePreviewInfo | null;
+  previewToken?: string;
   utm: Record<string, string | undefined>;
   chosenSubject?: string;
 }) {
@@ -75,6 +76,7 @@ export function SitePageView({ site, page, look, locale, t, phones, accent, acce
     },
     h1: h1Of(blocks),
     preview: preview !== null,
+    previewToken,
     utm,
     chosenSubject,
   };
