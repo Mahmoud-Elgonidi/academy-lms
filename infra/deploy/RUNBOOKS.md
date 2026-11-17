@@ -307,7 +307,7 @@ the new provider; a room already open keeps the one it was made with. Switch bac
 
 ## AI helpers
 
-The academies' helpers (practice items, report drafts from a teacher's voice note, recitation checks,
+The academies' helpers (practice items, report drafts from a teacher's voice note, curriculum outlines,
 the weekly message's wording) call the provider chosen in Platform settings (`AI_DRIVER`: Claude with
 `ANTHROPIC_API_KEY`, GPT with `OPENAI_API_KEY`, Gemini with `GEMINI_API_KEY` from a paid project, or the
 platform's own Ollama at `OLLAMA_URL`), and the ones that listen send the audio to ElevenLabs (`ELEVENLABS_API_KEY`) for its words. Each academy turns each helper
@@ -338,19 +338,6 @@ docker compose exec web php artisan queue:failed           # a helper's job that
   chosen for a few words (so a credit run out shows, not only a wrong key) and reads ElevenLabs' plan.
   Each call's model, tokens, seconds of audio and outcome are kept in `ai_usage` (never what was said or
   sent, never who), which the academy's settings page counts for the month.
-- **Before an academy turns on the recitation check**: measure it on real recordings whose mistakes a
-  teacher marked by ear. Put the recordings in a folder with a `cases.json`
-  (`[{"file": "01.webm", "surah": 78, "from": 1, "to": 5, "mistakes": [{"verse": 3, "word": 2, "kind": "missing"}]}]`,
-  a word counted from 1 in its verse), copy it into the container, and run it; it keeps nothing and
-  involves no academy, but the recordings go to the speech provider like any check. `--heard` also prints
-  what was heard (on the screen only).
-
-  ```bash
-  docker compose cp ./recitations web:/tmp/recitations
-  docker compose exec web php artisan quran:try-recitation /tmp/recitations
-  docker compose exec web rm -r /tmp/recitations
-  ```
-
 ### Engines and routes (console › AI engines, AI routing)
 
 Every model call goes through one gateway. With no engines saved it runs on the settings above, as
@@ -417,27 +404,12 @@ docker compose exec web php artisan platform:services --group=ai   # one section
 - The reason is in our words with the provider's own code in brackets, never its message; to dig further,
   look at the account on the provider's site.
 
-## The Quran's text
+## The Quran's old tables
 
-The Quran's words (lesson passages, practice suggestions) come only from Tanzil's Simple text and its
-metadata, kept in the storage volume (`storage/app/platform/quran`, with `manifest.json`: their SHA-256 and
-when they came; in the daily backup with the rest of the files). The deploy fetches them the first time
-(`quran:text --fetch --if-missing`; `curriculum:quran` is its older name); a deploy that could not reach Tanzil says so and goes on.
-
-```bash
-docker compose exec web php artisan quran:text            # which copy, its version and checksums
-docker compose exec web php artisan quran:text --fetch    # fetch again (or the console: Platform settings › "Fetch again")
-```
-
-A fetch is kept only once both files pass every check (114 surahs, 6,236 verses in order, Arabic lines,
-no rub-el-hizb or sajdah signs, Tanzil's notice); otherwise it says what failed and the copy in use stays.
-Tanzil's addresses are `QURAN_TEXT_URL` and `QURAN_DATA_URL` in `.env` should they move. Until a copy is
-there, lessons cannot name a passage of the Quran and everything else works.
-
-A server with the demo academy brings it up to date on every deploy, whatever `DEMO_DATA` says
-(`DemoCatchUpSeeder`, its line in the deploy's output gives the counts): once the text is here, the demo's
-Juz' Amma lessons read their surahs, its Quran learners' last lessons have a few marked words, and their
-hifz maps are made from the reports already handed in.
+The Quran moved to its own project. A server that ran it keeps its tables (`hifz_*`, `lesson_mushaf`,
+`recitation_mistakes`, `submission_checks`, `quran_*`) and their rows as they were: nothing here reads,
+writes or drops them, and its text in `storage/app/platform/quran` stays where it is. A plan, an academy or
+AI setting that still names `quran` or `recitation_check` is ignored.
 
 ## Scanning uploads
 
@@ -573,7 +545,7 @@ The console's **New academy** does it on screen; when nobody on the platform tea
 console yet, GitHub does it: **Actions › academy-new › Run workflow** (from `main`, in the `production`
 environment, with the deploy's SSH secrets). Give the address (`<slug>.<domain>`), both names, country,
 currency, time zone and language (Qatar's by default), the owner's name, email and (optionally) mobile, the
-plan's code (`growth` by default), the plan's areas to take away (`features_off`, e.g. `quran`), the optional
+plan's code (`growth` by default), the plan's areas to take away (`features_off`, e.g. `payroll`), the optional
 areas it starts with hidden (`hidden`: `groups`, `curriculum`, `games`, `messaging`, `announcements`,
 `support`, `evaluation`, `site`; the academy can show them again in Settings › Academy modules) and the
 reason (kept with the plan). The details reach the server as one JSON object on stdin (never on a command
@@ -592,7 +564,7 @@ and who the welcome went to. If a step after the academy is made fails, it says 
 finished in the console (Academies › the academy). By hand, as the deploy user in `~/academy-lms`:
 
 ```bash
-printf '%s' '{"slug":"nibras","name_ar":"أكاديمية نبراس","name_en":"Nibras Academy","country":"QA","currency":"QAR","timezone":"Asia/Qatar","locale":"ar","owner_name":"Khaled","owner_email":"khaled@example.com","owner_phone":null,"plan":"growth","features_off":["quran"],"hidden":["games"],"reason":"Signed contract"}' | bash console.sh academy
+printf '%s' '{"slug":"nibras","name_ar":"أكاديمية نبراس","name_en":"Nibras Academy","country":"QA","currency":"QAR","timezone":"Asia/Qatar","locale":"ar","owner_name":"Khaled","owner_email":"khaled@example.com","owner_phone":null,"plan":"growth","features_off":["payroll"],"hidden":["games"],"reason":"Signed contract"}' | bash console.sh academy
 ```
 
 Set mail up first (**Email** above): the welcome goes out once, when the academy is made (a `.test` address

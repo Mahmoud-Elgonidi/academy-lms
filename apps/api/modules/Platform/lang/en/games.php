@@ -19,7 +19,7 @@ return [
         'heading' => 'A new game from a story',
         'story_hint' => 'Tell it: the place, the characters, what the learner does and how winning feels. Claude builds the art, motion, sounds and rules.',
         'story_placeholder' => 'For example: on Monkey Jungle, Banana the monkey wants to reach the top of the tallest tree. Each right answer lifts him a branch, and the higher he climbs the more bananas…',
-        'topic_placeholder' => 'Quran memorisation, Arabic letters, times tables, English words…',
+        'topic_placeholder' => 'Arabic letters, fractions, times tables, English words…',
         'kinds_hint' => 'Questions and words come from the learner’s own curriculum (the lesson’s practice), never from the game.',
         'start' => 'Start designing',
         'started' => 'Claude started designing the game.',

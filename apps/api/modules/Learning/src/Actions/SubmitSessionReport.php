@@ -12,7 +12,6 @@ use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Learning\Contracts\Events\NodeMastered;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
-use Modules\Learning\Contracts\LearningQuran;
 use Modules\Learning\Domain\MasteryRule;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\LearningSettings;
@@ -36,13 +35,12 @@ final class SubmitSessionReport
         private readonly CurriculumApi $curriculum,
         private readonly ProjectProgress $project,
         private readonly AssignHomework $assign,
-        private readonly LearningQuran $recitation,
     ) {}
 
     /**
      * @param  array{engagement?: ?int, overall?: ?int, notes_for_student?: ?string, notes_internal?: ?string, absence_note?: ?string,
      *     items?: list<array{node_id: string, outcome: string, score?: ?int, note?: ?string}>, answers?: array<string, mixed>,
-     *     homework?: ?array{title?: ?string, instructions?: ?string, accepts?: ?string, due_days?: ?int, practice?: ?bool, expected?: ?array{surah: int, from: int, to: int}}}  $data
+     *     homework?: ?array{title?: ?string, instructions?: ?string, accepts?: ?string, due_days?: ?int, practice?: ?bool}}  $data
      */
     public function handle(SessionReport $report, string $actorId, array $data): SessionReport
     {
@@ -53,13 +51,8 @@ final class SubmitSessionReport
         $data = $this->validate($report, $tree, $data);
         $template = ReportTemplate::forReport($report);
         $answers = $template === null ? [] : TemplateAnswers::check($template, is_array($data['answers'] ?? null) ? $data['answers'] : []);
-        // What the homework asks to recite, for the teacher's check: left as it is unless the form says.
-        $given = is_array($data['homework'] ?? null) ? $data['homework'] : [];
-        $expected = array_key_exists('expected', $given) && trim((string) ($given['title'] ?? '')) !== ''
-            ? ['value' => $this->recitation->recitationTarget($given['expected'], (string) ($given['accepts'] ?? 'any'), $report->homework()->first()?->expected)]
-            : [];
 
-        DB::transaction(function () use ($report, $actorId, $data, $template, $answers, $expected) {
+        DB::transaction(function () use ($report, $actorId, $data, $template, $answers) {
             $now = CarbonImmutable::now();
             $first = $report->submitted_at === null;
             $lesson = $report->kind === 'lesson';
@@ -86,7 +79,7 @@ final class SubmitSessionReport
                 ]);
             }
 
-            $this->homework($report, $actorId, $data['homework'] ?? null, $now, $expected);
+            $this->homework($report, $actorId, $data['homework'] ?? null, $now);
 
             $mastered = $report->enrollment_id !== null && $lesson ? $this->project->handle($report->enrollment_id) : [];
 
@@ -134,7 +127,6 @@ final class SubmitSessionReport
             'homework.accepts' => ['nullable', Rule::in(Homework::ACCEPTS)],
             'homework.due_days' => ['nullable', 'integer', 'between:1,30'],
             'homework.practice' => ['nullable', 'boolean'],
-            'homework.expected' => ['nullable', 'array'],
         ];
 
         return Validator::make($data, $rules, [], trans('learning::reports.attributes'))->validate() + $data;
@@ -147,9 +139,8 @@ final class SubmitSessionReport
      * learner practises their items in the games.
      *
      * @param  array{title?: ?string, instructions?: ?string, accepts?: ?string, due_days?: ?int, practice?: ?bool}|null  $input
-     * @param  array{value?: ?array<string, mixed>}  $expected  what to recite, when the form says (LearningQuran)
      */
-    private function homework(SessionReport $report, string $actorId, ?array $input, CarbonImmutable $now, array $expected = []): void
+    private function homework(SessionReport $report, string $actorId, ?array $input, CarbonImmutable $now): void
     {
         $existing = $report->homework()->first();
         $title = trim((string) ($input['title'] ?? ''));
@@ -172,7 +163,7 @@ final class SubmitSessionReport
             'accepts' => $accepts === 'practice' && ! $practice ? 'any' : $accepts,
             'due_at' => ($report->submitted_at ?? $now)->addDays((int) ($input['due_days'] ?? LearningSettings::current()->homework_days)),
             'practice_nodes' => $practice ? array_values($lessons) : null,
-        ] + (array_key_exists('value', $expected) ? ['expected' => $expected['value']] : []);
+        ];
         if ($existing === null) {
             $this->assign->handle($fields + [
                 'teacher_id' => $report->teacher_id,

@@ -45,9 +45,6 @@ use Modules\Platform\Database\Seeders\DemoRechargeSeeder;
 use Modules\Platform\Database\Seeders\DemoUsageSeeder;
 use Modules\Platform\Models\PlatformAdmin;
 use Modules\Privacy\Database\Seeders\DemoPrivacySeeder;
-use Modules\Quran\Database\Seeders\DemoMistakesSeeder;
-use Modules\Quran\Database\Seeders\DemoQuranPlansSeeder;
-use Modules\Quran\Database\Seeders\DemoQuranSeeder;
 use Modules\Safeguarding\Database\Seeders\DemoSafeguardingSeeder;
 use Modules\Scheduling\Database\Seeders\DemoDisputesSeeder;
 use Modules\Scheduling\Database\Seeders\DemoDstSeeder;
@@ -71,7 +68,7 @@ use Modules\Support\Database\Seeders\DemoTicketsSeeder;
  * students with invoices in every state (payable online on the demo gateway), group lessons (a running group of adults, a children's
  * group and one still forming, on group plans), and five months of
  * paid renewals behind them (the revenue screen),
- * curricula, lesson reports with homework, the Quran program once the server has its text (plans, recorded lessons, an exam passed with its certificate and one to book), its public page (on, with three teachers' cards), teacher time off with a substitute
+ * curricula, lesson reports with homework, its public page (on, with three teachers' cards), teacher time off with a substitute
  * and an academy holiday, ratings, teachers' pay with last month closed, imports from sheets, and the notifications all of that sent;
  * a second academy (suspended) and the platform team's console with past support sign-ins, the academies on their SaaS plans (the demo on Pro, nine of its ten teachers' places taken). Every password is "password" (DEMO_PASSWORD on a server). `composer demo` rebuilds it.
  */
@@ -119,9 +116,7 @@ class DatabaseSeeder extends Seeder
             // What the demo does in the back office (prices, policy, voided invoices, ...) is in the activity log as the owner's.
             AuditActor::use(new AuditActor('user', $ownerId, 'هالة منصور'));
 
-            $this->call([DemoBrandingSeeder::class, DemoModulesSeeder::class, DemoPolicySeeder::class, DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoRevenueSeeder::class, DemoEnrollmentsSeeder::class, DemoOpenHoursSeeder::class, DemoShiftProposalsSeeder::class, DemoCurriculumSeeder::class, DemoQuranSeeder::class, DemoMaterialsSeeder::class, DemoPracticeSeeder::class, DemoLearningSeeder::class, DemoMistakesSeeder::class, DemoChallengesSeeder::class, DemoGamesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoTrialReportSeeder::class, DemoSelfStartSeeder::class, DemoEvaluationSeeder::class, DemoTicketsSeeder::class, DemoRecordingsSeeder::class, DemoDiscountsSeeder::class, DemoFamilyBillingSeeder::class, DemoCollectionSeeder::class, DemoAutoRenewSeeder::class, DemoGroupsSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class, DemoCatalogSeeder::class, DemoPeopleSeeder::class, DemoDisputesSeeder::class, DemoPrivacySeeder::class, DemoTeacherChecksSeeder::class, DemoSafeguardingSeeder::class, DemoMessagingSeeder::class, DemoAnnouncementsSeeder::class, DemoTeacherCardsSeeder::class, DemoSiteSeeder::class]);
-            // Last: the Quran's plans, recorded lessons and exams book people at moments the seeders above may use.
-            $this->call(DemoQuranPlansSeeder::class);
+            $this->call([DemoBrandingSeeder::class, DemoModulesSeeder::class, DemoPolicySeeder::class, DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoRevenueSeeder::class, DemoEnrollmentsSeeder::class, DemoOpenHoursSeeder::class, DemoShiftProposalsSeeder::class, DemoCurriculumSeeder::class, DemoMaterialsSeeder::class, DemoPracticeSeeder::class, DemoLearningSeeder::class, DemoChallengesSeeder::class, DemoGamesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoTrialReportSeeder::class, DemoSelfStartSeeder::class, DemoEvaluationSeeder::class, DemoTicketsSeeder::class, DemoRecordingsSeeder::class, DemoDiscountsSeeder::class, DemoFamilyBillingSeeder::class, DemoCollectionSeeder::class, DemoAutoRenewSeeder::class, DemoGroupsSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class, DemoCatalogSeeder::class, DemoPeopleSeeder::class, DemoDisputesSeeder::class, DemoPrivacySeeder::class, DemoTeacherChecksSeeder::class, DemoSafeguardingSeeder::class, DemoMessagingSeeder::class, DemoAnnouncementsSeeder::class, DemoTeacherCardsSeeder::class, DemoSiteSeeder::class]);
             AuditActor::forget();
         });
 

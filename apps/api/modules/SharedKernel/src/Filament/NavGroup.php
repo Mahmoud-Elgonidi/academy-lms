@@ -22,7 +22,6 @@ enum NavGroup: string
     case Lessons = 'lessons';
     case People = 'people';
     case Teaching = 'teaching';
-    case Quran = 'quran';
     case Sales = 'sales';
     case Finance = 'finance';
     case Communication = 'communication';
@@ -40,7 +39,6 @@ enum NavGroup: string
             self::Lessons => Heroicon::OutlinedCalendarDays,
             self::People => Heroicon::OutlinedUsers,
             self::Teaching => Heroicon::OutlinedAcademicCap,
-            self::Quran => Heroicon::OutlinedBookOpen,
             self::Sales => Heroicon::OutlinedMegaphone,
             self::Finance => Heroicon::OutlinedBanknotes,
             self::Communication => Heroicon::OutlinedChatBubbleLeftRight,

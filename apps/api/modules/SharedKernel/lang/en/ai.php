@@ -5,14 +5,12 @@ return [
     'features' => [
         'practice_items' => 'Practice suggestions for a lesson',
         'report_draft' => 'Lesson report from a voice note',
-        'recitation_check' => 'Recitation check',
         'digest_wording' => 'Wording of the weekly note to guardians',
         'curriculum_outline' => 'Curriculum outline',
     ],
     'about' => [
         'practice_items' => 'In the curriculum builder: a button that suggests practice questions for a lesson (choice, order, pairs) for you to review before saving.',
         'report_draft' => 'After a lesson the teacher records a short voice note and the helper fills in the report as a draft, which the teacher checks and sends.',
-        'recitation_check' => 'When a student hands in a recitation, the helper compares it with the expected text and marks missing or wrong words, for the teacher only.',
         'digest_wording' => 'The weekly note to guardians is written warmly from the week\'s facts, instead of the fixed list.',
         'curriculum_outline' => 'In the curriculum builder: an outline of levels, units and lessons from the goal you type, which you review and edit before it is saved.',
     ],

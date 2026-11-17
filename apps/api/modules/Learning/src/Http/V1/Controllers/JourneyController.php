@@ -6,7 +6,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Learning\Actions\OpenWeeklyChest;
 use Modules\Learning\Contracts\DTOs\JourneyGamesLayer;
-use Modules\Learning\Contracts\JourneyQuran;
 use Modules\Learning\Domain\Journey\Cheers;
 use Modules\Learning\Domain\Journey\Stars;
 use Modules\Learning\Models\Cheer;
@@ -156,8 +155,6 @@ final class JourneyController
                 'items' => array_map(fn (array $s) => $s + ['name' => __('learning::challenges.stickers.'.$s['key'])], $j['stickers']['items']),
             ],
             'games' => $j['games'] === null ? null : $this->games($j['games']),
-            /** The hifz review today (GET learning/hifz has it in full): pages left today, done today and a day's pages; null until the learner has pages on their hifz map, or while the academy's plan leaves the Quran out. */
-            'hifz' => $this->hifzToday($learner),
             'cheers' => ! $self ? [] : Cheer::query()->where('student_id', $learner)->whereNull('seen_at')->orderBy('created_at')->limit(10)->get()
                 ->map(fn (Cheer $c) => ['id' => $c->id, 'kind' => $c->kind, 'at' => $this->time->present($c->created_at)])->all(),
             /** For a guardian: cheers they may still send this learner today. */
@@ -281,12 +278,6 @@ final class JourneyController
             /** A guardian's look at the child's week (null for the student). */
             'glance' => $g->glance,
         ];
-    }
-
-    /** @return ?array{due: int, done_today: int, daily: int} the Quran module's (JourneyQuran) */
-    private function hifzToday(string $learner): ?array
-    {
-        return app(JourneyQuran::class)->today($learner);
     }
 
     /** @return array{0: string, 1: string} the viewer and the learner on their screen */

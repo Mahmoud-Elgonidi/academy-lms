@@ -21,11 +21,7 @@ use Modules\Learning\Contracts\Events\NodeMastered;
 use Modules\Learning\Contracts\Events\SessionReportOverdue;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
 use Modules\Learning\Contracts\JourneyGames;
-use Modules\Learning\Contracts\JourneyQuran;
 use Modules\Learning\Contracts\LearningApi;
-use Modules\Learning\Contracts\LearningQuran;
-use Modules\Learning\Contracts\NoJourneyQuran;
-use Modules\Learning\Contracts\NoLearningQuran;
 use Modules\Learning\Filament\Family\FamilyJourney;
 use Modules\Learning\Filament\LearningPlugin;
 use Modules\Learning\Filament\Pages\ReportsOversight;
@@ -61,9 +57,6 @@ final class LearningServiceProvider extends ServiceProvider
         $this->app->singleton(LearningApi::class, LearningService::class);
         // The journey without games until the Games module binds its own.
         $this->app->bindIf(JourneyGames::class, NoJourneyGames::class);
-        // Reports, homework and the journey ask nothing of the Quran until the Quran module binds its own.
-        $this->app->bindIf(LearningQuran::class, NoLearningQuran::class);
-        $this->app->bindIf(JourneyQuran::class, NoJourneyQuran::class);
     }
 
     public function boot(): void

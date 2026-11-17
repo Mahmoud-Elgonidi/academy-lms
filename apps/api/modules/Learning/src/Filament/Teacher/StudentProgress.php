@@ -8,15 +8,13 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Learning\Authorization\LearningAccess;
-use Modules\Learning\Contracts\LearningQuran;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\RoadmapQuery;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
  * One student of the teacher: the roadmap and the reports written so far
- * (with the internal notes); whatever another module adds for the course
- * (the Quran's hifz map) is a way out from the header (LearningQuran).
+ * (with the internal notes).
  */
 final class StudentProgress extends Page
 {
@@ -43,12 +41,6 @@ final class StudentProgress extends Page
     public function getSubheading(): string|Htmlable|null
     {
         return $this->summary['subject'] ?? null;
-    }
-
-    /** @return list<mixed> */
-    protected function getHeaderActions(): array
-    {
-        return app(LearningQuran::class)->studentActions($this->enrollment);
     }
 
     /** @return array<string, mixed> */

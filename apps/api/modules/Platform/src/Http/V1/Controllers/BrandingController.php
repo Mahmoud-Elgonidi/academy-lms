@@ -26,7 +26,7 @@ final class BrandingController
             'time_format' => $clock->academy()->value,
             /**
              * Every module that is on, paid and optional, as Feature values (crm, online_payments, import, custom_branding, payroll,
-             * ai, quran, groups, curriculum, games, messaging, announcements, support, evaluation, site); the core is always on and not listed.
+             * ai, groups, curriculum, games, messaging, announcements, support, evaluation, site); the core is always on and not listed.
              */
             'modules' => self::modules($plan),
             'app' => [

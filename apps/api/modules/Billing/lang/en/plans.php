@@ -55,7 +55,7 @@ return [
         'countries_hint' => "The countries this region's families live in. The academy's page shows the prices of the region with the visitor's country. A country is in one region only.",
     ],
     'hints' => [
-        'credit_scope' => 'A shared package is one balance for a student in any subject (say 12 lessons a month across Quran and Arabic). Each new course of theirs on it draws on the same balance, with no new invoice, and the lessons a week here are for all their subjects together. It stays as it is once someone is on it.',
+        'credit_scope' => 'A shared package is one balance for a student in any subject (say 12 lessons a month across Arabic and maths). Each new course of theirs on it draws on the same balance, with no new invoice, and the lessons a week here are for all their subjects together. It stays as it is once someone is on it.',
         'validity' => 'The weeks the block needs plus two weeks\' grace. Minutes left after that expire.',
         'format_locked' => 'Students are on this plan, so its lesson format stays as it is. For the other format, make a new plan.',
         'shape' => 'Lesson length, lessons a week and lessons per block stay as they are once someone is on it. For another shape, make a new plan.',

@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Url;
 use Modules\Identity\Contracts\PersonalChannel;
 use Modules\Learning\Actions\ReviewHomework;
-use Modules\Learning\Contracts\LearningQuran;
 use Modules\Learning\Models\Homework;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\Clock;
@@ -27,8 +26,7 @@ use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
  * Homework the teacher set: handed in and waiting for marking first; recordings
- * play in the page, each with its check word by word when the homework says
- * what to recite (for the teacher alone). Follows the teacher's `homework` signal.
+ * play in the page. Follows the teacher's `homework` signal.
  */
 final class HomeworkToMark extends Page implements HasTable
 {
@@ -121,8 +119,6 @@ final class HomeworkToMark extends Page implements HasTable
                     ->modalHeading(fn (Homework $h) => $h->title.' · '.$h->getAttribute('student_name'))
                     ->modalContent(fn (Homework $h) => view('learning::filament.teacher.submissions', [
                         'homework' => $h, 'at' => $at,
-                        'target' => app(LearningQuran::class)->targetView($h->expected),
-                        'checks' => array_map(fn (array $c) => app(LearningQuran::class)->checkView($c), app(LearningQuran::class)->checks($h->id, $h->expected)),
                     ]))
                     ->schema(fn (Homework $h) => $h->status === 'submitted' ? [
                         ToggleButtons::make('grade')->label(__('learning::teacher.homework.grade'))->inline()->options(array_combine(range(1, 5), array_map('strval', range(1, 5)))),

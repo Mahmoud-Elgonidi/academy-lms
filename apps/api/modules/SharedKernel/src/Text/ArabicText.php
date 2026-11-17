@@ -5,20 +5,16 @@ namespace Modules\SharedKernel\Text;
 /**
  * Arabic as it is compared, never as it is shown: the same word written
  * with or without its marks, in any of its alef forms, reads as one. Used
- * to line up what a recording said with the text it was meant to say, and
- * to find a passage's words in a model's answer. The text itself is never
- * changed where it is kept (the Quran's least of all); this works on copies.
+ * to line up what a recording said with the words it was meant to say, and
+ * to find words in a model's answer. The text itself is never changed where
+ * it is kept; this works on copies.
  *
- * The same rules as tools/course/listen.mjs, with the Quran's own marks.
- * The Quran is compared in its plain spelling (Tanzil's simple text), as
- * speech to text writes it: there a dagger alef is one the plain spelling
- * does not write (ذَٰلِكَ), so it goes with the marks. The Uthmani script
- * writes one where the plain spelling has an alef too (ٱلْكِتَٰبُ), which
- * no rule can tell apart: never compare that text.
+ * The same rules as tools/course/listen.mjs. A dagger alef goes with the
+ * marks, as speech to text writes the plain spelling.
  */
 final class ArabicText
 {
-    /** Marks that do not change the letters: harakat, tanwin, shadda, sukun, dagger alef, Quranic signs, tatweel. */
+    /** Marks that do not change the letters: harakat, tanwin, shadda, sukun, dagger alef, small high signs, tatweel. */
     private const MARKS = '/[\x{0610}-\x{061A}\x{064B}-\x{065F}\x{0670}\x{06D6}-\x{06ED}\x{0640}]/u';
 
     private const LETTERS = [

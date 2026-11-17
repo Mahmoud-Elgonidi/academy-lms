@@ -37,9 +37,7 @@ final class WeekFacts
 
     public const ANSWERS = 4;
 
-    /** A recording is the week's to hear when its check or its mark says it went well. */
-    public const VOICE_CHECKED = 0.8;
-
+    /** A recording is the week's to hear when its mark says it went well. */
     public const VOICE_GRADE = 4;
 
     public function __construct(private readonly AttendanceApi $attendance) {}
@@ -160,23 +158,17 @@ final class WeekFacts
         ];
     }
 
-    /** The recording of the week a guardian may hear: the best recited one handed in, when its check or mark says it went well. */
+    /** The recording of the week a guardian may hear: the best one handed in, when its mark says it went well. */
     private function voice(string $studentId, CarbonImmutable $from, CarbonImmutable $to): ?string
     {
         $best = DB::table('homework_submissions as s')
             ->join('homework as h', fn ($j) => $j->on('h.academy_id', '=', 's.academy_id')->on('h.id', '=', 's.homework_id'))
-            ->leftJoin('submission_checks as c', fn ($j) => $j->on('c.academy_id', '=', 's.academy_id')->on('c.submission_id', '=', 's.id')->where('c.status', 'ready'))
             ->where('h.student_id', $studentId)->whereNotNull('s.file_path')->where(fn ($q) => HomeworkSubmission::whereRecording($q, 's.mime'))
             ->where('s.submitted_at', '>=', $from)->where('s.submitted_at', '<', $to)
-            ->get(['s.id', 's.submitted_at', 'h.grade', 'c.result'])
-            ->map(function ($row) {
-                $summary = json_decode((string) $row->result, true)['summary'] ?? null;
-                $checked = is_array($summary) && ($summary['words'] ?? 0) > 0 ? $summary['ok'] / $summary['words'] : null;
-                $good = ($checked !== null && $checked >= self::VOICE_CHECKED) || ($row->grade !== null && (int) $row->grade >= self::VOICE_GRADE);
+            ->where('h.grade', '>=', self::VOICE_GRADE)
+            ->orderByDesc('h.grade')->orderByDesc('s.submitted_at')
+            ->first(['s.id']);
 
-                return $good ? ['id' => $row->id, 'score' => max($checked ?? 0, $row->grade !== null ? $row->grade / 5 : 0), 'at' => $row->submitted_at] : null;
-            })->filter()->sortBy([['score', 'desc'], ['at', 'desc']])->first();
-
-        return $best['id'] ?? null;
+        return $best?->id;
     }
 }

@@ -12,10 +12,8 @@ use Modules\Learning\Actions\SubmitGroupReport;
 use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Actions\SubmitSessionReport;
 use Modules\Learning\Authorization\LearningAccess;
-use Modules\Learning\Contracts\LearningQuran;
 use Modules\Learning\Http\V1\Resources\LearningPresenter;
 use Modules\Learning\Models\Homework;
-use Modules\Learning\Models\HomeworkSubmission;
 use Modules\Learning\Models\ReportTemplate;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\ReportFormQuery;
@@ -37,7 +35,6 @@ final class TeacherReportsController
         private readonly LearningAccess $access,
         private readonly LearningPresenter $present,
         private readonly ReportFormQuery $form,
-        private readonly LearningQuran $recitation,
     ) {}
 
     /**
@@ -70,9 +67,6 @@ final class TeacherReportsController
      *
      * The report with today's plan, the lessons to choose from, the homework set from it, the roadmap, and the
      * subject's own questions (`template`, null when it has none); send their answers as `answers` by key.
-     * Homework handed in by voice may say what to recite (`homework.expected`: surah, from, to) when
-     * `assist.recitation_check`; `expected_suggestion` is the passage of the report's lessons' text, and
-     * `mistakes_suggestion` the verses with the words marked in the lesson's shared mushaf.
      */
     public function show(Request $request, string $report, RoadmapQuery $roadmap, AcademyAi $ai, SubmitGroupReport $groups): JsonResponse
     {
@@ -83,18 +77,12 @@ final class TeacherReportsController
         return response()->json(['data' => $this->present->report($report, true, $items) + [
             'template' => $this->present->template(ReportTemplate::forReport($report)),
             'lesson_options' => collect($this->form->lessonOptions($report))->map(fn ($label, $id) => ['id' => $id, 'label' => $label])->values()->all(),
-            'homework' => $homework ? $this->recited($homework) : null,
+            'homework' => $homework ? $this->present->homework($homework) : null,
             'roadmap' => $report->enrollment_id ? $roadmap->for($report->enrollment_id, RoadmapQuery::MATERIALS_TEACHERS) : null,
-            // Helpers the academy turned on for this report: a draft from a voice note (POST teacher/reports/{report}/draft),
-            // and a check of recited homework against what it asks to recite (homework.expected).
+            // Helpers the academy turned on for this report: a draft from a voice note (POST teacher/reports/{report}/draft).
             'assist' => [
                 'voice_draft' => $report->status !== 'reviewed' && $ai->on(AiFeature::ReportDraft),
-                'recitation_check' => $report->status !== 'reviewed' && $this->recitation->recitationOffered(),
             ],
-            // What the report's lessons ask to recite, to start homework.expected from (null: none).
-            'expected_suggestion' => $report->kind === 'lesson' ? $this->recitation->targetFromLessons(array_column($items, 'node_id')) : null,
-            // The verses with the words marked in the lesson's shared mushaf (the surah with the most marks; null: none).
-            'mistakes_suggestion' => $report->kind === 'lesson' ? $this->recitation->targetFromMistakes($report->session_id) : null,
             // A group lesson: every student's report in it (send them all as `students` to PUT); null for a one-to-one lesson.
             'group' => SubmitGroupReport::isGroup($report) ? ['students' => $groups->reportsOf($report)->map(fn (SessionReport $r) => [
                 'report_id' => $r->id,
@@ -165,7 +153,7 @@ final class TeacherReportsController
         $homework = Homework::query()->with('submissions')->where('teacher_id', $request->user()->getAuthIdentifier())
             ->where('status', $status)->orderBy('due_at')->limit(100)->get();
 
-        return response()->json(['data' => $homework->map(fn (Homework $h) => $this->recited($h))->all()]);
+        return response()->json(['data' => $homework->map(fn (Homework $h) => $this->present->homework($h))->all()]);
     }
 
     public function mark(Request $request, string $homework, ReviewHomework $review): JsonResponse
@@ -176,7 +164,7 @@ final class TeacherReportsController
 
         $homework->load('submissions');
 
-        return response()->json(['data' => $this->recited($homework)]);
+        return response()->json(['data' => $this->present->homework($homework)]);
     }
 
     private function mine(Request $request, string $id): SessionReport
@@ -185,25 +173,5 @@ final class TeacherReportsController
         abort_unless($this->access->writesReport($request->user(), $report), 403);
 
         return $report;
-    }
-
-    /**
-     * The homework as LearningPresenter gives it, with what it asks to recite and each recording's check (the
-     * Quran module's, for the teacher alone; null: none).
-     *
-     * @return array<string, mixed>
-     */
-    private function recited(Homework $h): array
-    {
-        $presented = $this->present->homework($h);
-        $checks = $this->recitation->checks($h->id, $h->expected);
-        $presented['expected'] = $this->recitation->presentTarget($h->expected);
-        $presented['submissions'] = $h->submissions->map(fn (HomeworkSubmission $s) => [
-            ...$this->present->submission($s),
-            // The recording's check against what it asks to recite (null: none).
-            'check' => $checks[$s->id] ?? null,
-        ])->values()->all();
-
-        return $presented;
     }
 }

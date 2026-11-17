@@ -66,7 +66,7 @@ return [
         'scheduler' => 'The scheduler part is down: docker compose ps, then docker compose logs scheduler.',
         'worker' => 'The worker is down or behind: messages and reminders are not going out. docker compose logs worker.',
         'queue' => 'Many tasks are waiting or failed: docker compose exec web php artisan queue:failed.',
-        'assist' => 'The AI helpers\' worker is down or behind: recitation checks and weekly notes wait. docker compose logs worker.',
+        'assist' => 'The AI helpers\' worker is down or behind: weekly notes wait. docker compose logs worker.',
         'relay' => 'Screens do not update by themselves: docker compose logs relay.',
         'reverb' => 'Screens do not update by themselves: docker compose logs reverb.',
         'backups' => 'The daily backup did not happen or part of it failed: ./restore.sh list, and docker compose logs backup.',

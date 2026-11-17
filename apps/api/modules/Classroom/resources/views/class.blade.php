@@ -35,7 +35,6 @@
         'joining' => __($l.'check.joining'),
         'quality' => trans($l.'room.quality'),
         'providerError' => __($l.'errors.provider'),
-        'side' => $side !== null,
         'icons' => $icons,
         'words' => [
             'you' => __($r.'you'),
@@ -50,7 +49,7 @@
         ],
     ];
     $materials = collect($plan)->flatMap(fn ($line) => $line->materials)->unique('id')->values();
-    $hasPanel = $side !== null || $seat->role !== 'student' || $materials->isNotEmpty();
+    $hasPanel = $seat->role !== 'student' || $materials->isNotEmpty();
     // Materials' own icons (the panel's list).
     $materialIcons = [
         'pdf' => 'M14 3H7.5A1.5 1.5 0 0 0 6 4.5v15A1.5 1.5 0 0 0 7.5 21h9a1.5 1.5 0 0 0 1.5-1.5V7l-4-4ZM14 3v4h4M9 13h6M9 17h4',
@@ -91,7 +90,7 @@
         <span class="chip">{{ __($l.'roles.'.$seat->role) }}</span>
     </header>
 
-    <main class="{{ $side ? 'with-plan with-tool' : ($hasPanel ? 'with-plan' : '') }}">
+    <main class="{{ $hasPanel ? 'with-plan' : '' }}">
         <div class="stage">
             <section class="prejoin {{ $publishes ? '' : 'observer' }}" id="prejoin">
                 @if ($publishes)
@@ -171,18 +170,10 @@
                 </nav>
             </div>
 
-            @if ($side)
-                {{-- A lesson on Zoom or Meet opens in a tab of its own, so what is beside the room stays open here. --}}
-                <section class="notice" id="outside" hidden>
-                    <h1>{{ __($l.'external.opened') }}</h1>
-                    <div class="row"><a class="button primary" href="{{ $goUrl }}" target="_blank" rel="noopener">{{ __($l.'external.again') }}</a></div>
-                </section>
-            @endif
-
             {{-- The academy's video minutes ran out under the hard limit: this lesson is on the teacher's own link; said before going. --}}
             <section class="notice" id="held" hidden>
                 <h1 id="held-text"></h1>
-                <div class="row"><a class="button primary" href="{{ $goUrl }}" @if ($side) target="_blank" rel="noopener" @endif>{{ __('classroom::classroom.video_held_go') }}</a></div>
+                <div class="row"><a class="button primary" href="{{ $goUrl }}">{{ __('classroom::classroom.video_held_go') }}</a></div>
             </section>
 
             <section class="notice" id="left" hidden>
@@ -197,8 +188,6 @@
                     <strong>{{ __($r.'panel') }}</strong>
                     <button type="button" class="round" id="panel-close" title="{{ __($r.'panel_close') }}" aria-label="{{ __($r.'panel_close') }}">{!! $icon('close') !!}</button>
                 </div>
-                {{-- What another module puts beside the room (SharedKernel's LessonQuran). --}}
-                @if ($side) {{ $side }} @endif
             @if ($seat->role !== 'student')
                 <h2>{{ __($l.'plan.title') }}</h2>
                 @forelse ($plan as $line)
@@ -257,13 +246,12 @@
         let startedAt = 0, clock = null, pipWin = null, pipTrack = null;
         const tiles = new Map();   // "identity:camera|screen" → tile
 
-        // ——— States: prejoin, joining, live, left, outside ———
+        // ——— States: prejoin, joining, live, left ———
         const setState = (s) => {
             document.body.dataset.state = s;
             $('prejoin').hidden = s !== 'prejoin' && s !== 'joining';
             $('call').hidden = s !== 'live';
             $('left').hidden = s !== 'left';
-            if ($('outside')) $('outside').hidden = s !== 'outside';
             $('held').hidden = s !== 'held';
             $('timer').hidden = $('people').hidden = $('quality').hidden = s !== 'live';
             if (s !== 'live') { $('waiting').hidden = true; $('reconnecting').hidden = true; stopClock(); closePip(); closePops(); }
@@ -555,15 +543,14 @@
             else if (s === 'prejoin') { e.preventDefault(); if (k === 'mic') preMic = !preMic; else preCam = !preCam; applyPre(); }
         });
 
-        // The side panel: open by default on a wide screen when it holds a tool beside the room.
-        const wide = window.matchMedia('(min-width: 1000px)');
+        // The side panel: closed at first; the toggle opens it.
         function panel(open) {
             document.body.dataset.panel = open ? 'open' : 'closed';
             $('panel-toggle')?.setAttribute('aria-expanded', String(open));
             $('panel-toggle')?.setAttribute('aria-pressed', String(open));
             requestAnimationFrame(() => layout(false));
         }
-        panel(!!$('panel') && cfg.side && wide.matches);
+        panel(false);
         $('panel-toggle')?.addEventListener('click', () => panel(document.body.dataset.panel !== 'open'));
         $('panel-close')?.addEventListener('click', () => { panel(false); $('panel-toggle')?.focus(); });
 
@@ -672,10 +659,7 @@
                 return;
             }
             if (ticket.provider === 'external') {
-                // Beside a tool next to the room, Zoom or Meet opens in a tab of its own and this page stays.
-                if (!cfg.side) { window.location.href = cfg.goUrl; return; }
-                stopPreview(); setState('outside'); $('join').disabled = false; $('join').textContent = $('join').dataset.label;
-                window.open(cfg.goUrl, '_blank', 'noopener');
+                window.location.href = cfg.goUrl;
                 return;
             }
             if (!LK) return fail(cfg.providerError);

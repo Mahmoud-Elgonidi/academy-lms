@@ -6,7 +6,6 @@ return [
         'lessons' => 'الحصص',
         'people' => 'المعلّمون والأسر',
         'teaching' => 'التعليم',
-        'quran' => 'القرآن',
         'sales' => 'المبيعات',
         'finance' => 'المالية',
         'communication' => 'التواصل والمساعدة',

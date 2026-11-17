@@ -52,7 +52,7 @@ final class UserResource extends JsonResource
             // The areas the academy's plan includes and the academy did not hide (crm, online_payments, …, groups, messaging, …): the apps show only these.
             'plan_features' => $academy === null ? [] : $this->planFeatures(),
             // Every module that is on for this academy, paid (in its plan) and optional (not hidden in Settings › Academy modules),
-            // as SharedKernel\Plans\Feature values: crm, online_payments, import, custom_branding, payroll, ai, quran, groups,
+            // as SharedKernel\Plans\Feature values: crm, online_payments, import, custom_branding, payroll, ai, groups,
             // curriculum, games, messaging, announcements, support, evaluation, site. The portal and the app show only these;
             // the core (lessons, families, reports, billing, safeguarding, privacy, …) is always on and not listed.
             'modules' => $academy === null ? [] : $this->modules(),

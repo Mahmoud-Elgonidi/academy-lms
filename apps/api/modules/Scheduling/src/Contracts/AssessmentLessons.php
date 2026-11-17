@@ -5,7 +5,7 @@ namespace Modules\Scheduling\Contracts;
 use Modules\Scheduling\Contracts\DTOs\AssessmentBooking;
 
 /**
- * Assessment lessons (an exam another module holds: the Quran's), booked
+ * Assessment lessons (an exam another module holds), booked
  * and cancelled here so every rule of a lesson stays Scheduling's: a course
  * that is running and not paused or over on that day (CourseDays), an
  * examiner People clears for a student under 18 (MinorsGuard), nobody

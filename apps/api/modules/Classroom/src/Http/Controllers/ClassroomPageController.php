@@ -18,7 +18,6 @@ use Modules\Classroom\Recordings\RecordingState;
 use Modules\Learning\Contracts\LearningApi;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\Scheduling\Contracts\AttendanceApi;
-use Modules\SharedKernel\Quran\LessonQuran;
 use Modules\SharedKernel\Realtime\BrowserEcho;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Clock;
@@ -38,7 +37,7 @@ final class ClassroomPageController
         private readonly ClassPage $page,
     ) {}
 
-    public function show(Request $request, string $session, LearningApi $learning, BrandingApi $branding, TenantContext $tenant, RecordingState $recording, LessonQuran $quran): View
+    public function show(Request $request, string $session, LearningApi $learning, BrandingApi $branding, TenantContext $tenant, RecordingState $recording): View
     {
         $viewer = $this->viewer($request, $session);
         $lesson = $this->lessons->lesson($session);
@@ -53,16 +52,8 @@ final class ClassroomPageController
         $tz = $user->timezone ?: $tenant->require()->defaultTimezone;
         app(ViewerClock::class)->choose($user->time_format);
 
-        // What another module puts beside the room for this seat (LessonQuran), none for a hidden observer.
-        $side = $seat->role === 'observer' ? null : $quran->classPanel($lesson->id, $seat->userId, [
-            'channel' => $this->page->channel($lesson->id),
-            'auth' => route('classroom.live.auth', ['session' => $session]),
-            'echo' => BrowserEcho::config($request),
-        ]);
-
         return view('classroom::class', [
             'brand' => $branding->current(),
-            'side' => $side,
             'lesson' => $lesson,
             'seat' => $seat,
             'when' => $lesson->startsAt->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F · H:i')),

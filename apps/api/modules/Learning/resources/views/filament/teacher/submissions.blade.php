@@ -1,9 +1,8 @@
-{{-- What the student handed in: text, a recording that plays here, or a file; what the homework asks to recite and each recording's check, when the Quran module adds them (LearningQuran). $homework, $at, $target, $checks. --}}
+{{-- What the student handed in: text, a recording that plays here, or a file. $homework, $at. --}}
 <div style="display:flex; flex-direction:column; gap:.75rem; font-size:.875rem">
     @if ($homework->instructions)
         <p style="margin:0; color:var(--gray-600); white-space:pre-line">{{ $homework->instructions }}</p>
     @endif
-    {{ $target ?? null }}
     @if ($homework->hasPractice())
         <p style="margin:0; padding:.45rem .7rem; border-radius:var(--radius-lg); background:var(--success-50); color:var(--success-800)">🎮 {{ $homework->practice_result ? __('learning::homework.practice.result', $homework->practice_result) : __('learning::homework.practice.waiting') }}</p>
     @endif
@@ -14,7 +13,6 @@
             @if ($s->file_path)
                 @if ($s->isAudio())
                     <audio controls preload="none" src="{{ route('learning.files', ['submission' => $s->id]) }}" style="width:100%"></audio>
-                    {{ ($checks ?? [])[$s->id] ?? null }}
                 @else
                     <a href="{{ route('learning.files', ['submission' => $s->id]) }}" target="_blank" style="color:var(--primary-700); font-weight:600">{{ __('learning::teacher.homework.file') }} · {{ $s->file_name }}</a>
                 @endif

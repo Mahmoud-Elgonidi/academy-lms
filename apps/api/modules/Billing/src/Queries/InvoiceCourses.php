@@ -59,7 +59,7 @@ final class InvoiceCourses
         return self::of([$invoiceId])[$invoiceId] ?? [];
     }
 
-    /** @param  list<array{student: string, subject: string}>  $courses  "Ziad · Quran", or "Ziad · Quran، Maryam · Arabic" for a family invoice */
+    /** @param  list<array{student: string, subject: string}>  $courses  "Ziad · Arabic", or "Ziad · Arabic، Maryam · Maths" for a family invoice */
     public static function label(array $courses): string
     {
         return implode(app()->getLocale() === 'ar' ? '، ' : ', ', array_map(fn (array $c) => trim($c['student'].' · '.$c['subject'], ' ·'), $courses));

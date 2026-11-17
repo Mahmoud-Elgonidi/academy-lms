@@ -8,7 +8,7 @@ use InvalidArgumentException;
  * The system's AI capabilities, each registered by the module that owns it
  * (Capabilities::add in its provider). The console's routes page shows one
  * row for each, the academy's Settings › AI a switch for each, and the
- * gateway refuses a key nobody registered. The five helpers that came
+ * gateway refuses a key nobody registered. The four helpers that came
  * before the registry are always known, from their enum, even before their
  * modules boot.
  */
@@ -38,7 +38,7 @@ final class Capabilities
         return $this->get($capability) ?? throw new InvalidArgumentException('No AI capability is registered as '.self::key($capability).'.');
     }
 
-    /** @return array<string, Capability> by key: the five helpers first, in their order, then the rest by key */
+    /** @return array<string, Capability> by key: the four helpers first, in their order, then the rest by key */
     public function all(): array
     {
         $out = [];

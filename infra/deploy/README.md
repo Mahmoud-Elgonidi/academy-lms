@@ -165,8 +165,7 @@ database (in its backups too); emptied there, the line here holds again. Each se
 comes from now, and each section has a "Try it" that says why a service would not take its keys (a key
 refused, the credit run out, an account stopped) and what to do, tries what is typed before it is saved,
 and stays under the section; `platform:services` tries them all each morning and the platform team's
-alert mail says when one needs someone (`RUNBOOKS.md`, "An outside service needs you"). The Quran's text is fetched from Tanzil by the deploy
-(`QURAN_TEXT_URL`, `QURAN_DATA_URL`, not written: Tanzil's own addresses) or from the same page.
+alert mail says when one needs someone (`RUNBOOKS.md`, "An outside service needs you").
 
 | Settings | What they do | Where the value comes from |
 |---|---|---|

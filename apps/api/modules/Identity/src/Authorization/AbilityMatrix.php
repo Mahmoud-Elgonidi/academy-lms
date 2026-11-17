@@ -73,12 +73,6 @@ final class AbilityMatrix
             Ability::ManageAcademyTimezone => [Role::Owner],
             // Which optional areas the academy shows: the academy's setup, so its owner and admins.
             Ability::ManageModules => [Role::Owner, Role::Admin],
-            // The Quran module: its settings and programs are the academy's setup; the board is for who follows the teachers;
-            // a teacher teaches the Quran; examining is for who oversees the teachers until the academy chooses examiners.
-            Ability::ManageQuran => [Role::Owner, Role::Admin],
-            Ability::ViewQuranBoard => [Role::Owner, Role::Admin, Role::Supervisor],
-            Ability::TeachQuran => [Role::Teacher],
-            Ability::ExamineQuran => [Role::Owner, Role::Admin, Role::Supervisor],
         };
     }
 
