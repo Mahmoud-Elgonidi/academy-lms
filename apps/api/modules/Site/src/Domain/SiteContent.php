@@ -7,7 +7,8 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * What an academy's public page says, as its owner or admins set it: the
- * opening words, why families choose it (and the heading over it), what families said (real words,
+ * opening words, whom it speaks to (children with their families, or adults),
+ * why families choose it (and the heading over it), what families said (real words,
  * with their consent: never made up, so none by default), questions and
  * answers, which sections show, its WhatsApp number and the words search
  * engines read. Plain words only (the page writes them escaped), in Arabic
@@ -23,6 +24,9 @@ final class SiteContent
 {
     /** The page's sections the academy can hide (the opening and the free-trial form always show). */
     public const SECTIONS = ['subjects', 'teachers', 'pricing', 'app', 'steps', 'testimonials', 'faq', 'teach'];
+
+    /** Whom the page speaks to: children with their families ("your child"), or adults learning for themselves ("you"). */
+    public const AUDIENCES = ['families', 'adults'];
 
     public const MAX_FEATURES = 6;
 
@@ -49,6 +53,7 @@ final class SiteContent
     {
         $content = [
             'hero' => self::pairs($input['hero'] ?? [], ['title', 'lead']),
+            'audience' => self::audience($input['audience'] ?? null),
             'why' => self::pairs($input['why'] ?? [], ['title', 'lead']),
             'features' => self::rows($input['features'] ?? [], ['title', 'text'], null),
             'testimonials' => self::rows($input['testimonials'] ?? [], ['role', 'quote'], 'name'),
@@ -97,7 +102,9 @@ final class SiteContent
 
         return [
             'hero' => self::said('hero', ['title', 'lead']),
-            'why' => self::said('why', ['title', 'lead']),
+            'audience' => 'families',
+            // Nothing: the page says its own heading, worded for its audience.
+            'why' => self::pairs([], ['title', 'lead']),
             'features' => $features,
             'testimonials' => [],
             'faqs' => $faqs,
@@ -113,7 +120,7 @@ final class SiteContent
      * language, the other's where it is empty.
      *
      * @param  array<string, mixed>  $content
-     * @return array{hero: array{title: string, lead: string}, why: array{title: string, lead: string}, features: list<array{title: string, text: string}>, testimonials: list<array{name: string, role: string, quote: string}>, faqs: list<array{q: string, a: string}>, sections: list<string>, whatsapp: ?string, seo: array{title: string, description: string}}
+     * @return array{hero: array{title: string, lead: string}, audience: string, why: array{title: string, lead: string}, features: list<array{title: string, text: string}>, testimonials: list<array{name: string, role: string, quote: string}>, faqs: list<array{q: string, a: string}>, sections: list<string>, whatsapp: ?string, seo: array{title: string, description: string}}
      */
     public static function localized(array $content, string $locale): array
     {
@@ -138,6 +145,7 @@ final class SiteContent
 
         return [
             'hero' => ['title' => self::word($hero, 'title', $locale), 'lead' => self::word($hero, 'lead', $locale)],
+            'audience' => self::audience($content['audience'] ?? null),
             'why' => ['title' => self::word($why, 'title', $locale), 'lead' => self::word($why, 'lead', $locale)],
             'features' => $features,
             'testimonials' => $testimonials,
@@ -235,6 +243,12 @@ final class SiteContent
         }
 
         return $out;
+    }
+
+    /** families unless adults was asked for. */
+    private static function audience(mixed $asked): string
+    {
+        return in_array($asked, self::AUDIENCES, true) ? $asked : 'families';
     }
 
     /** @return list<string> the known sections asked for, in the page's order */

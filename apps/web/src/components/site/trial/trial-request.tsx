@@ -97,7 +97,7 @@ const API_FIELDS: Record<string, [StepKey, keyof TrialDraft]> = {
  * typed stays whatever fails; Back goes back; each step's heading takes the
  * focus; refusals are said in the API's words, near what they are about.
  */
-export function TrialRequest({ token, subjects, countries, utm, chosenSubject, settings, whatsapp, academy, timeFormat }: {
+export function TrialRequest({ token, subjects, countries, utm, chosenSubject, settings, whatsapp, academy, timeFormat, adults = false }: {
   token: string;
   subjects: Option[];
   countries: { code: string; name: string }[];
@@ -107,11 +107,13 @@ export function TrialRequest({ token, subjects, countries, utm, chosenSubject, s
   whatsapp: string | null;
   academy: string;
   timeFormat: TimeFormat;
+  /** The academy teaches adults: the lesson is for the one asking, so no "for my child" choice. */
+  adults?: boolean;
 }) {
   const t = useTranslations('site.trial');
   const locale = useLocale();
   const zone = useBrowserZone();
-  const [draft, setDraft] = useState<TrialDraft>({ ...EMPTY_DRAFT, subjectId: chosenSubject ?? '' });
+  const [draft, setDraft] = useState<TrialDraft>({ ...EMPTY_DRAFT, ...(adults ? { who: 'me' as const } : {}), subjectId: chosenSubject ?? '' });
   const [leaveToUs, setLeaveToUs] = useState(false);
   const [at, setAt] = useState<StepKey>('who');
   const [moved, setMoved] = useState(false);
@@ -392,22 +394,24 @@ export function TrialRequest({ token, subjects, countries, utm, chosenSubject, s
 
       {at === 'who' ? (
         <section className="lt-step" aria-labelledby="lt-step-title">
-          {heading('who.title', t('who.lead'))}
-          <fieldset className="lt-fieldset">
-            <legend className="ls-sr">{t('who.title')}</legend>
-            <div className="lt-who">
-              {(['child', 'me'] as const).map((who) => (
-                <label key={who} className="lt-who-card">
-                  <input type="radio" name="who" value={who} checked={draft.who === who} onChange={() => set('who', who)} />
-                  <span>
-                    <Icon name={who === 'child' ? 'child' : 'user'} />
-                    <b>{t(`who.${who}`)}</b>
-                    <small>{t(`who.${who}Hint`)}</small>
-                  </span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          {adults ? heading('who.titleAdults', t('who.leadAdults')) : heading('who.title', t('who.lead'))}
+          {adults ? null : (
+            <fieldset className="lt-fieldset">
+              <legend className="ls-sr">{t('who.title')}</legend>
+              <div className="lt-who">
+                {(['child', 'me'] as const).map((who) => (
+                  <label key={who} className="lt-who-card">
+                    <input type="radio" name="who" value={who} checked={draft.who === who} onChange={() => set('who', who)} />
+                    <span>
+                      <Icon name={who === 'child' ? 'child' : 'user'} />
+                      <b>{t(`who.${who}`)}</b>
+                      <small>{t(`who.${who}Hint`)}</small>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
           <div className="ls-form-grid">
             <label className="ls-field">
               <span>{draft.who === 'child' ? t('who.parentName') : t('who.name')}</span>

@@ -16804,6 +16804,7 @@ export interface operations {
                                     title: string;
                                     lead: string;
                                 };
+                                audience: string;
                                 why: {
                                     title: string;
                                     lead: string;

@@ -106,35 +106,39 @@ it('opens the settings to the owner and admins, and saves from the screen', func
     $this->get('http://noor.lms.test/admin/settings/site')->assertOk();
 });
 
-it('lets the academy word the heading over why families choose it, the page\'s own words while it keeps none', function () {
+it('lets the academy say whom its page is for and word the heading over why families choose it', function () {
     $this->actingAs($this->owner);
     $page = function (string $locale) {
-        $why = $this->getJson('http://noor.lms.test/api/v1/site', ['Accept-Language' => $locale])->assertOk()->json('data.content.why');
+        $content = $this->getJson('http://noor.lms.test/api/v1/site', ['Accept-Language' => $locale])->assertOk()->json('data.content');
         $this->actAsTenant($this->academy);   // the request leaves the academy behind
 
-        return $why;
+        return ['audience' => $content['audience'], 'why' => $content['why']];
     };
 
-    // Before anything is saved, the heading the page always had.
+    // At first: for families, and no heading of its own (the page says its own, for its audience).
     Livewire::test(SiteSettingsPage::class)
-        ->assertSet('data.why.title_ar', 'تعليم على مقاس ابنك')
-        ->assertSet('data.why.title_en', 'Teaching that fits your child')
+        ->assertSet('data.audience', 'families')
+        ->assertSet('data.why.title_ar', '')
+        ->assertSee('تعليم على مقاس ابنك')
+        ->set('data.audience', 'adults')
+        ->assertSee('تعليم على مقاسك')
         ->set('data.enabled', true)
-        ->set('data.why.title_ar', 'تعليم يناسب كل طالب')
-        ->set('data.why.lead_ar', 'معلّم واحد وخطة على قدر مستواه.')
-        ->set('data.why.title_en', '')
-        ->set('data.why.lead_en', '')
         ->call('save')
         ->assertNotified(__('site::site.settings.saved', [], 'en'));
+    expect($page('ar'))->toBe(['audience' => 'adults', 'why' => ['title' => '', 'lead' => '']]);
 
-    // English reads the Arabic where it is empty, like every text on the page.
-    expect($page('ar'))->toBe(['title' => 'تعليم يناسب كل طالب', 'lead' => 'معلّم واحد وخطة على قدر مستواه.'])
-        ->and($page('en'))->toBe(['title' => 'تعليم يناسب كل طالب', 'lead' => 'معلّم واحد وخطة على قدر مستواه.']);
+    // Its own heading; English reads the Arabic where it is empty, like every text on the page.
+    Livewire::test(SiteSettingsPage::class)
+        ->set('data.why.title_ar', 'تدريب يناسب فريقك')
+        ->set('data.why.lead_ar', 'معلّم واحد وخطة على قدر مستواك.')
+        ->call('save');
+    expect($page('ar')['why'])->toBe(['title' => 'تدريب يناسب فريقك', 'lead' => 'معلّم واحد وخطة على قدر مستواك.'])
+        ->and($page('en')['why'])->toBe(['title' => 'تدريب يناسب فريقك', 'lead' => 'معلّم واحد وخطة على قدر مستواك.']);
 
-    // Both left empty: nothing, and the page says its own heading. Held to its length.
+    // An audience it does not know is families; the heading is held to its length.
     $content = SiteSettings::current()->said();
-    app(SaveSiteSettings::class)->handle(['enabled' => true, 'why' => []] + $content);
-    expect($page('ar'))->toBe(['title' => '', 'lead' => ''])
+    app(SaveSiteSettings::class)->handle(['enabled' => true, 'audience' => 'robots'] + $content);
+    expect($page('ar')['audience'])->toBe('families')
         ->and(fn () => app(SaveSiteSettings::class)->handle(['why' => ['title_ar' => str_repeat('x', 121)]] + $content))->toThrow(ValidationException::class);
 });
 

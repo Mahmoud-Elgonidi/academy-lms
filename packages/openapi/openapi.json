@@ -37677,6 +37677,9 @@
                                                                 "lead"
                                                             ]
                                                         },
+                                                        "audience": {
+                                                            "type": "string"
+                                                        },
                                                         "why": {
                                                             "type": "object",
                                                             "properties": {
@@ -37780,6 +37783,7 @@
                                                     },
                                                     "required": [
                                                         "hero",
+                                                        "audience",
                                                         "why",
                                                         "features",
                                                         "testimonials",
