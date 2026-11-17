@@ -37,7 +37,11 @@ type Props = { children: ReactNode; params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const look = await branding();
-  return { title: locale === 'ar' ? look.name.ar : look.name.en };
+  return {
+    title: locale === 'ar' ? look.name.ar : look.name.en,
+    // The same icon as the academy's panels; without one, the browser's own.
+    icons: look.favicon_url ? { icon: look.favicon_url } : undefined,
+  };
 }
 
 // The page writes the viewer's zone for the next requests (sent to the API as X-Timezone).

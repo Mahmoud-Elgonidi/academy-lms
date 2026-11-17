@@ -11,6 +11,8 @@ export type Branding = {
   radii: { sm: string; md: string; lg: string; xl: string };
   fonts_url: string;
   logo_url?: string | null;
+  /** The browser tab's icon the academy chose (Settings › Branding). */
+  favicon_url?: string | null;
   /** How the academy writes a clock for everyone who has not chosen their own (the pages before signing in). */
   time_format?: string | null;
 };
