@@ -175,8 +175,8 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
               <div className="ls-wrap">
                 <header className="ls-head" data-reveal="">
                   <span className="ls-eyebrow">{t('why.eyebrow')}</span>
-                  <h2>{t('why.title')}</h2>
-                  <p>{t('why.lead')}</p>
+                  <h2>{content.why?.title || t('why.title')}</h2>
+                  <p>{content.why?.lead || t('why.lead')}</p>
                 </header>
                 <div className="ls-cards">
                   {content.features.map((f, i) => (

@@ -7,6 +7,10 @@ return [
             'title' => 'One-to-one online lessons with teachers you can trust',
             'lead' => 'One teacher for one learner, at times that suit you, with a report on your phone after every lesson. Start with a free trial lesson.',
         ],
+        'why' => [
+            'title' => 'Teaching that fits your child',
+            'lead' => 'A live lesson with one teacher who knows your child well, and a plan that moves at their pace.',
+        ],
         'features' => [
             ['title' => 'Live one-to-one lessons', 'text' => 'The teacher is all yours for the whole lesson, at your level and your pace.'],
             ['title' => 'Carefully chosen teachers', 'text' => 'We choose our teachers with care and follow their lessons; if you would like another teacher, we change them.'],
@@ -99,6 +103,8 @@ return [
         'enabled_hint' => 'Off until you switch it on: nobody sees it or sends requests from it.',
         'hero' => 'The first thing people see',
         'hero_hint' => "One strong sentence and a line explaining it. The academy's name and logo show by themselves, from the academy's name and look.",
+        'why' => 'The section\'s heading',
+        'why_hint' => 'The title and the line above the reasons on the page. Left empty, the page says its own.',
         'features' => 'Why families choose you',
         'features_hint' => 'Up to 6, each a short title and a line.',
         'testimonials' => 'What families say',

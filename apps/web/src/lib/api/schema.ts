@@ -16798,9 +16798,13 @@ export interface operations {
                                 /** @description The academy's code: what the app asks for to open it (X-Academy). */
                                 code: string;
                             };
-                            /** @description The words the academy set: hero, features, testimonials, faqs, sections shown, whatsapp, seo. */
+                            /** @description The words the academy set: hero, why (the heading over features; empty: the page's own), features, testimonials, faqs, sections shown, whatsapp, seo. */
                             content: {
                                 hero: {
+                                    title: string;
+                                    lead: string;
+                                };
+                                why: {
                                     title: string;
                                     lead: string;
                                 };

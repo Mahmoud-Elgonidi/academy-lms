@@ -106,6 +106,38 @@ it('opens the settings to the owner and admins, and saves from the screen', func
     $this->get('http://noor.lms.test/admin/settings/site')->assertOk();
 });
 
+it('lets the academy word the heading over why families choose it, the page\'s own words while it keeps none', function () {
+    $this->actingAs($this->owner);
+    $page = function (string $locale) {
+        $why = $this->getJson('http://noor.lms.test/api/v1/site', ['Accept-Language' => $locale])->assertOk()->json('data.content.why');
+        $this->actAsTenant($this->academy);   // the request leaves the academy behind
+
+        return $why;
+    };
+
+    // Before anything is saved, the heading the page always had.
+    Livewire::test(SiteSettingsPage::class)
+        ->assertSet('data.why.title_ar', 'تعليم على مقاس ابنك')
+        ->assertSet('data.why.title_en', 'Teaching that fits your child')
+        ->set('data.enabled', true)
+        ->set('data.why.title_ar', 'تعليم يناسب كل طالب')
+        ->set('data.why.lead_ar', 'معلّم واحد وخطة على قدر مستواه.')
+        ->set('data.why.title_en', '')
+        ->set('data.why.lead_en', '')
+        ->call('save')
+        ->assertNotified(__('site::site.settings.saved', [], 'en'));
+
+    // English reads the Arabic where it is empty, like every text on the page.
+    expect($page('ar'))->toBe(['title' => 'تعليم يناسب كل طالب', 'lead' => 'معلّم واحد وخطة على قدر مستواه.'])
+        ->and($page('en'))->toBe(['title' => 'تعليم يناسب كل طالب', 'lead' => 'معلّم واحد وخطة على قدر مستواه.']);
+
+    // Both left empty: nothing, and the page says its own heading. Held to its length.
+    $content = SiteSettings::current()->said();
+    app(SaveSiteSettings::class)->handle(['enabled' => true, 'why' => []] + $content);
+    expect($page('ar'))->toBe(['title' => '', 'lead' => ''])
+        ->and(fn () => app(SaveSiteSettings::class)->handle(['why' => ['title_ar' => str_repeat('x', 121)]] + $content))->toThrow(ValidationException::class);
+});
+
 it('takes a teacher\'s card off the page and puts it back, the teacher\'s own switch untouched', function () {
     $card = TeacherPublicCard::query()->where('teacher_id', $this->teachers['sara']->id)->sole();
     $this->actingAs($this->owner);

@@ -37660,9 +37660,24 @@
                                                 },
                                                 "content": {
                                                     "type": "object",
-                                                    "description": "The words the academy set: hero, features, testimonials, faqs, sections shown, whatsapp, seo.",
+                                                    "description": "The words the academy set: hero, why (the heading over features; empty: the page's own), features, testimonials, faqs, sections shown, whatsapp, seo.",
                                                     "properties": {
                                                         "hero": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "title": {
+                                                                    "type": "string"
+                                                                },
+                                                                "lead": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "title",
+                                                                "lead"
+                                                            ]
+                                                        },
+                                                        "why": {
                                                             "type": "object",
                                                             "properties": {
                                                                 "title": {
@@ -37765,6 +37780,7 @@
                                                     },
                                                     "required": [
                                                         "hero",
+                                                        "why",
                                                         "features",
                                                         "testimonials",
                                                         "faqs",

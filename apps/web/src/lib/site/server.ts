@@ -45,6 +45,8 @@ export type AcademySite = {
   academy: { name: string; code: string };
   content: {
     hero: { title: string; lead: string };
+    /** The heading over the features; empty, the page says its own. */
+    why?: { title: string; lead: string };
     features: { title: string; text: string }[];
     testimonials: { name: string; role: string; quote: string }[];
     faqs: { q: string; a: string }[];

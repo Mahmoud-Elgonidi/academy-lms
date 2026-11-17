@@ -100,7 +100,7 @@ final class SiteController
                     /** The academy's code: what the app asks for to open it (X-Academy). */
                     'code' => $academy->slug,
                 ],
-                /** The words the academy set: hero, features, testimonials, faqs, sections shown, whatsapp, seo. */
+                /** The words the academy set: hero, why (the heading over features; empty: the page's own), features, testimonials, faqs, sections shown, whatsapp, seo. */
                 'content' => $content,
                 /** Every subject the academy teaches (the free-trial form picks one). */
                 'subjects' => $subjects,

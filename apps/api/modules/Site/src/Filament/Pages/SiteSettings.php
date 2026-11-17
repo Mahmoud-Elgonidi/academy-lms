@@ -130,6 +130,10 @@ final class SiteSettings extends Page
                     ]),
                 ]),
                 Tab::make(__($s.'tabs.features'))->id('features')->icon(Heroicon::OutlinedStar)->schema([
+                    Section::make(__($s.'why'))->description(__($s.'why_hint'))->columns(2)->schema([
+                        ...$pair('why.title', 'title', 120),
+                        ...$pair('why.lead', 'lead', 300, long: true),
+                    ]),
                     Repeater::make('features')->label(__($s.'features'))->helperText(__($s.'features_hint'))
                         ->maxItems(SiteContent::MAX_FEATURES)->columns(2)->reorderable()->collapsible()->addActionLabel(__($s.'add'))
                         ->schema([...$pair('title', 'title', 60), ...$pair('text', 'text', 200, long: true)]),
