@@ -109,6 +109,7 @@ export function SitePageView({ site, page, look, locale, t, phones, accent, acce
       data-fonts={settings.fonts.url ? '' : undefined}
       data-preview={preview ? '' : undefined}
       data-first={firstHero ? 'hero' : 'block'}
+      data-hero-width={firstHero && blocks[0]!.style.width === 'wide' ? 'wide' : undefined}
       style={style as CSSProperties}
     >
       <a className="sp-skip" href="#main">{t('blocks.skip')}</a>

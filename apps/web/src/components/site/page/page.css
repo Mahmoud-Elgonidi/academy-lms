@@ -70,6 +70,8 @@
 .sp-page[data-character='editorial'] .ls-initial { background: var(--accent); color: var(--sp-on-accent); box-shadow: none; border-radius: calc(var(--sp-radius) * 0.6); }
 .sp-page[data-character='editorial'] .ls-nav a { font-weight: 500; }
 
+.sp-page[data-hero-width='wide'] .sp-header .ls-wrap { inline-size: min(1360px, 100% - 2rem); }
+
 /* ── Blocks: tone, spacing, measure ────────────────────── */
 .sp-block {
   --pad: clamp(64px, 3rem + 3.5vw, 96px);
@@ -133,10 +135,10 @@
   transition: background-color 0.2s, color 0.2s, box-shadow 0.2s, background-size 0.25s var(--sp-ease);
 }
 .sp-btn svg { inline-size: 1.25rem; block-size: 1.25rem; flex-shrink: 0; }
-.sp-btn-primary { background: var(--accent); color: var(--sp-on-accent); }
-.sp-btn-primary:hover { background: var(--sp-accent-strong); color: white; }
+.sp-page .sp-btn-primary { background: var(--accent); color: var(--sp-on-accent); }
+.sp-page .sp-btn-primary:hover { background: var(--sp-accent-strong); color: white; }
 .sp-page[data-accent-ink='dark'] .sp-btn-primary:hover { background: color-mix(in oklab, var(--accent) 85%, black); color: var(--sp-ink); }
-.sp-btn-outline { border: 1.5px solid currentColor; color: inherit; background: transparent; }
+.sp-page .sp-btn-outline { border: 1.5px solid currentColor; color: inherit; background: transparent; }
 .sp-btn-secondary, .sp-link {
   padding-inline: 0.1rem; border-radius: 0; color: inherit; background: linear-gradient(currentColor, currentColor) no-repeat;
   background-size: 100% 1px; background-position: 0 calc(100% - 0.55rem);
@@ -269,6 +271,11 @@
 .sp-face img { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; }
 .sp-face span { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; color: var(--sp-accent-strong); }
 .sp-person-words { margin-block-start: 1rem; }
+@media (max-width: 560px) {
+  .sp-people[data-variant='portraits'] { grid-template-columns: 1fr 1fr; gap: 1.75rem 0.9rem; }
+  .sp-people[data-variant='portraits'] .sp-person h3 { font-size: 1.05rem; }
+  .sp-people[data-variant='portraits'] .sp-bio { -webkit-line-clamp: 3; font-size: 0.92rem; }
+}
 .sp-person h3 { font-size: var(--fs-1); font-weight: 700; }
 .sp-person .sp-meta { margin-block-start: 0.2rem; }
 .sp-bio { margin-block-start: 0.7rem; color: var(--soft); line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
@@ -289,6 +296,19 @@
 .sp-regions button { padding: 0.4rem 0.95rem; border: 0; border-radius: 999px; background: transparent; color: inherit; font-weight: 600; cursor: pointer; }
 .sp-regions button[aria-checked='true'] { background: var(--accent); color: var(--sp-on-accent); }
 .sp-table-scroll { overflow-x: auto; }
+.sp-plan-cards { display: grid; gap: 1rem; }
+.sp-plan-cards li { display: grid; gap: 0.5rem; padding: 1.5rem; border-radius: var(--sp-radius); border: 1px solid var(--rule); background: white; color: var(--sp-ink); }
+.sp-plan-cards li[data-highlight] { border: 2px solid var(--accent); }
+.sp-plan-cards h3 { font-size: var(--fs-2); font-weight: 700; }
+.sp-plan-price b { font-size: var(--fs-3); font-weight: 700; font-variant-numeric: tabular-nums; }
+.sp-plan-price span { color: var(--sp-muted); font-size: var(--fs--1); }
+.sp-plan-cards dl { display: grid; margin-block: 0.5rem; border-block-start: 1px solid var(--sp-line); }
+.sp-plan-cards dl > div { display: flex; justify-content: space-between; gap: 1rem; padding-block: 0.6rem; border-block-end: 1px solid var(--sp-line); font-size: 0.95rem; }
+.sp-plan-cards dt { color: var(--sp-muted); }
+.sp-plan-cards dd { text-align: end; }
+.sp-plan-cards .sp-btn { margin-block-start: 0.5rem; }
+@media (min-width: 720px) { .sp-plan-cards { display: none; } }
+@media (max-width: 719px) { .sp-table-scroll { display: none; } }
 .sp-table { inline-size: 100%; min-inline-size: 36rem; border-collapse: separate; border-spacing: 0; text-align: start; }
 .sp-table :is(th, td) { padding: 1rem 1.25rem; border-block-end: 1px solid var(--rule); text-align: start; vertical-align: top; }
 .sp-table thead th { padding-block: 1.5rem 1.1rem; font-size: var(--fs-2); font-weight: 700; vertical-align: bottom; }

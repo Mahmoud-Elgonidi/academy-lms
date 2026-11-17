@@ -35,6 +35,27 @@ export function PlansTable({ plans, rows, regions, start, highlight, startLabel,
           </div>
         </div>
       ) : null}
+      {/* On a phone the same facts read plan by plan (the table is for wider screens). */}
+      <ul className="sp-plan-cards">
+        {plans.map((plan, i) => {
+          const here = plan.prices[region];
+          const marked = highlight?.id === plan.id;
+          return (
+            <li key={plan.id} data-highlight={marked ? '' : undefined}>
+              {marked ? <span className="sp-mark">{highlight.label}</span> : null}
+              <h3>{plan.name}</h3>
+              <p className="sp-plan-price"><b>{here ? here.price : t('ask')}</b> <span>{here ? t('perBlock') : null}</span></p>
+              {here?.perLesson ? <p className="sp-meta">{t('perLesson', { price: here.perLesson })}</p> : null}
+              <dl>
+                {rows.map((row) => (
+                  <div key={row.label}><dt>{row.label}</dt><dd>{row.cells[i] || '—'}</dd></div>
+                ))}
+              </dl>
+              {href ? <a className={`sp-btn ${marked ? 'sp-btn-primary' : 'sp-btn-outline'}`} href={href}>{startLabel}</a> : null}
+            </li>
+          );
+        })}
+      </ul>
       <div className="sp-table-scroll">
         <table className="sp-table">
           <thead>
