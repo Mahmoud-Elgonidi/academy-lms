@@ -133,7 +133,7 @@ function courses(l: (p: Pair) => string, lang: Lang): SitePageData {
         { icon: 'clock', title: l(['مواعيد مسائية', 'Evening times']), text: l(['تتعلّم بعد العمل دون أن تترك وظيفتك.', 'Learn after work without leaving your job.']) },
         { icon: 'chat', title: l(['مرشد لكل متعلّم', 'A mentor for each learner']), text: l(['تسأله بين الحصص ويجيبك في يومه.', 'Ask between lessons and hear back the same day.']) },
         { icon: 'globe', title: l(['بالعربية والإنجليزية', 'In Arabic and English']), text: l(['المصطلح بلغته، والشرح بلغتك.', 'Terms in their language, the explaining in yours.']) },
-      ] }, { anchor: 'why', nav: l(['لماذا نحن', 'Why us']), style: { tone: 'white' } }),
+      ] }, { nav: l(['لماذا نحن', 'Why us']), style: { tone: 'white' } }),
       block('teachers', 'portraits', { ...H, title: l(['معلّمون يعملون في المجال', 'Teachers who work in the field']), show_bio: true, show_languages: true, show_ages: false, show_badges: false }, { nav: l(['المعلّمون', 'Teachers']) }),
       block('pricing', 'table', { ...H, highlight: 'plan-2', highlight_label: null, per_lesson: true, note: l(['الأسعار شاملة الضريبة. تستطيع الاسترداد خلال سبعة أيام من الدفع.', 'Prices include VAT. Refunds within seven days of payment.']) }, { nav: l(['الأسعار', 'Pricing']), style: { tone: 'white' } }),
       block('testimonials', 'grid', { ...H, title: l(['ماذا قال متعلّمونا', 'What our learners say']), items: testimonials(l, true, lang) }, {}),
@@ -217,7 +217,7 @@ function everything(l: (p: Pair) => string, lang: Lang): SitePageData {
       block('app', 'plain', { ...H, points: null, show_code: true, show_stores: true, media: null }, { style: { tone: 'white' } }),
       block('app', 'image', { ...H, points: null, show_code: false, show_stores: true, media: photo('1588072432836-e10032774350', 1200, 1000, ['', ''], lang) }, { style: { tone: 'tint' } }),
       kids[6]!, a[5]!, kids[7]!, a[6]!, b[6]!, kids[8]!, a[7]!,
-      a[1]!, b[5]!,
+      b[5]!,
       block('rich_text', 'article', { ...H, title: l(['عن الأكاديمية', 'About the academy']), body: [
         { t: 'p', c: [{ text: l(['بدأنا عام ٢٠١٥ بمعلّمين اثنين وفكرة واحدة: ', 'We started in 2015 with two teachers and one idea: ']) }, { text: l(['كل متعلّم يستحق معلّمًا يعرفه', 'every learner deserves a teacher who knows them']), b: true }, { text: '.' }] },
         { t: 'h3', c: [{ text: l(['ما نؤمن به', 'What we believe']) }] },

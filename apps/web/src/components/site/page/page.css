@@ -411,9 +411,12 @@
 .sp-bullets svg { inline-size: 1.2rem; block-size: 1.2rem; margin-block-start: 0.25rem; flex-shrink: 0; color: var(--sp-accent-strong); }
 .sp-block[data-variant='overlap'] .sp-pair { gap: 0; }
 @media (min-width: 900px) {
-  .sp-block[data-variant='overlap'] .sp-pair[data-media] { grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); }
-  .sp-block[data-variant='overlap'] .sp-pair-words { position: relative; z-index: 1; margin-inline-start: -5rem; }
-  .sp-block[data-variant='overlap'] .sp-pair[data-side='start'] .sp-pair-words { margin-inline: 0 -5rem; }
+  /* The picture takes the larger column; the words' card reaches over it. */
+  .sp-block[data-variant='overlap'] .sp-pair[data-media][data-side='end'] { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
+  .sp-block[data-variant='overlap'] .sp-pair[data-media][data-side='start'] { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); }
+  .sp-block[data-variant='overlap'] .sp-pair-words { position: relative; z-index: 1; }
+  .sp-block[data-variant='overlap'] .sp-pair[data-side='end'] .sp-pair-words { margin-inline-end: -5rem; }
+  .sp-block[data-variant='overlap'] .sp-pair[data-side='start'] .sp-pair-words { margin-inline-start: -5rem; }
 }
 .sp-block[data-variant='overlap'] .sp-pair-words { padding: clamp(1.5rem, 3vw, 2.75rem); border-radius: var(--sp-radius); background: white; color: var(--sp-ink); box-shadow: 0 30px 60px -30px rgb(10 15 26 / 0.35); }
 @media (max-width: 899px) { .sp-block[data-variant='overlap'] .sp-pair-words { margin: -3rem 1rem 0; position: relative; } }
@@ -423,7 +426,7 @@
 .sp-block[data-variant='stacked'][data-align='center'] .sp-pair-words { margin-inline: auto; text-align: center; }
 
 /* ── gallery ───────────────────────────────────────────── */
-.sp-gallery-list { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); }
+.sp-gallery-list { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
 .sp-gallery[data-variant='masonry'] .sp-gallery-list { display: block; columns: 3 16rem; column-gap: 1rem; }
 .sp-gallery[data-variant='masonry'] li { break-inside: avoid; margin-block-end: 1rem; }
 .sp-gallery[data-variant='carousel'] .sp-gallery-list { display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-block-end: 0.75rem; overscroll-behavior-x: contain; }
@@ -450,7 +453,8 @@
 .sp-logos[data-mono] img { filter: grayscale(1); opacity: 0.68; transition: filter 0.3s, opacity 0.3s; }
 .sp-logos[data-mono] :is(li:hover, a:focus-visible) img { filter: none; opacity: 1; }
 .sp-block:is([data-tone='night'], [data-tone='brand']) .sp-logos[data-mono] img { filter: grayscale(1) brightness(0) invert(1); opacity: 0.8; }
-.sp-logos[data-variant='grid'] ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: 1rem; }
+.sp-logos[data-variant='grid'] ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, 13rem)); justify-content: center; gap: 1rem; }
+.sp-block[data-align='start'] .sp-logos[data-variant='grid'] ul { justify-content: start; }
 .sp-logos[data-variant='grid'] li { display: grid; place-items: center; padding: 1.5rem; border: 1px solid var(--rule); border-radius: var(--sp-radius); }
 .sp-logos[data-variant='marquee'] { overflow: hidden; mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent); }
 .sp-logos[data-variant='marquee'] ul { flex-wrap: nowrap; inline-size: max-content; justify-content: flex-start; }
@@ -584,3 +588,6 @@
 @keyframes sp-rise { from { opacity: 0; transform: translateY(12px); } }
 @keyframes sp-fade { from { opacity: 0; } }
 @keyframes sp-settle { from { transform: scale(1.02); } }
+
+/* A store button keeps its dark words on its white face, whatever the band around it. */
+.sp-page a.ls-store { color: #0b1f1a; }
