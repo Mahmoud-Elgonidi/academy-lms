@@ -27,5 +27,5 @@ arch('the engine adapters are asked only by the gateway (and its own Platform AI
     ->toOnlyBeUsedIn(['Modules\Platform\Ai']);
 
 arch('no module reaches Platform\'s AI: it asks the shared kernel\'s contracts with its capability')
-    ->expect(['Modules\Curriculum', 'Modules\Learning', 'Modules\Quran', 'Modules\Games', 'Modules\Crm', 'Modules\Support', 'Modules\Messaging', 'App'])
+    ->expect(['Modules\Curriculum', 'Modules\Learning', 'Modules\Games', 'Modules\Crm', 'Modules\Support', 'Modules\Messaging', 'App'])
     ->not->toUse(['Modules\Platform\Ai', 'Anthropic']);

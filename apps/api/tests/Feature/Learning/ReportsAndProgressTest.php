@@ -25,13 +25,13 @@ use Modules\Learning\Queries\ProgressQuery;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\Scheduling\Domain\Models\Session;
 use Tests\Support\EnrolledStudent;
-use Tests\Support\QuranProgram;
+use Tests\Support\SampleProgram;
 
-uses(EnrolledStudent::class, QuranProgram::class);
+uses(EnrolledStudent::class, SampleProgram::class);
 
 beforeEach(function () {
     $this->enrolStudentOnPlan();
-    $this->publishQuranProgram($this->quran);
+    $this->publishSampleProgram($this->quran);
     $this->enrollmentId = $this->booked->enrollmentId;
 });
 

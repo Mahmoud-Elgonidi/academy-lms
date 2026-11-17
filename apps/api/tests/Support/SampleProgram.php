@@ -12,9 +12,9 @@ use Modules\Curriculum\Models\Program;
  * level 2 with one unit of 2 lessons. Lesson ids land in $this->lessons, in
  * teaching order; the third lesson weighs 2 and needs two scores of 4+.
  */
-trait QuranProgram
+trait SampleProgram
 {
-    protected function publishQuranProgram(string $subjectId): Program
+    protected function publishSampleProgram(string $subjectId): Program
     {
         $program = app(SaveProgram::class)->handle(null, ['subject_id' => $subjectId, 'name_ar' => 'نور البيان', 'name_en' => 'Nour Al-Bayan']);
         $version = $program->workingVersion();

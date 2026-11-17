@@ -3,15 +3,15 @@
 use Modules\SharedKernel\Text\ArabicText;
 
 /*
- * Arabic as it is compared (the recitation check, quotations in a model's
+ * Arabic as it is compared (a voice note's words, quotations in a model's
  * answer): the same words with or without their marks, in any alef form,
  * read as one; the text itself is never changed where it is kept.
  */
 
-it('drops the marks, the Quran\'s own signs and tatweel, and keeps the letters', function () {
-    expect(ArabicText::normalize('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ'))->toBe('بسم الله الرحمن الرحيم')
-        // The Quran in its plain spelling (Tanzil's simple text): a dagger alef left there is one it does not write.
-        ->and(ArabicText::normalize('ذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِّلْمُتَّقِينَ'))->toBe('ذلك الكتاب لا ريب فيه هدي للمتقين')
+it('drops the marks, the small high signs and tatweel, and keeps the letters', function () {
+    expect(ArabicText::normalize('ٱلْمُعَلِّمُ يَشْرَحُ ٱلدَّرْسَ'))->toBe('المعلم يشرح الدرس')
+        // A dagger alef goes with the marks, as speech to text writes the plain spelling.
+        ->and(ArabicText::normalize('هَٰذَا ۛ كِتَابٌ مُفِيدٌ'))->toBe('هذا كتاب مفيد')
         ->and(ArabicText::normalize('الـــلـه'))->toBe('الله');
 });
 

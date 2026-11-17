@@ -178,7 +178,7 @@ it('gives the class page a call\'s controls: mic, camera, screen, picture in pic
         ->assertSee('id="audio-only"', false)->assertSee('id="timer"', false)->assertSee('id="people"', false)
         ->assertSee(__($room.'leave'))->assertSee(__($room.'mic_off').' (Ctrl+D)')->assertSee(__($room.'camera_off').' (Ctrl+E)')
         ->assertDontSee('id="record"', false);                     // the academy records nothing: no button
-    expect($teacher->getContent())->toContain("dispatchEvent(new CustomEvent('lms:room'")   // the mushaf hears the room
+    expect($teacher->getContent())->toContain("dispatchEvent(new CustomEvent('lms:room'")   // what is beside the room may hear it
         ->toContain('documentPictureInPicture')->toContain("setActionHandler('enterpictureinpicture'")
         ->toContain('adaptiveStream: true, dynacast: true');
 

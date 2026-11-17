@@ -11,15 +11,15 @@ use Modules\Learning\Models\SessionReport;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\Scheduling\Domain\Models\Session;
 use Tests\Support\EnrolledStudent;
-use Tests\Support\QuranProgram;
+use Tests\Support\SampleProgram;
 use Tests\TestCase;
 
-uses(EnrolledStudent::class, QuranProgram::class);
+uses(EnrolledStudent::class, SampleProgram::class);
 
 beforeEach(function () {
     Storage::fake('local');
     $this->enrolStudentOnPlan();
-    $this->publishQuranProgram($this->quran);
+    $this->publishSampleProgram($this->quran);
     $this->enrollmentId = $this->booked->enrollmentId;
     app(EnrollmentApi::class)->attachCurriculum($this->enrollmentId, Program::query()->value('id'));
     $this->guardian = User::query()->find(DB::table('guardian_student')->where('student_id', $this->student->id)->value('guardian_id'));

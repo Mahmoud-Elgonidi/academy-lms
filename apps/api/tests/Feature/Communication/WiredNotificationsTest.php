@@ -22,9 +22,9 @@ use Modules\Scheduling\Contracts\Events\ShiftProposalApproved;
 use Modules\Scheduling\Contracts\Events\ShiftProposalSubmitted;
 use Modules\Scheduling\Domain\Models\Session;
 use Tests\Support\EnrolledStudent;
-use Tests\Support\QuranProgram;
+use Tests\Support\SampleProgram;
 
-uses(EnrolledStudent::class, QuranProgram::class);
+uses(EnrolledStudent::class, SampleProgram::class);
 
 beforeEach(function () {
     Mail::fake();
@@ -57,7 +57,7 @@ it('sends the payer the invoice on enrolment and a receipt when it is paid', fun
 });
 
 it('tells the family about the report and the homework, and the teacher about the hand-in', function () {
-    app(EnrollmentApi::class)->attachCurriculum($this->booked->enrollmentId, $this->publishQuranProgram($this->quran)->id);
+    app(EnrollmentApi::class)->attachCurriculum($this->booked->enrollmentId, $this->publishSampleProgram($this->quran)->id);
     $session = ($this->first)();
     $session->update(['status' => 'completed']);
     event(new SessionFinalized($session->academy_id, $session->id, 'completed', []));

@@ -26,9 +26,9 @@ use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Filament\Family\FamilyLessons;
 use Modules\Scheduling\Filament\Family\NextLessonsWidget;
 use Tests\Support\EnrolledStudent;
-use Tests\Support\QuranProgram;
+use Tests\Support\SampleProgram;
 
-uses(EnrolledStudent::class, QuranProgram::class);
+uses(EnrolledStudent::class, SampleProgram::class);
 
 /*
  * The family area (/my): a guardian follows each child, a student sees
@@ -114,7 +114,7 @@ it('warns that a late cancellation counts, and refuses someone else\'s lesson', 
 });
 
 it('shows the roadmap, and the teacher\'s reports without their internal notes', function () {
-    $program = $this->publishQuranProgram($this->quran);
+    $program = $this->publishSampleProgram($this->quran);
     app(EnrollmentApi::class)->attachCurriculum($this->booked->enrollmentId, $program->id);
     SessionReport::query()->create([
         'session_id' => $this->lesson->id, 'enrollment_id' => $this->booked->enrollmentId, 'teacher_id' => $this->teacher->id, 'student_id' => $this->student->id,

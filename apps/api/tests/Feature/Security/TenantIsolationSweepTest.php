@@ -32,7 +32,7 @@ const OWN_FAMILY = ['api/v1/family/learners', 'api/v1/family/consents', 'api/v1/
 
 beforeEach(function () {
     SaasPlan::query()->create(['code' => 'pro', 'name_ar' => 'الاحتراف', 'name_en' => 'Pro', 'max_teachers' => 75, 'max_active_students' => 1000,
-        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll', 'quran', 'groups', 'curriculum', 'games', 'messaging', 'announcements', 'support', 'evaluation', 'site']]);
+        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll', 'groups', 'curriculum', 'games', 'messaging', 'announcements', 'support', 'evaluation', 'site']]);
     $this->seed(DatabaseSeeder::class);
     $this->clearTenant();
 
@@ -82,10 +82,6 @@ beforeEach(function () {
         'check' => $one('teacher_checks', fn ($q) => $q->whereNotNull('file_path')),
         'node' => $one('curriculum_nodes', fn ($q) => $q->where('kind', 'lesson')),
         'announcement' => $one('announcements'),
-        // The Quran's exams and certificates (the certificate by its public code).
-        'exam' => $one('quran_exams'),
-        'code' => (string) $platform->table('quran_certificates')->where('academy_id', $this->demo)->orderBy('id')->value('code'),
-        'certificate' => $one('quran_certificates'),
         // A receipt of the platform's for a pack the demo bought (recharging).
         'receipt' => $one('platform_receipts'),
     ]);
@@ -235,15 +231,13 @@ it('keeps every record of one academy out of reach of another academy\'s people'
             'admin/start-here',
             // The academy's page and its requests: this academy's own words, cards and requests.
             'admin/settings/site', 'admin/site/requests',
-            // The academy's hifz: its own courses only; the demo's student, asked for by course, is not found.
-            'admin/hifz', 'admin/hifz/{enrollment}',
             // The platform's receipts and the usage page: this academy's own purchases only.
             'platform/receipts/{receipt}', 'admin/settings/usage'],
         'accountant' => ['admin/invoices/{invoice}', 'admin/payroll/{teacher}', 'billing/proofs/{proof}/file', 'platform/receipts/{receipt}'],
-        'teacher' => ['teach/reports/{report}', 'teach/reports/{report}/game', 'teach/students/{enrollment}', 'teach/students/{enrollment}/hifz', 'class/{session}', 'class/{session}/go', 'class/{session}/mushaf',
+        'teacher' => ['teach/reports/{report}', 'teach/reports/{report}/game', 'teach/students/{enrollment}', 'class/{session}', 'class/{session}/go',
             'learning/files/{submission}', 'support/files/{message}', 'people/checks/{check}/file'],
-        'guardian' => ['my', 'class/{session}', 'class/{session}/mushaf', 'learning/files/{submission}', 'support/files/{message}', 'billing/proofs/{proof}/file'],
-        'student' => ['class/{session}', 'class/{session}/go', 'class/{session}/mushaf', 'learning/files/{submission}'],
+        'guardian' => ['my', 'class/{session}', 'learning/files/{submission}', 'support/files/{message}', 'billing/proofs/{proof}/file'],
+        'student' => ['class/{session}', 'class/{session}/go', 'learning/files/{submission}'],
     ];
     foreach ($pages as $role => $paths) {
         foreach ($paths as $path) {
@@ -260,8 +254,7 @@ it('keeps every record of one academy out of reach of another academy\'s people'
     }
     $posts = [
         'class/{session}/ticket' => [], 'class/{session}/recording' => [], 'class/{session}/recording/stop' => [],
-        // The shared mushaf and the lesson's own channel, asked with what would pass on the demo's host.
-        'class/{session}/mushaf' => ['change' => 'turn', 'page' => 1],
+        // The lesson's own channel, asked with what would pass on the demo's host.
         'class/{session}/live/auth' => ['socket_id' => '1.1', 'channel_name' => 'private-lesson.'.$this->ids['session']],
     ];
     foreach ($posts as $path => $body) {
@@ -283,7 +276,6 @@ it('keeps every record of one academy out of reach of another academy\'s people'
         ['learning.material', ['resource' => $this->ids['resource'] ?? $this->ids['session']]],
         ['billing.pay.return', ['checkout' => $this->ids['checkout'] ?? $this->ids['invoice']]],
         ['privacy.copy', ['request' => $this->ids['request'] ?? $this->ids['invoice']]],
-        ['quran.certificate', ['certificate' => $this->ids['certificate'] ?? $this->ids['invoice']]],
     ];
     foreach ($signed as [$name, $params]) {
         $url = URL::temporarySignedRoute($name, now()->addHour(), $params, absolute: false);

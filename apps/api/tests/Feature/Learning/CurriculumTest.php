@@ -14,9 +14,9 @@ use Modules\Enrollment\Contracts\DTOs\NewEnrollment;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
-use Tests\Support\QuranProgram;
+use Tests\Support\SampleProgram;
 
-uses(QuranProgram::class);
+uses(SampleProgram::class);
 
 beforeEach(function () {
     $this->academy = $this->actAsTenant($this->createAcademy(['slug' => 'noor']));
@@ -57,7 +57,7 @@ it('publishes a version with lessons, then refuses deleting from it', function (
 });
 
 it('puts a new enrolment on the subject\'s program when it has exactly one', function () {
-    $this->publishQuranProgram($this->subject);
+    $this->publishSampleProgram($this->subject);
     $student = User::factory()->withRole(Role::Student)->create();
     $teacher = User::factory()->withRole(Role::Teacher)->create();
 

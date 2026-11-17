@@ -96,7 +96,7 @@ it('lets a request start only when its estimate fits, and lets go of a hold nobo
 });
 
 it('charges each helper its rate: a base, and the minutes of what it heard', function () {
-    // practice 1, weekly-note wording 1, outline 5, recitation 2 a minute, report draft 2 and 1 a minute.
+    // practice 1, weekly-note wording 1, outline 5, report draft 2 and 1 a minute.
     expect(CreditRates::charge(1, 0))->toBe(1)
         ->and(CreditRates::charge(5, 0))->toBe(5)
         ->and(CreditRates::charge(0, 2, 59.0))->toBe(2)

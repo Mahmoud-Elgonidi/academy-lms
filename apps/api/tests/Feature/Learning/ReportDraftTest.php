@@ -25,10 +25,10 @@ use Modules\SharedKernel\Ai\LanguageModel;
 use Modules\SharedKernel\Ai\SpeechToText;
 use Modules\SharedKernel\Ai\Transcript;
 use Tests\Support\EnrolledStudent;
-use Tests\Support\QuranProgram;
+use Tests\Support\SampleProgram;
 use Tests\TestCase;
 
-uses(EnrolledStudent::class, QuranProgram::class);
+uses(EnrolledStudent::class, SampleProgram::class);
 
 /*
  * A lesson report's draft from the teacher's voice note (docs/architecture/02,
@@ -40,7 +40,7 @@ uses(EnrolledStudent::class, QuranProgram::class);
 beforeEach(function () {
     Storage::fake('local');
     $this->enrolStudentOnPlan();
-    $this->publishQuranProgram($this->quran);
+    $this->publishSampleProgram($this->quran);
     $this->enrollmentId = $this->booked->enrollmentId;
     app(EnrollmentApi::class)->attachCurriculum($this->enrollmentId, Program::query()->value('id'));
     DB::table('users')->where('id', $this->student->id)->update(['name' => 'يوسف أحمد']);

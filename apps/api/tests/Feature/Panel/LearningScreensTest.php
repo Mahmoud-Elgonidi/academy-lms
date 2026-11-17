@@ -23,14 +23,14 @@ use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Filament\Resources\Enrollments\ViewEnrollment;
 use Tests\Support\EnrolledStudent;
-use Tests\Support\QuranProgram;
+use Tests\Support\SampleProgram;
 
-uses(EnrolledStudent::class, QuranProgram::class);
+uses(EnrolledStudent::class, SampleProgram::class);
 
 beforeEach(function () {
     Storage::fake('local');
     $this->enrolStudentOnPlan();
-    $this->program = $this->publishQuranProgram($this->quran);
+    $this->program = $this->publishSampleProgram($this->quran);
     $session = Session::query()->where('enrollment_id', $this->booked->enrollmentId)->orderBy('starts_at')->firstOrFail();
     $session->update(['status' => 'completed']);
     event(new SessionFinalized($session->academy_id, $session->id, 'completed', []));
