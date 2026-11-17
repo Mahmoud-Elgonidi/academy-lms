@@ -171,7 +171,7 @@
 /* ── Media ─────────────────────────────────────────────── */
 .sp-frame { position: relative; display: block; overflow: hidden; border-radius: var(--sp-radius); background: color-mix(in oklab, var(--neutral) 10%, white); }
 .sp-frame > img, .sp-frame > video, .sp-frame > iframe { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; border: 0; display: block; }
-.sp-frame[data-shape='arch'] { border-radius: 999px 999px var(--sp-radius) var(--sp-radius); }
+.sp-frame[data-shape='arch'] { aspect-ratio: 4 / 5 !important; border-radius: 999px 999px var(--sp-radius) var(--sp-radius); }
 .sp-frame[data-shape='circle'] { aspect-ratio: 1 / 1 !important; border-radius: 50%; }
 .sp-video { background: #0a0f1a; color: white; }
 .sp-video[data-empty] { background: radial-gradient(120% 120% at 30% 20%, color-mix(in oklab, var(--accent) 40%, #0a0f1a), #0a0f1a); }

@@ -1,6 +1,6 @@
 import 'server-only';
 import { cache } from 'react';
-import { call, type PathFor } from '@/lib/api/server';
+import { call } from '@/lib/api/server';
 import type { SitePageData, SitePreviewInfo } from './page';
 import type { TrialSettings } from './trial';
 
@@ -136,7 +136,7 @@ export async function academySitePreview(token: string): Promise<AcademySite | P
   }
   if (!/^[A-Za-z0-9._~-]{8,512}$/.test(token)) return 'invalid';
   try {
-    const response = await call('get', '/v1/site/preview' as PathFor<'get'>, { query: { token } });
+    const response = await call('get', '/v1/site/preview', { query: { token } });
     if (response.status === 410) return 'expired';
     if (!response.ok) return 'invalid';
     return ((await response.json()) as { data: AcademySite }).data;
