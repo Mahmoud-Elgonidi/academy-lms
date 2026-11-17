@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { HifzCard } from '@/components/hifz/card';
 import { Icon } from '@/components/icons';
 import { FormatBadge } from '@/components/lesson-format';
 import { Card, Empty, Progress, SectionTitle, buttonLook, join } from '@/components/ui';
@@ -139,7 +138,7 @@ async function AddChildCard() {
   );
 }
 
-/** A guardian's (or an adult student's) home: the next lesson, each course's balance and what is owed, the journey's card (and today's hifz review), homework, and notices. */
+/** A guardian's (or an adult student's) home: the next lesson, each course's balance and what is owed, the journey's card, homework, and notices. */
 export async function ClassicHome({ name, learner, lessons, notices, courses, guardian, invoices, homework, journey }: {
   name: string;
   learner: Learner;
@@ -195,7 +194,6 @@ export async function ClassicHome({ name, learner, lessons, notices, courses, gu
         ) : null}
       </div>
       {journey ? <JourneyCard journey={journey} learner={learner} /> : null}
-      {journey?.hifz ? <HifzCard hifz={journey.hifz} /> : null}
       <HomeworkDue homework={openHomework(homework)} />
       {invoices || guardian ? (
         <div className="grid gap-3 sm:grid-cols-2">

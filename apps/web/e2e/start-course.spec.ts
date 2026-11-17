@@ -11,7 +11,7 @@ import { agree, choosePicks, confirm, fromReport, oneLessonAWeek, onStep, payOnT
  * welcome; a price that changed meanwhile confirmed again; a coupon typed
  * and taken off (the invoice issued again each time); a start called off
  * before paying; and a child's own look refused calmly. Each family is new
- * to the run (E2eResetSeeder::trialAfter): a 9-year-old's Tajweed trial two
+ * to the run (E2eResetSeeder::trialAfter): a 9-year-old's trial two
  * days ago, assessed, with an open 10% offer, the child's account waiting
  * for the guardian's consent. A week a time starts without (an academy
  * holiday two to three weeks ahead, E2eResetSeeder::testHoliday) is marked on the time,

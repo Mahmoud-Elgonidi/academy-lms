@@ -1,5 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import { HifzCard } from '@/components/hifz/card';
 import { RefreshAt } from '@/components/live-refresh';
 import { CourseBalanceCard } from '@/components/family/course-balance';
 import { Empty, Notice } from '@/components/ui';
@@ -25,8 +24,7 @@ import { MiddleJourney } from './middle';
  * refreshes on the person's signals (lessons, homework, practice) and at the
  * moments the clock alone changes it (a lesson's room opening, the week's
  * chest closing). ?homework= starts that homework's practice; ?island= opens
- * an island (back from the album). With pages on the learner's hifz map, a
- * card says what is left of today's review and opens it. A student's own look
+ * an island (back from the album). A student's own look
  * has each course's lessons left beside it (J5a: the kids' in a few words).
  * While the academy has its curriculum off there is no journey: a calm word.
  */
@@ -44,19 +42,15 @@ export async function JourneyScreen({ homework, island }: { homework?: string; i
   const clock = <RefreshAt moments={journeyMoments(map)} />;
   // A student's own balance (never a guardian's look at their child: the classic home has it).
   const balances = fam.stage === 'classic' ? [] : await studentBalances(map);
-  const hifz = (
-    <>
-      {map.hifz ? <HifzCard hifz={map.hifz} kids={look === 'kids'} /> : null}
-      {balances.length > 0 ? (
-        <div className="grid gap-3 sm:grid-cols-2" data-student-balance>
-          <RefreshAt moments={balances.flatMap((b) => balanceMoments(b.balance))} />
-          {balances.map((b) => (
-            <CourseBalanceCard key={b.balance.enrollment_id} balance={b.balance} subject={b.subject} />
-          ))}
-        </div>
-      ) : null}
-    </>
-  );
+  const extra =
+    balances.length > 0 ? (
+      <div className="grid gap-3 sm:grid-cols-2" data-student-balance>
+        <RefreshAt moments={balances.flatMap((b) => balanceMoments(b.balance))} />
+        {balances.map((b) => (
+          <CourseBalanceCard key={b.balance.enrollment_id} balance={b.balance} subject={b.subject} />
+        ))}
+      </div>
+    ) : null;
   return (
     <>
       {clock}
@@ -66,13 +60,13 @@ export async function JourneyScreen({ homework, island }: { homework?: string; i
         </div>
       ) : null}
       {look === 'kids' ? (
-        <KidsJourney key={learner.id} map={map} learnerName={name} autoplay={autoplay} openIsland={island ?? null} hifz={hifz} />
+        <KidsJourney key={learner.id} map={map} learnerName={name} autoplay={autoplay} openIsland={island ?? null} extra={extra} />
       ) : look === 'middle' ? (
-        <MiddleJourney key={learner.id} map={map} learnerName={name} autoplay={autoplay} hifz={hifz} />
+        <MiddleJourney key={learner.id} map={map} learnerName={name} autoplay={autoplay} extra={extra} />
       ) : look === 'guardian' ? (
-        <GuardianJourney key={learner.id} map={map} learnerName={name} autoplay={autoplay} hifz={hifz} />
+        <GuardianJourney key={learner.id} map={map} learnerName={name} autoplay={autoplay} extra={extra} />
       ) : (
-        <CalmJourney key={learner.id} map={map} title={t('mine')} autoplay={autoplay} look={fam.stage} hifz={hifz} />
+        <CalmJourney key={learner.id} map={map} title={t('mine')} autoplay={autoplay} look={fam.stage} extra={extra} />
       )}
     </>
   );

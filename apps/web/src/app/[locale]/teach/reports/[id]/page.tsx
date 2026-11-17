@@ -5,7 +5,6 @@ import { FormatBadge } from '@/components/lesson-format';
 import { Badge, Progress } from '@/components/ui';
 import { ReportEditor } from '@/components/teach/report-editor';
 import { get } from '@/lib/api/server';
-import type { Surah } from '@/lib/teach/recitation';
 import type { ReportForm } from '@/lib/teach/types';
 
 /**
@@ -27,8 +26,6 @@ export default async function Report({ params }: { params: Promise<{ id: string 
   const came = group?.students.find((s) => s.kind === 'lesson' && s.status !== 'reviewed');
   if (group && form.kind === 'absence' && came && came.report_id !== form.id) redirect({ href: `/teach/reports/${came.report_id}`, locale });
   const roadmap = form.roadmap;
-  // The surahs to choose what homework asks to recite, when the form may ask it.
-  const surahs = form.assist?.recitation_check || form.homework?.expected ? (await get<{ data: Surah[] }>('/v1/teacher/texts/quran')).data : [];
 
   return (
     <div>
@@ -55,7 +52,7 @@ export default async function Report({ params }: { params: Promise<{ id: string 
           </div>
         ) : null}
       </header>
-      <ReportEditor form={form} surahs={surahs} />
+      <ReportEditor form={form} />
     </div>
   );
 }

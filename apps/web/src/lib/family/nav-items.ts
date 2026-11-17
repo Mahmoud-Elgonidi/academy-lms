@@ -20,20 +20,18 @@ export type NavItem = { href: string; key: string; icon: IconName; also?: string
  * academy's safeguarding leads that something is wrong (tell us), and talk
  * with the learner's teachers (messages; the guardians are in every
  * conversation). The roadmap and the teacher's reports stay a place of
- * their own for students, and open from the journey for everyone. While
- * the academy's plan has the Quran (`quran`), everyone has its page (the
- * plan, the hifz map, exams, certificates) after messages, so the tabs stay.
+ * their own for students, and open from the journey for everyone.
  * Everyone has their free trials (the teacher's reports after them) after
  * the notifications, never as a tab. Whoever pays (the classic look) starts
  * a new course from its own place after money.
  *
  * `modules` are the academy's areas that are on (`me.modules`, lib/modules.ts;
  * left out, everything is): messages are messaging's, help support's, the
- * journey the curriculum's, the Quran the Quran's. An area that is off leaves
+ * journey the curriculum's. An area that is off leaves
  * the menu and the tabs, and the next place takes its tab (homework); a
  * student's home without the curriculum is no longer the journey.
  */
-export function itemsOf(stage: Stage, money: boolean, guardian = false, quran = false, modules?: readonly string[] | null): { all: NavItem[]; tabs: NavItem[] } {
+export function itemsOf(stage: Stage, money: boolean, guardian = false, modules?: readonly string[] | null): { all: NavItem[]; tabs: NavItem[] } {
   const on = (area: Module) => (modules ? hasModule(modules, area) : true);
   const curriculum = on('curriculum');
   const lessons: NavItem = { href: '/family/lessons', key: 'lessons', icon: 'calendar' };
@@ -45,8 +43,6 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false, quran = 
   // The journey (curriculum); without it a guardian's or an adult's courses and reports are their own place, as a student's are.
   const journeyItems: NavItem[] = curriculum ? [journey] : [progress];
   const more: NavItem = { href: '/family/more', key: 'more', icon: 'menu' };
-  // The Quran (its page, and the hifz map under it): only while the academy's plan has it.
-  const quranItems: NavItem[] = quran && on('quran') ? [{ href: '/family/quran', key: 'quran', icon: 'book', also: ['/family/hifz'] }] : [];
   // A student's home is their journey while the academy has its curriculum on.
   const home: NavItem = stage === 'classic' || !curriculum ? { href: '/family', key: 'home', icon: 'home' } : { href: '/family', key: 'home', icon: 'map', also: ['/family/journey'] };
   const pay: NavItem[] = money ? [{ href: '/family/money', key: 'money', icon: 'coins', also: ['/family/invoices'] }] : [];
@@ -68,16 +64,16 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false, quran = 
 
   if (stage === 'classic') {
     return {
-      all: [home, lessons, ...journeyItems, ...messageItems, ...quranItems, homework, ...pay, ...start, inbox, trials, ...recordings, ...privacy, ...help, tellUs, ...account, myData],
+      all: [home, lessons, ...journeyItems, ...messageItems, homework, ...pay, ...start, inbox, trials, ...recordings, ...privacy, ...help, tellUs, ...account, myData],
       tabs: curriculum ? [home, lessons, journey, ...(money ? pay : [homework]), more] : [home, lessons, homework, ...pay, more],
     };
   }
   if (stage === 'teen') {
-    return { all: [home, lessons, homework, progress, ...messageItems, ...quranItems, inbox, trials, ...recordings, ...help, tellUs, ...account], tabs: [home, lessons, homework, progress, more] };
+    return { all: [home, lessons, homework, progress, ...messageItems, inbox, trials, ...recordings, ...help, tellUs, ...account], tabs: [home, lessons, homework, progress, more] };
   }
   // Kids and middle school: their journey, lessons and teachers on the bar; homework (also the journey's missions) under more.
   return {
-    all: [home, lessons, ...messageItems, ...quranItems, homework, progress, inbox, trials, ...recordings, ...help, tellUs, ...account],
+    all: [home, lessons, ...messageItems, homework, progress, inbox, trials, ...recordings, ...help, tellUs, ...account],
     tabs: [home, lessons, ...(messageItems.length > 0 ? messageItems : [homework]), more],
   };
 }

@@ -2,7 +2,6 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Handed } from '@/components/handed';
 import { MarkForm } from '@/components/teach/mark-form';
-import { RecitationCheck } from '@/components/teach/recitation-check';
 import { Badge, Card, Empty, Heading, join } from '@/components/ui';
 import { get } from '@/lib/api/server';
 import type { Homework } from '@/lib/teach/types';
@@ -48,7 +47,6 @@ export default async function Marking({ searchParams }: { searchParams: Promise<
                 <p className="mt-1">{h.title}</p>
                 {h.instructions ? <p className="mt-1 whitespace-pre-line text-sm text-muted">{h.instructions}</p> : null}
                 {h.due_at ? <p className="mt-1 text-xs text-muted">{t('dueAt', { when: h.due_at.label })}</p> : null}
-                {h.expected?.title ? <p className="mt-1 text-sm text-muted">{t('reciteWhat', { title: h.expected.title })}</p> : null}
                 <div className="mt-4 space-y-3">
                   {h.submissions.length === 0 ? (
                     <p className="text-sm text-muted">{t('noAnswer')}</p>
@@ -56,7 +54,6 @@ export default async function Marking({ searchParams }: { searchParams: Promise<
                     h.submissions.map((s) => (
                       <div key={s.id}>
                         <Handed submission={s} />
-                        {s.check ? <RecitationCheck check={s.check} /> : null}
                       </div>
                     ))
                   )}

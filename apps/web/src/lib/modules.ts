@@ -15,7 +15,6 @@ export type Module =
   | 'custom_branding'
   | 'payroll'
   | 'ai'
-  | 'quran'
   | 'groups'
   | 'curriculum'
   | 'games'
@@ -60,7 +59,6 @@ export function offBy(problem: { extra?: Record<string, unknown> } | null | unde
 const PLACES: [string, Module][] = [
   ['/teach/trials', 'crm'],
   ['/teach/earnings', 'payroll'],
-  ['/teach/exams', 'quran'],
   ['/teach/messages', 'messaging'],
   ['/teach/help', 'support'],
   ['/teach/performance', 'evaluation'],
@@ -70,8 +68,6 @@ const PLACES: [string, Module][] = [
   ['/family/journey', 'curriculum'],
   ['/family/games', 'games'],
   ['/family/challenges', 'curriculum'],
-  ['/family/quran', 'quran'],
-  ['/family/hifz', 'quran'],
 ];
 
 /** The module a place belongs to, or null for the core. */

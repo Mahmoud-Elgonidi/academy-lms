@@ -28,7 +28,7 @@ import {
   type TrialSettings,
 } from './trial';
 
-const family: TrialSettings = { booking: 'family', response_hours: 4, notice_hours: 3, help_choose_subject: true, help_choose_subject_id: 'quran' };
+const family: TrialSettings = { booking: 'family', response_hours: 4, notice_hours: 3, help_choose_subject: true, help_choose_subject_id: 'math' };
 const staff: TrialSettings = { ...family, booking: 'staff' };
 const draft = (change: Partial<TrialDraft> = {}): TrialDraft => ({ ...EMPTY_DRAFT, ...change });
 
@@ -49,7 +49,7 @@ describe('the steps of a free trial request', () => {
   });
 
   it('books "help me choose" in the academy\'s own trial subject, and only when it has one', () => {
-    expect(bookingSubject(family, draft({ helpChoose: true }))).toBe('quran');
+    expect(bookingSubject(family, draft({ helpChoose: true }))).toBe('math');
     expect(canPickTime(family, draft({ helpChoose: true }))).toBe(true);
     const none = { ...family, help_choose_subject: false, help_choose_subject_id: null };
     expect(bookingSubject(none, draft({ helpChoose: true }))).toBeNull();
@@ -143,13 +143,13 @@ describe('the times on the family\'s clock', () => {
 });
 
 describe('the booked lesson in a calendar', () => {
-  const event = { utc: '2026-11-01T16:30:00Z', minutes: 30, title: 'Free trial lesson: Quran, Hifz; Noor', details: 'With Mona' };
+  const event = { utc: '2026-11-01T16:30:00Z', minutes: 30, title: 'Free trial lesson: Math, Algebra; Noor', details: 'With Mona' };
 
   it('writes the calendar file in UTC, its words escaped', () => {
     const ics = icsFor(event, '2026-10-31T10:00:00Z');
     expect(ics).toContain('DTSTART:20261101T163000Z\r\n');
     expect(ics).toContain('DTEND:20261101T170000Z\r\n');
-    expect(ics).toContain('SUMMARY:Free trial lesson: Quran\\, Hifz\\; Noor\r\n');
+    expect(ics).toContain('SUMMARY:Free trial lesson: Math\\, Algebra\\; Noor\r\n');
     expect(ics).toContain('DTSTAMP:20261031T100000Z');
     expect(ics.startsWith('BEGIN:VCALENDAR\r\n')).toBe(true);
     expect(icsFor({ ...event, title: 'a\r\nEND:VCALENDAR' }, event.utc)).not.toContain('\r\nEND:VCALENDAR\r\nEND');

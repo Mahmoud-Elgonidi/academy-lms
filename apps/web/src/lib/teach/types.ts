@@ -83,8 +83,6 @@ export type ReportItem = {
   note: string | null;
 };
 
-import type { Expected, RecitationCheck } from './recitation';
-
 export type Accepts = 'any' | 'text' | 'audio' | 'file';
 export const ACCEPTS: readonly Accepts[] = ['any', 'text', 'audio', 'file'];
 
@@ -99,8 +97,6 @@ export type Submission = {
   body: string | null;
   file: { name: string; mime: string; size: number; is_audio: boolean } | null;
   submitted_at: LocalTime | null;
-  /** The recording's check against what the homework asks to recite (teacher answers only; null: none). */
-  check?: RecitationCheck | null;
 };
 
 export type Homework = {
@@ -120,8 +116,6 @@ export type Homework = {
   feedback: string | null;
   reviewed_at: LocalTime | null;
   submissions: Submission[];
-  /** What it asks to recite, checked word by word for the teacher (teacher answers only; null: nothing). */
-  expected?: Expected | null;
 };
 
 export type Roadmap = {
@@ -180,12 +174,8 @@ export type ReportForm = ReportSummary & {
   /** The subject's own questions; null when it has none. */
   template: ReportTemplate | null;
   answers: ReportAnswer[];
-  /** Helpers the academy turned on for this report: a draft from a voice note (POST teacher/reports/{report}/draft), and the recitation check. */
-  assist?: { voice_draft: boolean; recitation_check?: boolean };
-  /** The passage of the report's lessons' text, to start what to recite from (null: none). */
-  expected_suggestion?: Expected | null;
-  /** The verses with the words marked in the lesson's shared mushaf (null: none marked). */
-  mistakes_suggestion?: Expected | null;
+  /** Helpers the academy turned on for this report: a draft from a voice note (POST teacher/reports/{report}/draft). */
+  assist?: { voice_draft: boolean };
   /** A group lesson: every student's report in it, all sent together (lib/teach/group-report); null for a one-to-one lesson. */
   group?: { students: GroupStudent[] } | null;
 };

@@ -2,8 +2,6 @@
 
 import { refresh } from 'next/cache';
 import { send, type Outcome } from '@/lib/api/server';
-import type { MushafPage, MushafResult, WordRef } from '@/lib/mushaf/types';
-import type { PartKey, PartRecord } from '@/lib/quran/types';
 import type { StudentPayload } from '@/lib/teach/group-report';
 import type { ShiftBlock } from '@/lib/teach/types';
 import type { VoiceDraft } from '@/lib/teach/voice-draft';
@@ -30,15 +28,12 @@ export type ReportPayload = {
   notes_internal?: string | null;
   absence_note?: string | null;
   items?: { node_id: string; outcome: string; score: number | null; note: string | null }[];
-  homework?: { title: string; instructions: string | null; accepts: string; due_days: number; expected?: { surah: number; from: number; to: number } | null } | null;
+  homework?: { title: string; instructions: string | null; accepts: string; due_days: number } | null;
   /** Answers to the subject's questions, by key. */
   answers?: Record<string, number | string | boolean>;
   /** A group lesson: a row per student in it (lib/teach/group-report), the rest above being the class's shared part. */
   students?: StudentPayload[];
 };
-
-/** One student's record of a Quran lesson: the parts they recited. */
-export type QuranStudentRecord = { student_id: string; parts: Partial<Record<PartKey, PartRecord>> };
 
 /** Sends (or corrects) a lesson report or absence note. */
 export async function submitReport(id: string, payload: ReportPayload): Promise<Result> {
@@ -140,51 +135,6 @@ export async function saveMeetingLink(url: string): Promise<Result> {
   return result(await send('put', '/v1/teacher/meeting-link', { body: { url: url.trim() } }));
 }
 
-export type HifzChoice = { juz?: number[]; surahs?: number[]; pages?: number[] };
-
-/**
- * Says what a student already knows by heart (whole parts, surahs or pages)
- * and how well: each page starts again as memorized, due for review as that
- * says. Back comes how many pages it marked.
- */
-export async function markHifz(enrollment: string, choice: HifzChoice, strength: 'strong' | 'good' | 'weak'): Promise<Result & { count?: number }> {
-  const done = await send<{ data: { marked: number } }>('post', '/v1/teacher/students/{enrollment}/hifz/memorized', { params: { enrollment }, body: { ...choice, strength } });
-  return done.ok ? { ...result(done), count: done.data.data.marked } : result(done);
-}
-
-/** Takes pages off a student's map (marked by mistake): they are new again. */
-export async function clearHifz(enrollment: string, choice: HifzChoice): Promise<Result & { count?: number }> {
-  const done = await send<{ data: { cleared: number } }>('post', '/v1/teacher/students/{enrollment}/hifz/clear', { params: { enrollment }, body: choice });
-  return done.ok ? { ...result(done), count: done.data.data.cleared } : result(done);
-}
-
-function mushafOf(outcome: Outcome<{ data: MushafPage }>): MushafResult {
-  if (outcome.ok) return { ok: true, mushaf: outcome.data.data };
-  return { ok: false, message: Object.values(outcome.problem.errors)[0]?.[0] ?? (outcome.problem.title || undefined) };
-}
-
-/*
- * The lesson's shared mushaf: the teacher turns its pages and marks words
- * (the student's screen follows, live). Each answers the page as it stands,
- * which the screen draws; nothing else on the page changes, so nothing
- * refreshes. Not money nor lessons: no idempotency key.
- */
-
-/** Turns the lesson's mushaf to a page. */
-export async function turnMushaf(session: string, page: number): Promise<MushafResult> {
-  return mushafOf(await send<{ data: MushafPage }>('put', '/v1/learning/lessons/{session}/mushaf', { params: { session }, body: { page } }));
-}
-
-/** Marks a word (wrong, hesitation, tajweed); marking it again changes what it was. Answers `page`. */
-export async function markWord(session: string, word: WordRef, kind: string, page: number): Promise<MushafResult> {
-  return mushafOf(await send<{ data: MushafPage }>('post', '/v1/learning/lessons/{session}/mistakes', { params: { session }, body: { ...word, kind, page } }));
-}
-
-/** Takes a word's mark off. Answers `page`. */
-export async function unmarkWord(session: string, word: WordRef, page: number): Promise<MushafResult> {
-  return mushafOf(await send<{ data: MushafPage }>('delete', '/v1/learning/lessons/{session}/mistakes', { params: { session }, query: { ...word, page } }));
-}
-
 /** Saves the teacher's own card on the academy's page: the name to show, a few words, whether it shows, and a photo (or none). */
 export async function saveCard(form: FormData): Promise<Result> {
   const sent = new FormData();
@@ -197,24 +147,3 @@ export async function saveCard(form: FormData): Promise<Result> {
   return result(await send('post', '/v1/teacher/card', { form: sent }));
 }
 
-/*
- * The Quran program (docs/architecture/02, section 26): recording what each
- * student recited of a lesson's portion, a student's pace, and an exam's
- * result. A record moves the plan (and an exam may earn a certificate), so
- * each submit sends one idempotency key: a retry answers the first time.
- */
-
-/** What each student recited of today's portion (POST quran/lessons/{session}/result); once per lesson and student. */
-export async function recordQuranLesson(session: string, students: QuranStudentRecord[], key: string): Promise<Result> {
-  return result(await send('post', '/v1/quran/lessons/{session}/result', { params: { session }, body: { students }, idempotencyKey: key }));
-}
-
-/** A student's own pace: the new amount a lesson, the near review (portions) and the far review (pages); null is the program's. */
-export async function saveQuranPace(enrollment: string, pace: { new_amount: number | null; near_portions: number | null; far_pages: number | null }): Promise<Result> {
-  return result(await send('patch', '/v1/quran/students/{enrollment}/plan', { params: { enrollment }, body: pace }));
-}
-
-/** An exam's result from its examiner: the mistakes by kind (else the lesson's mushaf marks), their own grade with a note, and a fail's retake day. */
-export async function recordQuranExam(exam: string, record: PartRecord & { retake_on: string | null }, key: string): Promise<Result> {
-  return result(await send('post', '/v1/quran/exams/{exam}/result', { params: { exam }, body: record, idempotencyKey: key }));
-}

@@ -13,14 +13,14 @@ function useActive() {
   return (item: NavItem) => isAt(item, path);
 }
 
-export function SideNav({ stage, money, guardian = false, quran = false, modules, unread, chats }: { stage: Stage; money: boolean; guardian?: boolean; quran?: boolean; modules?: readonly string[]; unread: number; chats: number }) {
+export function SideNav({ stage, money, guardian = false, modules, unread, chats }: { stage: Stage; money: boolean; guardian?: boolean; modules?: readonly string[]; unread: number; chats: number }) {
   const t = useTranslations(`nav.${stage}`);
   const common = useTranslations('common');
   const active = useActive();
   return (
     <nav aria-label={t('menu')}>
       <ul className="space-y-0.5">
-        {itemsOf(stage, money, guardian, quran, modules).all.map((item) => (
+        {itemsOf(stage, money, guardian, modules).all.map((item) => (
           <li key={item.href}>
             <Link
               href={item.href}
@@ -47,7 +47,7 @@ export function TabBar({ stage, money, modules, unread, chats }: { stage: Stage;
   const t = useTranslations(`nav.${stage}`);
   const common = useTranslations('common');
   const active = useActive();
-  const { tabs } = itemsOf(stage, money, false, false, modules);
+  const { tabs } = itemsOf(stage, money, false, modules);
   const inMore = !tabs.slice(0, -1).some((tab) => active(tab));
   const kids = stage === 'kids';
   return (

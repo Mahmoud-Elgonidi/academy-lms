@@ -104,9 +104,6 @@
       "myData": "My data",
       "tellUs": "Report a concern",
       "journey": "Journey",
-      "hifz": "Hifz map",
-      "mistakes": "Mistakes notebook",
-      "quran": "Quran",
       "trials": "Free trials",
       "start": "Start a course"
     },
@@ -122,9 +119,6 @@
       "more": "More",
       "help": "Help",
       "tellUs": "Tell a grown-up",
-      "hifz": "My hifz map",
-      "mistakes": "Words to practise",
-      "quran": "My Quran",
       "trials": "My free trial"
     },
     "middle": {
@@ -141,9 +135,6 @@
       "recordings": "My lesson recordings",
       "account": "My account",
       "tellUs": "Tell us",
-      "hifz": "My hifz map",
-      "mistakes": "My mistakes notebook",
-      "quran": "Quran",
       "trials": "My free trials"
     },
     "teen": {
@@ -160,9 +151,6 @@
       "recordings": "My lesson recordings",
       "account": "My account",
       "tellUs": "Report a concern",
-      "hifz": "Hifz",
-      "mistakes": "My mistakes notebook",
-      "quran": "Quran",
       "trials": "My free trials"
     },
     "help": "Help",
@@ -171,8 +159,7 @@
     "myData": "My data",
     "concern": "Raise a concern",
     "documents": "My documents",
-    "card": "My card on the academy's page",
-    "exams": "Quran exams"
+    "card": "My card on the academy's page"
   },
   "family": {
     "switchLearner": "Choose whose",
@@ -559,16 +546,6 @@
     "suggested": "Suggested",
     "checkThis": "Check this",
     "listJoin": ", ",
-    "reciteTitle": "Recitation check",
-    "reciteToggle": "Check the recitation automatically",
-    "reciteHint": "When the student hands in a recording, the words missed or said wrong are marked for you. For you alone; the family never sees it.",
-    "reciteSuggestion": "From the lesson's text: {title}",
-    "reciteFromMistakes": "From the lesson's mistakes: {title}",
-    "reciteSuggestions": "Choose in one tap",
-    "reciteSurah": "Surah",
-    "reciteFrom": "From verse",
-    "reciteTo": "To verse",
-    "reciteWhat": "To recite: {title}",
     "upcomingNote": "The academy approved it; your current schedule stays until that day.",
     "hoursChange": "From {before} to {after} a week",
     "proposalSteps": "Where the proposal is",
@@ -1194,150 +1171,16 @@
       "chest": "This week's chest"
     }
   },
-  "recited": {
-    "missing": "Missed",
-    "wrong": "Wrong",
-    "extra": "Extra",
-    "said": "Said: {word}",
-    "heard": "What was heard"
-  },
-  "hifz": {
-    "noLearner": "No learner to show a hifz map for.",
-    "of": "{name}'s hifz map",
-    "none": "The Quran's text is not here yet; the map shows once it is.",
-    "lead": "Each row is a part, each square a page in how well it is held now.",
-    "mapLabel": "Hifz map: {memorized} of {total} pages memorized",
-    "pageOf": "Page {page} · {strength}",
-    "page": "Page {page}",
-    "pagesN": "{n, plural, =0 {No pages} =1 {1 page} other {# pages}}",
-    "juz": "Part {n}",
-    "counts": {
-      "memorized": "pages memorized",
-      "learning": "being learned",
-      "due": "due today"
-    },
-    "wird": "Today's review",
-    "wirdLeft": "{n, plural, =1 {1 page left today} other {# pages left today}}",
-    "wirdProgress": "{done} of {daily} done",
-    "wirdDone": "Today's review is done. Well done!",
-    "wirdNone": "No pages to review today.",
-    "overdue": "{n, plural, =1 {1 day late} other {# days late}}",
-    "card": "Hifz review",
-    "latest": "Last recitation: page {page}",
-    "back": "Hifz map",
-    "dueAt": "Next review {when}",
-    "text": "The page's text",
-    "surah": "Surah {name}",
-    "reveal": "Show the page",
-    "hide": "Hide the page",
-    "reciteFirst": "Recite the page from memory first, then show it and check.",
-    "howWent": "How did it go?",
-    "grades": {
-      "1": "Forgot it",
-      "2": "Hard",
-      "3": "Good",
-      "4": "Easy"
-    },
-    "graded": "Saved: {grade}",
-    "next": "Next page",
-    "toMap": "Back to the map",
-    "record": "Recite the page",
-    "recordLead": "Record the page from memory, and it is checked word by word.",
-    "stop": "Done",
-    "send": "Send the recitation",
-    "recordAgain": "Record again",
-    "noRecorder": "This browser does not record sound. Grade the page yourself instead.",
-    "listening": "Listening to the recitation…",
-    "listeningHint": "The result shows here by itself.",
-    "result": "The recitation's check",
-    "counted": "Counted as the page's review:",
-    "again": "Recite again",
-    "selfInstead": "Grade the page yourself",
-    "selfFallback": "You can recite it from memory and grade it yourself below.",
-    "kids": {
-      "left": "{n, plural, =1 {1 page left to recite} other {# pages left to recite}}",
-      "wirdDone": "You finished today's review! 🎉",
-      "record": "Recite a page",
-      "reveal": "Show me the page",
-      "reciteFirst": "Recite the page from memory first, then look at it.",
-      "listening": "Listening to you… wait a little",
-      "grades": {
-        "1": "Forgot it 😅",
-        "2": "A bit hard",
-        "3": "Good 👍",
-        "4": "Super easy ⭐"
-      }
-    },
-    "teacher": {
-      "title": "Hifz map",
-      "emptyLead": "No pages on the map yet. Say what the student already knows.",
-      "tell": "Say what they know",
-      "tellLead": "Choose parts, surahs or pages, and how well. Each page starts as memorized, and comes up for review as that says.",
-      "parts": "Parts",
-      "surahs": "Surahs",
-      "surahSearch": "Type a surah's name or number",
-      "noSurah": "No surah by that name.",
-      "pages": "Pages",
-      "pagesHint": "For example: 582, 583 or 590-592",
-      "badPages": "These pages could not be read: {pages}",
-      "howWell": "How well?",
-      "chosen": "{n, plural, =0 {No pages chosen yet} =1 {1 page} other {# pages}}",
-      "chooseFirst": "Choose a part, a surah or a page.",
-      "save": "Save",
-      "marked": "{n, plural, =0 {No pages saved} =1 {1 page saved} other {# pages saved}}",
-      "recent": "Recent reviews",
-      "noRecent": "No reviews in the last two weeks.",
-      "clear": "Take pages off",
-      "clearLead": "The pages you take off are new on the map again; their past reviews stay.",
-      "clearButton": "Take them off",
-      "clearConfirm": "Take these pages off the map?",
-      "cleared": "{n, plural, =0 {No pages taken off} =1 {1 page taken off} other {# pages taken off}}"
-    }
-  },
-  "mushaf": {
-    "title": "Mushaf",
-    "teacherLead": "Tap any word to mark it; your student sees the page with you.",
-    "teacherClosed": "Marking words is closed now: it opens with the room and closes once the lesson's report is handed in.",
-    "followLead": "The page follows the teacher's. You can look at another one too.",
-    "prev": "Previous page",
-    "next": "Next page",
-    "pageField": "Page number",
-    "go": "Open",
-    "pageOf": "Page {page} of {total}",
-    "badPage": "Type a page number from 1 to {total}.",
-    "backToTeacher": "Back to the teacher's page",
-    "teacherOn": "The teacher is on page {page}",
-    "surahHead": "Surah {name}",
-    "wordMenu": "The word “{word}”",
-    "clear": "Clear the mark",
-    "nowMark": "{kind} in this lesson",
-    "earlierMark": "{kind} before · {times, plural, =1 {once} =2 {twice} other {# times}}",
-    "legendNow": "This lesson's marks",
-    "legendEarlier": "Earlier lessons",
-    "views": "Video or mushaf",
-    "video": "Video",
-    "book": "Mistakes notebook",
-    "bookLead": "The words marked in lessons in the last six months, to go over.",
-    "bookTeacherLead": "The words marked in the student's lessons in the last six months.",
-    "bookEmpty": "No words marked in the last six months.",
-    "words": "{n, plural, =0 {No words} =1 {One word} other {# words}}",
-    "markTitle": "{kinds} · {times, plural, =1 {once} =2 {twice} other {# times}} · last {when}",
-    "kids": {
-      "bookLead": "Words we'll say again together until they're easy.",
-      "bookEmpty": "No words to practise right now. Well done!",
-      "markTitle": "Tricky {times, plural, =1 {once} =2 {twice} other {# times}} · last {when}"
-    }
-  },
   "sitePhones": {
     "guardian": {
       "hello": "Good morning",
       "child": "Following Yusuf",
       "next": "Next lesson",
-      "subject": "Quran · with Ms Sara",
+      "subject": "Arabic · with Ms Sara",
       "when": "Today 5:00 pm",
       "soon": "in 25 min",
       "report": "Last lesson's report",
-      "reportLine": "Great memorising, tajweed getting better",
+      "reportLine": "Reads with confidence, pronunciation getting better",
       "plan": "This month's plan",
       "balance": "Balance",
       "lessons": "6 lessons"
@@ -1345,13 +1188,13 @@
     "student": {
       "stars": "42",
       "streak": "5",
-      "mission": "Today's mission: Surat Al-Mulk"
+      "mission": "Today's mission: Fractions"
     },
     "teacher": {
       "today": "Today's lessons",
       "live": "Live",
       "lessons": [
-        "Quran · Yusuf",
+        "Maths · Yusuf",
         "Arabic · Mariam",
         "English · Omar"
       ],
@@ -1395,16 +1238,16 @@
     "audiences": {
       "eyebrow": "Who it is for",
       "title": "Made for your academy, whatever you teach",
-      "lead": "Quran memorisation, languages or school subjects: the system takes the shape of your work.",
+      "lead": "Online courses, languages or school subjects: the system takes the shape of your work.",
       "items": [
         {
-          "art": "📖",
-          "title": "Quran academies",
-          "text": "A memorisation map for every student, smart revision, and a shared mushaf in the lesson where the teacher marks the very word.",
+          "art": "💻",
+          "title": "Online course academies",
+          "text": "Courses arranged in levels and units, live lessons in the platform's own classroom, and a clear path for every learner.",
           "points": [
-            "A daily portion on spaced repetition",
-            "A mistakes notebook for each student",
-            "AI recitation checking"
+            "Group and one-to-one lessons",
+            "Lesson recordings to watch again",
+            "Lesson reports drafted by AI"
           ]
         },
         {
@@ -1455,12 +1298,12 @@
           "text": "Islands, stars and creatures that hatch keep a child waiting for their lesson."
         },
         {
-          "title": "The memorisation map",
-          "text": "604 pages for every student, smart revision, and a shared mushaf in the lesson."
+          "title": "Lesson recordings",
+          "text": "Lessons recorded with everyone's consent, to watch again whenever you like."
         },
         {
           "title": "An AI assistant",
-          "text": "A lesson report from a voice note, suggested practice, and recitation checking."
+          "text": "A lesson report from a voice note, and suggested practice."
         },
         {
           "title": "Leads and trial lessons",
@@ -1626,7 +1469,7 @@
     },
     "floating": {
       "report": "Last lesson's report",
-      "reportValue": "Excellent recitation",
+      "reportValue": "Excellent progress",
       "attendance": "Attendance this month",
       "attendanceValue": "100%"
     },
@@ -2383,154 +2226,6 @@
     "seatNumber": "Your seat: {seat} of {capacity}",
     "groupPlan": "Group plan",
     "listJoin": ", "
-  },
-  "quran": {
-    "noLearner": "There is no student to show the Quran for.",
-    "of": "Quran · {name}",
-    "lead": "The plan and where you are in it, the next lesson's portion, and the results of lessons and exams.",
-    "none": "No Quran plan yet. It shows here once your teacher starts the plan.",
-    "off": {
-      "title": "The Quran isn't available right now",
-      "lead": "The academy's plan doesn't include the Quran at the moment. Everything recorded is kept and shows again when it comes back."
-    },
-    "progress": "Plan completed",
-    "percent": "{n}%",
-    "position": "Current position:",
-    "frozen": {
-      "paused": "Course paused",
-      "ended": "Course ended"
-    },
-    "finishedBadge": "Plan complete",
-    "finished": "The plan is complete. Well done!",
-    "portion": "Next lesson's portion",
-    "recent": "Last lessons' results",
-    "noResults": "No results recorded yet.",
-    "frozenResult": "Position held (course paused)",
-    "advanced": "Moved forward",
-    "parts": {
-      "new": "New memorization",
-      "near": "Near review",
-      "far": "Far review"
-    },
-    "pages": "Pages: {list}",
-    "mistakeCount": "{label}: {n}",
-    "noteSaid": "Your note: {note}",
-    "juzTitle": "The thirty parts",
-    "juzDone": "{n, plural, =0 {No part complete yet} one {# of 30 parts complete} other {# of 30 parts complete}}",
-    "juzCell": "Part {juz}: {memorized} of {total} pages memorized",
-    "legendMemorized": "Memorized",
-    "legendLearning": "Learning",
-    "hifz": "Memorization and review",
-    "mapLine": "{n, plural, =0 {No pages memorized yet} one {# page memorized} other {# pages memorized}}",
-    "bookLine": "{n, plural, =0 {No words to review} one {# word to review} other {# words to review}}",
-    "exams": "Exams",
-    "certificates": "Certificates",
-    "retake": "Retake",
-    "examiner": {
-      "lead": "The exams booked with you, soonest first.",
-      "none": "No exams are booked with you right now.",
-      "recent": "Results you recorded lately",
-      "enter": "Enter the exam lesson",
-      "formLead": "Record the result after the recitation: mistakes by kind, or leave them and the words marked in the mushaf count."
-    },
-    "notBefore": "Not booked before {day}",
-    "retakeOn": "Suggested retake: {day}",
-    "revoked": "Revoked",
-    "openCertificate": "View certificate",
-    "verify": "Verification page",
-    "listJoin": ", ",
-    "kids": {
-      "lead": "Your journey with the Quran, step by step.",
-      "none": "Your journey with the Quran starts soon.",
-      "stars": "Your memorization stars",
-      "position": "You reached:",
-      "portion": "Your next lesson",
-      "recent": "Your last lessons",
-      "advanced": "One step forward",
-      "parts": {
-        "new": "New",
-        "near": "Near review",
-        "far": "Far review"
-      },
-      "juzTitle": "Parts of the Quran",
-      "hifz": "My memorization",
-      "mapLine": "See the pages you know",
-      "bookLine": "Words we practise",
-      "exams": "My exams",
-      "passed": "Passed!"
-    },
-    "lesson": {
-      "title": "Quran lesson",
-      "panel": "Quran lesson: portion and record",
-      "panelLead": "Today's portion and recording what the student recited",
-      "openMushaf": "Open the shared mushaf",
-      "noPlan": "This course has no Quran plan yet, so the lesson has no portion.",
-      "frozen": "{why}: the position stays where it is.",
-      "groupPlan": "Group plan",
-      "portion": "Today's portion",
-      "recorded": "Recorded in this lesson",
-      "record": "Record the recitation",
-      "recordLead": "Count the mistakes for each part, or leave them and the words marked in the mushaf count. The position moves on when the new part reaches the pass grade.",
-      "allRecorded": "This lesson is recorded."
-    },
-    "student": {
-      "title": "Quran plan",
-      "back": "Student",
-      "noPlan": "This course has no Quran plan yet. The academy starts it."
-    },
-    "pace": {
-      "title": "Student's pace",
-      "newAmount": "New per lesson ({unit})",
-      "nearPortions": "Near review (portions)",
-      "farPages": "Far review (pages)",
-      "hint": "Leave a field empty to go back to the program's.",
-      "bad": "Type positive numbers, and whole numbers for the reviews.",
-      "save": "Save pace",
-      "group": "The academy sets a group plan's pace."
-    },
-    "form": {
-      "mistakes": "Mistakes",
-      "less": "One less {label} in {part}",
-      "more": "One more {label} in {part}",
-      "counted": "{n, plural, =0 {No mistakes} one {# mistake} other {# mistakes}}",
-      "fromMushaf": "Mistakes come from the words marked in the mushaf unless you count them here.",
-      "grade": "Grade",
-      "byMistakes": "By mistakes",
-      "note": "Why this grade",
-      "noteHint": "Needed when you choose a grade other than the mistakes give.",
-      "nothing": "Choose at least one part the student recited.",
-      "noteNeeded": "Write why you chose this grade.",
-      "recordThem": "Record",
-      "recited": "Recited",
-      "notRecited": "This part was not recited.",
-      "skipped": "Not recorded for this student now.",
-      "save": "Record the lesson",
-      "exam": "Exam",
-      "examNote": "Your words to the student",
-      "examNoteHint": "Needed on a fail: what to work on before the retake.",
-      "retakeOn": "Retake day",
-      "retakeHint": "Only on a fail: a day after today, within 180 days.",
-      "saveExam": "Record the result",
-      "examSaved": "The exam's result is recorded."
-    }
-  },
-  "certificate": {
-    "pageTitle": "Certificate check",
-    "kicker": "Quran certificate check",
-    "valid": "Valid certificate",
-    "revoked": "This certificate was revoked",
-    "revokedOn": "This certificate was revoked on {when}",
-    "awardedTo": "Awarded to {name}",
-    "portion": "Portion",
-    "riwaya": "Riwaya",
-    "grade": "Grade",
-    "issued": "Issued",
-    "number": "Certificate number",
-    "code": "Verification code",
-    "validNote": "The academy issued this certificate, and it still stands.",
-    "revokedNote": "The academy revoked this certificate; it no longer counts.",
-    "missingTitle": "We couldn't find this certificate",
-    "missingLead": "Check the verification code printed on the certificate, then try again."
   },
   "start": {
     "metaTitle": "Start a course",
