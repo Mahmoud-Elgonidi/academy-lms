@@ -2264,6 +2264,59 @@
         "back": "كل الحصص التجريبية",
         "missedTitle": "حصة {subject} لم تتم"
       }
+    },
+    "blocks": {
+      "skip": "انتقل إلى المحتوى",
+      "link": {
+        "more": "اعرف المزيد"
+      },
+      "pricing": {
+        "highlight": "الأكثر اختيارًا",
+        "group": "مجموعة",
+        "private": "حصة فردية",
+        "rows": {
+          "format": "نوع الحصة",
+          "lessons": "عدد الحصص",
+          "minutes": "مدة الحصة",
+          "perWeek": "في الأسبوع",
+          "validity": "الصلاحية"
+        }
+      },
+      "testimonials": {
+        "rating": "{count, plural, one {نجمة واحدة من خمس} two {نجمتان من خمس} few {# نجوم من خمس} other {# نجوم من خمس}}"
+      },
+      "carousel": {
+        "previous": "السابق",
+        "next": "التالي",
+        "of": "{current} من {total}"
+      },
+      "gallery": {
+        "open": "كبّر الصورة",
+        "close": "أغلق"
+      },
+      "video": {
+        "play": "شغّل الفيديو: {title}"
+      },
+      "contact": {
+        "title": "تواصل معنا",
+        "whatsapp": "واتساب",
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "address": "العنوان",
+        "hours": "ساعات العمل"
+      },
+      "footer": {
+        "links": "روابط",
+        "social": "حساباتنا"
+      }
+    },
+    "preview": {
+      "bar": "معاينة: لم تُنشر بعد",
+      "off": "الصفحة مطفأة الآن",
+      "formNote": "هذه معاينة: النموذج لا يرسل الطلبات.",
+      "expired": "انتهت صلاحية المعاينة.",
+      "invalid": "رابط المعاينة غير صالح.",
+      "again": "أعد فتحها من لوحة التحكم."
     }
   },
   "teachCard": {

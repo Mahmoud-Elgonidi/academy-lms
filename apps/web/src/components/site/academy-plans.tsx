@@ -20,10 +20,14 @@ export type ShownPlan = {
  * default region first, the others a tap away. Prices are written on the
  * server; this only chooses which to show.
  */
-export function AcademyPlans({ plans, regions, start }: {
+export function AcademyPlans({ plans, regions, start, highlight, startHref = '#join' }: {
   plans: ShownPlan[];
   regions: { id: string; name: string }[];
   start: string | null;
+  /** The plan the academy marks ("most chosen"), with its label. */
+  highlight?: { id: string; label: string } | null;
+  /** Where each plan's button leads (the form); null leaves the button out. */
+  startHref?: string | null;
 }) {
   const t = useTranslations('site.pricing');
   const [region, setRegion] = useState(start ?? regions[0]?.id ?? '');
@@ -46,7 +50,8 @@ export function AcademyPlans({ plans, regions, start }: {
         {plans.map((plan, i) => {
           const here = plan.prices[region];
           return (
-            <article key={plan.id} className="ls-card ls-plan" data-reveal="" data-format={plan.format ?? undefined} style={{ '--i': i } as CSSProperties}>
+            <article key={plan.id} className="ls-card ls-plan" data-reveal="" data-format={plan.format ?? undefined} data-highlight={highlight?.id === plan.id ? '' : undefined} style={{ '--i': i } as CSSProperties}>
+              {highlight?.id === plan.id ? <span className="ls-plan-mark">{highlight.label}</span> : null}
               {plan.format ? <FormatBadge format={plan.format} size="md" className="self-start" /> : null}
               <h3>{plan.name}</h3>
               <div className="ls-price" aria-live="polite">
@@ -65,7 +70,7 @@ export function AcademyPlans({ plans, regions, start }: {
                   <li key={fact}><Icon name="check" /><span>{fact}</span></li>
                 ))}
               </ul>
-              <a className="ls-btn ls-btn-dark" href="#join">{t('start')}</a>
+              {startHref ? <a className="ls-btn ls-btn-dark" href={startHref}>{t('start')}</a> : null}
             </article>
           );
         })}

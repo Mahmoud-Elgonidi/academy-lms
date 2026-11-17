@@ -2264,6 +2264,59 @@
         "back": "All free trials",
         "missedTitle": "The {subject} lesson did not take place"
       }
+    },
+    "blocks": {
+      "skip": "Skip to content",
+      "link": {
+        "more": "Learn more"
+      },
+      "pricing": {
+        "highlight": "Most chosen",
+        "group": "Group",
+        "private": "One-to-one",
+        "rows": {
+          "format": "Lesson type",
+          "lessons": "Lessons",
+          "minutes": "Lesson length",
+          "perWeek": "Per week",
+          "validity": "Valid for"
+        }
+      },
+      "testimonials": {
+        "rating": "{count, plural, one {# star out of five} other {# stars out of five}}"
+      },
+      "carousel": {
+        "previous": "Previous",
+        "next": "Next",
+        "of": "{current} of {total}"
+      },
+      "gallery": {
+        "open": "Enlarge the picture",
+        "close": "Close"
+      },
+      "video": {
+        "play": "Play the video: {title}"
+      },
+      "contact": {
+        "title": "Get in touch",
+        "whatsapp": "WhatsApp",
+        "email": "Email",
+        "phone": "Phone",
+        "address": "Address",
+        "hours": "Opening hours"
+      },
+      "footer": {
+        "links": "Links",
+        "social": "Find us on"
+      }
+    },
+    "preview": {
+      "bar": "Preview: not published yet",
+      "off": "The page is off right now",
+      "formNote": "This is a preview: the form sends nothing.",
+      "expired": "This preview has expired.",
+      "invalid": "This preview link is not valid.",
+      "again": "Open it again from the control panel."
     }
   },
   "teachCard": {

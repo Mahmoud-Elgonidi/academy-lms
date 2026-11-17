@@ -1,7 +1,7 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { routing } from './i18n/routing';
-import { newNonce, NONCE_HEADER, pagePolicy } from './lib/csp';
+import { newNonce, NONCE_HEADER, pagePolicy, previewPolicy } from './lib/csp';
 import { outside } from './lib/outside';
 import { SESSION_COOKIE } from './lib/session';
 
@@ -13,14 +13,18 @@ const intl = createMiddleware(routing);
  * certificate's public check at /certificates/{code}, a family's own free
  * trial links at /trial/…, whose token is the proof, and the way back from a
  * gateway at /pay/return, which reads the invoice only with a session and
- * otherwise leads back to the app or to signing in); then next-intl
+ * otherwise leads back to the app or to signing in, and the builder's
+ * preview of an academy's draft at /site-preview, whose token is the proof
+ * and which /admin may frame); then next-intl
  * keeps the locale in the path. The API still checks the token on each call.
  * Each page gets a fresh nonce: in the request's policy, where Next.js finds
  * it for its own scripts, and in the answer's (lib/csp.ts).
  */
 export default function proxy(incoming: NextRequest) {
   const nonce = newNonce();
-  const policy = pagePolicy(nonce, process.env.NODE_ENV === 'development');
+  const development = process.env.NODE_ENV === 'development';
+  const preview = /^\/(ar|en)\/site-preview\/?$/.test(incoming.nextUrl.pathname);
+  const policy = preview ? previewPolicy(nonce, process.env.SITE_PREVIEW_FRAME_ANCESTORS ?? '', development) : pagePolicy(nonce, development);
   const headers = new Headers(incoming.headers);
   headers.set(NONCE_HEADER, nonce);
   headers.set('Content-Security-Policy', policy);
@@ -31,8 +35,8 @@ export default function proxy(incoming: NextRequest) {
   const match = request.nextUrl.pathname.match(/^\/(ar|en)(\/.*)?$/);
   if (match) {
     const [, locale, rest = '/'] = match;
-    // The public pages: the academy's (or the platform's) at the locale's root, the platform's own, a certificate's check, a family's trial links, and back from a gateway.
-    const open = rest.startsWith('/sign-in') || rest === '/' || rest === '/platform' || rest.startsWith('/platform/') || rest.startsWith('/certificates/') || rest.startsWith('/trial/') || rest === '/pay/return';
+    // The public pages: the academy's (or the platform's) at the locale's root, the platform's own, a certificate's check, a family's trial links, back from a gateway, and the builder's preview.
+    const open = rest.startsWith('/sign-in') || rest === '/' || rest === '/platform' || rest.startsWith('/platform/') || rest.startsWith('/certificates/') || rest.startsWith('/trial/') || rest === '/pay/return' || rest === '/site-preview';
     if (!open && !request.cookies.has(SESSION_COOKIE)) {
       const target = outside(request, `/${locale}/sign-in`);
       target.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search);

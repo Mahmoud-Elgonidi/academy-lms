@@ -32,6 +32,7 @@ Or sign in with a code: it goes to Mailpit (http://localhost:8025) or `apps/api/
 |---|---|
 | `API_INTERNAL_URL` | where the portal's server reaches Laravel: `http://web:8080` in the production stack, `http://127.0.0.1:8000` on a laptop |
 | `ACADEMY` | a laptop only: the academy's slug, sent as `X-Academy` (on a server, the host decides, as for the panels) |
+| `SITE_PREVIEW_FRAME_ANCESTORS` | origins (space-separated) that may frame the page builder's preview at `/{locale}/site-preview` besides the portal's own host; empty in production (the panels share the academy's host), `http://demo.localhost:8000` on a laptop |
 
 ## How it is built
 

@@ -6,6 +6,7 @@ import { initialOf } from '@/lib/site/initial';
 import type { AcademySite } from '@/lib/site/server';
 import type { Branding } from '@/lib/viewer';
 import { AcademyCode, AcademyPlans, type ShownPlan } from './academy-plans';
+import { shownPlans, startRegion } from './plans';
 import { AppShowcase } from './app-showcase';
 import { AppleIcon, GooglePlayIcon, Icon, WhatsAppIcon, type IconName } from './icons';
 import { JoinAcademyForm } from './join-academy';
@@ -22,30 +23,6 @@ type AudienceKey = 'phonesLabel' | 'floating.reportValue' | 'why.title' | 'why.l
 type AudienceList = 'trust' | 'steps.items' | 'app.steps' | 'join.points';
 
 type Words = { title: string; text: string; points: string[] };
-
-/** A price per lesson, written as the API writes money ("40 ر.س." in Arabic with Latin digits, "SAR 40" in English). */
-function perLesson(amountMinor: number, currency: string, lessons: number, locale: string): string | null {
-  if (lessons < 2 || amountMinor <= 0) return null;
-  try {
-    const digits = new Intl.NumberFormat('en', { style: 'currency', currency }).resolvedOptions().maximumFractionDigits ?? 2;
-    const value = Math.round(amountMinor / lessons) / 10 ** digits;
-    const arabic = locale.startsWith('ar');
-    const text = new Intl.NumberFormat(arabic ? 'ar-u-nu-latn' : locale, {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: Number.isInteger(value) ? 0 : Math.min(2, digits),
-      maximumFractionDigits: Number.isInteger(value) ? 0 : Math.min(2, digits),
-    }).format(value).replace(/[‎‏]/g, '').trim();
-    return arabic ? `⁨${text}⁩` : text;
-  } catch {
-    return null;
-  }
-}
-
-/** The region a visitor sees prices in first: the academy's default, else the first. */
-function startRegion(regions: AcademySite['regions']): string | null {
-  return (regions.find((r) => r.default) ?? regions[0])?.id ?? null;
-}
 
 /**
  * An academy's own page, for families looking for lessons and teachers
@@ -82,23 +59,7 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
   const teachers = shown('teachers') ? site.teachers : [];
 
   // Private or group: said on each plan only when the academy sells both (a group plan always says so).
-  const isGroup = (plan: AcademySite['plans'][number]) => plan.format === 'group';
-  const bothKinds = site.plans.some(isGroup) && site.plans.some((p) => !isGroup(p));
-  const plans: ShownPlan[] = site.plans.map((plan) => {
-    const facts = [
-      ...(isGroup(plan) && plan.max_students ? [t('pricing.upTo', { count: plan.max_students })] : []),
-      t('pricing.lessons', { count: plan.sessions_per_block }),
-      t('pricing.minutes', { count: plan.session_minutes }),
-      t('pricing.perWeek', { count: plan.sessions_per_week }),
-      t('pricing.validity', { days: plan.validity_days }),
-    ];
-    if (plan.shared) facts.push(say('pricing.shared'));
-    const prices: ShownPlan['prices'] = {};
-    for (const p of plan.prices) {
-      prices[p.region_id] = { price: p.price, perLesson: perLesson(p.amount_minor, p.currency, plan.sessions_per_block, locale) };
-    }
-    return { id: plan.id, name: plan.name, facts, prices, format: isGroup(plan) ? 'group' : bothKinds ? 'private' : null };
-  });
+  const plans: ShownPlan[] = shownPlans(site.plans, locale, (key, values) => t(key, values), say('pricing.shared'));
 
   const range = (from: string | null, to: string | null) =>
     from || to ? t('teachers.levels', { from: from ?? t('teachers.fromStart'), to: to ?? t('teachers.toEnd') }) : null;

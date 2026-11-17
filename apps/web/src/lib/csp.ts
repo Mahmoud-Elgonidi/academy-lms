@@ -20,3 +20,15 @@ export function newNonce(): string {
 export function pagePolicy(nonce: string, development = false): string {
   return `${BASE_POLICY}; script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${development ? " 'unsafe-eval'" : ''}`;
 }
+
+/**
+ * The builder's preview page (/{locale}/site-preview) may also be framed by
+ * the origins in SITE_PREVIEW_FRAME_ANCESTORS (space-separated; empty in
+ * production, where /admin and the portal share the academy's host;
+ * locally the panels' own port). Only well-formed http(s) origins are kept.
+ */
+export function previewPolicy(nonce: string, ancestors: string, development = false): string {
+  const allowed = ancestors.split(/\s+/).filter((origin) => /^https?:\/\/[a-z0-9.-]+(:\d{1,5})?$/i.test(origin));
+  const base = `base-uri 'self'; object-src 'none'; frame-ancestors 'self'${allowed.length ? ` ${allowed.join(' ')}` : ''}`;
+  return `${base}; script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${development ? " 'unsafe-eval'" : ''}`;
+}
