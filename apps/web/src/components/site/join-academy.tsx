@@ -36,7 +36,7 @@ const browserZone = () => {
  * #teach opens the second. The visitor's time zone rides along, read in the
  * browser after the page shows (the form reads the same without it).
  */
-export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosenSubject, trials, whatsapp, academy, timeFormat }: {
+export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosenSubject, trials, whatsapp, academy, timeFormat, adults = false }: {
   token: string;
   subjects: Option[];
   countries: { code: string; name: string }[];
@@ -49,6 +49,8 @@ export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosen
   whatsapp: string | null;
   academy: string;
   timeFormat: TimeFormat;
+  /** The academy teaches adults: the lesson is always for the one asking, never a child. */
+  adults?: boolean;
 }) {
   const t = useTranslations('site.join');
   const hash = useSyncExternalStore(onHash, () => window.location.hash, () => '');
@@ -90,9 +92,10 @@ export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosen
               whatsapp={whatsapp}
               academy={academy}
               timeFormat={timeFormat}
+              adults={adults}
             />
           ) : (
-            <OneForm kind={tab} token={token} subjects={subjects} countries={countries} utm={utm} chosenSubject={chosenSubject} />
+            <OneForm kind={tab} token={token} subjects={subjects} countries={countries} utm={utm} chosenSubject={chosenSubject} adults={adults} />
           )}
         </div>
       ))}
@@ -100,13 +103,14 @@ export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosen
   );
 }
 
-function OneForm({ kind, token, subjects, countries, utm, chosenSubject }: {
+function OneForm({ kind, token, subjects, countries, utm, chosenSubject, adults }: {
   kind: Kind;
   token: string;
   subjects: Option[];
   countries: { code: string; name: string }[];
   utm: { source?: string; medium?: string; campaign?: string };
   chosenSubject?: string;
+  adults: boolean;
 }) {
   const t = useTranslations('site.join');
   const [state, action, pending] = useActionState<SiteFormState, FormData>(askTheAcademy, { status: 'idle', errors: {} });
@@ -165,10 +169,12 @@ function OneForm({ kind, token, subjects, countries, utm, chosenSubject }: {
                 {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             ), true) : null}
-            <label className="ls-check ls-full">
-              <input type="checkbox" name="for_child" checked={forChild} onChange={(e) => setForChild(e.target.checked)} />
-              <span>{t('fields.for_child')}</span>
-            </label>
+            {adults ? null : (
+              <label className="ls-check ls-full">
+                <input type="checkbox" name="for_child" checked={forChild} onChange={(e) => setForChild(e.target.checked)} />
+                <span>{t('fields.for_child')}</span>
+              </label>
+            )}
             {forChild ? (
               <>
                 {field('child_name', <input name="child_name" defaultValue={was('child_name')} maxLength={60} autoComplete="off" {...invalid('child_name')} />)}

@@ -17,6 +17,10 @@ import './site.css';
 const WHY_ICONS: IconName[] = ['users', 'report', 'calendar', 'map', 'shield', 'heart'];
 const ACCENTS = ['', 'gold', 'blue', 'rose', 'violet', ''];
 
+/** The page's words that differ for adults (site.adults in the messages). */
+type AudienceKey = 'phonesLabel' | 'floating.reportValue' | 'why.title' | 'why.lead' | 'subjects.lead' | 'app.lead' | 'pricing.shared' | 'testimonials.title';
+type AudienceList = 'trust' | 'steps.items' | 'app.steps' | 'join.points';
+
 type Words = { title: string; text: string; points: string[] };
 
 /** A price per lesson, written as the API writes money ("40 ر.س." in Arabic with Latin digits, "SAR 40" in English). */
@@ -62,9 +66,13 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
   const other = locale === 'ar' ? 'en' : 'ar';
   const { content } = site;
   const shown = (section: string) => content.sections.includes(section);
+  // A page for adults says "you" where one for families says "your child": site.adults holds only the words that differ.
+  const adults = content.audience === 'adults';
+  const say = (key: AudienceKey) => (adults ? t(`adults.${key}`) : t(key));
+  const sayAll = (key: AudienceList) => (adults ? t.raw(`adults.${key}`) : t.raw(key));
   const words = all.raw('sitePhones') as PhoneWords;
-  const steps = t.raw('steps.items') as { title: string; text: string }[];
-  const appSteps = t.raw('app.steps') as Words[];
+  const steps = sayAll('steps.items') as { title: string; text: string }[];
+  const appSteps = sayAll('app.steps') as Words[];
   const titleWords = content.hero.title.split(/\s+/).filter(Boolean);
   const whatsapp = site.whatsapp ? `https://wa.me/${site.whatsapp.replace(/^\+/, '')}` : null;
   const hasStores = Boolean(site.app.android_url || site.app.ios_url);
@@ -84,7 +92,7 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
       t('pricing.perWeek', { count: plan.sessions_per_week }),
       t('pricing.validity', { days: plan.validity_days }),
     ];
-    if (plan.shared) facts.push(t('pricing.shared'));
+    if (plan.shared) facts.push(say('pricing.shared'));
     const prices: ShownPlan['prices'] = {};
     for (const p of plan.prices) {
       prices[p.region_id] = { price: p.price, perLesson: perLesson(p.amount_minor, p.currency, plan.sessions_per_block, locale) };
@@ -146,19 +154,19 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
                   <a className="ls-btn ls-btn-ghost" href={`/${locale}/sign-in`}>{t('cta.signIn')}</a>
                 </div>
                 <div className="ls-trust">
-                  {(t.raw('trust') as string[]).map((line) => (
+                  {(sayAll('trust') as string[]).map((line) => (
                     <span key={line}><Icon name="check" />{line}</span>
                   ))}
                 </div>
               </div>
-              <div className="ls-stage" role="img" aria-label={t('phonesLabel')}>
+              <div className="ls-stage" role="img" aria-label={say('phonesLabel')}>
                 <Tilt className="ls-tilt" max={10}>
                   <Phone position="start"><StudentScreen w={words.student} /></Phone>
                   <Phone position="center"><GuardianScreen w={words.guardian} /></Phone>
                   <Phone position="end"><TeacherScreen w={words.teacher} /></Phone>
                   <div className="ls-float-card" data-at="top" aria-hidden="true">
                     <span>{t('floating.report')}</span>
-                    <b>{t('floating.reportValue')}</b>
+                    <b>{say('floating.reportValue')}</b>
                     <div className="ls-stars-row">{[0, 1, 2, 3, 4].map((i) => <Icon key={i} name="star" />)}</div>
                   </div>
                   <div className="ls-float-card" data-at="bottom" aria-hidden="true">
@@ -175,8 +183,8 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
               <div className="ls-wrap">
                 <header className="ls-head" data-reveal="">
                   <span className="ls-eyebrow">{t('why.eyebrow')}</span>
-                  <h2>{t('why.title')}</h2>
-                  <p>{t('why.lead')}</p>
+                  <h2>{content.why?.title || say('why.title')}</h2>
+                  <p>{content.why?.lead || say('why.lead')}</p>
                 </header>
                 <div className="ls-cards">
                   {content.features.map((f, i) => (
@@ -197,7 +205,7 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
                 <header className="ls-head" data-reveal="">
                   <span className="ls-eyebrow">{t('subjects.eyebrow')}</span>
                   <h2>{t('subjects.title')}</h2>
-                  <p>{t('subjects.lead')}</p>
+                  <p>{say('subjects.lead')}</p>
                 </header>
                 <div className="ls-subjects">
                   {subjects.map((subject, i) => (
@@ -311,7 +319,7 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
                 <header className="ls-head" data-reveal="">
                   <span className="ls-eyebrow">{t('app.eyebrow')}</span>
                   <h2>{t('app.title')}</h2>
-                  <p>{t('app.lead')}</p>
+                  <p>{say('app.lead')}</p>
                 </header>
                 <AppShowcase
                   steps={appSteps}
@@ -358,7 +366,7 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
             <section className="ls-section" id="testimonials">
               <header className="ls-head ls-wrap" data-reveal="">
                 <span className="ls-eyebrow">{t('testimonials.eyebrow')}</span>
-                <h2>{t('testimonials.title')}</h2>
+                <h2>{say('testimonials.title')}</h2>
               </header>
               <div className="ls-marquee" data-reveal="">
                 <div className="ls-marquee-track" style={{ '--ls-marquee': `${Math.max(30, content.testimonials.length * 9)}s` } as CSSProperties}>
@@ -404,7 +412,7 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
                 <h2>{t('join.title')}</h2>
                 <p className="ls-lead" style={{ marginBlockStart: '1rem' }}>{t(site.trials?.booking === 'family' ? 'join.leadBook' : 'join.lead')}</p>
                 <ul className="ls-join-points">
-                  {(t.raw('join.points') as string[]).map((p) => <li key={p}><Icon name="star" />{p}</li>)}
+                  {(sayAll('join.points') as string[]).map((p) => <li key={p}><Icon name="star" />{p}</li>)}
                 </ul>
                 {whatsapp ? (
                   <div className="ls-cta">
@@ -424,6 +432,7 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
                   whatsapp={site.whatsapp}
                   academy={site.academy.name}
                   timeFormat={timeFormatOf(look.time_format)}
+                  adults={adults}
                 />
               </div>
             </div>

@@ -45,6 +45,10 @@ export type AcademySite = {
   academy: { name: string; code: string };
   content: {
     hero: { title: string; lead: string };
+    /** Whom the page speaks to: families (children, "your child") or adults ("you"). */
+    audience?: 'families' | 'adults';
+    /** The heading over the features; empty, the page says its own. */
+    why?: { title: string; lead: string };
     features: { title: string; text: string }[];
     testimonials: { name: string; role: string; quote: string }[];
     faqs: { q: string; a: string }[];

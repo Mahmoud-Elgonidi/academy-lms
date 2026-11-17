@@ -16,6 +16,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -124,12 +125,23 @@ final class SiteSettings extends Page
             Tabs::make('site')->persistTabInQueryString('tab')->tabs([
                 Tab::make(__($s.'tabs.page'))->id('page')->icon(Heroicon::OutlinedSparkles)->schema([
                     Toggle::make('enabled')->label(__($s.'enabled'))->helperText(__($s.'enabled_hint')),
+                    Radio::make('audience')->label(__($s.'audience'))->helperText(__($s.'audience_hint'))
+                        ->options(array_combine(SiteContent::AUDIENCES, array_map(fn (string $a) => __($s.'audiences.'.$a), SiteContent::AUDIENCES)))
+                        ->inline()->required()->live(),
                     Section::make(__($s.'hero'))->description(__($s.'hero_hint'))->columns(2)->schema([
                         ...$pair('hero.title', 'title', 120),
                         ...$pair('hero.lead', 'lead', 300, long: true),
                     ]),
                 ]),
                 Tab::make(__($s.'tabs.features'))->id('features')->icon(Heroicon::OutlinedStar)->schema([
+                    Section::make(__($s.'why'))->description(__($s.'why_hint'))->columns(2)->schema(
+                        // Empty boxes show what the page says for its audience.
+                        array_map(function (TextInput|Textarea $box): TextInput|Textarea {
+                            [$key, $locale] = explode('_', str_replace('why.', '', $box->getName()));
+
+                            return $box->placeholder(fn (Get $get): string => __("site::site.defaults.why.{$get('audience')}.{$key}", [], $locale));
+                        }, [...$pair('why.title', 'title', 120), ...$pair('why.lead', 'lead', 300, long: true)]),
+                    ),
                     Repeater::make('features')->label(__($s.'features'))->helperText(__($s.'features_hint'))
                         ->maxItems(SiteContent::MAX_FEATURES)->columns(2)->reorderable()->collapsible()->addActionLabel(__($s.'add'))
                         ->schema([...$pair('title', 'title', 60), ...$pair('text', 'text', 200, long: true)]),
