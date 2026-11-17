@@ -58,6 +58,7 @@ Future<void> _close(WidgetTester tester) async {
 
 void main() {
   test('modules: what the API lists is on, an older server that lists nothing has everything on', () {
+    // A value the app no longer knows (an area that left the platform, such as the Quran's) is ignored.
     final some = Modules.fromJson(['curriculum', 'quran']);
     expect(some.has(Feature.curriculum), isTrue);
     expect(some.has(Feature.messaging), isFalse);
@@ -70,7 +71,6 @@ void main() {
     expect(featureAt('/kids/more/stickers'), Feature.curriculum);
     expect(featureAt('/teach/more/performance'), Feature.evaluation);
     expect(featureAt('/teach/more/card'), Feature.site);
-    expect(featureAt('/family/journey/hifz'), Feature.quran);
     // The tabs themselves stay: the journey says calmly that it is off.
     expect(featureAt('/kids/journey'), isNull);
     expect(featureAt('/family/journey/homework'), isNull);

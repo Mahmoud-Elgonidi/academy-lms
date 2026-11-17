@@ -32,13 +32,13 @@ Future<(TrialCubit, FakeApi, List<Duration>)> _cubit({
   return (cubit, app.api, waits);
 }
 
-/// A parent for an eight-year-old in the Quran: up to the wishes.
+/// A parent for an eight-year-old in science: up to the wishes.
 Future<void> _toWishes(TrialCubit c) async {
   await c.openAcademy('demo');
   c
     ..chooseLearner(Learner.child)
     ..saveWho(name: 'رامي فؤاد', childName: 'سلمى', childAge: 8)
-    ..chooseSubject('sub-quran');
+    ..chooseSubject('sub-science');
 }
 
 /// Up to the code, with Saturday 6 pm chosen.
@@ -251,7 +251,7 @@ void main() {
       name: ' رامي ',
       childName: 'سلمى',
       childAge: 8,
-      subjectId: 'sub-quran',
+      subjectId: 'sub-science',
       days: {7, 6},
       dayPart: DayPart.evening,
       teacherGender: TeacherGender.female,
@@ -261,7 +261,7 @@ void main() {
       'name': 'رامي',
       'phone': '+966501234504',
       'timezone': 'Asia/Riyadh',
-      'subject_id': 'sub-quran',
+      'subject_id': 'sub-science',
       'for_child': true,
       'child_name': 'سلمى',
       'child_birth_year': 2091,

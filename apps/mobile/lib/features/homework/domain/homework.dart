@@ -1,5 +1,4 @@
 import '../../../core/time/local_time.dart';
-import 'recitation.dart';
 
 /// A piece of homework and what was handed in.
 class Homework {
@@ -19,7 +18,6 @@ class Homework {
     this.reportId,
     this.reviewedAt,
     this.practice,
-    this.expected,
   });
 
   factory Homework.fromJson(Map<String, dynamic> json) => Homework(
@@ -38,7 +36,6 @@ class Homework {
     reportId: json['report_id'] as String?,
     reviewedAt: LocalTime.fromJson(json['reviewed_at']),
     practice: json['practice'] is Map<String, dynamic> ? HomeworkPractice.fromJson(json['practice'] as Map<String, dynamic>) : null,
-    expected: Expected.fromJson(json['expected']),
   );
 
   final String id;
@@ -62,9 +59,6 @@ class Homework {
 
   /// Practice in the games on its lessons (null: none): how the best round went, or not yet.
   final HomeworkPractice? practice;
-
-  /// What it asks to recite, checked word by word for the teacher (teacher answers only).
-  final Expected? expected;
 
   bool get open => status == 'assigned' || status == 'missed';
 
@@ -114,7 +108,7 @@ class SubmittedFile {
 
 /// One hand-in: words, a file, or both.
 class Submission {
-  const Submission({required this.id, this.body, this.file, this.at, this.check});
+  const Submission({required this.id, this.body, this.file, this.at});
 
   factory Submission.fromJson(Map<String, dynamic> json) {
     final file = json['file'] as Map<String, dynamic>?;
@@ -130,7 +124,6 @@ class Submission {
               isAudio: file['is_audio'] == true,
             ),
       at: LocalTime.fromJson(json['submitted_at']),
-      check: RecitationCheck.fromJson(json['check']),
     );
   }
 
@@ -138,7 +131,4 @@ class Submission {
   final String? body;
   final SubmittedFile? file;
   final LocalTime? at;
-
-  /// The recording's check against what the homework asks to recite (teacher answers only).
-  final RecitationCheck? check;
 }

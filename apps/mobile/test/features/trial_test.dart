@@ -68,10 +68,10 @@ Future<void> _toSubject(WidgetTester tester) async {
   await _tap(tester, find.text('التالي'));
 }
 
-/// The Quran, no wishes: up to the times.
+/// Science, no wishes: up to the times.
 Future<void> _toTimes(WidgetTester tester) async {
   await _toSubject(tester);
-  await _tap(tester, find.byKey(const Key('trial-subject-sub-quran')));
+  await _tap(tester, find.byKey(const Key('trial-subject-sub-science')));
   await _tap(tester, find.text('التالي'));
 }
 
@@ -165,7 +165,7 @@ void main() {
     await _toTimes(tester);
     expect(find.text('اختر موعد الحصة'), findsOneWidget);
     final asked = app.api.sent('GET', 'site/trial-slots').single.queryParameters;
-    expect(asked['subject_id'], 'sub-quran');
+    expect(asked['subject_id'], 'sub-science');
     expect(asked['birth_year'], DateTime.now().year - 8);
     expect(asked['timezone'], 'Asia/Riyadh');
     expect(asked.containsKey('teacher_gender'), isFalse);
@@ -187,7 +187,7 @@ void main() {
   testWidgets('the days and hours they gave narrow the times, unless nothing fits', (tester) async {
     await _open(tester);
     await _toSubject(tester);
-    await _tap(tester, find.byKey(const Key('trial-subject-sub-quran')));
+    await _tap(tester, find.byKey(const Key('trial-subject-sub-science')));
     // Evenings on Sunday.
     await _tap(tester, find.byKey(const Key('trial-day-7')), 2);
     await _tap(tester, find.byKey(const Key('trial-part-evening')), 2);
@@ -216,7 +216,7 @@ void main() {
       'data': {'received': true},
     }, status: 201);
     await _toSubject(tester);
-    await _tap(tester, find.byKey(const Key('trial-subject-sub-quran')));
+    await _tap(tester, find.byKey(const Key('trial-subject-sub-science')));
     await _tap(tester, find.byKey(const Key('trial-teacher-female')), 2);
     await _tap(tester, find.text('التالي'));
     expect(find.text('لا توجد مواعيد متاحة الآن'), findsOneWidget);
@@ -237,7 +237,7 @@ void main() {
       'name': 'رامي فؤاد',
       'phone': '+966501234504',
       'timezone': 'Asia/Riyadh',
-      'subject_id': 'sub-quran',
+      'subject_id': 'sub-science',
       'for_child': true,
       'child_name': 'سلمى',
       'child_birth_year': DateTime.now().year - 8,
@@ -273,7 +273,7 @@ void main() {
     expect(sent.data, containsPair('child_name', 'سلمى'));
 
     expect(find.text('حُجزت الحصة التجريبية'), findsOneWidget);
-    expect(find.text('القرآن الكريم مع أكاديمية النور'), findsOneWidget);
+    expect(find.text('العلوم مع أكاديمية النور'), findsOneWidget);
     expect(find.bySemanticsLabel(RegExp('السبت 7 نوفمبر · 6:00 م')), findsOneWidget);
     expect(find.text('ما الذي يحدث الآن'), findsOneWidget);
     expect(find.text('احجز لطفل آخر'), findsOneWidget);
@@ -477,16 +477,16 @@ void main() {
   });
 
   testWidgets('help me choose where the academy starts with its own subject: its times, booked as help choosing', (tester) async {
-    final app = await _open(tester, helpSubject: 'sub-quran');
+    final app = await _open(tester, helpSubject: 'sub-science');
     app.api
       ..on('POST', 'site/trials/code', codeSent(), status: 202)
       ..on('POST', 'site/trials', booked(teacher: 'أ. منى', minutes: 30), status: 201);
     await _toSubject(tester);
-    expect(find.text('نبدأ بحصة في القرآن الكريم، ونختار معًا ما يناسب بعدها.'), findsOneWidget);
+    expect(find.text('نبدأ بحصة في العلوم، ونختار معًا ما يناسب بعدها.'), findsOneWidget);
     await _tap(tester, find.byKey(const Key('trial-help-choose')));
     await _tap(tester, find.text('التالي'));
     expect(find.text('اختر موعد الحصة'), findsOneWidget);
-    expect(app.api.sent('GET', 'site/trial-slots').single.queryParameters['subject_id'], 'sub-quran');
+    expect(app.api.sent('GET', 'site/trial-slots').single.queryParameters['subject_id'], 'sub-science');
     await _tap(tester, find.byKey(const Key('trial-slot-2099-11-07T18:00:00+03:00')), 2);
     await _tap(tester, find.text('احجز هذا الموعد'));
     expect(find.text('نختار المادة معًا'), findsOneWidget);

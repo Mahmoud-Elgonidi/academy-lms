@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../app/theme/app_theme.dart';
 import '../../../../../core/l10n/l10n.dart';
 import '../../../../../shared/motion/motion.dart';
 import '../../../domain/room_stage.dart';
@@ -31,7 +30,6 @@ class RoomView extends StatefulWidget {
     this.quality = RoomQuality.unknown,
     this.connecting = false,
     this.notice,
-    this.panel,
     this.pip = false,
     super.key,
   });
@@ -48,9 +46,6 @@ class RoomView extends StatefulWidget {
 
   /// A line over the stage (a weak line, a problem).
   final Widget? notice;
-
-  /// The side panel (the lesson's mushaf), shown instead of the stage while [RoomControlsState.panelOpen].
-  final Widget? panel;
 
   /// Android shrank the app into a small window: the main picture alone.
   final bool pip;
@@ -86,8 +81,8 @@ class _RoomViewState extends State<RoomView> {
   @override
   void didUpdateWidget(RoomView old) {
     super.didUpdateWidget(old);
-    // Back from the small window, or the panel closed: the bars show, and go again when quiet.
-    if (old.pip != widget.pip || old.controls.panelOpen != widget.controls.panelOpen) _wake(rebuild: false);
+    // Back from the small window: the bars show, and go again when quiet.
+    if (old.pip != widget.pip) _wake(rebuild: false);
   }
 
   @override
@@ -96,7 +91,7 @@ class _RoomViewState extends State<RoomView> {
     super.dispose();
   }
 
-  bool get _mayHide => (_landscape ?? false) && !widget.pip && !(widget.controls.panelOpen && widget.panel != null);
+  bool get _mayHide => (_landscape ?? false) && !widget.pip;
 
   /// The bars back, and four seconds more before they go.
   void _wake({bool rebuild = true}) {
@@ -217,52 +212,7 @@ class _RoomViewState extends State<RoomView> {
   }
 
   Widget _stage(BuildContext context, StagePlan plan, {required bool landscape, EdgeInsets selfInsets = const EdgeInsets.all(12)}) {
-    final panel = widget.panel;
-    final Widget body;
-    if (panel != null && widget.controls.panelOpen) {
-      final main = plan.main ?? plan.grid.firstOrNull;
-      body = Container(
-        key: const Key('classroom-mushaf'),
-        margin: EdgeInsets.all(landscape ? 6 : 8),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(color: context.colors.page, borderRadius: BorderRadius.circular(22)),
-        child: Stack(
-          children: [
-            Positioned.fill(child: panel),
-            // The main picture small over the page; a tap goes back to it.
-            if (main != null)
-              PositionedDirectional(
-                top: 10,
-                end: 10,
-                width: landscape ? 140 : 92,
-                height: landscape ? 92 : 122,
-                child: Tooltip(
-                  message: context.l10n.mushafBackToVideo,
-                  child: Semantics(
-                    button: true,
-                    label: context.l10n.mushafBackToVideo,
-                    excludeSemantics: true,
-                    child: GestureDetector(
-                      key: const Key('mushaf-pip'),
-                      onTap: widget.actions.onPanel,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white, width: 2),
-                          boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 12, offset: Offset(0, 4))],
-                        ),
-                        child: RoomTile(tile: main, video: widget.video(main), radius: 14),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      );
-    } else {
-      body = StageView(plan: plan, video: widget.video, onPin: _pin, landscape: landscape, selfInsets: selfInsets);
-    }
+    final body = StageView(plan: plan, video: widget.video, onPin: _pin, landscape: landscape, selfInsets: selfInsets);
     final notice = widget.notice;
     return Stack(
       children: [

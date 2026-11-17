@@ -13,10 +13,10 @@ Map<String, Object?> sitePage({
     'content': <String, Object?>{},
     'subjects': [
       {
-        'id': 'sub-quran',
-        'name': 'القرآن الكريم',
+        'id': 'sub-science',
+        'name': 'العلوم',
         'levels': ['المستوى الأول', 'المستوى الثاني', 'المستوى الثالث'],
-        'categories': ['حفظ'],
+        'categories': ['تجارب'],
         'programs': <Object>[],
       },
       {'id': 'sub-arabic', 'name': 'اللغة العربية', 'levels': <String>[], 'categories': <String>[], 'programs': <Object>[]},
@@ -68,7 +68,7 @@ Map<String, Object?> codeSent({int resendAfter = 60, String expires = '2099-01-0
 Map<String, Object?> booked({String? teacher, int? minutes}) => {
   'data': {
     'starts_at': time('2099-11-07T15:00:00Z', '2099-11-07T18:00:00+03:00', label: 'السبت 7 نوفمبر · 6:00 م'),
-    'subject': 'القرآن الكريم',
+    'subject': 'العلوم',
     'teacher': ?teacher,
     'minutes': ?minutes,
   },

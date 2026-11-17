@@ -4,8 +4,6 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/time/formats.dart';
 import '../../../classroom/presentation/join.dart';
-import '../../../mushaf/presentation/widgets/mushaf_entry.dart';
-import '../../../quran/presentation/widgets/quran_entry.dart';
 import '../../../schedule/domain/lesson.dart';
 import '../../../schedule/presentation/widgets/group_lesson.dart';
 import '../../../../shared/motion/motion.dart';
@@ -14,17 +12,13 @@ import '../../../../shared/widgets/minute_tick.dart';
 
 /// The next lesson, the one surface in the brand's colour: when, with
 /// whom, how long until it starts, and its one action: the join button once
-/// the room opens, before that the time it opens (and, in a Quran lesson,
-/// its shared mushaf under it, and for its teacher its portion). The countdown is drawn
+/// the room opens, before that the time it opens. The countdown is drawn
 /// again each minute; the join state comes from the screen's reload at the
 /// room's opening (`Lesson.clockMoments`).
 class NextLessonCard extends StatelessWidget {
-  const NextLessonCard({required this.lesson, this.quran = false, super.key});
+  const NextLessonCard({required this.lesson, super.key});
 
   final Lesson? lesson;
-
-  /// The teacher's: the way to the lesson's Quran portion and record, once it follows a Quran plan.
-  final bool quran;
 
   @override
   Widget build(BuildContext context) => MinuteTick(builder: _card);
@@ -171,45 +165,6 @@ class NextLessonCard extends StatelessWidget {
                     ),
                   ),
           ),
-          MushafEntry(
-            lessonId: lesson.id,
-            builder: (context, label, open) => Padding(
-              padding: const EdgeInsets.only(top: Space.s),
-              child: SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: ink,
-                    side: BorderSide(color: ink.withValues(alpha: 0.55)),
-                  ),
-                  onPressed: open,
-                  icon: const Icon(Icons.menu_book_rounded),
-                  label: Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-                ),
-              ),
-            ),
-          ),
-          if (quran)
-            QuranLessonEntry(
-              lessonId: lesson.id,
-              builder: (context, label, open) => Padding(
-                padding: const EdgeInsets.only(top: Space.s),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: ink,
-                      side: BorderSide(color: ink.withValues(alpha: 0.55)),
-                    ),
-                    onPressed: open,
-                    icon: const Icon(Icons.fact_check_outlined),
-                    label: Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );

@@ -9,7 +9,6 @@ enum Feature {
   customBranding('custom_branding'),
   payroll('payroll'),
   ai('ai'),
-  quran('quran'),
   groups('groups'),
   curriculum('curriculum'),
   games('games'),
@@ -70,7 +69,5 @@ Feature? featureAt(String location) {
   if (parts.length >= 3 && parts[1] == 'journey' && parts[2] == 'levels') return Feature.curriculum;
   if (path == '/teach/more/performance') return Feature.evaluation;
   if (path == '/teach/more/card') return Feature.site;
-  // Everything of the Quran: the hifz map and the Quran under a journey, a lesson's mushaf and portion, the exams.
-  if (has('hifz') || has('mushaf') || has('quran') || has('quran-exams')) return Feature.quran;
   return null;
 }

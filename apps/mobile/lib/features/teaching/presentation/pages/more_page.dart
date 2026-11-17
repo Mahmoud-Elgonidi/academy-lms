@@ -10,7 +10,6 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../profile/presentation/pages/account_page.dart';
 import '../../../profile/presentation/widgets/more_rows.dart';
-import '../../../quran/presentation/widgets/quran_entry.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
 import '../widgets/teacher_header.dart';
@@ -157,7 +156,6 @@ class _GroupsState extends State<_Groups> {
             ),
           ],
         ),
-        const QuranExaminerGroup(),
         MenuGroup(
           title: l.moreMine,
           children: [

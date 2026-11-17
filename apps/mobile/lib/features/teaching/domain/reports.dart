@@ -1,6 +1,5 @@
 import '../../../core/time/local_time.dart';
 import '../../homework/domain/homework.dart';
-import '../../homework/domain/recitation.dart';
 import '../../roadmap/domain/report_answers.dart';
 
 /// A lesson report or absence note in the teacher's list.
@@ -170,9 +169,6 @@ class ReportForm {
     this.template,
     this.answers = const [],
     this.voiceDraft = false,
-    this.recitationCheck = false,
-    this.expectedSuggestion,
-    this.mistakesSuggestion,
     this.group,
   });
 
@@ -193,9 +189,6 @@ class ReportForm {
     template: ReportTemplate.fromJson(json['template']),
     answers: ReportAnswer.listOf(json['answers']),
     voiceDraft: (json['assist'] as Map<String, dynamic>?)?['voice_draft'] == true,
-    recitationCheck: (json['assist'] as Map<String, dynamic>?)?['recitation_check'] == true,
-    expectedSuggestion: Expected.fromJson(json['expected_suggestion']),
-    mistakesSuggestion: Expected.fromJson(json['mistakes_suggestion']),
     group: switch ((json['group'] as Map<String, dynamic>?)?['students']) {
       final List<dynamic> rows => [for (final r in rows.whereType<Map<String, dynamic>>()) GroupReportRow.fromJson(r)],
       _ => null,
@@ -221,15 +214,6 @@ class ReportForm {
 
   /// The academy turned on drafts from a voice note for this report.
   final bool voiceDraft;
-
-  /// The academy turned on the recitation check: homework handed in by voice may say what to recite.
-  final bool recitationCheck;
-
-  /// The passage of the report's lessons' text, to start what to recite from.
-  final Expected? expectedSuggestion;
-
-  /// The verses with the words marked in the lesson's shared mushaf (the surah with the most marks), to recite again.
-  final Expected? mistakesSuggestion;
 
   /// A group lesson: every student's report in it, handed in together (the shared part once, a row each);
   /// null for a one-to-one lesson.

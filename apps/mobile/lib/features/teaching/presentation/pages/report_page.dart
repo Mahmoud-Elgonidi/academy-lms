@@ -14,7 +14,6 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../../../shared/widgets/star_picker.dart';
 import '../../../homework/data/homework_repository.dart';
-import '../../../homework/domain/recitation.dart';
 import '../../../homework/presentation/widgets/submission_view.dart';
 import '../../../homework/presentation/widgets/voice_recorder.dart';
 import '../../../roadmap/domain/report_answers.dart';
@@ -29,10 +28,8 @@ import '../../../../shared/widgets/latin_digits.dart';
 /// it went (focus and overall), the subject's own questions, the words for
 /// the family and for the academy, and homework. An absence asks only for
 /// the note. When the academy turned it on, a voice note fills what is still
-/// empty (marked suggested until sent), and homework handed in by voice may
-/// say what to recite (the lesson's text, or the verses with the words marked
-/// in its mushaf), for a check of each recording. Sending and keeping a
-/// draft on this phone stay at the foot. Pops with true once sent.
+/// empty (marked suggested until sent). Sending and keeping a draft on this
+/// phone stay at the foot. Pops with true once sent.
 ///
 /// A group lesson's report goes in once for the whole class: the shared part
 /// (what was covered, the questions, the homework for every student, the
@@ -40,7 +37,7 @@ import '../../../../shared/widgets/latin_digits.dart';
 /// decided who came (focus, overall and a note for them) and who did not
 /// (the note for their absence); each row is checked on its own. The voice
 /// note fills the shared part only.
-typedef _Loaded = (ReportForm, ReportDraft?, List<Surah>);
+typedef _Loaded = (ReportForm, ReportDraft?);
 
 class TeacherReportPage extends StatelessWidget {
   const TeacherReportPage({required this.reportId, super.key});
@@ -55,9 +52,7 @@ class TeacherReportPage extends StatelessWidget {
         final repository = c.read<TeachingRepository>();
         final form = await repository.report(reportId);
         final draft = form.summary.open ? await ReportDrafts().of(account, reportId) : null;
-        // The surahs to choose what homework asks to recite, when the form may ask it.
-        final surahs = form.recitationCheck || form.homework?.expected != null ? await repository.surahs() : const <Surah>[];
-        return (form, draft, surahs);
+        return (form, draft);
       })..load(),
       child: BlocBuilder<LoadCubit<_Loaded>, LoadState<_Loaded>>(
         builder: (context, state) {
@@ -92,7 +87,6 @@ class TeacherReportPage extends StatelessWidget {
                 key: ValueKey(x.$2?.savedAt),
                 form: x.$1,
                 draft: x.$2,
-                surahs: x.$3,
                 account: account,
                 onDiscard: () async {
                   await ReportDrafts().remove(account, reportId);
@@ -108,12 +102,9 @@ class TeacherReportPage extends StatelessWidget {
 }
 
 class _Editor extends StatefulWidget {
-  const _Editor({required this.form, required this.account, required this.onDiscard, this.draft, this.surahs = const [], super.key});
+  const _Editor({required this.form, required this.account, required this.onDiscard, this.draft, super.key});
 
   final ReportForm form;
-
-  /// The Quran's surahs, when the form may ask what homework is to recite.
-  final List<Surah> surahs;
 
   /// What was kept on this phone; it stands in for the form's own values.
   final ReportDraft? draft;
@@ -140,13 +131,6 @@ class _EditorState extends State<_Editor> {
   late final _hwDetails = TextEditingController(text: d == null ? f.homework?.instructions : d!['hw_details'] as String?);
   late String _accepts = (d == null ? f.homework?.accepts : d!['accepts'] as String?) ?? 'any';
   late int _dueDays = (d?['due_days'] as num?)?.toInt() ?? 3;
-
-  /// What homework handed in by voice asks to recite: its own passage, else the lessons'.
-  late final Expected? _recited = f.homework?.expected ?? f.expectedSuggestion;
-  late bool _reciteOn = d == null ? f.homework?.expected != null : d!['recite_on'] == true;
-  late int? _reciteSurah = d == null ? _recited?.surah : (d!['recite_surah'] as num?)?.toInt();
-  late final _reciteFrom = TextEditingController(text: d == null ? _recited?.from.toString() : d!['recite_from'] as String?);
-  late final _reciteTo = TextEditingController(text: d == null ? _recited?.to.toString() : d!['recite_to'] as String?);
   late final Map<String, Object?> _answers = d == null
       ? {for (final a in f.answers) a.key: a.value}
       : {...?(d!['answers'] as Map<String, dynamic>?)};
@@ -199,23 +183,9 @@ class _EditorState extends State<_Editor> {
   /// Handed in or marked: the homework stays as it is.
   bool get _homeworkLocked => f.homework != null && (f.homework!.status != 'assigned' || f.homework!.submissions.isNotEmpty);
 
-  /// The form asks what to recite: the helper is on, or the homework already says.
-  bool get _reciteOffered => widget.surahs.isNotEmpty && (f.recitationCheck || f.homework?.expected != null);
-
   @override
   void dispose() {
-    for (final c in [
-      _forFamily,
-      _internal,
-      _absence,
-      _hwTitle,
-      _hwDetails,
-      _reciteFrom,
-      _reciteTo,
-      ..._typed.values,
-      ..._rowNote.values,
-      ..._rowAbsence.values,
-    ]) {
+    for (final c in [_forFamily, _internal, _absence, _hwTitle, _hwDetails, ..._typed.values, ..._rowNote.values, ..._rowAbsence.values]) {
       c.dispose();
     }
     super.dispose();
@@ -285,24 +255,10 @@ class _EditorState extends State<_Editor> {
       _fieldErrors = const {};
       _rowErrors = const {};
     });
-    final recite = expectedPayload(
-      offered: _reciteOffered,
-      on: _reciteOn,
-      accepts: _accepts,
-      surah: _reciteSurah,
-      from: int.tryParse(_reciteFrom.text.trim()),
-      to: int.tryParse(_reciteTo.text.trim()),
-    );
     final homework = _homeworkLocked || _absent
         ? null
         : (_give && _hwTitle.text.trim().isNotEmpty
-              ? {
-                  'title': _hwTitle.text.trim(),
-                  'instructions': _hwDetails.text.trim(),
-                  'accepts': _accepts,
-                  'due_days': _dueDays,
-                  if (recite.send) 'expected': recite.value,
-                }
+              ? {'title': _hwTitle.text.trim(), 'instructions': _hwDetails.text.trim(), 'accepts': _accepts, 'due_days': _dueDays}
               : {'title': ''});
     final payload = _group
         ? {
@@ -531,10 +487,6 @@ class _EditorState extends State<_Editor> {
       'hw_details': _hwDetails.text,
       'accepts': _accepts,
       'due_days': _dueDays,
-      'recite_on': _reciteOn,
-      'recite_surah': _reciteSurah,
-      'recite_from': _reciteFrom.text,
-      'recite_to': _reciteTo.text,
       'answers': {..._answers, for (final e in _typed.entries) e.key: e.value.text},
       if (_group)
         'group': {
@@ -985,94 +937,6 @@ class _EditorState extends State<_Editor> {
     );
   }
 
-  /// Asks to recite the verses with the words marked in the lesson's mushaf: the check on, the passage filled in.
-  void _reciteMistakes(Expected passage) => setState(() {
-    _reciteOn = true;
-    _reciteSurah = passage.surah;
-    _reciteFrom.text = '${passage.from}';
-    _reciteTo.text = '${passage.to}';
-  });
-
-  /// What homework handed in by voice asks to recite, so each recording is checked word by word for the teacher.
-  Widget _recitation(bool locked) {
-    final l = context.l10n;
-    final surah = widget.surahs.where((s) => s.number == _reciteSurah).firstOrNull;
-    final suggestion = f.expectedSuggestion?.title;
-    final mistakes = f.mistakesSuggestion;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Gap(Space.s),
-        SwitchListTile.adaptive(
-          key: const Key('recite'),
-          contentPadding: EdgeInsets.zero,
-          title: Text(l.reciteToggle, style: context.text.titleSmall),
-          subtitle: Text(l.reciteHint, style: context.type.caption),
-          value: _reciteOn,
-          onChanged: locked ? null : (v) => setState(() => _reciteOn = v),
-        ),
-        if (mistakes != null && !locked)
-          ActionChip(
-            key: const Key('recite-mistakes'),
-            avatar: Icon(Icons.menu_book_rounded, size: 18, color: context.colors.dangerInk),
-            label: Text(l.reciteFromMistakes(mistakes.title ?? '${mistakes.surah}: ${mistakes.from}–${mistakes.to}')),
-            onPressed: () => _reciteMistakes(mistakes),
-          ),
-        if (_err('homework.expected') case final e?) Text(e, style: TextStyle(color: context.colors.dangerInk)),
-        if (_reciteOn) ...[
-          if (suggestion != null) Text(l.reciteSuggestion(suggestion), style: context.type.caption),
-          ListTile(
-            key: const Key('recite-surah'),
-            contentPadding: EdgeInsets.zero,
-            title: Text(l.reciteSurah, style: context.type.caption),
-            subtitle: Text(surah?.label ?? l.reciteChooseSurah, style: context.text.titleSmall),
-            trailing: const Icon(Icons.expand_more_rounded),
-            enabled: !locked,
-            onTap: () async {
-              final picked = await showModalBottomSheet<({String id, String label})>(
-                context: context,
-                useRootNavigator: true,
-                isScrollControlled: true,
-                builder: (c) =>
-                    _LessonPicker(search: l.reciteSearch, options: [for (final s in widget.surahs) (id: '${s.number}', label: s.label)]),
-              );
-              if (picked != null) setState(() => _reciteSurah = int.parse(picked.id));
-            },
-          ),
-          if (_err('homework.expected.surah') case final e?) Text(e, style: TextStyle(color: context.colors.dangerInk)),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TextField(
-                  key: const Key('recite-from'),
-                  controller: _reciteFrom,
-                  enabled: !locked,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(labelText: l.reciteFrom, errorText: _err('homework.expected.from')),
-                ),
-              ),
-              const Gap(Space.m),
-              Expanded(
-                child: TextField(
-                  key: const Key('recite-to'),
-                  controller: _reciteTo,
-                  enabled: !locked,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: l.reciteTo,
-                    helperText: surah == null ? null : '${surah.verses}',
-                    errorText: _err('homework.expected.to'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
-
   Widget _homeworkCard(bool locked) {
     final l = context.l10n;
     final hw = f.homework;
@@ -1087,7 +951,6 @@ class _EditorState extends State<_Editor> {
             ],
           ),
           const SizedBox(height: 6),
-          if (hw.expected?.title case final title?) Text(l.reciteWhat(title), style: context.text.bodySmall),
           Text(l.homeworkLocked, style: context.text.bodySmall),
           for (final s in hw.submissions) ...[const SizedBox(height: 8), SubmissionView(submission: s, title: hw.student)],
         ],
@@ -1137,7 +1000,6 @@ class _EditorState extends State<_Editor> {
                 ),
             ],
           ),
-          if (_reciteOffered && reciteAccepts.contains(_accepts)) _recitation(locked),
           if (hw == null) ...[
             const SizedBox(height: 10),
             Row(
@@ -1204,12 +1066,9 @@ class _Section extends StatelessWidget {
 
 /// The lessons of the course to add one more to the report, with a search.
 class _LessonPicker extends StatefulWidget {
-  const _LessonPicker({required this.options, this.search});
+  const _LessonPicker({required this.options});
 
   final List<({String id, String label})> options;
-
-  /// The search field's label (lessons when none is given).
-  final String? search;
 
   @override
   State<_LessonPicker> createState() => _LessonPickerState();
@@ -1232,7 +1091,7 @@ class _LessonPickerState extends State<_LessonPicker> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: TextField(
-                  decoration: InputDecoration(labelText: widget.search ?? l.searchLessons, prefixIcon: const Icon(Icons.search_rounded)),
+                  decoration: InputDecoration(labelText: l.searchLessons, prefixIcon: const Icon(Icons.search_rounded)),
                   onChanged: (v) => setState(() => _q = v.trim()),
                 ),
               ),

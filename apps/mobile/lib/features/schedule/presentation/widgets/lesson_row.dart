@@ -6,14 +6,12 @@ import '../../../../core/time/formats.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../classroom/presentation/join.dart';
-import '../../../mushaf/presentation/widgets/mushaf_entry.dart';
-import '../../../quran/presentation/widgets/quran_entry.dart';
 import '../../domain/lesson.dart';
 import 'group_lesson.dart';
 
 /// What a lesson's own sheet can do now; each is null when it may not.
 class LessonActions {
-  const LessonActions({this.cancel, this.refuse, this.rate, this.dispute, this.report, this.quran = false});
+  const LessonActions({this.cancel, this.refuse, this.rate, this.dispute, this.report});
 
   final VoidCallback? cancel;
   final VoidCallback? refuse;
@@ -22,9 +20,6 @@ class LessonActions {
 
   /// The teacher's report on it, still to write.
   final VoidCallback? report;
-
-  /// The teacher's way to its Quran portion and record, shown once the lesson follows a Quran plan.
-  final bool quran;
 }
 
 /// One lesson in a list: the time in its own column, whom it is with, its
@@ -171,8 +166,7 @@ Tone lessonTone(Lesson x) => switch (x.status) {
 
 /// A lesson's own sheet: when and with whom on the viewer's clock, its state,
 /// a substitute's note with turning it down, the room (join, or when it
-/// opens), its shared mushaf in a Quran lesson, and what else may be done
-/// with it; cancelling last, in red.
+/// opens), and what else may be done with it; cancelling last, in red.
 Future<void> showLessonSheet(BuildContext context, Lesson lesson, {required LessonActions actions, String? learner, String? zone}) =>
     showActionSheet<void>(
       context,
@@ -320,24 +314,6 @@ class _LessonSheet extends StatelessWidget {
               ),
             ),
           ],
-          if (!x.cancelled)
-            MushafEntry(
-              lessonId: x.id,
-              onOpen: _after(context, () => openMushaf(host, x.id)),
-              builder: (context, label, open) => Padding(
-                padding: const EdgeInsets.only(top: Space.s),
-                child: SecondaryAction(label, icon: Icons.menu_book_rounded, onPressed: open),
-              ),
-            ),
-          if (actions.quran && !x.cancelled)
-            QuranLessonEntry(
-              lessonId: x.id,
-              onOpen: _after(context, () => openQuranLesson(host, x.id)),
-              builder: (context, label, open) => Padding(
-                padding: const EdgeInsets.only(top: Space.s),
-                child: SecondaryAction(label, icon: Icons.fact_check_outlined, onPressed: open),
-              ),
-            ),
           if (actions.report != null) ...[
             const Gap(Space.l),
             PrimaryAction(l.writeTheReport, icon: Icons.edit_note_rounded, onPressed: _after(context, actions.report!)),

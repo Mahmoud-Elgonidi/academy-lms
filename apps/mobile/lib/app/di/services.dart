@@ -13,13 +13,11 @@ import '../../features/classroom/data/classroom_repository.dart';
 import '../../features/dashboard/data/family_repository.dart';
 import '../../features/dashboard/data/home_loader.dart';
 import '../../features/games/data/games_repository.dart';
-import '../../features/hifz/data/hifz_repository.dart';
 import '../../features/homework/data/homework_repository.dart';
 import '../../features/journey/data/journey_repository.dart';
 import '../../features/live/data/live_repository.dart';
 import '../../features/notifications/data/notifications_repository.dart';
 import '../../features/profile/data/profile_repository.dart';
-import '../../features/quran/data/quran_repository.dart';
 import '../../features/roadmap/data/learning_repository.dart';
 import '../../features/schedule/data/lessons_repository.dart';
 import '../../features/start/data/start_repository.dart';
@@ -27,7 +25,6 @@ import '../../features/consent/data/consent_repository.dart';
 import '../../features/privacy/data/privacy_repository.dart';
 import '../../features/recordings/data/recordings_repository.dart';
 import '../../features/messages/data/messages_repository.dart';
-import '../../features/mushaf/data/mushaf_repository.dart';
 import '../../features/safeguarding/data/safeguarding_repository.dart';
 import '../../features/support/data/support_repository.dart';
 import '../../features/teaching/data/teaching_repository.dart';
@@ -52,9 +49,6 @@ class Services {
       challenges = ChallengesRepository(api),
       games = GamesRepository(api),
       journey = JourneyRepository(api),
-      hifz = HifzRepository(api),
-      mushaf = MushafRepository(api),
-      quran = QuranRepository(api),
       notifications = NotificationsRepository(api),
       consent = ConsentRepository(api),
       privacy = PrivacyRepository(api),
@@ -91,13 +85,6 @@ class Services {
   final ChallengesRepository challenges;
   final GamesRepository games;
   final JourneyRepository journey;
-  final HifzRepository hifz;
-
-  /// A Quran lesson's shared mushaf and the mistakes notebook.
-  final MushafRepository mushaf;
-
-  /// The Quran program: plans and portions, lessons' results, exams and certificates.
-  final QuranRepository quran;
   final NotificationsRepository notifications;
   final ConsentRepository consent;
   final PrivacyRepository privacy;
@@ -146,9 +133,6 @@ class Services {
       RepositoryProvider.value(value: challenges),
       RepositoryProvider.value(value: games),
       RepositoryProvider.value(value: journey),
-      RepositoryProvider.value(value: hifz),
-      RepositoryProvider.value(value: mushaf),
-      RepositoryProvider.value(value: quran),
       RepositoryProvider.value(value: notifications),
       RepositoryProvider.value(value: home),
       RepositoryProvider.value(value: live),
