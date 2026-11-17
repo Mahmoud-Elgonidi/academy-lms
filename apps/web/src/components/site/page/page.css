@@ -72,6 +72,17 @@
 
 .sp-page[data-hero-width='wide'] .sp-header .ls-wrap { inline-size: min(1360px, 100% - 2rem); }
 
+/* The menu on narrow screens (not on today's header, which keeps its look). */
+.sp-menu { position: relative; }
+.sp-menu summary { display: grid; place-items: center; inline-size: 2.5rem; block-size: 2.5rem; border-radius: var(--sp-btn-radius); border: 1px solid var(--sp-line); cursor: pointer; list-style: none; }
+.sp-menu summary::-webkit-details-marker { display: none; }
+.sp-menu summary svg { inline-size: 1.3rem; block-size: 1.3rem; }
+.sp-menu nav { position: absolute; inset-block-start: calc(100% + 0.6rem); inset-inline-end: 0; display: grid; min-inline-size: 13rem; padding: 0.5rem; border-radius: var(--sp-radius); background: white; color: var(--sp-ink); border: 1px solid var(--sp-line); box-shadow: 0 24px 48px -24px rgb(10 15 26 / 0.35); }
+.sp-menu nav a { padding: 0.7rem 0.9rem; border-radius: calc(var(--sp-radius) * 0.6); text-decoration: none; font-weight: 500; }
+.sp-menu nav a:hover { background: var(--sp-tint); }
+@media (min-width: 900px) { .sp-menu { display: none; } }
+.ls-hero-grid[data-solo] { grid-template-columns: minmax(0, 52rem); }
+
 /* ── Blocks: tone, spacing, measure ────────────────────── */
 .sp-block {
   --pad: clamp(64px, 3rem + 3.5vw, 96px);

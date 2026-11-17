@@ -4,6 +4,7 @@ import { WhatsAppIcon } from '../icons';
 import { SolidOnScroll } from '../motion';
 import type { PageCtx } from './context';
 import { labelOf, PageButton } from './link';
+import { PhoneMenu } from './phone-menu';
 
 export type HeaderMode = 'night' | 'light' | 'solid' | 'minimal';
 
@@ -52,6 +53,7 @@ export function PageHeader({ ctx, mode }: { ctx: PageCtx; mode: HeaderMode }) {
           {cta ? (
             <PageButton link={cta} ctx={ctx} className={`ls-btn ls-btn-main ls-btn-small${mode === 'minimal' ? '' : ' ls-wide-only'}`}>{ctaLabel}</PageButton>
           ) : null}
+          {mode !== 'night' && mode !== 'minimal' ? <PhoneMenu items={nav} label={t('blocks.menu')} /> : null}
         </div>
       </div>
     </SolidOnScroll>
