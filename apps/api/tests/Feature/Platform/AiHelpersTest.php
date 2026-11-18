@@ -199,6 +199,24 @@ it('keeps the switches to the owner and admin, and audits the helpers that are o
     Livewire::test(AiSettingsPage::class)->assertForbidden();
 });
 
+it('ignores a helper that left the platform (the recitation check) still stored in the academy\'s settings', function () {
+    // A row written before the Quran left: its helper's column on, and its key among the switched-off ones.
+    AiSettings::query()->create(['practice_items' => true, 'disabled' => ['recitation_check']]);
+    DB::table('ai_settings')->update(['recitation_check' => true]);
+    $ai = app(AcademyAi::class);
+    expect($ai->on(AiFeature::PracticeItems))->toBeTrue()
+        ->and(AiFeature::tryFrom('recitation_check'))->toBeNull()
+        ->and(AiSettings::current()->isOn('recitation_check'))->toBeFalse();
+
+    $this->actingAs($this->owner);
+    Filament::setCurrentPanel('academy');
+    Livewire::test(AiSettingsPage::class)
+        ->assertFormSet(['practice_items' => true, 'report_draft' => false])
+        ->fillForm(['report_draft' => true])
+        ->call('save')->assertHasNoFormErrors();
+    expect(AiSettings::current())->toMatchArray(['practice_items' => true, 'report_draft' => true]);
+});
+
 it('keeps only how many calls and how they went, never who asked or what was said, and never changes it', function () {
     AiUsage::note(AiFeature::ReportDraft, 'elevenlabs', 'scribe', ['audio_seconds' => 42], 'ok');
     $row = DB::table('ai_usage')->sole();

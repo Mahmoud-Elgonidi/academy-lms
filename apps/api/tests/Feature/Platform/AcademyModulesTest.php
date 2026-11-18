@@ -33,6 +33,7 @@ use Modules\Platform\Domain\Modules\ModuleRules;
 use Modules\Platform\Filament\Pages\AcademyModulesPage;
 use Modules\Platform\Models\AcademyModules;
 use Modules\Platform\Models\SaasPlan;
+use Modules\Platform\Models\SaasSubscription;
 use Modules\Platform\Plans\PlatformAcademyPlan;
 use Modules\Platform\Setup\ModulesStep;
 use Modules\Scheduling\Filament\Pages\FindTeacher;
@@ -333,4 +334,34 @@ it('tells the apps which modules are on, in me and in branding', function () {
     $on = array_values(array_diff($all, ['games', 'support']));
     moduleApi($this->student)->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.modules', $on);
     $this->getJson('http://noor.lms.test/api/v1/branding')->assertOk()->assertJsonPath('modules', $on);
+});
+
+it('ignores an area that left the platform (the Quran) still stored in a plan, the academy\'s terms or its modules', function () {
+    $this->enrolStudentOnPlan();
+    $all = array_column(Feature::cases(), 'value');
+    $this->clearTenant();
+    $plan = SaasPlan::query()->create(['code' => 'old', 'name_ar' => 'قديمة', 'name_en' => 'Old', 'features' => [...$all, 'quran']]);
+    app(ChangeAcademyPlan::class)->handle($this->academy->id, $plan->id, 'For this test', [], ['payroll'], ['messaging']);
+    // Rows written before the Quran left: its key in the plan's terms and in the academy's hidden modules.
+    // A subscription is kept as it was once written (only ending it is allowed), so the old one is ended and its successor written as it was then.
+    $current = SaasSubscription::currentFor($this->academy->id);
+    $current->update(['ended_at' => now()]);
+    SaasSubscription::query()->create([
+        'academy_id' => $this->academy->id, 'plan_id' => $plan->id, 'reason' => 'Written before the Quran left', 'started_at' => now(),
+        'features_on' => ['payroll', 'quran'], 'features_off' => ['messaging', 'quran'],
+    ]);
+    $this->actAsTenant($this->academy);
+    AcademyModules::query()->create(['hidden' => ['quran']]);
+    app(PlatformAcademyPlan::class)->forget();
+
+    $on = array_values(array_diff($all, ['messaging']));
+    expect(array_map(fn (Feature $f) => $f->value, app(PlatformAcademyPlan::class)->modules()))->toBe($on)
+        ->and(AcademyModules::current()->hiddenFeatures())->toBe([]);
+    moduleApi($this->student)->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.modules', $on);
+    $this->getJson('http://noor.lms.test/api/v1/branding')->assertOk()->assertJsonPath('modules', $on);
+
+    // Saving the modules over the old row works, and leaves the old key behind.
+    modules(['games' => false]);
+    expect(AcademyModules::current()->hiddenFeatures())->toBe([Feature::Games]);
+    Livewire::test(AcademyModulesPage::class)->assertOk()->assertSee(Feature::Games->label());
 });
