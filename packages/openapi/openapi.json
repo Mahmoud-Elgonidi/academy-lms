@@ -12703,7 +12703,7 @@
                                                 "type": "object",
                                                 "properties": {
                                                     "id": {
-                                                        "type": "string"
+                                                        "type": "integer"
                                                     },
                                                     "device": {
                                                         "type": "string"

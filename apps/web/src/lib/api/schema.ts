@@ -7989,7 +7989,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: {
-                            id: string;
+                            id: number;
                             device: string;
                             /** @description This app, the one asking. */
                             current: boolean;
