@@ -70,7 +70,8 @@
 .sp-page[data-character='editorial'] .ls-initial { background: var(--accent); color: var(--sp-on-accent); box-shadow: none; border-radius: calc(var(--sp-radius) * 0.6); }
 .sp-page[data-character='editorial'] .ls-nav a { font-weight: 500; }
 
-.sp-page[data-hero-width='wide'] .sp-header .ls-wrap { inline-size: min(1360px, 100% - 2rem); }
+.sp-page[data-hero-width='wide'] .sp-header .ls-wrap,
+.sp-page[data-character='editorial'][data-hero-width='wide'] .ls-header .ls-wrap { inline-size: min(1360px, 100% - 2rem); }
 
 /* A night mood keeps the bar dark too. */
 .sp-page[data-mood='night'] .ls-header.sp-header { background: color-mix(in oklab, var(--sp-night) 90%, transparent); color: white; box-shadow: 0 1px 0 rgb(255 255 255 / 0.08); }
@@ -524,7 +525,8 @@
 @media (min-width: 860px) { .sp-stats { grid-template-columns: repeat(min(var(--count), 6), minmax(0, 1fr)); } }
 /* Two to a row on narrow screens: an odd last number takes the whole row instead of leaving a hole. */
 @media (max-width: 859.98px) { .sp-stats > div:last-child:nth-child(odd) { grid-column: 1 / -1; } }
-.sp-stats > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 0.4rem; }
+.sp-stats > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; align-items: flex-start; gap: 0.4rem; }
+/* A number reads left to right (dir=auto); sized to itself, it still stands at the page's start. */
 .sp-stats dd { font-size: var(--fs-4); line-height: 1; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .sp-stats dt { color: var(--soft); font-size: var(--fs--1); line-height: 1.5; max-inline-size: 22ch; }
 .sp-stats[data-variant='band'] > div { padding-inline-start: 1.25rem; border-inline-start: 2px solid color-mix(in oklab, var(--accent) 45%, transparent); }
