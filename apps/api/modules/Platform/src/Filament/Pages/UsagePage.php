@@ -76,7 +76,7 @@ final class UsagePage extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
 
-    protected static ?int $navigationSort = 914;
+    protected static ?int $navigationSort = 915;
 
     protected static ?string $slug = 'settings/usage';
 

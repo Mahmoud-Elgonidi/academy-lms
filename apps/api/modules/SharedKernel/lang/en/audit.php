@@ -96,8 +96,12 @@ return [
             'concern_reopened' => 'Safeguarding concern :concern opened again',
         ],
         'site' => [
-            'settings_saved' => "The academy's page saved (:state; sections: :shown; free trials booked by: :trial_booking; answered within :response_hours hours; booked at least :trial_notice_hours hours ahead)",
+            'settings_saved' => "The academy's page settings saved (:state; free trials booked by: :trial_booking; answered within :response_hours hours; booked at least :trial_notice_hours hours ahead)",
             'request_handled' => 'A request from the academy\'s page answered (:request_status)',
+            'page_published' => "The academy's page published (version :revision, :blocks sections: :types)",
+            'page_discarded' => "The academy's page draft set back to the published page",
+            'page_template_applied' => "The academy's page draft started from a template: :template",
+            'page_restored' => "Version :revision of the academy's page restored to the draft",
         ],
         'crm' => [
             'settings_saved' => 'Lead settings changed (website leads shared out: :assign_website_leads)',
@@ -244,6 +248,8 @@ return [
         ],
     ],
     'values' => [
+        'template' => ['online_courses' => 'online courses academy', 'training' => 'training and development', 'kids_families' => 'school for children and families', 'language_school' => 'language school', 'blank' => 'blank page'],
+        'types' => ['hero' => 'opening', 'features' => 'why us', 'subjects' => 'subjects', 'teachers' => 'teachers', 'pricing' => 'prices', 'steps' => 'how it starts', 'app' => 'app', 'testimonials' => 'testimonials', 'faq' => 'questions', 'stats' => 'numbers', 'rich_text' => 'text', 'image_text' => 'picture and text', 'gallery' => 'gallery', 'video' => 'video', 'logos' => 'logos', 'cta' => 'call to action', 'form' => 'form', 'contact' => 'contact', 'spacer' => 'spacer'],
         'offer' => ['applied' => 'applied', 'ended' => 'ended', 'family_discount_bigger' => 'sibling discount bigger', 'not_for_plan' => 'not for this plan', 'package' => 'shared package', 'none' => 'none'],
         'trial_booking' => ['family' => 'the family', 'staff' => 'the academy\'s staff'],
         'assign_website_leads' => ['on' => 'on', 'off' => 'off'],

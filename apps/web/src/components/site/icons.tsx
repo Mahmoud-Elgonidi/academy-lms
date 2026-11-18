@@ -29,9 +29,21 @@ const PATHS = {
   child: 'M12 4a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM8 21v-6l-2-2 2.5-3h7L18 13l-2 2v6M10 21v-4h4v4',
   pencil: 'M15.23 5.23l3.54 3.54M4 20h4L18.5 9.5a2.5 2.5 0 0 0-3.54-3.54L4.5 16.5 4 20z',
   sparkle: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z',
+  play: 'M14.75 12.27l-4.6 2.8A.75.75 0 0 1 9 14.43V9.57a.75.75 0 0 1 1.15-.64l4.6 2.8a.32.32 0 0 1 0 .54zM21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
+  award: 'M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zm-3.5-1.1L7 21l5-3 5 3-1.5-7.1',
+  laptop: 'M4 16V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10M2 19h20l-1.5-3h-17L2 19z',
+  mail: 'M3 8l7.89 5.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z',
+  pin: 'M17.66 16.66L13.41 20.9a2 2 0 0 1-2.82 0l-4.25-4.24a8 8 0 1 1 11.32 0zM15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0z',
+  call: 'M3 5a2 2 0 0 1 2-2h3.28a1 1 0 0 1 .95.68l1.5 4.5a1 1 0 0 1-.5 1.21l-2.26 1.13a11.04 11.04 0 0 0 5.52 5.52l1.13-2.26a1 1 0 0 1 1.21-.5l4.5 1.5a1 1 0 0 1 .68.95V19a2 2 0 0 1-2 2h-1C9.72 21 3 14.28 3 6V5z',
+  external: 'M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M14 4h6m0 0v6m0-6L10 14',
 } as const;
 
 export type IconName = keyof typeof PATHS;
+
+/** Whether a name (an academy's choice for a feature, sent by the API) is one of these icons. */
+export function isIconName(name: string): name is IconName {
+  return Object.hasOwn(PATHS, name);
+}
 
 export function Icon({ name, className }: { name: IconName; className?: string }) {
   return (

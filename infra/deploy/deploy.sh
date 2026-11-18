@@ -242,6 +242,11 @@ UPLOAD_SCANNER=none
 UPLOAD_SCAN_REQUIRED=true
 CLAMAV_HOST=clamav
 
+# The academy's page builder (docs/architecture/site-builder.md): its live preview opens on the
+# academy's own host, and the page's files are paths on that host. Only a laptop sets these.
+SITE_PREVIEW_URL=
+SITE_MEDIA_ABSOLUTE=false
+
 # Claude, with the platform's own key: the games studio's designer (console › Game studio,
 # GAME_DESIGNER_MODEL: a Claude model id; the most capable one designs best) and the
 # academies' helpers (Settings › AI helpers; each academy turns each one on, all off at

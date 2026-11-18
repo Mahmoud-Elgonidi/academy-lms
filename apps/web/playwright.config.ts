@@ -51,6 +51,8 @@ export default defineConfig({
     { name: 'modules', testMatch: /modules\.spec\.ts/, dependencies: ['setup'], use: { ...devices['Pixel 7'] } },
     // The pages before signing in (the academy's, the platform's), on a phone.
     { name: 'site', testMatch: /site\.spec\.ts/, dependencies: ['setup'], use: { ...devices['Pixel 7'] } },
+    // The academy's page as blocks: the migrated page, the builder's preview.
+    { name: 'site-page', testMatch: /site-page\.spec\.ts/, use: { ...devices['Pixel 7'] } },
     // A family asks for and books its own free trial on the academy's page, and uses the trial's own links (no sign-in).
     { name: 'trial', testMatch: /trial-booking\.spec\.ts/, use: { ...devices['Pixel 7'] } },
     // After the free trial: the report and its offer from the family's link and in their account, the second trial, booking again (no setup: its own families).

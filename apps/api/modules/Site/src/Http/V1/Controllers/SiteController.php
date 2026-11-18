@@ -12,11 +12,23 @@ use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\People\Contracts\DTOs\PublicTeacher;
 use Modules\People\Contracts\DTOs\PublicTeacherSubject;
 use Modules\People\Contracts\PeopleApi;
+use Modules\Platform\Contracts\BrandingApi;
 use Modules\SharedKernel\Http\FormToken;
+use Modules\SharedKernel\Http\ProblemException;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\Site\Actions\SubmitJoinRequest;
-use Modules\Site\Domain\SiteContent;
+use Modules\Site\Domain\Page\LegacyContent;
+use Modules\Site\Domain\Page\LegacyImport;
+use Modules\Site\Domain\Page\Localize;
+use Modules\Site\Domain\Page\MediaRefs;
+use Modules\Site\Domain\Page\PageContext;
+use Modules\Site\Models\SiteMedia;
+use Modules\Site\Models\SitePage;
 use Modules\Site\Models\SiteSettings;
+use Modules\Site\Support\PreviewLinks;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * The academy's public page (on its own host, before anyone signs in): what
@@ -30,18 +42,68 @@ final class SiteController
     /**
      * The academy's page.
      *
-     * In the request's language (Accept-Language). Not found while the academy keeps its page off.
+     * In the request's language (Accept-Language): the published page the academy built (`page`: its settings and its visible
+     * blocks in order), and the live lists its blocks read. Not found while the academy keeps its page off.
      */
-    public function show(TenantContext $tenants, CatalogApi $catalog, CurriculumApi $curriculum, PeopleApi $people, BillingApi $billing): JsonResponse
+    public function show(TenantContext $tenants, CatalogApi $catalog, CurriculumApi $curriculum, PeopleApi $people, BillingApi $billing, BrandingApi $branding): JsonResponse
     {
         $settings = SiteSettings::current();
         abort_unless($settings->shows(), 404);
+        $page = SitePage::current();
+        $doc = $page->publishedDoc() ?? LegacyImport::fromContent($settings->said());
+        $revision = $page->published !== null ? (int) $page->published_revision : 0;
+
+        return response()->json(['data' => $this->payload($doc, $revision, $settings, $tenants, $catalog, $curriculum, $people, $billing, $branding, FormToken::issue(SubmitJoinRequest::FORM))])
+            ->header('Cache-Control', 'no-store');
+    }
+
+    /**
+     * The academy's page as its draft stands: the builder's live preview.
+     *
+     * The same shape as `GET v1/site`, from the draft, even while the page is off, with `preview` added and an empty `form_token`
+     * (the preview's form does not send). token is the builder's preview token (two hours): another academy's or a forged one is
+     * not found; an expired one is gone (410, link-expired).
+     */
+    public function preview(Request $request, TenantContext $tenants, CatalogApi $catalog, CurriculumApi $curriculum, PeopleApi $people, BillingApi $billing, BrandingApi $branding): JsonResponse
+    {
+        $token = $request->query('token');
+        $token = is_string($token) ? $token : null;
+        if (! PreviewLinks::valid($token)) {
+            if (PreviewLinks::expired($token)) {
+                throw new ProblemException(410, 'link-expired', (string) __('site::builder.preview.expired'));
+            }
+            throw new NotFoundHttpException;
+        }
+        abort_unless(app(AcademyPlan::class)->has(Feature::Site), 404);
+        $settings = SiteSettings::current();
+        $page = SitePage::current();
+        $data = $this->payload($page->draftDoc(), (int) $page->draft_revision, $settings, $tenants, $catalog, $curriculum, $people, $billing, $branding, '');
+        $data['preview'] = [
+            /** The draft's revision shown. */
+            'revision' => (int) $page->draft_revision,
+            /** The revision that is live, or null when nothing was published yet. */
+            'published_revision' => $page->published !== null ? (int) $page->published_revision : null,
+            /** Whether the page is on (it may be built before it is). */
+            'enabled' => $settings->shows(),
+        ];
+
+        return response()->json(['data' => $data])
+            ->header('Cache-Control', 'no-store, private')
+            ->header('X-Robots-Tag', 'noindex, nofollow')
+            ->header('Referrer-Policy', 'no-referrer');
+    }
+
+    /**
+     * @param  array<string, mixed>  $doc
+     * @return array<string, mixed>
+     */
+    private function payload(array $doc, int $revision, SiteSettings $settings, TenantContext $tenants, CatalogApi $catalog, CurriculumApi $curriculum, PeopleApi $people, BillingApi $billing, BrandingApi $branding, string $formToken): array
+    {
         $locale = app()->getLocale() === 'en' ? 'en' : 'ar';
         $academy = $tenants->require();
-        $said = $settings->said();
-        $content = SiteContent::localized($said, $locale);
 
         $subjects = [];
+        $subjectIds = [];
         foreach ($catalog->subjectNames() as $id => $name) {
             $programs = [];
             foreach ($curriculum->programsFor((string) $id) as $program) {
@@ -59,6 +121,7 @@ final class SiteController
             foreach ($catalog->categories((string) $id) as $category) {
                 $categories[] = (string) $category;
             }
+            $subjectIds[] = (string) $id;
             $subjects[] = [
                 /** Sent back with the free-trial form as subject_id. */
                 'id' => (string) $id,
@@ -72,17 +135,62 @@ final class SiteController
             ];
         }
 
+        // The live blocks that show, and their filters (never sent: applied to the lists below).
+        $teachersBlock = null;
+        $pricingBlock = null;
+        foreach ($doc['blocks'] as $block) {
+            if ($block['hidden']) {
+                continue;
+            }
+            if ($block['type'] === 'teachers' && $teachersBlock === null) {
+                $teachersBlock = $block;
+            }
+            if ($block['type'] === 'pricing' && $pricingBlock === null) {
+                $pricingBlock = $block;
+            }
+        }
+
         $teachers = [];
-        if (SiteContent::shows($said, 'teachers')) {
+        if ($teachersBlock !== null) {
+            $cards = [];
             foreach ($people->publicTeachers() as $teacher) {
+                $cards[$teacher->id] = $teacher;
+            }
+            $only = $teachersBlock['data']['only'] ?? [];
+            $chosen = [];
+            if ($only === []) {
+                $chosen = array_values($cards);
+            } else {
+                foreach ($only as $id) {
+                    if (isset($cards[$id])) {
+                        $chosen[] = $cards[$id];
+                    }
+                }
+            }
+            foreach (array_slice($chosen, 0, (int) ($teachersBlock['data']['max'] ?? 12)) as $teacher) {
                 $teachers[] = $this->teacher($teacher);
             }
         }
 
         $plans = [];
-        if (SiteContent::shows($said, 'pricing')) {
+        if ($pricingBlock !== null) {
             $groupSize = $people->largestGroupSize();
+            $options = [];
             foreach ($billing->planOptions() as $plan) {
+                $options[$plan->id] = $plan;
+            }
+            $only = $pricingBlock['data']['only'] ?? [];
+            $chosen = [];
+            if ($only === []) {
+                $chosen = array_values($options);
+            } else {
+                foreach ($only as $id) {
+                    if (isset($options[$id])) {
+                        $chosen[] = $options[$id];
+                    }
+                }
+            }
+            foreach ($chosen as $plan) {
                 $plans[] = $this->plan($plan, $locale, $groupSize);
             }
         }
@@ -92,49 +200,86 @@ final class SiteController
             $regions[] = $this->region($region);
         }
 
-        return response()->json([
-            'data' => [
-                'academy' => [
-                    /** The academy's name in the request's language. */
-                    'name' => $locale === 'ar' ? $academy->nameAr : $academy->nameEn,
-                    /** The academy's code: what the app asks for to open it (X-Academy). */
-                    'code' => $academy->slug,
-                ],
-                /** The words the academy set: hero, why (the heading over features; empty: the page's own), features, testimonials, faqs, sections shown, whatsapp, seo. */
-                'content' => $content,
-                /** Every subject the academy teaches (the free-trial form picks one). */
-                'subjects' => $subjects,
-                /** The teachers who chose to show on the page; empty when the section is off. */
-                'teachers' => $teachers,
-                /** The plans families enrol on, with a price in each region; empty when the section is off. */
-                'plans' => $plans,
-                /** The price regions: the page picks the visitor's by their country, else the default one. */
-                'regions' => $regions,
-                'app' => [
-                    /** The store page on Android, or null. */
-                    'android_url' => config('platform.app.android_url'),
-                    /** The App Store page, or null. */
-                    'ios_url' => config('platform.app.ios_url'),
-                ],
-                /** The academy's WhatsApp number (E.164), or null. */
-                'whatsapp' => $content['whatsapp'],
-                /** How the academy takes a free trial asked for on the page. */
-                'trials' => [
-                    /** family: the family picks its own time (site/trial-slots, then a code to its number: site/trials); staff: the academy books it after the request. */
-                    'booking' => $settings->trial_booking,
-                    /** How many hours the academy promises to answer a request within. */
-                    'response_hours' => (int) $settings->response_hours,
-                    /** A family books its own trial at least this many hours ahead. */
-                    'notice_hours' => (int) $settings->trial_notice_hours,
-                    /** Whether a family that asks for help choosing starts with the academy's own trial subject (else sales choose with them). */
-                    'help_choose_subject' => $settings->default_trial_subject_id !== null,
-                    /** That subject (one of `subjects`), whose times a family that asks for help choosing books from; null when sales choose with them. */
-                    'help_choose_subject_id' => $settings->default_trial_subject_id !== null ? (string) $settings->default_trial_subject_id : null,
-                ],
-                /** Sent back with the request form, unchanged. */
-                'form_token' => FormToken::issue(SubmitJoinRequest::FORM),
+        $media = [];
+        $ids = MediaRefs::of($doc);
+        if ($ids !== []) {
+            foreach (SiteMedia::query()->whereIn('id', $ids)->get() as $file) {
+                $media[$file->id] = [
+                    'kind' => $file->kind, 'mime' => $file->mime, 'url' => $file->url(), 'width' => $file->width, 'height' => $file->height,
+                    'alt' => ['ar' => (string) ($file->alt['ar'] ?? ''), 'en' => (string) ($file->alt['en'] ?? '')],
+                ];
+            }
+        }
+        $tokens = $branding->current()->tokens;
+        $localized = Localize::page($doc, new PageContext(
+            locale: $locale,
+            media: $media,
+            subjects: $subjectIds,
+            brandFonts: ['heading' => (string) $tokens['heading_font'], 'body' => (string) $tokens['body_font']],
+            fontsUrl: fn (string ...$families): string => $branding->fontsUrl(...$families),
+        ));
+        $content = LegacyContent::from($doc, $locale);
+
+        return [
+            'academy' => [
+                /** The academy's name in the request's language. */
+                'name' => $locale === 'ar' ? $academy->nameAr : $academy->nameEn,
+                /** The academy's code: what the app asks for to open it (X-Academy). */
+                'code' => $academy->slug,
             ],
-        ])->header('Cache-Control', 'no-store');
+            /**
+             * The page the academy built: revision (the published one), settings (audience, fonts, accent, mood, corners,
+             * motion, header, footer, whatsapp, floating_whatsapp, seo) and blocks (visible only, in order: id, type, variant,
+             * anchor, nav, style, data; see docs/architecture/site-builder.md, sections 3 and 8.3).
+             */
+            'page' => [
+                'revision' => $revision,
+                'settings' => $localized['settings'],
+                /**
+                 * The visible blocks in order; each block's `data` is its type's own shape (site-builder.md, 8.3).
+                 *
+                 * @var list<array{id: string, type: 'hero'|'features'|'subjects'|'teachers'|'pricing'|'steps'|'app'|'testimonials'|'faq'|'stats'|'rich_text'|'image_text'|'gallery'|'video'|'logos'|'cta'|'form'|'contact'|'spacer', variant: string, anchor: string, nav: string|null, style: array{tone: 'paper'|'white'|'tint'|'brand'|'night', align: 'start'|'center', space: 'compact'|'normal'|'roomy', width: 'narrow'|'normal'|'wide'|'full', eyebrow: bool}, data: array<string, mixed>}>
+                 */
+                'blocks' => $localized['blocks'],
+            ],
+            /**
+             * The old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`.
+             *
+             * @deprecated Read `page`; this goes in a later release.
+             */
+            'content' => $content,
+            /** Every subject the academy teaches (the free-trial form picks one). */
+            'subjects' => $subjects,
+            /** The teachers its teachers block shows, in its order; empty without a visible teachers block. */
+            'teachers' => $teachers,
+            /** The plans its pricing block shows, with a price in each region; empty without a visible pricing block. */
+            'plans' => $plans,
+            /** The price regions: the page picks the visitor's by their country, else the default one. */
+            'regions' => $regions,
+            'app' => [
+                /** The store page on Android, or null. */
+                'android_url' => config('platform.app.android_url'),
+                /** The App Store page, or null. */
+                'ios_url' => config('platform.app.ios_url'),
+            ],
+            /** The academy's WhatsApp number (E.164), or null. */
+            'whatsapp' => $localized['settings']['whatsapp'],
+            /** How the academy takes a free trial asked for on the page. */
+            'trials' => [
+                /** family: the family picks its own time (site/trial-slots, then a code to its number: site/trials); staff: the academy books it after the request. */
+                'booking' => $settings->trial_booking,
+                /** How many hours the academy promises to answer a request within. */
+                'response_hours' => (int) $settings->response_hours,
+                /** A family books its own trial at least this many hours ahead. */
+                'notice_hours' => (int) $settings->trial_notice_hours,
+                /** Whether a family that asks for help choosing starts with the academy's own trial subject (else sales choose with them). */
+                'help_choose_subject' => $settings->default_trial_subject_id !== null,
+                /** That subject (one of `subjects`), whose times a family that asks for help choosing books from; null when sales choose with them. */
+                'help_choose_subject_id' => $settings->default_trial_subject_id !== null ? (string) $settings->default_trial_subject_id : null,
+            ],
+            /** Sent back with the request form, unchanged ("" in the preview: its form does not send). */
+            'form_token' => $formToken,
+        ];
     }
 
     /**

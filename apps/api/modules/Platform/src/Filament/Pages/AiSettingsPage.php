@@ -35,7 +35,7 @@ final class AiSettingsPage extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static ?int $navigationSort = 909;
+    protected static ?int $navigationSort = 910;
 
     protected static ?string $slug = 'settings/ai';
 

@@ -4,19 +4,16 @@ namespace Modules\Site\Filament\Pages;
 
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -30,18 +27,17 @@ use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\Site\Actions\SaveSiteSettings;
-use Modules\Site\Domain\SiteContent;
+use Modules\Site\Models\SitePage;
 use Modules\Site\Models\SiteSettings as Settings;
 use UnitEnum;
 
 /**
  * Settings › The academy's page (site.manage: the owner and admins): on or
- * off, its opening words, why families choose the academy, what families
- * said, questions and answers, which sections show, the teachers' cards
- * (each teacher writes theirs; the academy may take any off), its
- * WhatsApp and search words, and its free trials (who books them, how soon
- * the academy answers, the subject for "help me choose"). Subjects come from Catalog, prices from the
- * plans; the requests it brings are under "Page requests".
+ * off, the teachers' cards (each teacher writes theirs; the academy may take
+ * any off), and its free trials (who books them, how soon the academy
+ * answers, the subject for "help me choose"). What the page says and how it
+ * looks is built in Settings › Page design (SiteBuilder). The requests it
+ * brings are under "Page requests".
  *
  * @property-read Schema $form
  */
@@ -51,7 +47,7 @@ final class SiteSettings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGlobeAlt;
 
-    protected static ?int $navigationSort = 908;
+    protected static ?int $navigationSort = 909;
 
     protected static ?string $slug = 'settings/site';
 
@@ -97,12 +93,13 @@ final class SiteSettings extends Page
     private static function state(Settings $settings): array
     {
         return ['enabled' => $settings->enabled, 'trial_booking' => $settings->trial_booking, 'response_hours' => $settings->response_hours, 'trial_notice_hours' => $settings->trial_notice_hours,
-            'default_trial_subject_id' => $settings->default_trial_subject_id] + $settings->said();
+            'default_trial_subject_id' => $settings->default_trial_subject_id];
     }
 
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('design')->label(__('site::site.settings.design'))->icon(Heroicon::OutlinedPaintBrush)->url(fn () => SiteBuilder::getUrl()),
             Action::make('open')->label(__('site::site.settings.open'))->icon(Heroicon::OutlinedArrowTopRightOnSquare)->color('gray')
                 ->url(fn () => self::pageUrl(app()->getLocale() === 'en' ? 'en' : 'ar'))->openUrlInNewTab(),
         ];
@@ -110,63 +107,22 @@ final class SiteSettings extends Page
 
     public function form(Schema $schema): Schema
     {
-        $l = 'site::site.fields.';
         $s = 'site::site.settings.';
-        $pair = fn (string $name, string $label, int $max, bool $long = false) => [
-            ($long ? Textarea::make("{$name}_ar")->rows(3) : TextInput::make("{$name}_ar"))->label(__($l."{$label}_ar"))->maxLength($max),
-            ($long ? Textarea::make("{$name}_en")->rows(3) : TextInput::make("{$name}_en"))->label(__($l."{$label}_en"))->maxLength($max)->extraInputAttributes(['dir' => 'ltr']),
-        ];
-        $sections = [];
-        foreach (SiteContent::SECTIONS as $section) {
-            $sections[$section] = __('site::site.sections.'.$section);
-        }
 
         return $schema->statePath('data')->components([
             Tabs::make('site')->persistTabInQueryString('tab')->tabs([
                 Tab::make(__($s.'tabs.page'))->id('page')->icon(Heroicon::OutlinedSparkles)->schema([
                     Toggle::make('enabled')->label(__($s.'enabled'))->helperText(__($s.'enabled_hint')),
-                    Radio::make('audience')->label(__($s.'audience'))->helperText(__($s.'audience_hint'))
-                        ->options(array_combine(SiteContent::AUDIENCES, array_map(fn (string $a) => __($s.'audiences.'.$a), SiteContent::AUDIENCES)))
-                        ->inline()->required()->live(),
-                    Section::make(__($s.'hero'))->description(__($s.'hero_hint'))->columns(2)->schema([
-                        ...$pair('hero.title', 'title', 120),
-                        ...$pair('hero.lead', 'lead', 300, long: true),
-                    ]),
-                ]),
-                Tab::make(__($s.'tabs.features'))->id('features')->icon(Heroicon::OutlinedStar)->schema([
-                    Section::make(__($s.'why'))->description(__($s.'why_hint'))->columns(2)->schema(
-                        // Empty boxes show what the page says for its audience.
-                        array_map(function (TextInput|Textarea $box): TextInput|Textarea {
-                            [$key, $locale] = explode('_', str_replace('why.', '', $box->getName()));
-
-                            return $box->placeholder(fn (Get $get): string => __("site::site.defaults.why.{$get('audience')}.{$key}", [], $locale));
-                        }, [...$pair('why.title', 'title', 120), ...$pair('why.lead', 'lead', 300, long: true)]),
-                    ),
-                    Repeater::make('features')->label(__($s.'features'))->helperText(__($s.'features_hint'))
-                        ->maxItems(SiteContent::MAX_FEATURES)->columns(2)->reorderable()->collapsible()->addActionLabel(__($s.'add'))
-                        ->schema([...$pair('title', 'title', 60), ...$pair('text', 'text', 200, long: true)]),
-                ]),
-                Tab::make(__($s.'tabs.testimonials'))->id('testimonials')->icon(Heroicon::OutlinedChatBubbleBottomCenterText)->schema([
-                    Repeater::make('testimonials')->label(__($s.'testimonials'))->helperText(__($s.'testimonials_hint'))
-                        ->maxItems(SiteContent::MAX_TESTIMONIALS)->columns(2)->reorderable()->collapsible()->addActionLabel(__($s.'add'))
-                        ->schema([
-                            TextInput::make('name')->label(__($l.'name'))->required()->maxLength(60)->columnSpanFull(),
-                            ...$pair('role', 'role', 60),
-                            ...$pair('quote', 'quote', 400, long: true),
-                        ]),
-                ]),
-                Tab::make(__($s.'tabs.faqs'))->id('faqs')->icon(Heroicon::OutlinedQuestionMarkCircle)->schema([
-                    Repeater::make('faqs')->label(__($s.'faqs'))->maxItems(SiteContent::MAX_FAQS)->columns(2)->reorderable()->collapsible()
-                        ->addActionLabel(__($s.'add'))
-                        ->schema([...$pair('q', 'q', 160), ...$pair('a', 'a', 800, long: true)]),
-                ]),
-                Tab::make(__($s.'tabs.sections'))->id('sections')->icon(Heroicon::OutlinedSquares2x2)->schema([
-                    CheckboxList::make('sections')->label(__($s.'sections'))->helperText(__($s.'sections_hint'))->options($sections)->columns(2),
+                    // The words, sections and look are the builder's now (Settings › Page design).
+                    Callout::make(__($s.'design_title'))
+                        ->description(fn (): string => __($s.'design_hint', ['audience' => __($s.'audiences.'.$this->audience())]))
+                        ->icon(Heroicon::OutlinedPaintBrush)->color('primary')
+                        ->actions([Action::make('design')->label(__($s.'design'))->icon(Heroicon::OutlinedPaintBrush)->url(fn () => SiteBuilder::getUrl())]),
                 ]),
                 Tab::make(__($s.'tabs.teachers'))->id('teachers')->icon(Heroicon::OutlinedAcademicCap)->schema([
                     View::make('site::filament.teacher-cards')->viewData(fn (): array => [
                         'cards' => app(PeopleApi::class)->teacherCards(),
-                        'off' => ! in_array('teachers', (array) ($this->data['sections'] ?? []), true),
+                        'off' => ! $this->showsTeachers(),
                     ]),
                 ]),
                 Tab::make(__($s.'tabs.trials'))->id('trials')->icon(Heroicon::OutlinedCalendarDays)->schema([
@@ -182,17 +138,27 @@ final class SiteSettings extends Page
                             ->options(fn (): array => app(CatalogApi::class)->subjectNames())->placeholder('—'),
                     ]),
                 ]),
-                Tab::make(__($s.'tabs.contact'))->id('contact')->icon(Heroicon::OutlinedChatBubbleLeftRight)->schema([
-                    Section::make(__($s.'contact'))->schema([
-                        TextInput::make('whatsapp')->label(__($l.'whatsapp'))->helperText(__($l.'whatsapp_hint'))->tel()->maxLength(20)->extraInputAttributes(['dir' => 'ltr']),
-                    ]),
-                    Section::make(__($s.'seo'))->description(__($s.'seo_hint'))->columns(2)->schema([
-                        ...$pair('seo.title', 'seo_title', 70),
-                        ...$pair('seo.description', 'seo_description', 170, long: true),
-                    ]),
-                ]),
             ]),
         ]);
+    }
+
+    /** Whom the page speaks to, as its draft says (the builder sets it). */
+    private function audience(): string
+    {
+        return (string) (SitePage::current()->draftDoc()['settings']['audience'] ?? 'families');
+    }
+
+    /** Whether the published page has a teachers block that shows. */
+    private function showsTeachers(): bool
+    {
+        $page = SitePage::current();
+        foreach (($page->publishedDoc() ?? $page->draftDoc())['blocks'] as $block) {
+            if ($block['type'] === 'teachers' && ! $block['hidden']) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** Takes a teacher's card off the page, or puts it back (the teacher's own switch stays theirs). */

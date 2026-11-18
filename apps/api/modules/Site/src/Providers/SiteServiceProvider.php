@@ -3,11 +3,14 @@
 namespace Modules\Site\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
+use Modules\SharedKernel\Plans\Limit;
+use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Setup\SetupChecklist;
 use Modules\Site\Commands\SweepJoinRequests;
@@ -32,6 +35,7 @@ final class SiteServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(SiteApi::class, SiteService::class);
+        $this->mergeConfigFrom(__DIR__.'/../../config/site.php', 'site');
     }
 
     public function boot(): void
@@ -47,6 +51,8 @@ final class SiteServiceProvider extends ServiceProvider
         $this->app->make(PersonalData::class)->add(JoinRequestsData::class);
         // An optional step of "Start here": the page switched on.
         $this->app->make(SetupChecklist::class)->add(SiteStep::class);
+        // The page's own images and videos count towards the plan's storage.
+        $this->app->make(UsageMeters::class)->add(Limit::StorageMb, fn () => (int) DB::table('site_media')->sum('bytes'));
 
         SendSiteNotifications::templates($this->app->make(NotificationsApi::class));
         // In the back office it opens the requests for whoever answers that kind; nowhere else.

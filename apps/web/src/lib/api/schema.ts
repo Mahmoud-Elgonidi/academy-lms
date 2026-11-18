@@ -2856,9 +2856,32 @@ export interface paths {
         };
         /**
          * The academy's page
-         * @description In the request's language (Accept-Language). Not found while the academy keeps its page off.
+         * @description In the request's language (Accept-Language): the published page the academy built (`page`: its settings and its visible
+         *     blocks in order), and the live lists its blocks read. Not found while the academy keeps its page off.
          */
         get: operations["site.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/site/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The academy's page as its draft stands: the builder's live preview
+         * @description The same shape as `GET v1/site`, from the draft, even while the page is off, with `preview` added and an empty `form_token`
+         *     (the preview's form does not send). token is the builder's preview token (two hours): another academy's or a forged one is
+         *     not found; an expired one is gone (410, link-expired).
+         */
+        get: operations["site.preview"];
         put?: never;
         post?: never;
         delete?: never;
@@ -14128,13 +14151,112 @@ export interface operations {
                                 /** @description The academy's code: what the app asks for to open it (X-Academy). */
                                 code: string;
                             };
-                            /** @description The words the academy set: hero, why (the heading over features; empty: the page's own), features, testimonials, faqs, sections shown, whatsapp, seo. */
+                            /**
+                             * @description The page the academy built: revision (the published one), settings (audience, fonts, accent, mood, corners,
+                             *     motion, header, footer, whatsapp, floating_whatsapp, seo) and blocks (visible only, in order: id, type, variant,
+                             *     anchor, nav, style, data; see docs/architecture/site-builder.md, sections 3 and 8.3).
+                             */
+                            page: {
+                                revision: number;
+                                settings: {
+                                    audience: string;
+                                    fonts: {
+                                        heading: string;
+                                        body: string;
+                                        url: string | null;
+                                    };
+                                    accent: string;
+                                    mood: string;
+                                    corners: string;
+                                    motion: string;
+                                    header: {
+                                        style: string;
+                                        cta: {
+                                            label: string;
+                                            action: {
+                                                /** @constant */
+                                                kind: "trial";
+                                            } | null | {
+                                                /** @constant */
+                                                kind: "teach";
+                                            } | {
+                                                /** @constant */
+                                                kind: "sign_in";
+                                            } | {
+                                                /** @constant */
+                                                kind: "whatsapp";
+                                            } | {
+                                                /** @constant */
+                                                kind: "block";
+                                                block: string;
+                                            } | {
+                                                /** @constant */
+                                                kind: "url";
+                                                url: string;
+                                            };
+                                        } | null;
+                                        sign_in: boolean;
+                                        language_switch: boolean;
+                                    };
+                                    footer: {
+                                        text: string | null;
+                                        links: {
+                                            label: string | null;
+                                            url: string;
+                                        }[];
+                                        social: {
+                                            network: string;
+                                            url: string;
+                                        }[];
+                                    };
+                                    whatsapp: string | null;
+                                    floating_whatsapp: boolean;
+                                    seo: {
+                                        title: string | null;
+                                        description: string | null;
+                                        image: {
+                                            url: string;
+                                            width: string;
+                                            height: string;
+                                            alt: string;
+                                            mime: string;
+                                        } | null;
+                                    };
+                                };
+                                /** @description The visible blocks in order; each block's `data` is its type's own shape (site-builder.md, 8.3). */
+                                blocks: {
+                                    id: string;
+                                    /** @enum {string} */
+                                    type: "hero" | "features" | "subjects" | "teachers" | "pricing" | "steps" | "app" | "testimonials" | "faq" | "stats" | "rich_text" | "image_text" | "gallery" | "video" | "logos" | "cta" | "form" | "contact" | "spacer";
+                                    variant: string;
+                                    anchor: string;
+                                    nav: string | null;
+                                    style: {
+                                        /** @enum {string} */
+                                        tone: "paper" | "white" | "tint" | "brand" | "night";
+                                        /** @enum {string} */
+                                        align: "start" | "center";
+                                        /** @enum {string} */
+                                        space: "compact" | "normal" | "roomy";
+                                        /** @enum {string} */
+                                        width: "narrow" | "normal" | "wide" | "full";
+                                        eyebrow: boolean;
+                                    };
+                                    data: {
+                                        [key: string]: unknown;
+                                    };
+                                }[];
+                            };
+                            /**
+                             * @deprecated
+                             * @description The old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`. Read `page`; this goes in a later release.
+                             */
                             content: {
                                 hero: {
                                     title: string;
                                     lead: string;
                                 };
-                                audience: string;
+                                audience: string | "families";
                                 why: {
                                     title: string;
                                     lead: string;
@@ -14175,7 +14297,7 @@ export interface operations {
                                     description: string | null;
                                 }[];
                             }[];
-                            /** @description The teachers who chose to show on the page; empty when the section is off. */
+                            /** @description The teachers its teachers block shows, in its order; empty without a visible teachers block. */
                             teachers: {
                                 /** @description The card's id (not the teacher's account). */
                                 id: string;
@@ -14200,7 +14322,7 @@ export interface operations {
                                 /** @description Whether they teach group lessons. */
                                 accepts_groups: boolean;
                             }[];
-                            /** @description The plans families enrol on, with a price in each region; empty when the section is off. */
+                            /** @description The plans its pricing block shows, with a price in each region; empty without a visible pricing block. */
                             plans: {
                                 id: string;
                                 name: string;
@@ -14258,13 +14380,300 @@ export interface operations {
                                 /** @description That subject (one of `subjects`), whose times a family that asks for help choosing books from; null when sales choose with them. */
                                 help_choose_subject_id: string | null;
                             };
-                            /** @description Sent back with the request form, unchanged. */
+                            /** @description Sent back with the request form, unchanged ("" in the preview: its form does not send). */
                             form_token: string;
                         };
                     };
                 };
             };
             404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "site.preview": {
+        parameters: {
+            query?: {
+                token?: string;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            academy: {
+                                /** @description The academy's name in the request's language. */
+                                name: string;
+                                /** @description The academy's code: what the app asks for to open it (X-Academy). */
+                                code: string;
+                            };
+                            /**
+                             * @description The page the academy built: revision (the published one), settings (audience, fonts, accent, mood, corners,
+                             *     motion, header, footer, whatsapp, floating_whatsapp, seo) and blocks (visible only, in order: id, type, variant,
+                             *     anchor, nav, style, data; see docs/architecture/site-builder.md, sections 3 and 8.3).
+                             */
+                            page: {
+                                revision: number;
+                                settings: {
+                                    audience: string;
+                                    fonts: {
+                                        heading: string;
+                                        body: string;
+                                        url: string | null;
+                                    };
+                                    accent: string;
+                                    mood: string;
+                                    corners: string;
+                                    motion: string;
+                                    header: {
+                                        style: string;
+                                        cta: {
+                                            label: string;
+                                            action: {
+                                                /** @constant */
+                                                kind: "trial";
+                                            } | null | {
+                                                /** @constant */
+                                                kind: "teach";
+                                            } | {
+                                                /** @constant */
+                                                kind: "sign_in";
+                                            } | {
+                                                /** @constant */
+                                                kind: "whatsapp";
+                                            } | {
+                                                /** @constant */
+                                                kind: "block";
+                                                block: string;
+                                            } | {
+                                                /** @constant */
+                                                kind: "url";
+                                                url: string;
+                                            };
+                                        } | null;
+                                        sign_in: boolean;
+                                        language_switch: boolean;
+                                    };
+                                    footer: {
+                                        text: string | null;
+                                        links: {
+                                            label: string | null;
+                                            url: string;
+                                        }[];
+                                        social: {
+                                            network: string;
+                                            url: string;
+                                        }[];
+                                    };
+                                    whatsapp: string | null;
+                                    floating_whatsapp: boolean;
+                                    seo: {
+                                        title: string | null;
+                                        description: string | null;
+                                        image: {
+                                            url: string;
+                                            width: string;
+                                            height: string;
+                                            alt: string;
+                                            mime: string;
+                                        } | null;
+                                    };
+                                };
+                                /** @description The visible blocks in order; each block's `data` is its type's own shape (site-builder.md, 8.3). */
+                                blocks: {
+                                    id: string;
+                                    /** @enum {string} */
+                                    type: "hero" | "features" | "subjects" | "teachers" | "pricing" | "steps" | "app" | "testimonials" | "faq" | "stats" | "rich_text" | "image_text" | "gallery" | "video" | "logos" | "cta" | "form" | "contact" | "spacer";
+                                    variant: string;
+                                    anchor: string;
+                                    nav: string | null;
+                                    style: {
+                                        /** @enum {string} */
+                                        tone: "paper" | "white" | "tint" | "brand" | "night";
+                                        /** @enum {string} */
+                                        align: "start" | "center";
+                                        /** @enum {string} */
+                                        space: "compact" | "normal" | "roomy";
+                                        /** @enum {string} */
+                                        width: "narrow" | "normal" | "wide" | "full";
+                                        eyebrow: boolean;
+                                    };
+                                    data: {
+                                        [key: string]: unknown;
+                                    };
+                                }[];
+                            };
+                            /**
+                             * @deprecated
+                             * @description The old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`. Read `page`; this goes in a later release.
+                             */
+                            content: {
+                                hero: {
+                                    title: string;
+                                    lead: string;
+                                };
+                                audience: string | "families";
+                                why: {
+                                    title: string;
+                                    lead: string;
+                                };
+                                features: {
+                                    title: string;
+                                    text: string;
+                                }[];
+                                testimonials: {
+                                    name: string;
+                                    role: string;
+                                    quote: string;
+                                }[];
+                                faqs: {
+                                    q: string;
+                                    a: string;
+                                }[];
+                                sections: string[];
+                                whatsapp: string | null;
+                                seo: {
+                                    title: string;
+                                    description: string;
+                                };
+                            };
+                            /** @description Every subject the academy teaches (the free-trial form picks one). */
+                            subjects: {
+                                /** @description Sent back with the free-trial form as subject_id. */
+                                id: string;
+                                name: string;
+                                /** @description The subject's levels, in order. */
+                                levels: string[];
+                                /** @description Its tracks or the curricula it follows. */
+                                categories: string[];
+                                /** @description Its published programs. */
+                                programs: {
+                                    name: string;
+                                    /** @description What the program is, or null. */
+                                    description: string | null;
+                                }[];
+                            }[];
+                            /** @description The teachers its teachers block shows, in its order; empty without a visible teachers block. */
+                            teachers: {
+                                /** @description The card's id (not the teacher's account). */
+                                id: string;
+                                name: string;
+                                bio: string | null;
+                                photo_url: string | null;
+                                /** @description female or male. */
+                                gender: string | null;
+                                /** @description ISO 639-1 codes they explain in. */
+                                languages: string[];
+                                /** @description kids, middle, teen, adults: the ages they teach (none: any age). */
+                                age_groups: string[];
+                                subjects: {
+                                    name: string;
+                                    /** @description The first level they teach, or null (from the start). */
+                                    level_from: string | null;
+                                    /** @description The last level they teach, or null (to the end). */
+                                    level_to: string | null;
+                                }[];
+                                /** @description Whether they take free trial lessons. */
+                                accepts_trials: boolean;
+                                /** @description Whether they teach group lessons. */
+                                accepts_groups: boolean;
+                            }[];
+                            /** @description The plans its pricing block shows, with a price in each region; empty without a visible pricing block. */
+                            plans: {
+                                id: string;
+                                name: string;
+                                /**
+                                 * @description private (one student a lesson) or group.
+                                 * @enum {string}
+                                 */
+                                format: "group" | "private";
+                                /** @description A group plan: the most students in one of its lessons (the largest group any of the academy's teachers takes); null for a private plan. */
+                                max_students: number | null;
+                                session_minutes: number;
+                                sessions_per_week: number;
+                                /** @description Lessons in each paid block. */
+                                sessions_per_block: number;
+                                /** @description Days a block lasts from payment. */
+                                validity_days: number;
+                                /** @description One balance for all of a student's courses on it. */
+                                shared: boolean;
+                                prices: {
+                                    region_id: string;
+                                    /** @description The block's price, written out ("SAR 480"). */
+                                    price: string;
+                                    amount_minor: number;
+                                    currency: string;
+                                }[];
+                            }[];
+                            /** @description The price regions: the page picks the visitor's by their country, else the default one. */
+                            regions: {
+                                id: string;
+                                name: string;
+                                currency: string;
+                                /** @description The region for a visitor whose country no region names. */
+                                default: boolean;
+                                /** @description ISO 3166-1 alpha-2 codes of the countries it serves. */
+                                countries: string[];
+                            }[];
+                            app: {
+                                /** @description The store page on Android, or null. */
+                                android_url: string;
+                                /** @description The App Store page, or null. */
+                                ios_url: string;
+                            };
+                            /** @description The academy's WhatsApp number (E.164), or null. */
+                            whatsapp: string | null;
+                            /** @description How the academy takes a free trial asked for on the page. */
+                            trials: {
+                                /** @description family: the family picks its own time (site/trial-slots, then a code to its number: site/trials); staff: the academy books it after the request. */
+                                booking: string;
+                                /** @description How many hours the academy promises to answer a request within. */
+                                response_hours: number;
+                                /** @description A family books its own trial at least this many hours ahead. */
+                                notice_hours: number;
+                                /** @description Whether a family that asks for help choosing starts with the academy's own trial subject (else sales choose with them). */
+                                help_choose_subject: boolean;
+                                /** @description That subject (one of `subjects`), whose times a family that asks for help choosing books from; null when sales choose with them. */
+                                help_choose_subject_id: string | null;
+                            };
+                            /** @description Sent back with the request form, unchanged ("" in the preview: its form does not send). */
+                            form_token: string;
+                            preview: {
+                                /** @description The draft's revision shown. */
+                                revision: number;
+                                /** @description The revision that is live, or null when nothing was published yet. */
+                                published_revision: number | null;
+                                /** @description Whether the page is on (it may be built before it is). */
+                                enabled: boolean;
+                            };
+                        };
+                    };
+                };
+            };
+            404: components["responses"]["ModelNotFoundException"];
+            409: components["responses"]["ProblemException"];
         };
     };
     "site.requests": {

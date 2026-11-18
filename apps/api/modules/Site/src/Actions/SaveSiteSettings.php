@@ -14,20 +14,21 @@ use Modules\Site\Domain\SiteContent;
 use Modules\Site\Models\SiteSettings;
 
 /**
- * The owner or an admin saves the academy's page: on or off, what it says
- * (Domain\SiteContent, cleaned and held to its lengths), and its free trials:
- * who books one (the family itself or the academy's staff), how many hours
- * the academy promises to answer within, and the subject of a trial whose
- * family asked for help choosing. It shows at once. Audited with whether it
- * is on, the sections shown and the trial settings, never the words.
+ * The owner or an admin saves the academy's page settings: on or off, and its
+ * free trials: who books one (the family itself or the academy's staff), how
+ * many hours the academy promises to answer within, and the subject of a
+ * trial whose family asked for help choosing. It applies at once. What the
+ * page says is the builder's (SaveSiteDraft, PublishSitePage): the old
+ * `content` column is no longer written (kept one release for a rollback).
+ * Audited with whether it is on and the trial settings.
  */
 final class SaveSiteSettings
 {
     public function __construct(private readonly AuditTrail $audit) {}
 
     /**
-     * @param  array<string, mixed>  $data  enabled, the content (hero, features, testimonials, faqs, sections, whatsapp, seo),
-     *                                      and the trials: trial_booking (family | staff), response_hours (1–72), default_trial_subject_id
+     * @param  array<string, mixed>  $data  enabled, and the trials: trial_booking (family | staff), response_hours (1–72),
+     *                                      trial_notice_hours (1–72), default_trial_subject_id
      *
      * @throws ValidationException
      */
@@ -36,7 +37,6 @@ final class SaveSiteSettings
         if (! Gate::allows(Ability::ManageSite->value)) {
             throw new AuthorizationException;
         }
-        $content = SiteContent::normalize($data);
         $enabled = filter_var($data['enabled'] ?? false, FILTER_VALIDATE_BOOL);
         $current = SiteSettings::current();
         $trials = Validator::make([
@@ -56,16 +56,16 @@ final class SaveSiteSettings
             'default_trial_subject_id' => __('site::site.settings.trials.default_subject'),
         ])->validate();
 
-        return DB::transaction(function () use ($content, $enabled, $trials) {
-            $row = SiteSettings::query()->lockForUpdate()->first() ?? new SiteSettings;
-            $row->fill(['enabled' => $enabled, 'content' => $content, 'updated_by' => auth()->id()] + [
+        return DB::transaction(function () use ($enabled, $trials) {
+            $row = SiteSettings::query()->lockForUpdate()->first() ?? new SiteSettings(['content' => SiteContent::defaults()]);
+            $row->fill(['enabled' => $enabled, 'updated_by' => auth()->id()] + [
                 'trial_booking' => $trials['trial_booking'],
                 'response_hours' => (int) $trials['response_hours'],
                 'trial_notice_hours' => (int) $trials['trial_notice_hours'],
                 'default_trial_subject_id' => $trials['default_trial_subject_id'] ?? null,
             ])->save();
             $this->audit->record('site.settings_saved', 'site_settings', null, [
-                'state' => $enabled ? 'on' : 'off', 'shown' => $content['sections'],
+                'state' => $enabled ? 'on' : 'off',
                 'trial_booking' => $trials['trial_booking'], 'response_hours' => (int) $trials['response_hours'],
                 'trial_notice_hours' => (int) $trials['trial_notice_hours'],
                 'default_trial_subject' => ($trials['default_trial_subject_id'] ?? null) !== null,

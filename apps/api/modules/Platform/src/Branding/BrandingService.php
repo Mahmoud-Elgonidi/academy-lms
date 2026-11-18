@@ -23,6 +23,16 @@ final class BrandingService implements BrandingApi
         return $this->current ??= $this->build();
     }
 
+    public function fontFamilies(): array
+    {
+        return array_keys(BrandFonts::ALL);
+    }
+
+    public function fontsUrl(string ...$families): string
+    {
+        return BrandFonts::stylesheetUrl(...$families);
+    }
+
     public function forget(): void
     {
         $this->current = null;

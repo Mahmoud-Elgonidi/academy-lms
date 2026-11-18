@@ -55,7 +55,7 @@ final class BrandingSettings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSwatch;
 
-    protected static ?int $navigationSort = 911;
+    protected static ?int $navigationSort = 912;
 
     protected static ?string $slug = 'settings/branding';
 
