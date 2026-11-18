@@ -24,16 +24,15 @@ final class Audience
      */
     public static function ageGroups(array $groups, string $audience): array
     {
-        if ($audience !== self::ADULTS) {
-            return array_values($groups);
-        }
-        $out = [];
-        foreach ($groups as $group) {
-            if (in_array($group, self::ADULT_GROUPS, true)) {
-                $out[] = $group;
+        $kept = $groups;
+        if ($audience === self::ADULTS) {
+            foreach ($kept as $i => $group) {
+                if (! in_array($group, self::ADULT_GROUPS, true)) {
+                    unset($kept[$i]);
+                }
             }
         }
 
-        return $out;
+        return array_values($kept);
     }
 }

@@ -14227,7 +14227,7 @@ export interface operations {
                                 blocks: {
                                     id: string;
                                     /** @enum {string} */
-                                    type: "hero" | "features" | "subjects" | "teachers" | "pricing" | "steps" | "app" | "testimonials" | "faq" | "stats" | "rich_text" | "image_text" | "gallery" | "video" | "logos" | "cta" | "form" | "contact" | "spacer";
+                                    type: "hero" | "features" | "subjects" | "teachers" | "pricing" | "steps" | "app" | "testimonials" | "faq" | "stats" | "rich_text" | "image_text" | "gallery" | "video" | "logos" | "cards" | "cta" | "form" | "contact" | "spacer";
                                     variant: string;
                                     anchor: string;
                                     nav: string | null;
@@ -14308,7 +14308,7 @@ export interface operations {
                                 gender: string | null;
                                 /** @description ISO 639-1 codes they explain in. */
                                 languages: string[];
-                                /** @description kids, middle, teen, adults: the ages they teach (none: any age). */
+                                /** @description kids, middle, teen, adults: the ages they teach (none: any age). A page for adults names adults alone. */
                                 age_groups: string[];
                                 subjects: {
                                     name: string;
@@ -14505,7 +14505,7 @@ export interface operations {
                                 blocks: {
                                     id: string;
                                     /** @enum {string} */
-                                    type: "hero" | "features" | "subjects" | "teachers" | "pricing" | "steps" | "app" | "testimonials" | "faq" | "stats" | "rich_text" | "image_text" | "gallery" | "video" | "logos" | "cta" | "form" | "contact" | "spacer";
+                                    type: "hero" | "features" | "subjects" | "teachers" | "pricing" | "steps" | "app" | "testimonials" | "faq" | "stats" | "rich_text" | "image_text" | "gallery" | "video" | "logos" | "cards" | "cta" | "form" | "contact" | "spacer";
                                     variant: string;
                                     anchor: string;
                                     nav: string | null;
@@ -14586,7 +14586,7 @@ export interface operations {
                                 gender: string | null;
                                 /** @description ISO 639-1 codes they explain in. */
                                 languages: string[];
-                                /** @description kids, middle, teen, adults: the ages they teach (none: any age). */
+                                /** @description kids, middle, teen, adults: the ages they teach (none: any age). A page for adults names adults alone. */
                                 age_groups: string[];
                                 subjects: {
                                     name: string;

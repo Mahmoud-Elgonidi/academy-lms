@@ -31284,6 +31284,7 @@
                                                                             "gallery",
                                                                             "video",
                                                                             "logos",
+                                                                            "cards",
                                                                             "cta",
                                                                             "form",
                                                                             "contact",
@@ -31621,7 +31622,7 @@
                                                             },
                                                             "age_groups": {
                                                                 "type": "array",
-                                                                "description": "kids, middle, teen, adults: the ages they teach (none: any age).",
+                                                                "description": "kids, middle, teen, adults: the ages they teach (none: any age). A page for adults names adults alone.",
                                                                 "items": {
                                                                     "type": "string"
                                                                 }
@@ -32295,6 +32296,7 @@
                                                                             "gallery",
                                                                             "video",
                                                                             "logos",
+                                                                            "cards",
                                                                             "cta",
                                                                             "form",
                                                                             "contact",
@@ -32632,7 +32634,7 @@
                                                             },
                                                             "age_groups": {
                                                                 "type": "array",
-                                                                "description": "kids, middle, teen, adults: the ages they teach (none: any age).",
+                                                                "description": "kids, middle, teen, adults: the ages they teach (none: any age). A page for adults names adults alone.",
                                                                 "items": {
                                                                     "type": "string"
                                                                 }

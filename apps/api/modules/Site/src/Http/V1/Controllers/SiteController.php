@@ -312,6 +312,10 @@ final class SiteController
         foreach ($teacher->subjects as $subject) {
             $subjects[] = $this->subject($subject);
         }
+        $ages = [];
+        foreach (Audience::ageGroups($teacher->ageGroups, $audience) as $age) {
+            $ages[] = (string) $age;
+        }
 
         return [
             /** The card's id (not the teacher's account). */
@@ -324,7 +328,7 @@ final class SiteController
             /** ISO 639-1 codes they explain in. */
             'languages' => $teacher->languages,
             /** kids, middle, teen, adults: the ages they teach (none: any age). A page for adults names adults alone. */
-            'age_groups' => Audience::ageGroups($teacher->ageGroups, $audience),
+            'age_groups' => $ages,
             'subjects' => $subjects,
             /** Whether they take free trial lessons. */
             'accepts_trials' => $teacher->acceptsTrials,
