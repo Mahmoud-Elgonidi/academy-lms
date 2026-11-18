@@ -184,6 +184,7 @@ final class SiteBuilder extends Page
                 ->deleteAction(fn (Action $action) => $action->requiresConfirmation()->modalDescription(__('site::builder.block.delete_confirm')))
                 ->extraItemActions([
                     Action::make('toggleHidden')
+                        ->label(fn (array $arguments, Builder $component) => ($component->getRawItemState($arguments['item'])['hidden'] ?? false) ? __('site::builder.actions.show') : __('site::builder.actions.hide'))
                         ->icon(fn (array $arguments, Builder $component) => ($component->getRawItemState($arguments['item'])['hidden'] ?? false) ? Heroicon::OutlinedEyeSlash : Heroicon::OutlinedEye)
                         ->tooltip(fn (array $arguments, Builder $component) => ($component->getRawItemState($arguments['item'])['hidden'] ?? false) ? __('site::builder.actions.show') : __('site::builder.actions.hide'))
                         ->color('gray')
@@ -195,6 +196,7 @@ final class SiteBuilder extends Page
                             $this->saveDraft();
                         }),
                     Action::make('focusPreview')
+                        ->label(__('site::builder.actions.show_in_preview'))
                         ->icon(Heroicon::OutlinedViewfinderCircle)
                         ->tooltip(__('site::builder.actions.show_in_preview'))
                         ->color('gray')
@@ -485,6 +487,8 @@ final class SiteBuilder extends Page
                     $this->revision = (int) $page->draft_revision;
                     $this->publishedRevision = (int) $page->published_revision;
                     $this->hasPublished = true;
+                    // The preview reloads to say the draft it shows is the page now.
+                    $this->dispatch('site-draft-saved', revision: $this->revision);
                     $notice = Notification::make()->success()->title(__('site::builder.publish.done'));
                     if (! $this->pageIsOn()) {
                         $notice->body(__('site::builder.publish.off'))->persistent()->actions([
@@ -532,6 +536,7 @@ final class SiteBuilder extends Page
             ->modalHeading(__('site::builder.media.upload_title'))
             ->modalDescription(__('site::builder.media.upload_hint'))
             ->modalWidth(Width::Large)
+            ->modalSubmitActionLabel(__('site::builder.media.upload'))
             ->schema([
                 FileUpload::make('file')->label(__('site::builder.media.file'))->required()->storeFiles(false)
                     ->acceptedFileTypes([...array_keys(SiteMedia::IMAGES), ...array_keys(SiteMedia::VIDEOS)])

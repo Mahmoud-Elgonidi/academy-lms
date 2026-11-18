@@ -26,7 +26,7 @@
             return {
                 device: 'desktop', lang: cfg.lang, rev: cfg.revision, token: cfg.token, base: cfg.base,
                 widths: { desktop: 1280, tablet: 820, phone: 390 },
-                active: 0, loading: true, anchor: null, scale: 1, stageH: 640, open: false, failed: false,
+                active: 0, loading: true, timer: null, anchor: null, scale: 1, stageH: 640, open: false, failed: false,
                 init() {
                     this.$nextTick(() => { this.measure(); this.load(); });
                     if (window.ResizeObserver) { new ResizeObserver(() => this.measure()).observe(this.$refs.stage); }
@@ -52,8 +52,10 @@
                     const frame = this.$refs['frame' + next];
                     if (! frame) { return; }
                     this.loading = true;
-                    const timer = setTimeout(() => { this.failed = true; }, 15000);
-                    frame.onload = () => { clearTimeout(timer); this.failed = false; this.active = next; this.loading = false; };
+                    // One watch at a time: a newer load replaces the frame's onload, so the older timer must go too.
+                    clearTimeout(this.timer);
+                    this.timer = setTimeout(() => { this.failed = true; }, 15000);
+                    frame.onload = () => { clearTimeout(this.timer); this.failed = false; this.active = next; this.loading = false; };
                     frame.src = this.url();
                 },
                 refresh(rev) { if (rev) { this.rev = rev; } this.anchor = null; this.load(); },

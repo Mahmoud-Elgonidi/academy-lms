@@ -120,6 +120,7 @@ final class MediaPicker extends Field
             ->size('sm')
             ->modalHeading(__('site::builder.media.upload_title'))
             ->modalWidth(Width::Large)
+            ->modalSubmitActionLabel(__('site::builder.media.upload'))
             ->schema(array_values(array_filter([
                 $upload,
                 $image ? Grid::make(2)->schema([

@@ -12,7 +12,7 @@ return [
         'stats' => ['items' => [
             ['value' => '1:1', 'label' => 'One teacher for each learner'],
             ['value' => '100%', 'label' => 'Live online lessons'],
-            ['value' => '0', 'label' => 'Fees for the trial lesson'],
+            ['value' => '7', 'label' => 'Days a week to choose your times from'],
         ]],
         'subjects' => ['title' => 'Our courses', 'lead' => 'Choose the course that fits your goal, and start at the level that suits you.', 'nav' => 'Courses'],
         'features' => [
@@ -82,7 +82,7 @@ return [
         'stats' => ['items' => [
             ['value' => '1:1', 'label' => 'One-to-one sessions available'],
             ['value' => '100%', 'label' => 'Live online training'],
-            ['value' => '0', 'label' => 'Fees for the first meeting'],
+            ['value' => '7', 'label' => 'Days a week to choose your sessions from'],
         ]],
         'cta' => [
             'title' => 'Let\'s design your team\'s programme together',

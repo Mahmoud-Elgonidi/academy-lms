@@ -2313,6 +2313,7 @@
     },
     "preview": {
       "bar": "Preview: not published yet",
+      "live": "Preview: this version is live",
       "off": "The page is off right now",
       "formNote": "This is a preview: the form sends nothing.",
       "expired": "This preview has expired.",

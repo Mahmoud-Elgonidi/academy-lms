@@ -117,7 +117,7 @@ export function SitePageView({ site, page, look, locale, t, phones, accent, acce
       <a className="sp-skip" href="#main">{t('blocks.skip')}</a>
       {preview ? (
         <div className="sp-preview-bar" role="status">
-          <span>{t('preview.bar')}</span>
+          <span>{t(preview.revision === preview.published_revision ? 'preview.live' : 'preview.bar')}</span>
           {!preview.enabled ? <span className="sp-preview-off">{t('preview.off')}</span> : null}
         </div>
       ) : null}
