@@ -1,6 +1,7 @@
 import { toneOf, type PageBlock } from '@/lib/site/page';
 import type { PageCtx } from './context';
 import { App } from './blocks/app';
+import { Cards } from './blocks/cards';
 import { Contact } from './blocks/contact';
 import { Cta } from './blocks/cta';
 import { Faq } from './blocks/faq';
@@ -39,6 +40,7 @@ export function Block({ block, ctx }: { block: PageBlock; ctx: PageCtx }) {
     case 'gallery': return <Gallery block={block} ctx={ctx} tone={tone} />;
     case 'video': return <Video block={block} ctx={ctx} tone={tone} />;
     case 'logos': return <Logos block={block} ctx={ctx} tone={tone} />;
+    case 'cards': return <Cards block={block} ctx={ctx} tone={tone} />;
     case 'cta': return <Cta block={block} ctx={ctx} tone={tone} />;
     case 'form': return <Form block={block} ctx={ctx} tone={tone} />;
     case 'contact': return <Contact block={block} ctx={ctx} tone={tone} />;

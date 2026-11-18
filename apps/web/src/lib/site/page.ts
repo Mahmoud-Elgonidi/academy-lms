@@ -72,6 +72,9 @@ export type VideoBlock = Base<'video', 'framed' | 'wide' | 'side', Heading & {
 export type LogosBlock = Base<'logos', 'row' | 'marquee' | 'grid', Heading & {
   items: { media: Media; name: string; url: string | null }[]; mono: boolean;
 }>;
+/** The academy's own courses, programmes or topics (not the catalogue's subjects). */
+export type CardItem = { media: Media | null; label: string | null; title: string; text: string | null; link: PageLink | null };
+export type CardsBlock = Base<'cards', 'grid' | 'list' | 'overlay', Heading & { items: CardItem[]; columns: 2 | 3 | 4 }>;
 export type CtaBlock = Base<'cta', 'banner' | 'card' | 'split', {
   title: string; lead: string | null; primary: PageLink | null; secondary: PageLink | null; media: Media | null;
 }>;
@@ -84,7 +87,7 @@ export type SpacerBlock = Base<'spacer', 'space' | 'divider', { size: 'sm' | 'md
 export type PageBlock =
   | HeroBlock | FeaturesBlock | SubjectsBlock | TeachersBlock | PricingBlock | StepsBlock | AppBlock
   | TestimonialsBlock | FaqBlock | StatsBlock | RichTextBlock | ImageTextBlock | GalleryBlock | VideoBlock
-  | LogosBlock | CtaBlock | FormBlock | ContactBlock | SpacerBlock;
+  | LogosBlock | CardsBlock | CtaBlock | FormBlock | ContactBlock | SpacerBlock;
 
 export type BlockType = PageBlock['type'];
 export type BlockOf<T extends BlockType> = Extract<PageBlock, { type: T }>;
@@ -108,7 +111,7 @@ export type SitePreviewInfo = { revision: number; published_revision: number | n
 
 export const BLOCK_TYPES: readonly BlockType[] = [
   'hero', 'features', 'subjects', 'teachers', 'pricing', 'steps', 'app', 'testimonials', 'faq', 'stats',
-  'rich_text', 'image_text', 'gallery', 'video', 'logos', 'cta', 'form', 'contact', 'spacer',
+  'rich_text', 'image_text', 'gallery', 'video', 'logos', 'cards', 'cta', 'form', 'contact', 'spacer',
 ];
 
 /** A block of a type this portal draws (a newer server may send one it does not know: it is skipped). */
@@ -126,6 +129,16 @@ const ADULT_KEYS = new Set([
 /** The message key (under `site`) a page for this audience says when the academy left a field unset. */
 export function defaultKey(key: string, audience: PageSettings['audience']): string {
   return audience === 'adults' && ADULT_KEYS.has(key) ? `adults.${key}` : key;
+}
+
+/**
+ * The age groups a teacher's card names on the page (site-builder.md, 9.2):
+ * a page for adults never names a child's group, only "adults" when the
+ * teacher teaches them; a page for families names them all. The server sends
+ * them so already; this holds on the portal too.
+ */
+export function ageGroupsFor(groups: string[], audience: PageSettings['audience']): string[] {
+  return audience === 'adults' ? groups.filter((group) => group === 'adults') : groups;
 }
 
 /** What a page says for a field: the academy's words, else the portal's default for the audience. */

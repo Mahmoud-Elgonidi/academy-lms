@@ -188,6 +188,11 @@ function training(l: (p: Pair) => string, lang: Lang): SitePageData {
         { media: photo('1523240795612-9a054b0db644', 1200, 800, ['فريق في مكتبة', 'A team in a library'], lang), caption: null },
       ] }, { style: { tone: 'white' } }),
       block('video', 'framed', { ...H, title: l(['شاهد يومًا من برنامج القيادة', 'A day in the leadership programme']), source: { kind: 'youtube', id: 'dQw4w9WgXcQ', poster: photo('1515378791036-0648a3ef77b2', 1600, 900, ['', ''], lang) }, caption: l(['ثلاث دقائق من الورشة الثانية.', 'Three minutes from the second workshop.']), ratio: '16:9', autoplay_muted: false }, {}),
+      block('cards', 'grid', { ...H, title: l(['برامجنا', 'Our programmes']), lead: l(['ثلاثة برامج نقدّمها كل فصل، ونصمّم غيرها عند الطلب.', 'Three programmes we run every term, and others designed on request.']), columns: 3, items: [
+        { media: photo('1454165804606-c3d57bc86b40', 1200, 900, ['اجتماع عمل', 'A work meeting'], lang), label: l(['6 أسابيع', '6 weeks']), title: l(['إدارة المخاطر', 'Risk management']), text: l(['تحديد المخاطر وتقييمها ووضع خطط الاستجابة لها.', 'Identifying and assessing risks, and planning the response.']), link: { label: l(['اطلب التفاصيل', 'Ask for details']), action: { kind: 'trial' } } },
+        { media: photo('1450101499163-c8848c66ca85', 1200, 900, ['مستندات على مكتب', 'Papers on a desk'], lang), label: l(['4 أسابيع', '4 weeks']), title: l(['الامتثال والحوكمة', 'Compliance and governance']), text: l(['الأطر التنظيمية والسياسات الداخلية والتدقيق.', 'Regulatory frameworks, internal policies and audit.']), link: { label: l(['اطلب التفاصيل', 'Ask for details']), action: { kind: 'trial' } } },
+        { media: photo('1552664730-d307ca884978', 1200, 900, ['فريق يخطط', 'A team planning'], lang), label: l(['حسب الطلب', 'On request']), title: l(['التخطيط لاستمرارية الأعمال', 'Business continuity planning']), text: l(['خطط تبقي العمل قائمًا في الأزمات.', 'Plans that keep the work going through a crisis.']), link: { label: '', action: { kind: 'url', url: 'https://example.com/continuity' } } },
+      ] }, { style: { tone: 'paper' }, nav: l(['البرامج', 'Programmes']) }),
       block('cta', 'split', { title: l(['جاهزون لبرنامج فريقكم؟', 'Ready for your team’s programme?']), lead: l(['أرسلوا لنا هدفكم، ونعود إليكم بمقترح خلال يومين.', 'Send us your goal; we reply with a proposal within two days.']), primary: { label: l(['اطلب عرضًا', 'Request a proposal']), action: { kind: 'trial' } }, secondary: null, media: photo('1573496359142-b8d87734a5a2', 1200, 900, ['مدرّبة تبتسم', 'A smiling trainer'], lang) }, { style: { tone: 'paper' } }),
       block('form', 'split', { ...H, title: l(['اطلب عرضًا لفريقك', 'Request a proposal for your team']), points: [l(['ردّ خلال يومين', 'A reply within two days']), l(['دون أي التزام', 'No commitment'])], teach: true, whatsapp_button: true }, { style: { tone: 'night' } }),
     ],
@@ -240,7 +245,15 @@ function everything(l: (p: Pair) => string, lang: Lang): SitePageData {
         { media: photo('1524178232363-1fb2b075b655', 1200, 800, ['', ''], lang), caption: null },
         { media: photo('1543269865-cbf427effbad', 1200, 800, ['', ''], lang), caption: null },
       ] }, { style: { tone: 'white' } }),
-      b[7]!,
+      b[7]!, b[9]!,
+      block('cards', 'list', { ...H, title: l(['طرق التعلّم', 'Ways to learn']), columns: 3, items: [
+        { media: null, label: l(['فردي', 'One-to-one']), title: l(['دورة فردية', 'A one-to-one course']), text: l(['معلّم لك وحدك.', 'A teacher just for you.']), link: { label: '', action: { kind: 'trial' } } },
+        { media: null, label: null, title: l(['دورة في مجموعة', 'A group course']), text: null, link: null },
+      ] }, { style: { tone: 'white' } }),
+      block('cards', 'overlay', { ...H, title: l(['مساراتنا', 'Our tracks']), columns: 4, items: [
+        { media: photo('1517245386807-bb43f82c33c4', 900, 1200, ['', ''], lang), label: l(['مبتدئ', 'Beginner']), title: l(['أساسيات الإدارة', 'Management basics']), text: null, link: { label: '', action: { kind: 'block', block: 'join' } } },
+        { media: null, label: null, title: l(['القيادة', 'Leadership']), text: l(['للمديرين الجدد.', 'For new managers.']), link: null },
+      ] }, { style: { tone: 'night' } }),
       block('video', 'wide', { ...H, title: l(['جولة في الأكاديمية', 'A tour of the academy']), source: { kind: 'upload', video: VIDEO, poster: photo('1427504494785-3a9ca7044f45', 1600, 900, ['', ''], lang) }, caption: null, ratio: '16:9', autoplay_muted: false }, { style: { tone: 'night', width: 'wide' } }),
       block('video', 'side', { ...H, title: l(['تعرّف على منهجنا', 'Meet our method']), lead: l(['دقيقتان تشرحان كيف تسير الحصة.', 'Two minutes on how a lesson goes.']), source: { kind: 'vimeo', id: '76979871', poster: null }, caption: null, ratio: '16:9', autoplay_muted: false }, {}),
       b[1]!,

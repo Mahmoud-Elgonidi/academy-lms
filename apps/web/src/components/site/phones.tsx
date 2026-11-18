@@ -18,7 +18,16 @@ export type PhoneWords = {
   guardian: { hello: string; child: string; next: string; subject: string; when: string; soon: string; report: string; reportLine: string; plan: string; balance: string; lessons: string };
   student: { stars: string; streak: string; mission: string };
   teacher: { today: string; live: string; lessons: [string, string, string]; times: [string, string, string]; voice: string; drafted: string };
+  /** A page for adults: the learner's own screens (no guardian, no child, no game), and the teacher's day with adult learners. */
+  adults: {
+    learner: { hello: string; title: string; next: string; course: string; when: string; soon: string; progress: string; courses: { name: string; value: string }[]; certificates: string; certificatesValue: string };
+    session: { title: string; course: string; feedback: string; feedbackLine: string; units: string; unitsValue: string; unitsDone: string; task: string; taskLine: string; certificate: string; certificateLine: string };
+    lessons: [string, string, string];
+  };
 };
+
+/** The screens a page shows for its audience: an adult learns for themselves; a child has a guardian and a journey. */
+export type PhoneSet = 'families' | 'adults';
 
 export function Phone({ position, children, style }: { position?: 'center' | 'start' | 'end'; children: ReactNode; style?: CSSProperties }) {
   return (
@@ -26,6 +35,22 @@ export function Phone({ position, children, style }: { position?: 'center' | 'st
       <div className="ls-screen">{children}</div>
     </div>
   );
+}
+
+/** The phones' screens for the page's audience, in the order they stand (start, centre, end). */
+export function screensFor(set: PhoneSet, w: PhoneWords): { start: ReactNode; center: ReactNode; end: ReactNode } {
+  if (set === 'adults') {
+    return {
+      start: <SessionScreen w={w.adults.session} />,
+      center: <LearnerScreen w={w.adults.learner} />,
+      end: <TeacherScreen w={{ ...w.teacher, lessons: w.adults.lessons }} />,
+    };
+  }
+  return {
+    start: <StudentScreen w={w.student} />,
+    center: <GuardianScreen w={w.guardian} />,
+    end: <TeacherScreen w={w.teacher} />,
+  };
 }
 
 /** A parent's home: the next lesson, the last report, the month's plan. */
@@ -94,6 +119,81 @@ export function StudentScreen({ w }: { w: PhoneWords['student'] }) {
         <p>{w.mission}</p>
       </div>
     </div>
+  );
+}
+
+/** An adult learner's home: their next live session, their courses with progress, their certificates. */
+export function LearnerScreen({ w }: { w: PhoneWords['adults']['learner'] }) {
+  return (
+    <>
+      <div className="ls-s-top">
+        <small>{w.hello}</small>
+        <strong>{w.title}</strong>
+      </div>
+      <div className="ls-s-body">
+        <div className="ls-s-card">
+          <div className="ls-s-row">
+            <h4>{w.next}</h4>
+            <span className="ls-pill" data-tone="gold">{w.soon}</span>
+          </div>
+          <p>{w.course}</p>
+          <small>{w.when}</small>
+        </div>
+        <div className="ls-s-card">
+          <h4>{w.progress}</h4>
+          {w.courses.map((course) => (
+            <div className="ls-s-course" key={course.name}>
+              <div className="ls-s-row">
+                <span>{course.name}</span>
+                <b>{course.value}</b>
+              </div>
+              <div className="ls-meter"><i style={{ inlineSize: course.value }} /></div>
+            </div>
+          ))}
+        </div>
+        <div className="ls-s-card ls-s-row">
+          <h4>{w.certificates}</h4>
+          <p>{w.certificatesValue}</p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/** After a session: the teacher's notes, the units done, the next task and the certificate it leads to. */
+export function SessionScreen({ w }: { w: PhoneWords['adults']['session'] }) {
+  return (
+    <>
+      <div className="ls-s-top">
+        <small>{w.course}</small>
+        <strong>{w.title}</strong>
+      </div>
+      <div className="ls-s-body">
+        <div className="ls-s-card">
+          <h4>{w.feedback}</h4>
+          <div className="ls-stars-row">★★★★★</div>
+          <p className="ls-s-quote">{w.feedbackLine}</p>
+        </div>
+        <div className="ls-s-card">
+          <div className="ls-s-row">
+            <h4>{w.units}</h4>
+            <span className="ls-pill">{w.unitsValue}</span>
+          </div>
+          <div className="ls-meter"><i style={{ inlineSize: w.unitsDone }} /></div>
+        </div>
+        <div className="ls-s-card">
+          <h4>{w.task}</h4>
+          <p>{w.taskLine}</p>
+        </div>
+        <div className="ls-s-card ls-s-cert">
+          <span className="ls-s-seal" aria-hidden="true">✓</span>
+          <div>
+            <p>{w.certificate}</p>
+            <small>{w.certificateLine}</small>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 

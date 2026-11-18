@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { initialOf } from '@/lib/site/initial';
-import type { TeachersBlock, Tone } from '@/lib/site/page';
+import { ageGroupsFor, type TeachersBlock, type Tone } from '@/lib/site/page';
 import { comma, type PageCtx } from '../context';
 import { Head, LegacyHead } from '../heading';
 import { LegacySection, Section } from '../section';
@@ -49,7 +49,7 @@ export function Teachers({ block, ctx, tone }: { block: TeachersBlock; ctx: Page
               {show_bio && teacher.bio ? <p>{teacher.bio}</p> : null}
               <p className="ls-tags">
                 {show_languages && teacher.languages.length > 0 ? <span>{t('teachers.explains')} {teacher.languages.map((code) => languages.of(code) ?? code).join('، ')}</span> : null}
-                {show_ages ? teacher.age_groups.map((a) => <span key={a}>{age(a)}</span>) : null}
+                {show_ages ? ageGroupsFor(teacher.age_groups, ctx.audience).map((a) => <span key={a}>{age(a)}</span>) : null}
                 {show_badges && teacher.accepts_trials ? <span data-tone="good">{t('teachers.trials')}</span> : null}
                 {show_badges && teacher.accepts_groups ? <span data-tone="group">{t('teachers.groups')}</span> : null}
               </p>
@@ -68,7 +68,7 @@ export function Teachers({ block, ctx, tone }: { block: TeachersBlock; ctx: Page
         {teachers.map((teacher, i) => {
           const facts = [
             show_languages && teacher.languages.length > 0 ? `${t('teachers.explains')} ${teacher.languages.map((code) => languages.of(code) ?? code).join(comma(ctx))}` : null,
-            ...(show_ages ? teacher.age_groups.map(age) : []),
+            ...(show_ages ? ageGroupsFor(teacher.age_groups, ctx.audience).map(age) : []),
           ].filter((f): f is string => Boolean(f));
           return (
             <li key={teacher.id} className="sp-person" data-reveal="" style={{ '--i': i % 4 } as CSSProperties}>

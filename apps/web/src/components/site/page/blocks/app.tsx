@@ -1,9 +1,9 @@
-import type { CSSProperties } from 'react';
+import { Fragment, type CSSProperties } from 'react';
 import type { AppBlock, Tone } from '@/lib/site/page';
 import { AcademyCode } from '../../academy-plans';
 import { AppShowcase } from '../../app-showcase';
 import { AppleIcon, GooglePlayIcon, Icon } from '../../icons';
-import { GuardianScreen, StudentScreen } from '../../phones';
+import { screensFor } from '../../phones';
 import { audienceRaw, type PageCtx } from '../context';
 import { Head, LegacyHead } from '../heading';
 import { Picture } from '../media';
@@ -45,13 +45,14 @@ export function App({ block, ctx, tone }: { block: AppBlock; ctx: PageCtx; tone:
   );
 
   if (block.variant === 'phones') {
-    const words = ctx.phones;
+    // The learner's home first, then the second screen of the set (a child's journey, or an adult's session notes).
+    const screens = screensFor(ctx.audience, ctx.phones);
     return (
       <LegacySection block={block} tone={tone}>
         <LegacyHead block={block} ctx={ctx} defaults={DEFAULTS} />
         <AppShowcase
           steps={points.map((p) => ({ title: p.title, text: p.text, points: p.points ?? [] }))}
-          screens={[<GuardianScreen key="g" w={words.guardian} />, <StudentScreen key="s" w={words.student} />]}
+          screens={[<Fragment key="c">{screens.center}</Fragment>, <Fragment key="s">{screens.start}</Fragment>]}
           footer={footer}
         />
       </LegacySection>

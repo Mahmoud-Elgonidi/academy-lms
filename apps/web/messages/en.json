@@ -1205,6 +1205,47 @@
       ],
       "voice": "Your report, by voice",
       "drafted": "The draft is ready in seconds"
+    },
+    "adults": {
+      "learner": {
+        "hello": "Good evening",
+        "title": "My courses",
+        "next": "Next session",
+        "course": "Project management · with Mr Khaled",
+        "when": "Today 7:00 pm",
+        "soon": "in 40 min",
+        "progress": "My progress",
+        "courses": [
+          {
+            "name": "Project management",
+            "value": "68%"
+          },
+          {
+            "name": "Data analysis",
+            "value": "35%"
+          }
+        ],
+        "certificates": "Certificates",
+        "certificatesValue": "1 earned"
+      },
+      "session": {
+        "title": "Session notes",
+        "course": "Project management · Unit 5",
+        "feedback": "Your teacher's notes",
+        "feedbackLine": "A clear risk analysis. Review the timeline before the next session.",
+        "units": "Units done",
+        "unitsValue": "5 of 8",
+        "unitsDone": "62%",
+        "task": "Next task",
+        "taskLine": "A one-page project plan",
+        "certificate": "Certificate of completion",
+        "certificateLine": "Issued once all eight units are done"
+      },
+      "lessons": [
+        "Project management · Ahmed",
+        "Data analysis · Layla",
+        "Presenting · Fahd"
+      ]
     }
   },
   "platformSite": {

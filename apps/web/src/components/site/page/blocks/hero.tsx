@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import { say, sayList, type HeroBlock } from '@/lib/site/page';
 import { Icon } from '../../icons';
 import { Tilt } from '../../motion';
-import { GuardianScreen, Phone, StudentScreen, TeacherScreen } from '../../phones';
+import { Phone, screensFor } from '../../phones';
 import { Starfield } from '../../starfield';
 import { audienceRaw, audienceSay, type PageCtx } from '../context';
 import { TitleTag } from '../heading';
@@ -33,10 +33,15 @@ function Words({ title, glow }: { title: string; glow: boolean }) {
   ));
 }
 
-/** Today's opening for children's academies: the night sky, the three phones and the floating cards (pixel-equal to the old page). */
+/**
+ * The opening with the app's phones: the night sky, three phones and the
+ * floating cards (for families, pixel-equal to the old page). A page for
+ * adults shows the learner's own screens, never a guardian's, a child's or
+ * a game.
+ */
 function PhonesHero({ block, ctx }: { block: HeroBlock; ctx: PageCtx }) {
   const w = wordsOf(block, ctx);
-  const words = ctx.phones;
+  const screens = screensFor(ctx.audience, ctx.phones);
   return (
     <section className="ls-hero" id={block.anchor} data-block="hero">
       <div className="ls-aurora" aria-hidden="true"><span /><span /><span /></div>
@@ -62,9 +67,9 @@ function PhonesHero({ block, ctx }: { block: HeroBlock; ctx: PageCtx }) {
         {block.data.show.media ? (
           <div className="ls-stage" role="img" aria-label={audienceSay(ctx, 'phonesLabel')}>
             <Tilt className="ls-tilt" max={10}>
-              <Phone position="start"><StudentScreen w={words.student} /></Phone>
-              <Phone position="center"><GuardianScreen w={words.guardian} /></Phone>
-              <Phone position="end"><TeacherScreen w={words.teacher} /></Phone>
+              <Phone position="start">{screens.start}</Phone>
+              <Phone position="center">{screens.center}</Phone>
+              <Phone position="end">{screens.end}</Phone>
               <div className="ls-float-card" data-at="top" aria-hidden="true">
                 <span>{ctx.t('floating.report')}</span>
                 <b>{audienceSay(ctx, 'floating.reportValue')}</b>
