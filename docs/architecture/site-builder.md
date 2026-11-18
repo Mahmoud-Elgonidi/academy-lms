@@ -248,6 +248,12 @@ Variants: `row` (a single line, wraps), `marquee` (moves, stops under reduced mo
 Data: heading (optional, e.g. «شركاؤنا»); `items`: 2–24 `{ media: MediaRef(image) required, name: string ≤ 60 required (the alt text), url: https URL ≤ 500 | null }`; `mono: bool` (true: shown in one colour, full colour on hover or focus).
 PNG or WebP with transparency is recommended. The library flags JPEGs used here.
 
+#### `cards`: the academy's own courses, programmes or topics
+
+Variants: `grid` (a picture above the words, cards in columns), `list` (a row each: the picture at the start, the words, the button at the end), `overlay` (tall cards, the words on a shade over the picture).
+Data: heading (optional); `items`: 1–12 `{ media: MediaRef(image) | null, label: Text<40> (a small label: a length, a level, a price as words), title: Text<80> required, text: Text<300>, link: Link | null }`; `columns: 3 | 2 | 4` (default 3; `list` ignores it).
+Not live: the academy writes each card itself (Catalog's subjects stay the `subjects` block). A card's button is any `Link` (the trial form, a section such as Contact, an address); with one, the whole card opens it. Publish warns when some cards have a picture and some do not (`cards_mixed`), and of a picture narrower than 600 px.
+
 #### `cta`: call-to-action banner
 
 Variants: `banner` (a full-width band), `card` (a raised card inside the content width), `split` (text with an image on one side).
@@ -550,8 +556,8 @@ All texts are MSA and name no academy (the page adds the name). Each template is
 
 | key | audience | blocks in order |
 |---|---|---|
-| `online_courses` | adults | hero `split` (paper) · stats `band` · subjects `cards` (titled as courses) · features `icons` · teachers `portraits` · pricing `cards` · testimonials `grid` · faq `two_columns` · cta `banner` · form `centered` · contact `band` |
-| `training` | adults | hero `video` (night) · logos `row` · features `list` · image_text `side` · steps `line` · stats `cards` · testimonials `single` · cta `split` · form `split` |
+| `online_courses` | adults | hero `split` (paper) · stats `band` · subjects `cards` (titled as courses) · cards `list` (ways to learn: one-to-one, groups, organisations) · features `icons` · teachers `portraits` · pricing `cards` · testimonials `grid` · faq `two_columns` · cta `banner` · form `centered` · contact `band` |
+| `training` | adults | hero `video` (night) · logos `row` · cards `grid` ("Our training programmes", each with a button to the form) · features `list` · image_text `side` · steps `line` · stats `cards` · testimonials `single` · cta `split` · form `split` |
 | `kids_families` | families | today's page exactly: hero `phones` · features `cards` · subjects · teachers · steps · app `phones` · pricing · testimonials `marquee` · faq · form `split` (`teach: true`) |
 | `language_school` | adults | hero `centered` · subjects `chips` · features `cards` · teachers `cards` · gallery `masonry` · pricing `table` · faq `accordion` · form `split` |
 | `blank` | current | hero `minimal` · form `centered` |
@@ -848,6 +854,9 @@ export type VideoBlock = Base<'video', 'framed' | 'wide' | 'side', Heading & {
 export type LogosBlock = Base<'logos', 'row' | 'marquee' | 'grid', Heading & {
   items: { media: Media; name: string; url: string | null }[]; mono: boolean;
 }>;
+export type CardsBlock = Base<'cards', 'grid' | 'list' | 'overlay', Heading & {
+  items: { media: Media | null; label: string | null; title: string; text: string | null; link: PageLink | null }[]; columns: 2 | 3 | 4;
+}>;
 export type CtaBlock = Base<'cta', 'banner' | 'card' | 'split', {
   title: string; lead: string | null; primary: PageLink | null; secondary: PageLink | null; media: Media | null;
 }>;
@@ -860,7 +869,7 @@ export type SpacerBlock = Base<'spacer', 'space' | 'divider', { size: 'sm' | 'md
 export type PageBlock =
   | HeroBlock | FeaturesBlock | SubjectsBlock | TeachersBlock | PricingBlock | StepsBlock | AppBlock
   | TestimonialsBlock | FaqBlock | StatsBlock | RichTextBlock | ImageTextBlock | GalleryBlock | VideoBlock
-  | LogosBlock | CtaBlock | FormBlock | ContactBlock | SpacerBlock;
+  | LogosBlock | CardsBlock | CtaBlock | FormBlock | ContactBlock | SpacerBlock;
 
 export type PageSettings = {
   audience: 'families' | 'adults';
@@ -919,5 +928,17 @@ Per-string `lang` attributes for fallback text; caption tracks for videos; serve
 
 - **The migrated menu follows 9.1 with the portal's own words.** `LegacyImport::NAV` copies `site.nav.*` exactly, so the English FAQ item is "Questions" (what today's header says), not "FAQ". `style.eyebrow` is true on every migrated block but the hero; `kids_families` gets both through `LegacyImport`.
 - **An empty (d) heading still shows the portal's words (the gap in 9.1).** No "none" value for a text in v1 (it would change the `Text` contract on both sides). Instead: the builder's title and lead boxes of the blocks with portal defaults (features, subjects, teachers, steps, app, pricing, testimonials, faq, form, contact), the hero's kicker and every eyebrow show the placeholder «فارغ: تظهر كلمات الصفحة المعتادة», and the adult templates set their own features lead (`online_courses`, `language_school`; `training` had one).
-- **`content` is marked `deprecated: true` in OpenAPI** through a `@deprecated` tag on the array key (Scramble reads it). The blocks are typed inline (an enum of the 19 types, `data` as an open object) rather than a separate `SiteBlock` component; the portal types blocks by hand (8.3), so the generated shape is documentation only.
+- **`content` is marked `deprecated: true` in OpenAPI** through a `@deprecated` tag on the array key (Scramble reads it). The blocks are typed inline (an enum of the block types, `data` as an open object) rather than a separate `SiteBlock` component; the portal types blocks by hand (8.3), so the generated shape is documentation only.
 - **Tests run with more than 128 MB.** `artisan test` starts Pest in a child PHP process at the default 128 MB, and the builder screen's test (a Filament form with every block) needs more. CI runs `vendor/bin/pest` under setup-php (no limit); locally run `php -d memory_limit=3G vendor/bin/pest`.
+
+### 9.3 Pages for adults (branch `feature/site-adults-cards`)
+
+Many academies are adult training centres (risk management, compliance, languages for work) with no children, parents or families. With `settings.audience = adults`:
+
+- **Nothing on the page names a child, a son or daughter, a parent or guardian, or a family**, in either language: not the academy's blocks as the templates write them, not the portal's own words for the (d) fields (`site.adults.*`), not the form (no "for my child" choice), not the phones. Checked on both sides: `tests/Feature/Site/SiteAdultsTest.php` publishes the `training` and `online_courses` templates with every live block added (teachers showing ages, the phones opening) and reads `GET v1/site` in Arabic and English; the portal's `components/site/page/adults.test.tsx` renders those pages with the portal's default words and the phones. Both look for whole words with Arabic's attached letters (و ف ب ل ال) and treat the Arabic comma as a word's end.
+- **The phones (`hero.phones`, `app.phones`) show the learner's own screens** (`phones.tsx`, `screensFor(audience)`): the start phone is a session's notes (the teacher's notes with stars, units done, the next task, the certificate it leads to), the centre phone the learner's home (the next live session, their courses with progress, their certificates), the end phone the teacher's day with adult learners. Never the guardian's home, a child's report or the island game. Words in `sitePhones.adults` (MSA). The families' phones are unchanged (pixel-equal).
+- **Teachers' age groups: the rule.** On a page for adults a teacher's card names "adults" alone, when the teacher teaches adults, and no age at all otherwise, whatever the block's `show_ages` says (`Domain\Page\Audience::ageGroups`, applied by `GET v1/site` to `teachers[].age_groups`; the portal's `ageGroupsFor` does the same). A page for families shows every group as before. The adult templates (`online_courses`, `language_school`) start with `show_ages` off: on a page for adults "adults" says nothing new.
+- **The builder's own words no longer assume families** (the testimonials hint, the trial settings, the requests and setup lines): "whoever asked", "visitors", "learners". The audience choice itself still names both.
+- **A new block, `cards` (1.3)**, for the academy's own courses and programmes, with the media picker per card and a button per card; `online_courses` and `training` start with one.
+- Known and left: an academy with no `site_pages` row still reads `LegacyImport` of its old `site_settings.content`, whose defaults speak to families (the reasons and questions); an academy for adults gets a clean page by applying an adult template (the first builder save writes the row). The legacy `academy-page.tsx` is unchanged.
+
