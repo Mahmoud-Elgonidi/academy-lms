@@ -242,7 +242,11 @@ final class SiteController
                  */
                 'blocks' => $localized['blocks'],
             ],
-            /** Deprecated: the old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`. */
+            /**
+             * The old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`.
+             *
+             * @deprecated Read `page`; this goes in a later release.
+             */
             'content' => $content,
             /** Every subject the academy teaches (the free-trial form picks one). */
             'subjects' => $subjects,

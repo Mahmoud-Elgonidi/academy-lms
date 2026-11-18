@@ -55,6 +55,9 @@ it('turns today\'s page into blocks in today\'s order, with their old anchors', 
         ->and($doc['blocks'][1]['data']['items'])->toHaveCount(6)
         ->and(array_column($doc['blocks'][1]['data']['items'], 'icon'))->toBe(['users', 'report', 'calendar', 'map', 'shield', 'heart'])
         ->and($doc['blocks'][9]['data']['teach'])->toBeTrue()
+        // The old menu and the small labels (portal's contract change, 9.1).
+        ->and(array_map(fn ($b) => $b['nav']['en'], $doc['blocks']))->toBe(['', 'Why us', 'Subjects', 'Teachers', '', '', 'Pricing', '', 'Questions', ''])
+        ->and(array_map(fn ($b) => $b['style']['eyebrow'], $doc['blocks']))->toBe([false, true, true, true, true, true, true, true, true, true])
         ->and($doc['settings']['motion'])->toBe('full')
         ->and($doc['settings']['header']['style'])->toBe('overlay')
         // The same content always makes the same page.

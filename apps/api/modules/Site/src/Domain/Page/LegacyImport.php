@@ -22,6 +22,15 @@ final class LegacyImport
         'app' => 'lapp0000', 'pricing' => 'lpricing', 'testimonials' => 'ltestimo', 'faq' => 'lfaq0000', 'form' => 'ljoin000',
     ];
 
+    /** The old header's menu words (the portal's site.nav.*), on the blocks it listed. */
+    public const NAV = [
+        'features' => ['ar' => 'لماذا نحن', 'en' => 'Why us'],
+        'subjects' => ['ar' => 'المواد', 'en' => 'Subjects'],
+        'teachers' => ['ar' => 'المعلّمون', 'en' => 'Teachers'],
+        'pricing' => ['ar' => 'الأسعار', 'en' => 'Pricing'],
+        'faq' => ['ar' => 'أسئلة', 'en' => 'Questions'],
+    ];
+
     /**
      * @param  array<string, mixed>  $content  SiteContent's shape, already over its defaults (SiteSettings::said())
      * @return array{v: int, settings: array<string, mixed>, blocks: list<array<string, mixed>>}
@@ -57,9 +66,10 @@ final class LegacyImport
         $why = is_array($content['why'] ?? null) ? $content['why'] : [];
         $seo = is_array($content['seo'] ?? null) ? $content['seo'] : [];
 
+        // The old header's menu, and the small label every section but the opening showed.
         $block = fn (string $type, string $variant, ?string $anchor, string $tone, bool $hidden, array $data) => [
             'id' => self::IDS[$type], 'type' => $type, 'variant' => $variant, 'hidden' => $hidden,
-            'nav' => ['ar' => '', 'en' => ''], 'style' => ['tone' => $tone], 'data' => $data,
+            'nav' => self::NAV[$type] ?? ['ar' => '', 'en' => ''], 'style' => ['tone' => $tone, 'eyebrow' => $type !== 'hero'], 'data' => $data,
         ] + ($anchor !== null ? ['anchor' => $anchor] : []);
 
         $blocks = [

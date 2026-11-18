@@ -112,22 +112,27 @@ final class BlockForms
         ];
     }
 
+    /** The blocks whose title and lead fall back to the portal's words when empty (spec 6.6). */
+    private const SAID = ['features', 'subjects', 'teachers', 'steps', 'app', 'pricing', 'testimonials', 'faq', 'form', 'contact'];
+
     // ---- Content -------------------------------------------------------------
 
     /** @return list<Component> */
     private static function content(string $type): array
     {
         $c = 'content.';
+        // A heading the portal has its own words for (spec 6.6): empty shows them, and the box says so.
+        $said = in_array($type, self::SAID, true) ? __(self::B.'fields.empty_default') : null;
         $heading = fn (bool $lead = true) => [
-            self::pair($c.'eyebrow', __(self::B.'fields.eyebrow'), 40)->visible(fn (Get $get) => (bool) $get('style.eyebrow')),
-            self::pair($c.'title', __(self::B.'fields.title'), 120),
-            ...($lead ? [self::pair($c.'lead', __(self::B.'fields.lead'), 300, long: true)] : []),
+            self::pair($c.'eyebrow', __(self::B.'fields.eyebrow'), 40, placeholder: __(self::B.'fields.empty_default'))->visible(fn (Get $get) => (bool) $get('style.eyebrow')),
+            self::pair($c.'title', __(self::B.'fields.title'), 120, placeholder: $said),
+            ...($lead ? [self::pair($c.'lead', __(self::B.'fields.lead'), 300, long: true, placeholder: $said)] : []),
         ];
         $note = fn (string $key) => Callout::make(__(self::B."live.{$key}"))->info()->icon(Heroicon::OutlinedInformationCircle);
 
         return match ($type) {
             'hero' => [
-                self::pair($c.'kicker', __(self::B.'fields.kicker'), 60),
+                self::pair($c.'kicker', __(self::B.'fields.kicker'), 60, placeholder: __(self::B.'fields.empty_default')),
                 self::pair($c.'title', __(self::B.'fields.title'), 120),
                 self::pair($c.'lead', __(self::B.'fields.lead'), 300, long: true),
                 Section::make(__(self::B.'fields.buttons'))->compact()->collapsible()->schema([
@@ -393,10 +398,10 @@ final class BlockForms
     }
 
     /** A text in Arabic and English, side by side; English written left to right. */
-    public static function pair(string $path, string $label, int $max, bool $long = false): Grid
+    public static function pair(string $path, string $label, int $max, bool $long = false, ?string $placeholder = null): Grid
     {
         $box = fn (string $locale) => ($long ? Textarea::make("{$path}.{$locale}")->rows(2)->autosize() : TextInput::make("{$path}.{$locale}"))
-            ->label($label)->hint($locale === 'ar' ? 'ع' : 'EN')->maxLength($max)
+            ->label($label)->hint($locale === 'ar' ? 'ع' : 'EN')->maxLength($max)->placeholder($placeholder)
             ->extraInputAttributes($locale === 'en' ? ['dir' => 'ltr', 'lang' => 'en'] : ['dir' => 'rtl', 'lang' => 'ar']);
 
         return Grid::make(['default' => 1, 'md' => 2])->schema([$box('ar'), $box('en')]);

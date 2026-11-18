@@ -57,7 +57,7 @@ final class Templates
                 self::block('stats', 'band', ['space' => 'compact'], ['items' => self::items("{$k}.stats", 3, ['value', 'label'])]),
                 self::block('subjects', 'cards', [], ['title' => self::t("{$k}.subjects.title"), 'lead' => self::t("{$k}.subjects.lead")], self::t("{$k}.subjects.nav")),
                 self::block('features', 'icons', [], [
-                    'title' => self::t("{$k}.features.title"),
+                    'title' => self::t("{$k}.features.title"), 'lead' => self::t("{$k}.features.lead"),
                     'items' => self::icons("{$k}.features", ['laptop', 'users', 'clock', 'report', 'award', 'chat']),
                 ], self::t("{$k}.features.nav")),
                 self::block('teachers', 'portraits', ['tone' => 'paper'], ['title' => self::t("{$k}.teachers.title")], self::t("{$k}.teachers.nav")),
@@ -131,7 +131,7 @@ final class Templates
                 ]),
                 self::block('subjects', 'chips', ['align' => 'center', 'space' => 'compact'], ['title' => self::t("{$k}.subjects.title"), 'show_programs' => false], self::t("{$k}.subjects.nav")),
                 self::block('features', 'cards', ['tone' => 'paper'], [
-                    'title' => self::t("{$k}.features.title"),
+                    'title' => self::t("{$k}.features.title"), 'lead' => self::t("{$k}.features.lead"),
                     'items' => self::icons("{$k}.features", ['chat', 'globe', 'book', 'clock', 'users', 'award']),
                 ], self::t("{$k}.features.nav")),
                 self::block('teachers', 'cards', [], ['title' => self::t("{$k}.teachers.title")], self::t("{$k}.teachers.nav")),

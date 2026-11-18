@@ -196,6 +196,7 @@ return [
         'network' => 'Network',
         'seo' => 'Share picture',
         'use_default' => ':field: the page\'s usual words',
+        'empty_default' => 'Empty: the page\'s usual words show',
         'buttons' => 'Buttons',
     ],
 

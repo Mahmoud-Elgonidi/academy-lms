@@ -31,6 +31,7 @@ use Modules\Platform\Contracts\BrandingApi;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Files\CleanFile;
+use Modules\SharedKernel\Time\Clock;
 use Modules\Site\Actions\ApplySiteTemplate;
 use Modules\Site\Actions\DeleteSiteMedia;
 use Modules\Site\Actions\DiscardSiteDraft;
@@ -598,7 +599,7 @@ final class SiteBuilder extends Page
         foreach ($rows as $row) {
             $out[] = [
                 'id' => $row->id, 'revision' => $row->revision, 'blocks' => count($row->page['blocks'] ?? []),
-                'when' => $row->published_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M Y · H:i'),
+                'when' => $row->published_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M Y · H:i')),
                 'by' => $row->published_by !== null ? ($names[$row->published_by] ?? null) : null,
             ];
         }

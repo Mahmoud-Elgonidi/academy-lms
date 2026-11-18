@@ -16917,7 +16917,10 @@ export interface operations {
                                     };
                                 }[];
                             };
-                            /** @description Deprecated: the old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`. */
+                            /**
+                             * @deprecated
+                             * @description The old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`. Read `page`; this goes in a later release.
+                             */
                             content: {
                                 hero: {
                                     title: string;
@@ -17192,7 +17195,10 @@ export interface operations {
                                     };
                                 }[];
                             };
-                            /** @description Deprecated: the old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`. */
+                            /**
+                             * @deprecated
+                             * @description The old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`. Read `page`; this goes in a later release.
+                             */
                             content: {
                                 hero: {
                                     title: string;

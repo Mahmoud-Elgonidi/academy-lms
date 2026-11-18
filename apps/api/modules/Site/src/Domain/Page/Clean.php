@@ -2,8 +2,6 @@
 
 namespace Modules\Site\Domain\Page;
 
-use Illuminate\Support\Str;
-
 /** Small cleaners the page's documents share: words, numbers, addresses, links (pure). */
 final class Clean
 {
@@ -38,7 +36,7 @@ final class Clean
 
     public static function uuid(mixed $value): ?string
     {
-        return is_string($value) && Str::isUuid($value) ? strtolower($value) : null;
+        return is_string($value) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $value) === 1 ? strtolower($value) : null;
     }
 
     public static function length(string $text): int

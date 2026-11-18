@@ -17,6 +17,7 @@ return [
         'subjects' => ['title' => 'Our courses', 'lead' => 'Choose the course that fits your goal, and start at the level that suits you.', 'nav' => 'Courses'],
         'features' => [
             'title' => 'Why learners choose us',
+            'lead' => 'Everything you need to learn with confidence: a teacher who knows you, a time that suits you, and progress you can see after every lesson.',
             'nav' => 'Why us',
             'items' => [
                 ['title' => 'Learn from anywhere', 'text' => 'Live lessons with sound and video, from a computer or a phone.'],
@@ -99,6 +100,7 @@ return [
         'subjects' => ['title' => 'The languages we teach', 'nav' => 'Languages'],
         'features' => [
             'title' => 'How we teach',
+            'lead' => 'We teach the language as it is used: speaking from day one, and a graded course that shows you where you stand.',
             'nav' => 'Our method',
             'items' => [
                 ['title' => 'Speaking first', 'text' => 'You speak from the first lesson, and grammar comes in context.'],

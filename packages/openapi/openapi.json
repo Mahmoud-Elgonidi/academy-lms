@@ -38077,7 +38077,8 @@
                                                 },
                                                 "content": {
                                                     "type": "object",
-                                                    "description": "Deprecated: the old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`.",
+                                                    "description": "The old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`. Read `page`; this goes in a later release.",
+                                                    "deprecated": true,
                                                     "properties": {
                                                         "hero": {
                                                             "type": "object",
@@ -39087,7 +39088,8 @@
                                                 },
                                                 "content": {
                                                     "type": "object",
-                                                    "description": "Deprecated: the old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`.",
+                                                    "description": "The old page's words (hero, why, features, testimonials, faqs, sections shown, whatsapp, seo), made from `page`. Read `page`; this goes in a later release.",
+                                                    "deprecated": true,
                                                     "properties": {
                                                         "hero": {
                                                             "type": "object",
