@@ -53,7 +53,8 @@ export function PageHeader({ ctx, mode }: { ctx: PageCtx; mode: HeaderMode }) {
           {cta ? (
             <PageButton link={cta} ctx={ctx} className={`ls-btn ls-btn-main ls-btn-small${mode === 'minimal' ? '' : ' ls-wide-only'}`}>{ctaLabel}</PageButton>
           ) : null}
-          {mode !== 'night' && mode !== 'minimal' ? <PhoneMenu items={nav} label={t('blocks.menu')} /> : null}
+          {/* Today's night header has no menu on phones (the migrated page stays as it was); an editorial page over a dark opening gets one. */}
+          {mode !== 'minimal' && (mode !== 'night' || ctx.character === 'editorial') ? <PhoneMenu items={nav} label={t('blocks.menu')} /> : null}
         </div>
       </div>
     </SolidOnScroll>

@@ -93,6 +93,8 @@ function EditorialHero({ block, ctx, tone }: { block: HeroBlock; ctx: PageCtx; t
   const hasMedia = data.show.media && Boolean(data.media || data.video);
   // A split hero without its picture reads as a centred one (4.4); a video hero without its video, as a centred one in its tone.
   const variant = block.variant === 'split' && !hasMedia ? 'centered' : block.variant === 'video' && !data.video ? 'centered' : block.variant;
+  // Downgraded, the words stand in the middle: start-aligned, they would leave the picture's half empty.
+  const align = variant === 'split' ? 'start' : variant !== block.variant ? 'center' : block.style.align;
   const label = data.title;
   return (
     <section
@@ -101,7 +103,7 @@ function EditorialHero({ block, ctx, tone }: { block: HeroBlock; ctx: PageCtx; t
       data-block="hero"
       data-variant={variant}
       data-tone={tone}
-      data-align={variant === 'split' ? 'start' : block.style.align}
+      data-align={align}
       data-space={block.style.space}
       data-width={block.style.width}
       data-side={data.media_side}

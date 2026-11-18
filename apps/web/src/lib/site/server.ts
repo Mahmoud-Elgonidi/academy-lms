@@ -129,11 +129,6 @@ export type PreviewRefusal = 'expired' | 'invalid';
  * (a two-hour link from /admin); the portal holds no admin session.
  */
 export async function academySitePreview(token: string): Promise<AcademySite | PreviewRefusal> {
-  // Until the API ships the preview (8.4): a fixture page in development only. Removed before merge.
-  if (token.startsWith('fixture') && process.env.NODE_ENV === 'development') {
-    const [{ fixtureSite }, { getLocale }] = await Promise.all([import('./fixtures/site'), import('next-intl/server')]);
-    return fixtureSite(token.slice('fixture'.length).replace(/^-/, '') || 'all', await getLocale());
-  }
   if (!/^[A-Za-z0-9._~-]{8,512}$/.test(token)) return 'invalid';
   try {
     const response = await call('get', '/v1/site/preview', { query: { token } });

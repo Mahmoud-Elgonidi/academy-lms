@@ -910,7 +910,10 @@ Per-string `lang` attributes for fallback text; caption tracks for videos; serve
 - Pricing per lesson and the plans' wording moved from `academy-page.tsx` into `components/site/plans.ts` (shared by both pages; no change in rendering).
 - **Gap (for the builder): a (d) heading text cannot be removed.** A `lead` (or `title`) with a default and both languages empty means "not set", so the portal shows its default words (for example the families' «لماذا نحن» lead under an adult training page's features). Until the document can say "none" for a text (as `Lines` can with `[]`), templates for adults should set their own leads, and the builder's hint should say an empty lead shows the default.
 - The phone menu: the editorial header gets a small disclosure menu below 900 px (the wide menu's links); today's header (`night` mode) keeps its look, so the migrated page is unchanged at 390 px.
-- Dev only, removed before merge (8.4): `/{locale}/site-preview?t=fixture-<page>[-<mood>[-<accent>]]` draws `lib/site/fixtures/site.ts` (pages `legacy`, `courses`, `training`, `all`) with stock photos by URL.
+- The dev-only fixture preview (`?t=fixture-…`) is gone now that `GET v1/site/preview` exists (8.4). `lib/site/fixtures/site.ts` stays, for the Vitest render tests only (stock photos by URL, never shipped to a page).
+- A `split` hero with no picture (a template before the academy adds one) is drawn as `centered` **and centred**: start-aligned, the words left the picture's half empty. A `video` hero without its video does the same.
+- An editorial page whose header is `overlay` over a dark opening (a video hero, a night or brand first block) gets the phone menu too; only the playful page (today's look) keeps today's header without one at 390 px.
+- Stats on narrow screens sit two to a row; an odd last number takes the whole row.
 
 ### 9.2 Server
 

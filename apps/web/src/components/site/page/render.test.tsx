@@ -171,6 +171,26 @@ describe('the page as blocks', () => {
   });
 });
 
+describe('the opening and the header, after a look at the real API', () => {
+  it('stands a split hero without its picture in the middle (no empty half)', () => {
+    const { site, page: doc } = page('courses');
+    const blocks = doc.blocks.map((b) => (b.type === 'hero' ? { ...b, variant: 'split' as const, style: { ...b.style, align: 'start' as const }, data: { ...b.data, media: null, video: null } } : b));
+    const html = render(site, { ...doc, blocks });
+    expect(html).toMatch(/data-block="hero" data-variant="centered" data-tone="[a-z]+" data-align="center"/);
+  });
+
+  it('gives an editorial page over a dark opening the phone menu, and keeps today’s header without one', () => {
+    const training = page('training');
+    // The training fixture names no block in its menu; give one a label.
+    const blocks = training.page.blocks.map((b, i) => (i === 1 ? { ...b, nav: 'Courses' } : b));
+    const html = render(training.site, { ...training.page, blocks });
+    expect(headerModeOf(training.page, 'light')).toBe('night');
+    expect(html).toContain('class="sp-menu"');
+    const legacy = page('legacy');
+    expect(render(legacy.site, legacy.page)).not.toContain('class="sp-menu"');
+  });
+});
+
 describe('the page’s code', () => {
   it('never writes raw HTML (no dangerouslySetInnerHTML under components/site/page)', () => {
     const dir = join(__dirname);

@@ -84,6 +84,7 @@
 .sp-menu nav { position: absolute; inset-block-start: calc(100% + 0.6rem); inset-inline-end: 0; display: grid; min-inline-size: 13rem; padding: 0.5rem; border-radius: var(--sp-radius); background: white; color: var(--sp-ink); border: 1px solid var(--sp-line); box-shadow: 0 24px 48px -24px rgb(10 15 26 / 0.35); }
 .sp-menu nav a { padding: 0.7rem 0.9rem; border-radius: calc(var(--sp-radius) * 0.6); text-decoration: none; font-weight: 500; }
 .sp-menu nav a:hover { background: var(--sp-tint); }
+.ls-header:not(.sp-header) .sp-menu summary { color: white; border-color: rgb(255 255 255 / 0.25); }
 @media (min-width: 900px) { .sp-menu { display: none; } }
 .ls-hero-grid[data-solo] { grid-template-columns: minmax(0, 52rem); }
 
@@ -207,6 +208,7 @@
 .sp-trust li { display: inline-flex; align-items: center; gap: 0.45rem; }
 .sp-trust svg { inline-size: 1.05rem; block-size: 1.05rem; color: var(--sp-accent-strong); }
 .sp-block:is([data-tone='night'], [data-tone='brand']) .sp-trust svg { color: inherit; }
+.sp-hero[data-variant='video'] .sp-trust svg { color: inherit; }
 
 @media (min-width: 960px) {
   .sp-hero[data-variant='split'] .sp-hero-grid { grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); }
@@ -520,6 +522,8 @@
 /* ── stats ─────────────────────────────────────────────── */
 .sp-stats { display: grid; gap: 1.5rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 860px) { .sp-stats { grid-template-columns: repeat(min(var(--count), 6), minmax(0, 1fr)); } }
+/* Two to a row on narrow screens: an odd last number takes the whole row instead of leaving a hole. */
+@media (max-width: 859.98px) { .sp-stats > div:last-child:nth-child(odd) { grid-column: 1 / -1; } }
 .sp-stats > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 0.4rem; }
 .sp-stats dd { font-size: var(--fs-4); line-height: 1; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .sp-stats dt { color: var(--soft); font-size: var(--fs--1); line-height: 1.5; max-inline-size: 22ch; }
