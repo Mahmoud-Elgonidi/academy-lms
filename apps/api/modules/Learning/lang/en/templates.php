@@ -3,7 +3,7 @@
 return [
     'nav' => 'Report questions',
     'title' => 'Report questions',
-    'subtitle' => 'Your own questions in each subject\'s lesson report, after the stars and notes every report has: pages memorised, tajweed, new words… Each save is a new version: reports already written keep the questions they answered.',
+    'subtitle' => 'Your own questions in each subject\'s lesson report, after the stars and notes every report has: understanding, pronunciation, new words… Each save is a new version: reports already written keep the questions they answered.',
     'subject' => 'Subject',
     'no_subjects' => 'Add subjects first (Catalog).',
     'version' => 'Version :n',
@@ -35,7 +35,7 @@ return [
         'unit_ar_few' => 'Unit for 3–10 (Arabic)',
         'unit_few_hint' => 'آيات، صفحات',
         'unit_en' => 'Unit (English)',
-        'unit_hint' => 'Pages, verses, words…',
+        'unit_hint' => 'Pages, words, problems…',
         'options' => 'Choices',
         'option_ar' => 'Choice (Arabic)',
         'option_en' => 'Choice (English)',

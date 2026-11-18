@@ -206,7 +206,7 @@ return [
             'age' => 'Age group',
             'first_age' => 'Its first student\'s',
             'name' => 'Group name',
-            'name_hint' => 'Optional, like "Juz Amma – evenings"',
+            'name_hint' => 'Optional, like "Beginner English – evenings"',
             'done' => 'The group was made',
         ],
         'join' => [

@@ -22,7 +22,7 @@ return [
     ],
     // The page a guardian opens to hear the recording of the week (no sign-in; their own link).
     'voice' => [
-        'title' => ':student recites',
+        'title' => ":student's recording",
         'lead' => "From this week's homework: :homework",
         'when' => 'Handed in :when',
         'private' => 'This link is yours alone and ends after 14 days. The recording plays here and is not downloaded.',
@@ -35,7 +35,7 @@ return [
         'subtitle' => "One message a week to each student's guardians about their child's week.",
         'toggle' => 'Send the weekly note',
         'when' => "It goes out on Friday after 7 pm on the student's clock, for every student with a course running or paused, to the guardians who receive reports (push, email and WhatsApp as each chose). A week with no lesson, homework or practice sends nothing.",
-        'what' => "It holds: lessons attended and missed, the lessons and how they went, the teacher's words for the family, the academy's questions families see, homework, practice and the week's stars (unless the journey is plain). When the week has a good recitation recording, it carries a link for the guardian to hear it.",
+        'what' => "It holds: lessons attended and missed, the lessons and how they went, the teacher's words for the family, the academy's questions families see, homework, practice and the week's stars (unless the journey is plain). When the week has a good voice recording, it carries a link for the guardian to hear it.",
         'never' => "It never says: the teacher's internal notes, the academy's review, ratings, disputes, or teachers' numbers and pay.",
         'wording_on' => 'Wording: the AI helper writes it from these facts alone; anything it writes beyond them sends the facts as they are.',
         'wording_off' => 'Wording: the facts as they are. The AI helper can word it more warmly: Settings › AI.',

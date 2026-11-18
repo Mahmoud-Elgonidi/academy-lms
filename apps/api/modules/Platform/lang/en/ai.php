@@ -41,7 +41,7 @@ return [
     'demo' => [
         'heard' => [
             'practice_items' => 'A demo lesson',
-            'report_draft' => 'We finished An-Nasr and he knew it well, we reviewed Al-Kafirun and he needed focus. Homework: recite An-Nasr three times. Great engagement.',
+            'report_draft' => 'We finished fractions and he understood them well, we reviewed multiplication and he needed focus. Homework: five fraction problems. Great engagement.',
             'digest_wording' => 'A demo week',
             'curriculum_outline' => 'A demo outline',
         ],

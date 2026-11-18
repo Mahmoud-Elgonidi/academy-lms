@@ -70,8 +70,6 @@ return [
     'external' => [
         'title' => 'This lesson is on an outside link',
         'go' => 'Open the lesson',
-        'opened' => 'The lesson opened in a new tab. Keep this page open beside it.',
-        'again' => 'If it did not open, open it here',
     ],
     'refused' => [
         'title' => 'You cannot enter this lesson',

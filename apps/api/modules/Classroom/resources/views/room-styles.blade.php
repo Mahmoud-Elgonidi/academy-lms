@@ -157,7 +157,7 @@
     .materials span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .materials em { font-style: normal; font-size: 11px; color: var(--muted); white-space: nowrap; }
 
-    /* Notices: an outside meeting opened beside the page, or the lesson left. */
+    /* Notices: the lesson moved to the teacher's own link, or the lesson left. */
     .notice { margin: auto; width: 100%; max-width: 480px; background: var(--panel); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; text-align: center; }
     .notice h1 { margin: 0; font-size: 20px; font-weight: 500; }
     .notice .row { justify-content: center; }
@@ -166,7 +166,6 @@
     /* Wide screens: the panel sits beside the stage (always before joining; in the call, while it is open). */
     @media (min-width: 1000px) {
         body:not([data-state="live"]) main.with-plan, body[data-state="live"][data-panel="open"] main.with-plan { grid-template-columns: minmax(0, 1fr) 340px; }
-        body:not([data-state="live"]) main.with-tool, body[data-state="live"][data-panel="open"] main.with-tool { grid-template-columns: minmax(0, 1fr) 440px; }
         body[data-state="live"]:not([data-panel="open"]) aside { display: none; }
     }
     /* Narrow screens: before joining the panel follows the card; in the call it slides over the stage. */
