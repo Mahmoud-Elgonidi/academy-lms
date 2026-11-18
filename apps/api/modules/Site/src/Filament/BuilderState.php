@@ -45,8 +45,6 @@ final class BuilderState
     {
         $settings['header']['cta'] = self::linkToForm($settings['header']['cta'] ?? null);
         $settings['seo']['image'] = $settings['seo']['image'] ?? ['media' => null, 'alt' => null];
-        $settings['fonts']['heading'] ??= '';
-        $settings['fonts']['body'] ??= '';
 
         return $settings;
     }

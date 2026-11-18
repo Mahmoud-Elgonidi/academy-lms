@@ -57,7 +57,8 @@
                     frame.src = this.url();
                 },
                 refresh(rev) { if (rev) { this.rev = rev; } this.anchor = null; this.load(); },
-                focus(anchor) { this.anchor = anchor; this.open = true; this.load(); },
+                // The side preview shows the block where it stands; a narrow screen opens the preview over the page.
+                focus(anchor) { this.anchor = anchor; if (! window.matchMedia('(min-width: 1280px)').matches) { this.open = true; } this.load(); },
                 setDevice(d) { this.device = d; this.$nextTick(() => this.measure()); },
                 setLang(l) { if (this.lang !== l) { this.lang = l; this.load(); } },
                 save() { this.$wire.saveDraft(); },
@@ -307,7 +308,7 @@
                     <a class="lms-pv-link" x-bind:href="url()" target="_blank" rel="noopener" title="{{ __($b.'preview.open') }}" aria-label="{{ __($b.'preview.open') }}">
                         <x-filament::icon icon="heroicon-o-arrow-top-right-on-square" />
                     </a>
-                    <button type="button" class="lms-pv-link" x-show="open" x-cloak x-on:click="open = false" aria-label="{{ __('filament-actions::modal.actions.close.label') }}">
+                    <button type="button" class="lms-pv-link" x-show="open" x-cloak x-on:click="open = false" aria-label="{{ __('filament::components/modal.actions.close.label') }}">
                         <x-filament::icon icon="heroicon-o-x-mark" />
                     </button>
                 </div>

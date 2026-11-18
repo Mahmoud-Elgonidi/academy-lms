@@ -242,7 +242,7 @@ return [
         'fonts' => 'الخطوط',
         'font_heading' => 'خط العناوين',
         'font_body' => 'خط النص',
-        'brand_font' => 'خط الأكاديمية (:font)',
+        'brand_font' => 'خط الأكاديمية: :font',
         'sample' => 'تعلّم بثقة · Learn with confidence',
         'accent' => 'اللون الأساسي للأزرار',
         'accents' => ['primary' => 'الأساسي', 'attention' => 'اللافت', 'info' => 'المعلوماتي'],

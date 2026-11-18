@@ -155,7 +155,7 @@ final class SiteBuilder extends Page
         $this->revision = (int) $page->draft_revision;
         $this->publishedRevision = $page->published !== null && $page->exists ? (int) $page->published_revision : ($page->exists ? null : 1);
         $this->hasPublished = $page->published !== null;
-        $this->savedAt = $page->draft_saved_at?->setTimezone(auth()->user()?->timezone ?? config('app.timezone'))->format('H:i');
+        $this->savedAt = $page->draft_saved_at?->setTimezone(auth()->user()?->timezone ?? config('app.timezone'))->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i'));
         $this->blocksForm->fill(BuilderState::blocksToForm($doc));
         $this->settingsForm->fill(BuilderState::settingsToForm($doc['settings']));
         $this->resetErrorBag();
@@ -230,9 +230,9 @@ final class SiteBuilder extends Page
                         ->options($words('audiences', PageDoc::AUDIENCES))->inline()->live()->afterStateUpdated($save),
                     Grid::make(['default' => 1, 'lg' => 2])->schema([
                         Select::make('fonts.heading')->label(__($p.'font_heading'))->native(false)->live()->afterStateUpdated($save)
-                            ->options(['' => __($p.'brand_font', ['font' => $tokens['heading_font']])] + $fonts)->selectablePlaceholder(false),
+                            ->options($fonts)->placeholder(__($p.'brand_font', ['font' => $tokens['heading_font']])),
                         Select::make('fonts.body')->label(__($p.'font_body'))->native(false)->live()->afterStateUpdated($save)
-                            ->options(['' => __($p.'brand_font', ['font' => $tokens['body_font']])] + $fonts)->selectablePlaceholder(false),
+                            ->options($fonts)->placeholder(__($p.'brand_font', ['font' => $tokens['body_font']])),
                     ]),
                     ViewField::make('accent')->label(__($p.'accent'))->view('site::filament.accent-picker')
                         ->viewData(['accents' => ['primary' => $tokens['primary'], 'attention' => $tokens['attention'], 'info' => $tokens['info']], 'names' => $words('accents', PageDoc::ACCENTS)])
@@ -303,7 +303,7 @@ final class SiteBuilder extends Page
         $this->toldProblems = '';
         if ($page->draft_revision !== $this->revision) {
             $this->revision = (int) $page->draft_revision;
-            $this->savedAt = now()->setTimezone(auth()->user()?->timezone ?? config('app.timezone'))->format('H:i');
+            $this->savedAt = now()->setTimezone(auth()->user()?->timezone ?? config('app.timezone'))->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i'));
             $this->dispatch('site-draft-saved', revision: $this->revision);
         }
     }
