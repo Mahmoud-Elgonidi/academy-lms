@@ -77,7 +77,7 @@ final class AiSettingsPage extends Page
         $s = 'platform::ai.settings.';
         $provider = __('platform::ai.providers.'.(AiProvider::current()?->value ?? 'claude'));
 
-        // Every capability a module registered: the first five with their own words, any other with its module's.
+        // Every capability a module registered: the first four with their own words, any other with its module's.
         return $schema->statePath('data')->components(array_values(array_map(fn (Capability $c) => Section::make($c->label())
             ->description($c->feature() !== null ? __($s.'helpers.'.$c->key.'.what') : $c->description())
             ->schema([

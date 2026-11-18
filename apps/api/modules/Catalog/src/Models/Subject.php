@@ -12,17 +12,16 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property string $academy_id
  * @property string $name_ar
  * @property string $name_en
- * @property string $kind general | quran (its courses the Quran module's to follow)
- * @property ?string $quran_track hifz | tilawa | talqin | noorani, for a Quran subject
+ *
+ * The table's kind and quran_track columns are no longer read (they followed
+ * the Quran, which moved to its own project).
  */
 final class Subject extends Model
 {
     use BelongsToTenant;
     use HasUuids;
 
-    protected $fillable = ['name_ar', 'name_en', 'kind', 'quran_track'];
-
-    protected $attributes = ['kind' => 'general'];
+    protected $fillable = ['name_ar', 'name_en'];
 
     /** @return HasMany<SubjectLevel, $this> */
     public function levels(): HasMany

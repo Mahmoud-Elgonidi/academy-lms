@@ -7,18 +7,16 @@ import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
 import type { FamilyLessons } from '@/lib/family/types';
 import { groupOf } from '@/lib/lesson-format';
-import { lessonMushaf } from '@/lib/mushaf/server';
 import { clock } from '@/lib/time';
 import { viewerTimeFormat } from '@/lib/viewer';
 
 /**
  * The learner's lesson room: the seat is asked for only when they choose to
- * go in. A Quran lesson of a course the hifz map belongs to brings its shared
- * mushaf, following the teacher's page.
+ * go in.
  */
 export default async function LessonRoom({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [t, f, locale, format, fam, mushaf] = await Promise.all([getTranslations('family'), getTranslations('format'), getLocale(), viewerTimeFormat(), family(), lessonMushaf(id)]);
+  const [t, f, locale, format, fam] = await Promise.all([getTranslations('family'), getTranslations('format'), getLocale(), viewerTimeFormat(), family()]);
   const lessons = fam.current ? await get<FamilyLessons>('/v1/family/lessons', { query: { learner_id: fam.current.id } }) : null;
   const lesson = lessons?.data.find((l) => l.id === id);
   // A group lesson: its seats and the classmates as the family may see them (first names; the kids' look, how many).
@@ -49,7 +47,6 @@ export default async function LessonRoom({ params }: { params: Promise<{ id: str
       <Classroom
         id={id}
         back={{ href: '/family/lessons', label: t('backToLessons') }}
-        mushaf={mushaf}
         title={lesson ? t('withTeacher', { name: lesson.with }) : undefined}
         subtitle={lesson?.subject}
       />

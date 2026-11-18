@@ -28,7 +28,6 @@ class _Taps {
     onFlip: () => heard.add('flip'),
     onAudioOnly: () => heard.add('audio'),
     onRecord: () => heard.add('record'),
-    onPanel: () => heard.add('panel'),
     onLeave: () => heard.add('leave'),
   );
 }
@@ -40,7 +39,6 @@ Widget _room(
   bool recording = false,
   bool pip = false,
   bool calm = false,
-  Widget? panel,
 }) => MaterialApp(
   theme: buildTheme(Branding.fallback, Stage.classic),
   locale: const Locale('ar'),
@@ -66,7 +64,6 @@ Widget _room(
       controls: controls,
       actions: (taps ?? _Taps()).actions,
       pip: pip,
-      panel: panel,
     ),
   ),
 );
@@ -273,23 +270,6 @@ void main() {
       expect(find.byKey(const Key('room-mic')), findsNothing);
       expect(find.byKey(const Key('recording-on')), findsNothing);
       expect(find.byKey(const Key('self-view')), findsNothing);
-    });
-
-    testWidgets('the mushaf takes the stage with the main picture small on it; a tap on it goes back', (tester) async {
-      final taps = _Taps();
-      await _show(
-        tester,
-        _room(
-          [_me, _teacher],
-          taps: taps,
-          panel: const Center(child: Text('صفحة المصحف')),
-          controls: const RoomControlsState(ready: true, micOn: true, camOn: true, hasPanel: true, panelOpen: true),
-        ),
-      );
-      expect(find.byKey(const Key('classroom-mushaf')), findsOneWidget);
-      expect(find.text('صفحة المصحف'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('mushaf-pip')));
-      expect(taps.heard, ['panel']);
     });
 
     testWidgets('with less motion asked for, everything stands still (the recording dot too)', (tester) async {

@@ -22,9 +22,9 @@ use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\Scheduling\Domain\Models\Session;
 use Tests\Support\EnrolledStudent;
-use Tests\Support\QuranProgram;
+use Tests\Support\SampleProgram;
 
-uses(EnrolledStudent::class, QuranProgram::class);
+uses(EnrolledStudent::class, SampleProgram::class);
 
 /*
  * The game layer (docs/architecture/02, "التحديات"): each stage's challenges
@@ -37,7 +37,7 @@ uses(EnrolledStudent::class, QuranProgram::class);
 
 beforeEach(function () {
     $this->enrolStudentOnPlan();
-    app(EnrollmentApi::class)->attachCurriculum($this->booked->enrollmentId, $this->publishQuranProgram($this->quran)->id);
+    app(EnrollmentApi::class)->attachCurriculum($this->booked->enrollmentId, $this->publishSampleProgram($this->quran)->id);
     $this->guardian = User::query()->find(DB::table('guardian_student')->where('student_id', $this->student->id)->value('guardian_id'));
     $this->stranger = User::factory()->withRole(Role::Guardian)->create();
     $this->tuesday = Session::query()->where('enrollment_id', $this->booked->enrollmentId)->orderBy('starts_at')->firstOrFail();

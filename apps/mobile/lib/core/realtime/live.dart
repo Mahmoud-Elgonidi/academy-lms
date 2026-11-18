@@ -57,12 +57,6 @@ class Live {
   static const messages = 'messages.changed';
   static const practice = 'practice.changed';
 
-  /// A learner's hifz map: a page reviewed, marked or recited (and a recited page's check done).
-  static const hifz = 'hifz.changed';
-
-  /// A lesson's shared mushaf: its teacher turned the page or marked a word (the teacher, the student, the guardians).
-  static const mushaf = 'mushaf.changed';
-
   /// Who the family follows changed on this phone (a child added): heard here only, never from the socket.
   static const learners = 'learners.changed';
 

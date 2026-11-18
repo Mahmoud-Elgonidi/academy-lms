@@ -9,11 +9,7 @@ import 'package:livekit_client/livekit_client.dart' as lk;
 
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
-import '../../../../core/state/load_cubit.dart';
 import '../../../../shared/widgets/lms.dart';
-import '../../../mushaf/data/mushaf_repository.dart';
-import '../../../mushaf/domain/mushaf.dart';
-import '../../../mushaf/presentation/widgets/mushaf_pane.dart';
 import '../../../recordings/data/recordings_repository.dart';
 import '../../../recordings/domain/recordings.dart';
 import '../../data/classroom_repository.dart';
@@ -32,11 +28,7 @@ import '../widgets/room/room_view.dart';
 /// bars step aside; on Android, leaving the app shrinks the room into a small
 /// window ([PictureInPicture]). Attendance is the server's (LiveKit tells it
 /// who is in the room). Everyone sees when the lesson is being recorded; its
-/// teacher starts and stops it here, once everyone it records agreed. A
-/// Quran lesson has its shared mushaf a tap away, the main picture small over
-/// it: the teacher's turns and marks reach the room at once (data on the
-/// `mushaf` topic, heard only from the teacher's seat), and the mushaf signal
-/// follows for anyone beside the room.
+/// teacher starts and stops it here, once everyone it records agreed.
 class ClassroomPage extends StatefulWidget {
   const ClassroomPage({required this.lessonId, this.ticket, super.key});
 
@@ -69,25 +61,17 @@ class _ClassroomPageState extends State<ClassroomPage> {
   /// The camera in use on a phone with two.
   lk.CameraPosition _facing = lk.CameraPosition.front;
 
-  /// The lesson's shared mushaf, once the API says it has one; shown over the video while [_showMushaf].
-  late final _place = MushafPlace(widget.lessonId);
-  LoadCubit<LessonMushaf>? _mushaf;
-  bool _showMushaf = false;
   late final lk.EventsListener<lk.RoomEvent> _events = _room.createListener();
 
   @override
   void initState() {
     super.initState();
     _room.addListener(_changed);
-    _events.on<lk.DataReceivedEvent>((e) {
-      if (isMushafSignal(topic: e.topic, metadata: e.participant?.metadata)) unawaited(_mushaf?.load());
-    });
     // Whoever speaks gets the ring at once.
     _events.on<lk.ActiveSpeakersChangedEvent>((_) => _changed());
     // The room turns sideways with the phone (a shared screen reads better so); the app's own way comes back on leaving.
     unawaited(SystemChrome.setPreferredOrientations(DeviceOrientation.values));
     unawaited(_connect());
-    unawaited(_findMushaf());
     _tick = Timer.periodic(const Duration(seconds: 1), (_) => mounted ? setState(() {}) : null);
   }
 
@@ -99,23 +83,8 @@ class _ClassroomPageState extends State<ClassroomPage> {
     unawaited(SystemChrome.setPreferredOrientations(const []));
     _room.removeListener(_changed);
     unawaited(_events.dispose());
-    unawaited(_mushaf?.close());
     unawaited(closeRoom(disconnect: _room.disconnect, dispose: _room.dispose));
     super.dispose();
-  }
-
-  Future<void> _findMushaf() async {
-    final has = await context.read<MushafRepository>().has(widget.lessonId);
-    if (has && mounted) setState(() => _mushaf = mushafCubit(context, _place)..load());
-  }
-
-  /// The teacher turned or marked: the room hears at once (the others read the mushaf again).
-  Future<void> _tellRoom() async {
-    try {
-      await _room.localParticipant?.publishData(mushafSignal(), reliable: true, topic: mushafTopic);
-    } on Object {
-      // Not in the room (yet): the mushaf signal still reaches everyone a moment later.
-    }
   }
 
   void _changed() {
@@ -306,20 +275,12 @@ class _ClassroomPageState extends State<ClassroomPage> {
             notice: _problem != null || quality == RoomQuality.poor
                 ? Note(_problem ?? l.weakNetwork, tone: _problem != null ? Tone.danger : Tone.reward, icon: Icons.wifi_rounded)
                 : null,
-            panel: _mushaf == null
-                ? null
-                : BlocProvider.value(
-                    value: _mushaf!,
-                    child: MushafPane(place: _place, onChanged: _tellRoom, size: 22),
-                  ),
             controls: RoomControlsState(
               ready: ready,
               micOn: me?.isMicrophoneEnabled() ?? false,
               camOn: me?.isCameraEnabled() ?? false,
               canFlip: _canFlip,
               audioOnly: _audioOnly,
-              hasPanel: _mushaf != null,
-              panelOpen: _showMushaf,
               recordControls: _recording.controls,
               recordingOn: _recordingOn,
               recordBusy: _recordBusy,
@@ -331,7 +292,6 @@ class _ClassroomPageState extends State<ClassroomPage> {
               onFlip: () => unawaited(_flipCamera()),
               onAudioOnly: () => unawaited(_toggleAudioOnly()),
               onRecord: () => unawaited(_toggleRecording()),
-              onPanel: () => setState(() => _showMushaf = !_showMushaf),
               onLeave: _leave,
             ),
           ),

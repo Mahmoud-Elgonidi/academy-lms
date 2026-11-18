@@ -9,9 +9,8 @@ const intl = createMiddleware(routing);
 
 /**
  * Every portal page needs a session, except signing in and the public pages
- * (the locale's root and /platform, whose own page decides, a Quran
- * certificate's public check at /certificates/{code}, a family's own free
- * trial links at /trial/…, whose token is the proof, and the way back from a
+ * (the locale's root and /platform, whose own page decides, a family's own
+ * free trial links at /trial/…, whose token is the proof, and the way back from a
  * gateway at /pay/return, which reads the invoice only with a session and
  * otherwise leads back to the app or to signing in); then next-intl
  * keeps the locale in the path. The API still checks the token on each call.
@@ -31,8 +30,8 @@ export default function proxy(incoming: NextRequest) {
   const match = request.nextUrl.pathname.match(/^\/(ar|en)(\/.*)?$/);
   if (match) {
     const [, locale, rest = '/'] = match;
-    // The public pages: the academy's (or the platform's) at the locale's root, the platform's own, a certificate's check, a family's trial links, and back from a gateway.
-    const open = rest.startsWith('/sign-in') || rest === '/' || rest === '/platform' || rest.startsWith('/platform/') || rest.startsWith('/certificates/') || rest.startsWith('/trial/') || rest === '/pay/return';
+    // The public pages: the academy's (or the platform's) at the locale's root, the platform's own, a family's trial links, and back from a gateway.
+    const open = rest.startsWith('/sign-in') || rest === '/' || rest === '/platform' || rest.startsWith('/platform/') || rest.startsWith('/trial/') || rest === '/pay/return';
     if (!open && !request.cookies.has(SESSION_COOKIE)) {
       const target = outside(request, `/${locale}/sign-in`);
       target.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search);

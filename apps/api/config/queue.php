@@ -62,7 +62,7 @@ return [
             'after_commit' => false,
         ],
 
-        // The AI helpers' background work (a recitation check, a weekly note):
+        // The AI helpers' background work (a weekly note):
         // requests that can take minutes, on their own queue and worker, with a
         // reservation that outlasts one.
         'assist' => env('QUEUE_CONNECTION', 'database') === 'redis' ? [

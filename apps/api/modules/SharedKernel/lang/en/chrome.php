@@ -6,7 +6,6 @@ return [
         'lessons' => 'Lessons',
         'people' => 'Teachers and families',
         'teaching' => 'Teaching',
-        'quran' => 'The Quran',
         'sales' => 'Sales',
         'finance' => 'Finance',
         'communication' => 'Communication and help',

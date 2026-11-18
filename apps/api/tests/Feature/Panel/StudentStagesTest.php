@@ -29,9 +29,9 @@ use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Filament\Family\FamilyLessons;
 use Modules\Scheduling\Filament\Resources\Enrollments\ViewEnrollment;
 use Tests\Support\EnrolledStudent;
-use Tests\Support\QuranProgram;
+use Tests\Support\SampleProgram;
 
-uses(EnrolledStudent::class, QuranProgram::class);
+uses(EnrolledStudent::class, SampleProgram::class);
 
 /*
  * A student's own area takes the look of their stage (children, middle
@@ -43,7 +43,7 @@ uses(EnrolledStudent::class, QuranProgram::class);
 
 beforeEach(function () {
     $this->enrolStudentOnPlan();                      // Mon 5 Oct 2026; Lesson 1–5 in level 1, 6–7 in level 2
-    app(EnrollmentApi::class)->attachCurriculum($this->booked->enrollmentId, $this->publishQuranProgram($this->quran)->id);
+    app(EnrollmentApi::class)->attachCurriculum($this->booked->enrollmentId, $this->publishSampleProgram($this->quran)->id);
     $this->guardian = User::query()->find(DB::table('guardian_student')->where('student_id', $this->student->id)->value('guardian_id'));
 });
 

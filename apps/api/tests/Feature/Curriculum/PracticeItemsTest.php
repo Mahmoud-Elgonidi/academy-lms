@@ -11,10 +11,10 @@ use Modules\Curriculum\Models\NodeItem;
 use Modules\SharedKernel\Games\GameCatalog;
 use Modules\SharedKernel\Games\ItemKind;
 use Tests\Support\EnrolledStudent;
-use Tests\Support\QuranProgram;
+use Tests\Support\SampleProgram;
 use Tests\Support\StarterGames;
 
-uses(EnrolledStudent::class, QuranProgram::class, StarterGames::class);
+uses(EnrolledStudent::class, SampleProgram::class, StarterGames::class);
 
 /*
  * A lesson's practice items (docs/architecture/02, section 18): the words
@@ -26,7 +26,7 @@ uses(EnrolledStudent::class, QuranProgram::class, StarterGames::class);
 
 beforeEach(function () {
     $this->enrolStudentOnPlan();
-    $this->program = $this->publishQuranProgram($this->quran);
+    $this->program = $this->publishSampleProgram($this->quran);
     $this->first = Node::query()->findOrFail($this->lessons[0]);
 });
 

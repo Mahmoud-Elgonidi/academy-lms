@@ -14,8 +14,6 @@ class RoomControlsState {
     this.camOn = false,
     this.canFlip = false,
     this.audioOnly = false,
-    this.hasPanel = false,
-    this.panelOpen = false,
     this.recordControls = false,
     this.recordingOn = false,
     this.recordBusy = false,
@@ -30,10 +28,6 @@ class RoomControlsState {
   /// A phone's front and back cameras, the camera on.
   final bool canFlip;
   final bool audioOnly;
-
-  /// The lesson has its shared mushaf, and it is open now.
-  final bool hasPanel;
-  final bool panelOpen;
 
   /// This seat starts and stops the recording (the lesson's teacher).
   final bool recordControls;
@@ -54,7 +48,6 @@ class RoomActions {
     required this.onFlip,
     required this.onAudioOnly,
     required this.onRecord,
-    required this.onPanel,
     required this.onLeave,
   });
 
@@ -63,7 +56,6 @@ class RoomActions {
   final VoidCallback onFlip;
   final VoidCallback onAudioOnly;
   final VoidCallback onRecord;
-  final VoidCallback onPanel;
   final VoidCallback onLeave;
 }
 
@@ -77,12 +69,12 @@ class _Control {
   final _Tone tone;
 }
 
-/// At rest, switched on (the academy's colour), switched off where that is
-/// a warning (a microphone or camera off, recording: red), or open (white).
-enum _Tone { rest, on, off, open }
+/// At rest, switched on (the academy's colour), or switched off where that
+/// is a warning (a microphone or camera off, recording: red).
+enum _Tone { rest, on, off }
 
 /// The round buttons under the stage, as in a video call: microphone,
-/// camera, the other camera, the mushaf, audio only, the layout, recording
+/// camera, the other camera, audio only, the layout, recording
 /// (its teacher), and leaving in red. Where the bar has no room for them
 /// all, audio only, the layout and recording go under "more options".
 class RoomControls extends StatelessWidget {
@@ -123,14 +115,6 @@ class RoomControls extends StatelessWidget {
       ),
       if (s.canFlip && s.camOn)
         _Control(id: 'room-flip', icon: Icons.flip_camera_android_rounded, label: l.roomFlipCamera, onPressed: actions.onFlip),
-      if (s.hasPanel)
-        _Control(
-          id: 'mushaf-toggle',
-          icon: s.panelOpen ? Icons.videocam_rounded : Icons.menu_book_rounded,
-          label: s.panelOpen ? l.mushafShowVideo : l.mushafShow,
-          tone: s.panelOpen ? _Tone.open : _Tone.rest,
-          onPressed: actions.onPanel,
-        ),
     ];
     final more = [
       _Control(
@@ -291,7 +275,6 @@ class _RoundButton extends StatelessWidget {
       _Tone.rest => (RoomColors.control, RoomColors.ink),
       _Tone.on => (context.colors.brand, Colors.white),
       _Tone.off => (RoomColors.red, Colors.white),
-      _Tone.open => (RoomColors.ink, RoomColors.stage),
     };
     return Semantics(
       toggled: c.tone == _Tone.rest ? null : true,

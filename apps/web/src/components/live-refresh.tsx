@@ -17,8 +17,8 @@ function announce(signal: string) {
  * refreshes when it is looked at again. Without a socket, or with the relay
  * quiet, it refreshes every minute instead, as the panels do. Each signal is
  * also told to the page's scripts (a window event), so a screen keeping its
- * own state reads it again; the ones such a screen follows by itself (the
- * shared mushaf's) leave the page alone.
+ * own state reads it again; the ones such a screen follows by itself
+ * (OWN_SIGNALS) leave the page alone.
  */
 export function LiveRefresh({ realtime }: { realtime: Realtime | null }) {
   const router = useRouter();
@@ -171,8 +171,7 @@ export function useSignal(signals: readonly Signal[], then: (signal: string) => 
 
 /**
  * A page that shows what one of the signals a screen follows by itself
- * changes (the mistakes notebook: the words marked in the shared mushaf)
- * refreshes for it, once for a burst; a hidden tab when it is looked at again.
+ * changes refreshes for it, once for a burst; a hidden tab when it is looked at again.
  */
 export function RefreshOn({ signals }: { signals: Signal[] }) {
   const router = useRouter();

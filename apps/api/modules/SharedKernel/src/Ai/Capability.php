@@ -47,7 +47,7 @@ final readonly class Capability
     }
 
     /**
-     * One of the five helpers that came before the registry, as its enum describes it.
+     * One of the four helpers that came before the registry, as its enum describes it.
      *
      * @param  array<string, mixed>  $demo
      */

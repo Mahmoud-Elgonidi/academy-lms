@@ -42,5 +42,5 @@ return [
     ],
     // The weekly note to guardians (Actions\Digest\SendWeeklyDigest): :body is the week, written already.
     'weekly_digest' => ['title' => 'أسبوع :student', 'body' => ':body'],
-    'weekly_digest_voice' => ['title' => 'أسبوع :student', 'body' => ':body واستمع إلى تسميع :student من هذا الأسبوع: :link'],
+    'weekly_digest_voice' => ['title' => 'أسبوع :student', 'body' => ':body واستمع إلى تسجيل :student من هذا الأسبوع: :link'],
 ];

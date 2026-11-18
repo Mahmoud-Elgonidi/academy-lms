@@ -192,9 +192,10 @@ return [
         ],
         'learning' => [
             'weekly_digest_saved' => 'الرسالة الأسبوعية لأولياء الأمور: :state',
-            // Kept for entries written before the Quran module (now quran.daily_pages_saved).
+            // Kept for entries written while the Quran was part of the platform (it moved to its own project).
             'hifz_daily_saved' => 'أصبح ورد المراجعة :pages صفحة في اليوم على الأكثر',
         ],
+        // Kept for entries written while the Quran was part of the platform (it moved to its own project); nothing writes these now.
         'quran' => [
             'daily_pages_saved' => 'أصبح ورد المراجعة :pages صفحة في اليوم على الأكثر',
             'settings_saved' => 'تعديل إعدادات القرآن: :quran_fields',

@@ -15,6 +15,7 @@ use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
 use Modules\Platform\Actions\Plans\ChangeAcademyPlan;
 use Modules\Platform\Actions\SaveAiSettings;
+use Modules\Platform\Ai\AiProvider;
 use Modules\Platform\Ai\AiSlots;
 use Modules\Platform\Ai\ClaudeLanguageModel;
 use Modules\Platform\Ai\ElevenLabsSpeechToText;
@@ -107,7 +108,7 @@ it('lets a helper run only when the academy turned it on, its plan has the area,
     app(SaveAiSettings::class)->handle(['practice_items' => true, 'report_draft' => true, 'nonsense' => true], $this->owner->id);
     expect($ai->on(AiFeature::PracticeItems))->toBeTrue()
         ->and($ai->on(AiFeature::ReportDraft))->toBeTrue()
-        ->and($ai->why(AiFeature::RecitationCheck))->toBe('off')
+        ->and($ai->why(AiFeature::DigestWording))->toBe('off')
         ->and(AiSettings::current()->getAttributes())->not->toHaveKey('nonsense');
 
     // The keys each one needs: the listening ones need the speech key too.
@@ -176,10 +177,11 @@ it('keeps the switches to the owner and admin, and audits the helpers that are o
 
     $this->actingAs($this->owner);
     Filament::setCurrentPanel('academy');
+    $draftData = __('platform::ai.settings.helpers.report_draft.data', ['provider' => __('platform::ai.providers.'.(AiProvider::current()?->value ?? 'claude'))]);
     Livewire::test(AiSettingsPage::class)
         ->assertSee(__('platform::ai.settings.title'))
-        ->assertSee(__('platform::ai.settings.helpers.recitation_check.data'))
-        ->assertFormSet(['practice_items' => false, 'report_draft' => false, 'recitation_check' => false, 'digest_wording' => false])
+        ->assertSee($draftData)
+        ->assertFormSet(['practice_items' => false, 'report_draft' => false, 'digest_wording' => false])
         ->fillForm(['practice_items' => true, 'digest_wording' => true])
         ->call('save')->assertHasNoFormErrors();
 
@@ -191,10 +193,28 @@ it('keeps the switches to the owner and admin, and audits the helpers that are o
     config(['platform.ai.speech.key' => '']);
     Livewire::test(AiSettingsPage::class)
         ->assertSee(__('platform::ai.settings.not_configured'))
-        ->assertDontSee(__('platform::ai.settings.helpers.recitation_check.data'));
+        ->assertDontSee($draftData);
 
     $this->actingAs($this->accountant);
     Livewire::test(AiSettingsPage::class)->assertForbidden();
+});
+
+it('ignores a helper that left the platform (the recitation check) still stored in the academy\'s settings', function () {
+    // A row written before the Quran left: its helper's column on, and its key among the switched-off ones.
+    AiSettings::query()->create(['practice_items' => true, 'disabled' => ['recitation_check']]);
+    DB::table('ai_settings')->update(['recitation_check' => true]);
+    $ai = app(AcademyAi::class);
+    expect($ai->on(AiFeature::PracticeItems))->toBeTrue()
+        ->and(AiFeature::tryFrom('recitation_check'))->toBeNull()
+        ->and(AiSettings::current()->isOn('recitation_check'))->toBeFalse();
+
+    $this->actingAs($this->owner);
+    Filament::setCurrentPanel('academy');
+    Livewire::test(AiSettingsPage::class)
+        ->assertFormSet(['practice_items' => true, 'report_draft' => false])
+        ->fillForm(['report_draft' => true])
+        ->call('save')->assertHasNoFormErrors();
+    expect(AiSettings::current())->toMatchArray(['practice_items' => true, 'report_draft' => true]);
 });
 
 it('keeps only how many calls and how they went, never who asked or what was said, and never changes it', function () {
@@ -258,7 +278,7 @@ it('hears a recording through ElevenLabs without being told what it should say, 
         ],
     ])]);
 
-    $heard = app(ElevenLabsSpeechToText::class)->transcribe(AiFeature::RecitationCheck, aiClip());
+    $heard = app(ElevenLabsSpeechToText::class)->transcribe(AiFeature::ReportDraft, aiClip());
 
     expect($heard->text)->toBe('بسم الله الرحمن الرحيم')
         ->and(array_map(fn ($w) => $w->text, $heard->words))->toBe(['بسم', 'الله', 'الرحمن', 'الرحيم'])
@@ -273,12 +293,12 @@ it('hears a recording through ElevenLabs without being told what it should say, 
             && $fields->has('file') && $fields->has('model_id')
             && ! $fields->keys()->intersect(['text', 'expected', 'prompt', 'keyterms'])->count();
     });
-    expect(DB::table('ai_usage')->sole())->toMatchArray(['provider' => 'elevenlabs', 'feature' => 'recitation_check', 'audio_seconds' => 3, 'outcome' => 'ok'])
+    expect(DB::table('ai_usage')->sole())->toMatchArray(['provider' => 'elevenlabs', 'feature' => 'report_draft', 'audio_seconds' => 3, 'outcome' => 'ok'])
         ->and(ServiceHealth::last('elevenlabs'))->toHaveKey('ok');
 
     // Where the account allows it, nothing is kept there.
     config(['platform.ai.speech.zero_retention' => true]);
-    app(ElevenLabsSpeechToText::class)->transcribe(AiFeature::RecitationCheck, aiClip());
+    app(ElevenLabsSpeechToText::class)->transcribe(AiFeature::ReportDraft, aiClip());
     Http::assertSent(fn (Request $request) => str_contains($request->url(), 'enable_logging=false'));
 });
 

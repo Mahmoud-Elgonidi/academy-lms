@@ -8,12 +8,10 @@ import { Icon } from '@/components/icons';
 import { Badge, Button, Card, Field, Input, Notice, Select, Textarea, join } from '@/components/ui';
 import { ReportAnswers } from '@/components/report-answers';
 import { GroupRows } from '@/components/teach/group-rows';
-import { RecitationField } from '@/components/teach/recitation-field';
 import { VoiceDraft } from '@/components/teach/voice-draft';
 import { formProblem } from '@/lib/problems';
 import { answersOf, answersPayload, missingAnswers, type Answers, type Question } from '@/lib/report-answers';
 import { ACCEPTS, OUTCOMES, type HomeworkAccepts, type Outcome, type ReportForm, type ReportItem } from '@/lib/teach/types';
-import { expectedPayload, recitable, suggestionsOf, type Expected, type Surah } from '@/lib/teach/recitation';
 import { draftAnswers, draftItems, fieldNames, marksOf, nearestDays, type Mark, type VoiceDraft as Draft } from '@/lib/teach/voice-draft';
 import { rowErrors, rowProblems, rowsOf, sharedLessonNeeded, studentsPayload, type GroupRow } from '@/lib/teach/group-report';
 
@@ -26,8 +24,7 @@ const DUE_DAYS = [1, 2, 3, 4, 5, 6, 7, 10, 14] as const;
  * today's plan (and any added), focus and overall, words for the family and
  * for the academy, the subject's own questions, and homework. An absence
  * asks only for a note. When the academy turned it on, a voice note fills
- * what is still empty (marked suggested until sent), and homework handed in by
- * voice may say what to recite, for a check of each recording. The API checks
+ * what is still empty (marked suggested until sent). The API checks
  * it again (SubmitSessionReport) and its words come back here.
  *
  * A group lesson's report (form.group) is written once for the class: the
@@ -35,7 +32,7 @@ const DUE_DAYS = [1, 2, 3, 4, 5, 6, 7, 10, 14] as const;
  * the voice note fills only these) and a compact row per student below it
  * (SubmitGroupReport), each row's problems marked on the row.
  */
-export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?: Surah[] }) {
+export function ReportEditor({ form }: { form: ReportForm }) {
   const t = useTranslations('teach');
   const common = useTranslations('common');
   const router = useRouter();
@@ -63,10 +60,6 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
   // Homework handed in by playing (chosen in the panel) keeps that way when the report is saved again.
   const acceptsChoices: HomeworkAccepts[] = hw?.accepts === 'practice' ? [...ACCEPTS, 'practice'] : [...ACCEPTS];
   const [dueDays, setDueDays] = useState(3);
-  // What to recite: asked while the helper is on, or the homework already says (its passage, else the lesson's).
-  const reciteOffered = surahs.length > 0 && (Boolean(form.assist?.recitation_check) || Boolean(hw?.expected));
-  const [reciteOn, setReciteOn] = useState(Boolean(hw?.expected));
-  const [recite, setRecite] = useState<Partial<Expected>>(hw?.expected ?? form.expected_suggestion ?? form.mistakes_suggestion ?? {});
   const [answers, setAnswers] = useState<Answers>(answersOf(form.answers));
   const [problem, setProblem] = useState<{ message?: string; errors: Record<string, string[]> }>({ errors: {} });
   const [marks, setMarks] = useState<Record<string, Mark>>({});
@@ -185,7 +178,7 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
     if (!homeworkLocked) {
       payload.homework =
         giving && title.trim()
-          ? { title: title.trim(), instructions: instructions.trim() || null, accepts, due_days: dueDays, ...expectedPayload(reciteOffered, reciteOn, accepts, recite) }
+          ? { title: title.trim(), instructions: instructions.trim() || null, accepts, due_days: dueDays }
           : null;
     }
     start(async () => {
@@ -197,7 +190,6 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
         setProblem({
           message: formProblem({ message: done.message ?? common('problem'), errors }, [
             'engagement', 'overall', 'notes_for_student', 'notes_internal', 'absence_note', 'items', 'homework.title', 'homework.instructions',
-            'homework.expected', 'homework.expected.surah', 'homework.expected.from', 'homework.expected.to',
             ...(form.template?.fields ?? []).map((q) => `answers.${q.key}`),
           ]),
           errors,
@@ -236,7 +228,7 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
     if (!homeworkLocked) {
       payload.homework =
         giving && title.trim()
-          ? { title: title.trim(), instructions: instructions.trim() || null, accepts, due_days: dueDays, ...expectedPayload(reciteOffered, reciteOn, accepts, recite) }
+          ? { title: title.trim(), instructions: instructions.trim() || null, accepts, due_days: dueDays }
           : null;
     }
     start(async () => {
@@ -254,7 +246,6 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
           formProblem({ message: done.message ?? common('problem'), errors }, [
             'students',
             'notes_internal', 'items', 'homework.title', 'homework.instructions',
-            'homework.expected', 'homework.expected.surah', 'homework.expected.from', 'homework.expected.to',
             ...(form.template?.fields ?? []).map((q) => `answers.${q.key}`),
           ]) ?? (errors.students?.[0] || (rowCount > 0 ? t('rowsMissing', { n: rowCount }) : undefined)),
         errors,
@@ -414,7 +405,6 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
           <>
             <h2 className="font-semibold">{t('homeworkTitle')}</h2>
             <p className="mt-1">{hw.title}</p>
-            {hw.expected?.title ? <p className="mt-1 text-sm text-muted">{t('reciteWhat', { title: hw.expected.title })}</p> : null}
             <p className="mt-2 text-sm text-muted">{t('homeworkLocked')}</p>
           </>
         ) : (
@@ -452,17 +442,6 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
                     </Select>
                   </Field>
                 </div>
-                {reciteOffered && recitable(accepts) ? (
-                  <RecitationField
-                    surahs={surahs}
-                    suggestions={suggestionsOf(form)}
-                    on={reciteOn}
-                    onToggle={setReciteOn}
-                    value={recite}
-                    onChange={setRecite}
-                    error={error}
-                  />
-                ) : null}
               </div>
             ) : null}
           </>

@@ -29,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
 
         ApiDocumentation::configure();
 
+        // The Quran moved to its own project; the tables it made here stay as they are (nothing reads them now and
+        // nothing drops them), so a new database is made the same as one that already has them.
+        $this->loadMigrationsFrom(database_path('migrations/legacy'));
+
         // Signing in on a panel marks the landing: an academy not ready for families opens its owner and admins on "Start here".
         Event::listen(Login::class, [OpenFirstAllowedScreen::class, 'signedIn']);
 

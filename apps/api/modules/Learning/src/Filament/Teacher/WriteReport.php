@@ -27,7 +27,6 @@ use Modules\Learning\Actions\Assist\DraftReportFromVoice;
 use Modules\Learning\Actions\SubmitGroupReport;
 use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Actions\SubmitSessionReport;
-use Modules\Learning\Contracts\LearningQuran;
 use Modules\Learning\Domain\MasteryRule;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\LearningSettings;
@@ -51,10 +50,7 @@ use Modules\SharedKernel\Time\ViewerTimezone;
  * lesson, two ratings, notes, the subject's own questions (its report
  * template), and optional homework. Same Action as the API. When the
  * academy turned the helper on, a voice note drafts what is still empty
- * (DraftReportFromVoice): the teacher checks it, then sends as usual; and
- * homework handed in by voice may say what to recite where the Quran module
- * adds it (LearningQuran), so each recording is checked word by word for the
- * teacher.
+ * (DraftReportFromVoice): the teacher checks it, then sends as usual.
  *
  * @property-read Schema $form
  */
@@ -82,12 +78,6 @@ final class WriteReport extends Page
 
     private bool $templateRead = false;
 
-    /** What the report's lessons ask to recite, as it reads (null: none, or the homework has its own; LearningQuran). */
-    public ?string $reciteSuggestion = null;
-
-    /** What the words marked in this lesson suggest reciting (surah, from, to, title), offered with one tap (LearningQuran). */
-    public ?array $mistakesSuggestion = null;
-
     public static function canAccess(): bool
     {
         return Gate::allows(Ability::WriteReports->value);
@@ -107,16 +97,6 @@ final class WriteReport extends Page
         }
 
         $homework = $this->sessionReport->homework()->first();
-        $quran = app(LearningQuran::class);
-        // What to recite: the homework's own, else what the report's lessons ask, ready for when the teacher turns it on.
-        $recite = $quran->presentTarget($homework?->expected);
-        if ($recite === null && $this->sessionReport->kind === 'lesson') {
-            $recite = $quran->targetFromLessons(array_column(app(ReportFormQuery::class)->items($this->sessionReport), 'node_id'));
-            $this->reciteSuggestion = $recite['title'] ?? null;
-        }
-        if ($this->sessionReport->kind === 'lesson') {
-            $this->mistakesSuggestion = $quran->targetFromMistakes($this->sessionReport->session_id);
-        }
         $this->form->fill([
             'items' => app(ReportFormQuery::class)->items($this->sessionReport),
             'engagement' => $this->sessionReport->engagement,
@@ -132,8 +112,6 @@ final class WriteReport extends Page
                 'accepts' => $homework->accepts ?? 'any',
                 'practice' => $homework?->hasPractice() ?? false,
                 'due_days' => $homework ? max(1, (int) round($this->sessionReport->submitted_at?->diffInDays($homework->due_at) ?? LearningSettings::current()->homework_days)) : LearningSettings::current()->homework_days,
-                'recite' => $homework?->expected !== null,
-                'expected' => ['surah' => $recite['surah'] ?? null, 'from' => $recite['from'] ?? null, 'to' => $recite['to'] ?? null],
             ],
         ]);
         if ($this->sessionReport->status === 'reviewed') {
@@ -223,7 +201,6 @@ final class WriteReport extends Page
                             ->options(collect([1, 2, 3, 5, 7, 14])->mapWithKeys(fn ($d) => [$d => trans_choice('learning::teacher.write.days', $d, ['n' => $d])])),
                     ]),
                     Toggle::make('homework.practice')->label(__('learning::homework.practice.with'))->helperText(__('learning::homework.practice.with_hint')),
-                    ...$this->recitation(),
                 ]),
         ])));
     }
@@ -266,22 +243,6 @@ final class WriteReport extends Page
                             ->visible(fn (Get $get) => $get('kind') === 'absence')->required(fn (Get $get) => $get('kind') === 'absence'),
                     ]),
             ]);
-    }
-
-    /** Whether the form asks what the homework is to recite: the Quran module offers it, or the homework already says. */
-    public function reciteOffered(): bool
-    {
-        return app(LearningQuran::class)->recitationOffered() || $this->sessionReport->homework()->whereNotNull('expected')->exists();
-    }
-
-    /**
-     * What a homework handed in by voice asks to recite, for the teacher's check (the Quran module's fields).
-     *
-     * @return list<mixed>
-     */
-    private function recitation(): array
-    {
-        return $this->reciteOffered() ? app(LearningQuran::class)->reportFields($this->mistakesSuggestion, $this->reciteSuggestion) : [];
     }
 
     /** The subject's own questions (the version this report was handed in with, else the one now). */
@@ -408,14 +369,6 @@ final class WriteReport extends Page
     {
         $data = $this->form->getState();
         $data['items'] = array_values(array_map(fn (array $i) => array_intersect_key($i, array_flip(['node_id', 'outcome', 'score', 'note'])), $data['items'] ?? []));
-        // What to recite goes only when the form asks it: the passage while the switch is on, else none.
-        $recite = (bool) ($data['homework']['recite'] ?? false) && in_array($data['homework']['accepts'] ?? null, Homework::VOICE, true);
-        if ($this->reciteOffered()) {
-            $data['homework']['expected'] = $recite ? array_map(fn ($v) => $v === null || $v === '' ? null : (int) $v, $data['homework']['expected'] ?? []) : null;
-        } else {
-            unset($data['homework']['expected']);
-        }
-        unset($data['homework']['recite']);
 
         try {
             if ($this->group) {
@@ -426,8 +379,8 @@ final class WriteReport extends Page
                 app(SubmitSessionReport::class)->handle($this->sessionReport, (string) auth()->id(), $data);
             }
         } catch (ValidationException $e) {
-            // Why what to recite cannot be checked shows under its switch.
-            throw ValidationException::withMessages(collect($e->errors())->mapWithKeys(fn ($messages, $key) => ['data.'.($key === 'homework.expected' ? 'homework.recite' : $key) => $messages])->all());
+            // Each refusal shows under its own field.
+            throw ValidationException::withMessages(collect($e->errors())->mapWithKeys(fn ($messages, $key) => ['data.'.$key => $messages])->all());
         }
 
         Notification::make()->success()->title(__('learning::teacher.write.sent'))->send();

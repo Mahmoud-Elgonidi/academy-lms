@@ -16,7 +16,6 @@ use Modules\Billing\Queries\Renewals\NextRenewals;
 use Modules\Communication\Models\Notification;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Platform\Models\SaasPlan;
-use Modules\Quran\Texts\QuranText;
 
 /*
  * Automatic renewal in the demo (J5b): the family whose next renewal is
@@ -26,8 +25,7 @@ use Modules\Quran\Texts\QuranText;
 
 beforeEach(function () {
     SaasPlan::query()->create(['code' => 'pro', 'name_ar' => 'الاحتراف', 'name_en' => 'Pro', 'max_teachers' => 75, 'max_active_students' => 1000,
-        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll', 'quran', 'groups', 'curriculum', 'games', 'messaging', 'announcements', 'support', 'evaluation', 'site']]);
-    app()->instance(QuranText::class, new QuranText(base_path('tests/Fixtures/none')));
+        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll', 'groups', 'curriculum', 'games', 'messaging', 'announcements', 'support', 'evaluation', 'site']]);
 });
 
 afterEach(fn () => CarbonImmutable::setTestNow());

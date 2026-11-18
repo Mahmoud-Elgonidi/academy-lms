@@ -29,10 +29,10 @@ use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\Scheduling\Domain\Models\Session;
 use Tests\Support\EnrolledStudent;
-use Tests\Support\QuranProgram;
+use Tests\Support\SampleProgram;
 use Tests\Support\StarterGames;
 
-uses(EnrolledStudent::class, QuranProgram::class, StarterGames::class);
+uses(EnrolledStudent::class, SampleProgram::class, StarterGames::class);
 
 /*
  * The journey (docs/architecture/02, section 18): the academy's own
@@ -48,7 +48,7 @@ uses(EnrolledStudent::class, QuranProgram::class, StarterGames::class);
 
 beforeEach(function () {
     $this->enrolStudentOnPlan();
-    app(EnrollmentApi::class)->attachCurriculum($this->booked->enrollmentId, $this->publishQuranProgram($this->quran)->id);
+    app(EnrollmentApi::class)->attachCurriculum($this->booked->enrollmentId, $this->publishSampleProgram($this->quran)->id);
     $this->installStarterGames();
     $this->guardian = User::query()->find(DB::table('guardian_student')->where('student_id', $this->student->id)->value('guardian_id'));
     app(PeopleApi::class)->saveStudentProfile($this->student->id, null, LearnerStage::Kids);

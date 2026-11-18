@@ -68,11 +68,6 @@ enum Ability: string
     case ManageModules = 'academy.manage-modules';
     // A subject's own questions after a lesson report: reports are in every plan, so this stays when the curriculum is hidden.
     case ManageReportQuestions = 'reports.manage-questions';
-    // The Quran module (docs/architecture/02, section 26): its settings and programs, teaching it, examining, the board.
-    case ManageQuran = 'quran.manage';
-    case TeachQuran = 'quran.teach';
-    case ExamineQuran = 'quran.examine';
-    case ViewQuranBoard = 'quran.board';
 
     /** The plan area this ability belongs to, if a plan may leave it out. */
     public function feature(): ?Feature
@@ -82,7 +77,6 @@ enum Ability: string
             self::ManagePayroll, self::ViewOwnEarnings => Feature::Payroll,
             self::ImportData => Feature::Import,
             self::ManageAi => Feature::Ai,
-            self::ManageQuran, self::TeachQuran, self::ExamineQuran, self::ViewQuranBoard => Feature::Quran,
             // Optional areas the academy may hide (Feature::optional()).
             self::ManageCurriculum => Feature::Curriculum,
             self::ReviewPerformance, self::ViewOwnPerformance => Feature::Evaluation,

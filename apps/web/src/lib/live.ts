@@ -12,20 +12,19 @@ export type Realtime = { enabled: boolean; key: string | null; host: string | nu
  * The person's own signals (no data): the page asks the API again for what it
  * shows. The journey follows lessons (a lesson's stars, the next one),
  * homework (missions, the week's chest) and practice (rounds, the egg,
- * creatures, a guardian's limits); the hifz map and its daily review follow
- * hifz (a page reviewed, marked, or recited and then heard); a lesson's
- * shared mushaf follows mushaf (its page turned, a word marked).
+ * creatures, a guardian's limits).
  */
-export const SIGNALS = ['lessons.changed', 'homework.changed', 'inbox.changed', 'payments.changed', 'consents.changed', 'tickets.changed', 'privacy.changed', 'concerns.changed', 'checks.changed', 'messages.changed', 'practice.changed', 'hifz.changed', 'mushaf.changed'] as const;
+export const SIGNALS = ['lessons.changed', 'homework.changed', 'inbox.changed', 'payments.changed', 'consents.changed', 'tickets.changed', 'privacy.changed', 'concerns.changed', 'checks.changed', 'messages.changed', 'practice.changed'] as const;
 
 export type Signal = (typeof SIGNALS)[number];
 
 /**
  * Signals a screen follows by itself, reading its own part again, so the page
- * is not refreshed for them: the shared mushaf turns its pages many times a
- * lesson. A page that shows what they change refreshes itself (RefreshOn).
+ * is not refreshed for them (none today: a screen that changes many times a
+ * minute would be one). A page that shows what they change refreshes itself
+ * (RefreshOn).
  */
-export const OWN_SIGNALS: readonly Signal[] = ['mushaf.changed'];
+export const OWN_SIGNALS: readonly Signal[] = [];
 
 /** Whether a signal refreshes the whole page (LiveRefresh), or only the screens that follow it. */
 export function refreshesPage(signal: string): boolean {

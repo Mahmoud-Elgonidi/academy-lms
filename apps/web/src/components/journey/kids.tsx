@@ -54,15 +54,15 @@ const still = () => typeof window !== 'undefined' && window.matchMedia('(prefers
  * own items, then the missions strip, the egg and the week's chest. A round
  * plays over it; its stars, a creature hatching and the egg come after.
  */
-export function KidsJourney({ map, learnerName, autoplay, openIsland, hifz }: {
+export function KidsJourney({ map, learnerName, autoplay, openIsland, extra }: {
   map: JourneyMap;
   learnerName: string;
   /** A homework's practice to start on arrival (?homework=). */
   autoplay: PlayTarget | null;
   /** An island to open on arrival (back from the album: its art's key). */
   openIsland: string | null;
-  /** Today's hifz review, when the learner has a hifz map. */
-  hifz?: ReactNode;
+  /** Cards shown with the journey (a student's course balances). */
+  extra?: ReactNode;
 }) {
   const t = useTranslations('journey');
   const games = useTranslations('games');
@@ -393,7 +393,7 @@ export function KidsJourney({ map, learnerName, autoplay, openIsland, hifz }: {
           )}
         </section>
 
-        {hifz}
+        {extra}
 
         {stars ? (
           <div className="jr-row">

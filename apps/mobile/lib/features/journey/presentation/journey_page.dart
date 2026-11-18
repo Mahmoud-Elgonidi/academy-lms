@@ -17,7 +17,6 @@ import '../../dashboard/presentation/bloc/learner_cubit.dart';
 import '../../dashboard/presentation/widgets/family_header.dart';
 import '../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../../games/presentation/art/art.dart';
-import '../../quran/presentation/widgets/quran_entry.dart';
 import '../data/journey_repository.dart';
 import '../domain/journey.dart';
 import 'calm/calm_journey.dart';
@@ -33,7 +32,7 @@ import 'middle/middle_journey.dart';
 /// homework, lessons) and the moments the clock alone changes (the next
 /// lesson's room opening). Cheers a guardian sent pop up once. While the
 /// academy has the curriculum off, the tab stays and says so calmly, with
-/// the lessons, homework and Quran a tap away.
+/// the lessons and homework a tap away.
 class JourneyPage extends StatelessWidget {
   const JourneyPage({super.key});
 
@@ -54,7 +53,7 @@ class JourneyPage extends StatelessWidget {
             key: ValueKey('$learnerId:${context.hasModule(Feature.curriculum)}'),
             create: (c) => LoadCubit<JourneyMap>(
               () => c.read<JourneyRepository>().map(learnerId: learnerId),
-              refreshOn: c.read<Live>().on({Live.practice, Live.homework, Live.lessons, Live.hifz}),
+              refreshOn: c.read<Live>().on({Live.practice, Live.homework, Live.lessons}),
               refreshAt: (m) => m.clockMoments,
             )..load(),
             child: _Journey(place: place, name: name, family: family),
@@ -146,7 +145,7 @@ class _JourneyState extends State<_Journey> {
 }
 
 /// The journey's tab while the academy has the curriculum off: said calmly (by the academy, or outside its plan),
-/// and the lessons, homework, a family's reports and the Quran still a tap away.
+/// and the lessons, homework and a family's reports still a tap away.
 class _JourneyOff extends StatelessWidget {
   const _JourneyOff({required this.problem, required this.place, required this.family});
 
@@ -189,8 +188,6 @@ class _JourneyOff extends StatelessWidget {
               ),
           ],
         ),
-        const Gap(Space.m),
-        QuranJourneyCard(base: place.base),
       ],
     );
   }

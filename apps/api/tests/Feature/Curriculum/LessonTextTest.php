@@ -24,9 +24,9 @@ use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Ai\AiPrompt;
 use Modules\SharedKernel\Ai\LanguageModel;
-use Tests\Support\QuranProgram;
+use Tests\Support\SampleProgram;
 
-uses(QuranProgram::class);
+uses(SampleProgram::class);
 
 /*
  * A lesson's text and the practice helper (docs/architecture/02, section 22):
@@ -39,7 +39,7 @@ uses(QuranProgram::class);
 beforeEach(function () {
     $this->academy = $this->actAsTenant($this->createAcademy(['slug' => 'noor']));
     $this->admin = User::factory()->withRole(Role::Admin)->create(['name' => 'Huda Admin', 'email' => 'huda@noor.test']);
-    $this->program = $this->publishQuranProgram(app(CatalogApi::class)->createSubject('قرآن', 'Quran'));
+    $this->program = $this->publishSampleProgram(app(CatalogApi::class)->createSubject('قرآن', 'Quran'));
     $this->lesson = Node::query()->findOrFail($this->lessons[0]);
     config(['platform.ai.driver' => 'claude', 'platform.ai.key' => 'a-key-for-the-test']);
     RateLimiter::clear('ai:practice:'.$this->academy->id.':'.$this->admin->id);

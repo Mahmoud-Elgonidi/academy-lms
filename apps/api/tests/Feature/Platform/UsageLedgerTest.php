@@ -106,7 +106,7 @@ function usageLedger(): Meters
 
 function aiOn(): void
 {
-    app(SaveAiSettings::class)->handle(['practice_items' => true, 'report_draft' => true, 'digest_wording' => true, 'curriculum_outline' => true, 'recitation_check' => true], test()->owner->id);
+    app(SaveAiSettings::class)->handle(['practice_items' => true, 'report_draft' => true, 'digest_wording' => true, 'curriculum_outline' => true], test()->owner->id);
 }
 
 function aiPrompt(): AiPrompt
@@ -204,32 +204,28 @@ it('charges each helper its rate once, after its answer, and a failure costs not
     $model->json(AiFeature::CurriculumOutline, aiPrompt());
     expect(usageLedger()->state($this->academy->id, Meter::AiCredits)->used)->toBe(7);
 
-    // The recitation check: 2 a minute of what was heard (the demo hears half a second a word: one minute).
-    $speech->transcribe(AiFeature::RecitationCheck, usageRecording());
-    expect(usageLedger()->state($this->academy->id, Meter::AiCredits)->used)->toBe(9);
-
     // A report from a voice note hears then writes: charged once, 2 and 1 for the minute, when the words come back.
     $speech->transcribe(AiFeature::ReportDraft, usageRecording());
-    expect(usageLedger()->state($this->academy->id, Meter::AiCredits)->used)->toBe(9)
+    expect(usageLedger()->state($this->academy->id, Meter::AiCredits)->used)->toBe(7)
         ->and(usageLedger()->state($this->academy->id, Meter::AiCredits)->held)->toBeGreaterThan(0);
     $model->json(AiFeature::ReportDraft, aiPrompt());
     $state = usageLedger()->state($this->academy->id, Meter::AiCredits);
-    expect($state->used)->toBe(12)->and($state->held)->toBe(0);
+    expect($state->used)->toBe(10)->and($state->held)->toBe(0);
 
     // Heard and never written from (too few words, say): nothing.
     $speech->transcribe(AiFeature::ReportDraft, usageRecording());
     app(PendingCharges::class)->releaseAll();
-    expect(usageLedger()->state($this->academy->id, Meter::AiCredits))->used->toBe(12)->held->toBe(0);
+    expect(usageLedger()->state($this->academy->id, Meter::AiCredits))->used->toBe(10)->held->toBe(0);
 
     // Each use names the helper and who asked.
     $rows = DB::connection('pgsql_platform')->table('usage_ledger')->where('academy_id', $this->academy->id)->where('kind', 'consume')->get();
-    expect($rows->pluck('subject')->unique()->sort()->values()->all())->toBe(['curriculum_outline', 'digest_wording', 'practice_items', 'recitation_check', 'report_draft'])
+    expect($rows->pluck('subject')->unique()->sort()->values()->all())->toBe(['curriculum_outline', 'digest_wording', 'practice_items', 'report_draft'])
         ->and($rows->pluck('user_id')->unique()->all())->toBe([$this->teacher->id]);
 
     // The console's rate counts from the next request.
     app(SaveAiCreditRates::class)->handle($this->platformOwner, ['practice_items' => ['base' => 3, 'per_minute' => 0]]);
     $model->json(AiFeature::PracticeItems, aiPrompt());
-    expect(usageLedger()->state($this->academy->id, Meter::AiCredits)->used)->toBe(15);
+    expect(usageLedger()->state($this->academy->id, Meter::AiCredits)->used)->toBe(13);
 });
 
 it('holds the estimate before a request and lets it go when the provider fails', function () {

@@ -28,7 +28,7 @@ beforeEach(function () {
     $this->withoutDefer();
     $this->clearTenant();
     SaasPlan::query()->create(['code' => 'starter', 'name_ar' => 'البداية', 'name_en' => 'Starter', 'features' => [], 'is_default' => true]);
-    $this->growth = SaasPlan::query()->create(['code' => 'growth', 'name_ar' => 'النمو', 'name_en' => 'Growth', 'features' => ['crm', 'quran', 'payroll']]);
+    $this->growth = SaasPlan::query()->create(['code' => 'growth', 'name_ar' => 'النمو', 'name_en' => 'Growth', 'features' => ['crm', 'payroll']]);
 });
 
 afterEach(fn () => AuditActor::forget());
@@ -49,16 +49,16 @@ function clientAcademy(array $overrides = []): array
         'slug' => 'nibras', 'name_ar' => 'أكاديمية نبراس', 'name_en' => 'Nibras Academy',
         'country' => 'QA', 'currency' => 'QAR', 'timezone' => 'Asia/Qatar', 'locale' => 'ar',
         'owner_name' => 'خالد', 'owner_email' => 'Khaled@Nibras.example', 'owner_phone' => '55123456',
-        'plan' => 'growth', 'features_off' => ['quran'], 'hidden' => ['games', 'messaging', 'evaluation'],
+        'plan' => 'growth', 'features_off' => ['payroll'], 'hidden' => ['games', 'messaging', 'evaluation'],
         'reason' => 'New client, signed contract',
     ];
 }
 
-it('opens an academy with its owner, its plan without the Quran, three areas hidden, and the welcome by email, never printing the link', function () {
+it('opens an academy with its owner, its plan without payroll, three areas hidden, and the welcome by email, never printing the link', function () {
     [$code, $out] = onboard(clientAcademy());
 
     expect($code)->toBe(0, $out)
-        ->and($out)->toContain('nibras.lms.test')->toContain('growth')->toContain('quran')
+        ->and($out)->toContain('nibras.lms.test')->toContain('growth')->toContain('payroll')
         ->toContain('games, messaging, evaluation')->toContain('welcome sent to khaled@nibras.example')
         ->not->toContain('/welcome/')->not->toContain('signature')->not->toContain('expires=');
 
@@ -67,7 +67,7 @@ it('opens an academy with its owner, its plan without the Quran, three areas hid
 
     $current = SaasSubscription::query()->where('academy_id', $academy->id)->whereNull('ended_at')->sole();
     expect($current->plan_id)->toBe($this->growth->id)
-        ->and($current->features_off)->toBe(['quran'])
+        ->and($current->features_off)->toBe(['payroll'])
         ->and($current->reason)->toBe('New client, signed contract');
 
     $this->actAsTenant($academy->toTenantRef());
@@ -107,7 +107,7 @@ it('refuses a taken address, a bad email or anything else wrong, with nothing ma
     'a taken address' => [['slug' => 'noor'], 'slug'],
     'a bad email' => [['owner_email' => 'not-an-email'], 'owner_email'],
     'an unknown plan' => [['plan' => 'gold'], 'plan'],
-    'a paid area hidden' => [['hidden' => ['quran']], 'Only optional modules'],
+    'a paid area hidden' => [['hidden' => ['payroll']], 'Only optional modules'],
     'an unknown area off' => [['features_off' => ['teleport']], 'features_off'],
     'a bad address' => [['slug' => '-no'], 'slug'],
     'no reason' => [['reason' => ''], 'reason'],

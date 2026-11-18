@@ -192,9 +192,10 @@ return [
         ],
         'learning' => [
             'weekly_digest_saved' => 'Turned the weekly note to guardians :state',
-            // Kept for entries written before the Quran module (now quran.daily_pages_saved).
+            // Kept for entries written while the Quran was part of the platform (it moved to its own project).
             'hifz_daily_saved' => 'The daily hifz review is now :pages pages at most',
         ],
+        // Kept for entries written while the Quran was part of the platform (it moved to its own project); nothing writes these now.
         'quran' => [
             'daily_pages_saved' => 'The daily hifz review is now :pages pages at most',
             'settings_saved' => 'Quran settings changed: :quran_fields',

@@ -39,13 +39,6 @@ use Modules\Platform\Filament\Pages\AiSettingsPage;
 use Modules\Platform\Filament\Pages\BrandingSettings;
 use Modules\Platform\Filament\Pages\UsagePage;
 use Modules\Privacy\Filament\Pages\DataRequests;
-use Modules\Quran\Filament\Pages\HifzOverview;
-use Modules\Quran\Filament\Pages\QuranCertificates;
-use Modules\Quran\Filament\Pages\QuranExams;
-use Modules\Quran\Filament\Pages\QuranHomePage;
-use Modules\Quran\Filament\Pages\QuranPrograms;
-use Modules\Quran\Filament\Pages\QuranSettingsPage;
-use Modules\Quran\Filament\Pages\QuranStudents;
 use Modules\Safeguarding\Filament\Pages\Safeguarding;
 use Modules\Scheduling\Filament\Pages\AcademyCalendar;
 use Modules\Scheduling\Filament\Pages\DstChanges;
@@ -84,8 +77,6 @@ const ACADEMY_MENU = [
         GuardianConsents::class, TeacherChecks::class],
     'Teaching' => [SubjectResource::class, ProgramResource::class, ReportsOversight::class,
         ReportTemplates::class, TeachersPerformance::class, RecordingsPage::class, GameSettingsPage::class],
-    'Quran' => [QuranHomePage::class, QuranStudents::class, HifzOverview::class, QuranPrograms::class,
-        QuranExams::class, QuranCertificates::class, QuranSettingsPage::class],
     'Sales' => [Leads::class, SiteRequests::class],
     'Finance' => [Revenue::class, InvoiceResource::class, SavedCards::class, Payroll::class,
         PlanResource::class, CouponResource::class, RateCardResource::class],

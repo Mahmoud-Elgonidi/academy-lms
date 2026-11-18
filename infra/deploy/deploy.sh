@@ -270,7 +270,7 @@ OLLAMA_URL=
 OLLAMA_API_KEY=
 OLLAMA_MODEL=
 OLLAMA_FAST_MODEL=
-# Speech to text for the helpers that listen (a teacher's voice note, a recitation):
+# Speech to text for the helpers that listen (a teacher's voice note):
 # ElevenLabs, with the platform's key (ELEVENLABS_API_BASE=https://api.eu.residency.elevenlabs.io
 # keeps the audio in the EU; ELEVENLABS_ZERO_RETENTION=true once the account allows it).
 # Empty: those helpers stay off.
@@ -392,19 +392,13 @@ done
 say "Migrations (as lms_owner), then fresh table statistics"
 compose run --rm --no-deps -T web migrate
 
-# The Quran's text: fetched from Tanzil once and checked whole, then kept in the storage volume (and its backups).
-# Not fetched now (no network, Tanzil down): the deploy goes on, and the console's Platform settings fetches it later.
-say "The Quran's text (only if the server has no copy yet)"
-compose run --rm --no-deps -T web php artisan quran:text --fetch --if-missing \
-    || say "The Quran's text was not fetched this time; fetch it from the console (Platform settings) or: php artisan quran:text --fetch"
-
 if [ "$DEMO_DATA" = 1 ]; then
     say "Demo academies (only if they are not there yet)"
     compose run --rm --no-deps -T web seed-demo
 fi
 
-# A demo already there takes what later versions of it add (its Quran lessons' surahs, marked words and hifz maps once
-# the text is here; the AI helpers' area), whatever DEMO_DATA says. Nothing on a server without the demo academy.
+# A demo already there takes what later versions of it add (the AI helpers' area, its public page, groups, ...),
+# whatever DEMO_DATA says. Nothing on a server without the demo academy.
 say "The demo academy, brought up to date (when there is one)"
 compose run --rm --no-deps -T web php artisan db:seed --class='Database\Seeders\DemoCatchUpSeeder' --force \
     || say "The demo was not brought up to date this time; the next deploy tries again."

@@ -11,7 +11,8 @@ namespace Modules\SharedKernel\Plans;
  * homework, invoices paid by hand, live lessons, notifications, the team,
  * safeguarding, privacy) is always on. A module guards its own area: its
  * screens (canAccess), its API routes (the "plan.feature" middleware), its
- * Actions and what it sends.
+ * Actions and what it sends. A stored value no case names (an area that
+ * left the platform) is read as nothing and ignored.
  */
 enum Feature: string
 {
@@ -22,7 +23,6 @@ enum Feature: string
     case CustomBranding = 'custom_branding';
     case Payroll = 'payroll';
     case Ai = 'ai';
-    case Quran = 'quran';
 
     // Optional: free, on at first; the academy may hide them.
     case Groups = 'groups';

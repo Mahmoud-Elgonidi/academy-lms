@@ -8,7 +8,7 @@ return [
     ],
     'kind_hints' => [
         'choice' => 'A question with 2 to 4 answers, one of them right.',
-        'order' => 'Parts in their right order (a verse’s words, a word’s letters, steps); the game shuffles them.',
+        'order' => 'Parts in their right order (a sentence’s words, a word’s letters, steps); the game shuffles them.',
         'pair' => 'Two things that go together (a word and its meaning, a number and its amount).',
     ],
     'stages' => [

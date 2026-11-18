@@ -23,7 +23,7 @@ use Modules\SharedKernel\Plans\Meter;
 final class DemoUsageSeeder extends Seeder
 {
     /** What the AI helpers used on a working day, by capability. */
-    private const AI_DAY = ['practice_items' => 4, 'report_draft' => 9, 'digest_wording' => 2, 'recitation_check' => 6, 'curriculum_outline' => 5];
+    private const AI_DAY = ['practice_items' => 4, 'report_draft' => 9, 'digest_wording' => 2, 'curriculum_outline' => 5];
 
     public function run(TenantDirectory $academies, Meters $meters): void
     {

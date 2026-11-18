@@ -156,7 +156,7 @@ jobs:
           if printf 'short@platform.test\nShort\nshort\n' | bash "$dir/console.sh" owner; then echo "console.sh took a short password"; exit 1; fi
           # A client academy opened from GitHub (academy-new.yml): made with its owner, the welcome link never printed;
           # the same address again, or anything not a JSON object, refused.
-          academy='{"slug":"rehearsal","name_ar":"أكاديمية التجربة","name_en":"Rehearsal","country":"QA","currency":"QAR","timezone":"Asia/Qatar","locale":"ar","owner_name":"Rehearsal Owner","owner_email":"owner@rehearsal.test","plan":"growth","features_off":["quran"],"hidden":["games"],"reason":"Deploy rehearsal"}'
+          academy='{"slug":"rehearsal","name_ar":"أكاديمية التجربة","name_en":"Rehearsal","country":"QA","currency":"QAR","timezone":"Asia/Qatar","locale":"ar","owner_name":"Rehearsal Owner","owner_email":"owner@rehearsal.test","plan":"growth","features_off":["payroll"],"hidden":["games"],"reason":"Deploy rehearsal"}'
           printf '%s\n' "$academy" | bash "$dir/console.sh" academy 2>&1 | tee /tmp/academy
           grep -q 'Academy opened: https://rehearsal.lms.example' /tmp/academy || { echo "console.sh did not open the academy"; exit 1; }
           if grep -q '/welcome/' /tmp/academy; then echo "console.sh printed the welcome link"; exit 1; fi

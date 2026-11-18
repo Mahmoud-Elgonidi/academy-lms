@@ -6,7 +6,7 @@ const template: ReportTemplate = {
   version: 2,
   fields: [
     { key: 'f1', label: 'Pages memorised', type: 'number', required: true, family: true, options: [], min: 0, max: 20, unit: 'pages' },
-    { key: 'f2', label: 'Tajweed', type: 'choice', required: false, family: true, options: [{ key: 'o1', label: 'Excellent' }], min: null, max: null, unit: null },
+    { key: 'f2', label: 'Reading', type: 'choice', required: false, family: true, options: [{ key: 'o1', label: 'Excellent' }], min: null, max: null, unit: null },
     { key: 'f4', label: 'Revision', type: 'yes_no', required: true, family: true, options: [], min: null, max: null, unit: null },
     { key: 'f5', label: 'Note', type: 'text', required: false, family: false, options: [], min: null, max: null, unit: null },
   ],

@@ -63,7 +63,7 @@ return [
         'mail_ready' => 'مضبوط (:mailer)، ولم تُرسل أي رسالة بعد',
     ],
     'hints' => [
-        'assist' => 'منفّذ مهام المساعد الآلي متوقف أو متأخر: تصحيح التسميع والرسائل الأسبوعية بالانتظار. docker compose logs worker.',
+        'assist' => 'منفّذ مهام المساعد الآلي متوقف أو متأخر: الرسائل الأسبوعية بالانتظار. docker compose logs worker.',
         'scheduler' => 'جزء scheduler متوقف: docker compose ps، ثم docker compose logs scheduler.',
         'worker' => 'جزء worker متوقف أو متأخر: الرسائل والتذكيرات لا تُرسل. docker compose logs worker.',
         'queue' => 'توجد مهام كثيرة بالانتظار أو فاشلة: docker compose exec web php artisan queue:failed.',

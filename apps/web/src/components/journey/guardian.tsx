@@ -22,7 +22,7 @@ import { ChestCard, CourseChips, islandNames, MissionList, Note, PlayLayer, Stat
  * and the week at a glance, cheering, and playing a lesson together. Never
  * pay or KPIs.
  */
-export function GuardianJourney({ map, learnerName, autoplay, hifz }: { map: JourneyMap; learnerName: string; autoplay: PlayTarget | null; hifz?: ReactNode }) {
+export function GuardianJourney({ map, learnerName, autoplay, extra }: { map: JourneyMap; learnerName: string; autoplay: PlayTarget | null; extra?: ReactNode }) {
   const t = useTranslations('journey');
   const stars = hasStars(map);
   const layer = stars ? map.games : null;
@@ -62,7 +62,7 @@ export function GuardianJourney({ map, learnerName, autoplay, hifz }: { map: Jou
         </section>
       ) : null}
       <NextLessonCard lesson={lesson} last={map.last_lesson} stars={stars} />
-      {hifz}
+      {extra}
       <MissionList missions={missions.filter((m) => m !== lesson)} map={map} player={player} stars={stars} onStation={setSheet} />
       {stars && map.chest ? <ChestCard chest={map.chest} /> : null}
 

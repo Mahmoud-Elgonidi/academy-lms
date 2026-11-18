@@ -378,10 +378,10 @@ it('still runs on the server\'s settings with no engines, and imports them as en
 
     $made = app(ImportAiEngines::class)->handle($this->platformOwner);
     expect(array_map(fn (AiEngine $e) => $e->name, $made))->toBe([__('platform::services.names.anthropic'), __('platform::services.names.openai'), __('platform::services.names.elevenlabs')])
-        ->and(AiRoute::query()->where('scope', 'default')->count())->toBe(6);   // five helpers' words, two of them hear
+        ->and(AiRoute::query()->where('scope', 'default')->count())->toBe(5);   // four helpers' words, one of them hears
     $route = app(Routes::class)->resolve('practice_items', 'text');
     expect($route->scope)->toBe('default')->and($route->steps[0]->engine->key)->toBe('sk-settings')->and($route->steps[0]->engine->modelBest)->toBe('gpt-settings')
-        ->and(app(Routes::class)->resolve('recitation_check', 'speech')->steps[0]->engine->key)->toBe('a-speech-key');
+        ->and(app(Routes::class)->resolve('report_draft', 'speech')->steps[0]->engine->key)->toBe('a-speech-key');
     expect(fn () => app(ImportAiEngines::class)->handle($this->platformOwner))->toThrow(ValidationException::class);
 
     // AI_DRIVER=off still turns every helper off; the demo still answers with no engine asked.
@@ -403,7 +403,7 @@ it('saves routes only for registered capabilities, engines that do the work, and
     $refused(fn () => gatewayRoute('practice_items', 'academy:'.Str::uuid(), [$words]));
     $refused(fn () => gatewayRoute('practice_items', 'default', [$words, $words]));
     $refused(fn () => gatewayRoute('practice_items', 'default', [$words], split: 120, second: [$words]));
-    gatewayRoute('recitation_check', 'default', [$ears], 'speech');
+    gatewayRoute('report_draft', 'default', [$ears], 'speech');
     expect(AiRoute::query()->count())->toBe(1)
         ->and(DB::connection('pgsql_platform')->table('audit_logs')->where('action', 'platform.ai_route_saved')->value('data'))->toContain('Ears');
 });

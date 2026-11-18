@@ -81,17 +81,6 @@ describe('the journey', () => {
     expect(isAt(classic.find((i) => i.key === 'home')!, '/family/journey')).toBe(false);
   });
 
-  it('has the Quran’s page only while the academy’s plan has it, after messages and never as a tab', () => {
-    for (const stage of STAGES) {
-      expect(itemsOf(stage, seesMoney(stage)).all.some((i) => i.key === 'quran')).toBe(false);
-      const { all, tabs } = itemsOf(stage, seesMoney(stage), stage === 'classic', true);
-      const at = all.findIndex((i) => i.key === 'quran');
-      expect(at).toBe(all.findIndex((i) => i.key === 'messages') + 1);
-      expect(tabs.some((i) => i.key === 'quran')).toBe(false);
-      expect(isAt(all[at]!, '/family/hifz/12')).toBe(true);
-    }
-  });
-
   it('has no games, challenges or badges places any more', () => {
     for (const stage of STAGES) {
       const { all, tabs } = itemsOf(stage, seesMoney(stage), stage === 'classic');
@@ -207,40 +196,41 @@ describe('the free trials', () => {
 });
 
 describe('the places while the academy has modules off', () => {
-  const ALL = ['messaging', 'support', 'curriculum', 'games', 'evaluation', 'quran'];
+  const ALL = ['messaging', 'support', 'curriculum', 'games', 'evaluation'];
   const without = (...off: string[]) => ALL.filter((m) => !off.includes(m));
   const keys = (items: { key: string }[]) => items.map((i) => i.key);
 
   it('keeps every place while every module is on', () => {
     for (const stage of STAGES) {
-      expect(itemsOf(stage, seesMoney(stage), stage === 'classic', true, ALL)).toEqual(itemsOf(stage, seesMoney(stage), stage === 'classic', true));
+      expect(itemsOf(stage, seesMoney(stage), stage === 'classic', ALL)).toEqual(itemsOf(stage, seesMoney(stage), stage === 'classic'));
     }
   });
 
   it('drops messages and help, and the kids’ and middle school’s bar takes homework in place of messages', () => {
     for (const stage of STAGES) {
-      const { all, tabs } = itemsOf(stage, seesMoney(stage), false, false, without('messaging', 'support'));
+      const { all, tabs } = itemsOf(stage, seesMoney(stage), false, without('messaging', 'support'));
       expect(keys(all)).not.toContain('messages');
       expect(all.some((i) => i.href === '/family/help')).toBe(false);
       expect(keys(tabs)).not.toContain('messages');
     }
-    expect(keys(itemsOf('kids', false, false, false, without('messaging')).tabs)).toEqual(['home', 'lessons', 'homework', 'more']);
-    expect(keys(itemsOf('middle', false, false, false, without('messaging')).tabs)).toEqual(['home', 'lessons', 'homework', 'more']);
+    expect(keys(itemsOf('kids', false, false, without('messaging')).tabs)).toEqual(['home', 'lessons', 'homework', 'more']);
+    expect(keys(itemsOf('middle', false, false, without('messaging')).tabs)).toEqual(['home', 'lessons', 'homework', 'more']);
   });
 
   it('without the curriculum: no journey, a student’s home is no longer it, and a guardian finds the courses in progress', () => {
     for (const stage of STAGES) {
-      const { all, tabs } = itemsOf(stage, seesMoney(stage), false, false, without('curriculum'));
+      const { all, tabs } = itemsOf(stage, seesMoney(stage), false, without('curriculum'));
       expect([...all, ...tabs].some((i) => i.href === '/family/journey' || (i.also ?? []).includes('/family/journey'))).toBe(false);
       expect(keys(all)).toContain('progress');
     }
-    expect(keys(itemsOf('classic', true, false, false, without('curriculum')).tabs)).toEqual(['home', 'lessons', 'homework', 'money', 'more']);
-    expect(keys(itemsOf('classic', false, false, false, without('curriculum')).tabs)).toEqual(['home', 'lessons', 'homework', 'more']);
+    expect(keys(itemsOf('classic', true, false, without('curriculum')).tabs)).toEqual(['home', 'lessons', 'homework', 'money', 'more']);
+    expect(keys(itemsOf('classic', false, false, without('curriculum')).tabs)).toEqual(['home', 'lessons', 'homework', 'more']);
   });
 
-  it('drops the Quran when its module is off even if asked for', () => {
-    expect(keys(itemsOf('classic', true, false, true, without('quran')).all)).not.toContain('quran');
-    expect(keys(itemsOf('classic', true, false, true, ALL).all)).toContain('quran');
+  it('ignores an area it no longer has (an older plan may still list the Quran)', () => {
+    for (const stage of STAGES) {
+      expect(itemsOf(stage, seesMoney(stage), stage === 'classic', [...ALL, 'quran'])).toEqual(itemsOf(stage, seesMoney(stage), stage === 'classic', ALL));
+    }
   });
 
   it('offers rating only while evaluation is on', () => {

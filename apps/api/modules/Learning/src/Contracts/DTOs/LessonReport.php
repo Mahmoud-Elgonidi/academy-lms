@@ -5,7 +5,7 @@ namespace Modules\Learning\Contracts\DTOs;
 use Carbon\CarbonImmutable;
 
 /**
- * A lesson report as another module reads it (the Quran's hifz map): which
+ * A lesson report as another module reads it: which
  * lesson and student, when the lesson started, and each curriculum lesson's
  * outcome in it (introduced, practiced, mastered, needs_review).
  */

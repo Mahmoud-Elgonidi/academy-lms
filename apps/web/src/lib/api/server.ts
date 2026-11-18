@@ -135,7 +135,7 @@ export type Outcome<T> = { ok: true; data: T } | { ok: false; problem: Problem }
 
 /**
  * A read that may come back without an answer and leave the page as it is:
- * a part of a page only some records have (a lesson's mushaf), or a Server
+ * a part of a page only some records have, or a Server
  * Action's read for a client component. A lapsed session goes back to
  * signing in, as for every read.
  */

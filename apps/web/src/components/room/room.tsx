@@ -33,7 +33,7 @@ type Props = {
   recording: LessonRecording;
   /** Whether this person sends sound and video (a watcher only follows). */
   canPublish: boolean;
-  /** The side panel (the shared mushaf), with its name, when the lesson has one. */
+  /** A side panel beside the stage, with its name, when the lesson has one. */
   panel: { name: string; content: ReactNode } | null;
 };
 

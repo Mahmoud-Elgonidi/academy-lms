@@ -51,26 +51,6 @@ export type Fixtures = {
     student: string;
     teacher: string;
   };
-  /**
-   * The demo's Quran (docs/architecture/02, section 26; DemoQuranSeeder and
-   * E2eResetSeeder): a Quran course with a plan, its teacher's lesson whose
-   * room is open or held today and not yet recorded, the course's family
-   * (a guardian in the classic look and the student in the kids' look), and
-   * a standing certificate's verification code (the academy shows
-   * certificates to families).
-   */
-  quran: {
-    /** Sign-ins (the demo password): the course's teacher, a guardian of its student, and the student. */
-    teacher: string;
-    guardian: string;
-    student: string;
-    /** A lesson of the course with today's portion, not yet recorded. */
-    lesson_id: string;
-    enrollment_id: string;
-    /** A standing certificate of the student (XXXX-XXXX-XXXX-XXXX) and its number. */
-    certificate_code: string;
-    certificate_number: string;
-  };
 };
 
 export function fixtures(): Fixtures {
@@ -189,10 +169,10 @@ export async function phoneCode(phone: string): Promise<string> {
 
 /** A family new to this run after its free trial (E2eResetSeeder::trialAfter): its links' paths, the report's lesson, and its sign-ins. */
 export type TrialAfter = {
-  /** The report's link (Arabic, English): an assessed Tajweed trial two days ago, an open offer, a second trial to book. */
+  /** The report's link (Arabic, English): an assessed trial two days ago, an open offer, a second trial to book. */
   report: string;
   report_en: string;
-  /** Another family's "book again" link after a Quran trial its child missed yesterday. */
+  /** Another family's "book again" link after a trial its child missed yesterday. */
   rebook: string;
   /** The report's trial (its lesson's id): /family/trials/{session}. */
   session: string;

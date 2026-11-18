@@ -97,7 +97,6 @@ Map<String, Object?> fxJourney({
   List<Object> cheers = const [],
   Map<String, Object?>? limits,
   Map<String, Object?>? glance,
-  Map<String, Object?>? hifz,
 }) => {
   'data': {
     'learner_id': viewer == 'guardian' ? 'c1' : 'u-$stage',
@@ -292,7 +291,6 @@ Map<String, Object?> fxJourney({
       'limits': limits,
       'glance': glance,
     },
-    'hifz': hifz,
     'cheers': cheers,
     'cheers_left': viewer == 'guardian' ? 3 : 0,
   },

@@ -5,8 +5,7 @@ namespace Modules\Classroom\Contracts;
 use Illuminate\Http\Request;
 
 /**
- * The lesson's class page, for a module that adds something beside the room
- * (SharedKernel's LessonQuran): who is looking, and the lesson's own live
+ * The lesson's class page: who is looking, and the lesson's own live
  * channel, which every seat in the lesson may hear (the page signs it for a
  * student or guardian who came by their signed link, at classroom.live.auth).
  */

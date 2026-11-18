@@ -5,7 +5,7 @@ return [
     'ways' => [
         'ai' => ['label' => 'Start with AI', 'hint' => 'Describe the goal and the helper suggests levels and lessons.'],
         'list' => ['label' => 'Paste a list', 'hint' => 'From a document or an Excel file.'],
-        'template' => ['label' => 'From a template', 'hint' => 'Juz Amma, the letters, English, the Noorani Qaida.'],
+        'template' => ['label' => 'From a template', 'hint' => 'The Arabic letters, English.'],
         'copy' => ['label' => 'Copy a curriculum', 'hint' => 'From another program of the academy.'],
     ],
     'ai' => [

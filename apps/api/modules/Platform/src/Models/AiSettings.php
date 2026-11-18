@@ -10,14 +10,14 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
  * Which AI helpers the academy turned on (Settings › AI). Each of the first
- * five is off until the academy turns it on (a column each); a capability
+ * four is off until the academy turns it on (a column each); a capability
  * registered after them is on unless the academy switched it off (its key in
- * `disabled`). One row, made on first save.
+ * `disabled`). One row, made on first save. Its `recitation_check` column
+ * is no longer read (its helper left the platform).
  *
  * @property string $academy_id
  * @property bool $practice_items
  * @property bool $report_draft
- * @property bool $recitation_check
  * @property bool $digest_wording
  * @property bool $curriculum_outline
  * @property list<string> $disabled
@@ -37,11 +37,11 @@ final class AiSettings extends Model
 
     protected $guarded = [];
 
-    protected $attributes = ['practice_items' => false, 'report_draft' => false, 'recitation_check' => false, 'digest_wording' => false, 'curriculum_outline' => false, 'disabled' => '[]'];
+    protected $attributes = ['practice_items' => false, 'report_draft' => false, 'digest_wording' => false, 'curriculum_outline' => false, 'disabled' => '[]'];
 
     protected function casts(): array
     {
-        return ['practice_items' => 'boolean', 'report_draft' => 'boolean', 'recitation_check' => 'boolean', 'digest_wording' => 'boolean', 'curriculum_outline' => 'boolean', 'disabled' => 'array'];
+        return ['practice_items' => 'boolean', 'report_draft' => 'boolean', 'digest_wording' => 'boolean', 'curriculum_outline' => 'boolean', 'disabled' => 'array'];
     }
 
     public static function current(): self
@@ -49,7 +49,7 @@ final class AiSettings extends Model
         return self::query()->first() ?? new self;
     }
 
-    /** The first five by their own column (off at first); any other capability unless the academy switched it off. */
+    /** The first four by their own column (off at first); any other capability unless the academy switched it off. */
     public function isOn(AiFeature|string|Capability $capability): bool
     {
         $key = $capability instanceof Capability ? $capability->key : Capabilities::key($capability);
