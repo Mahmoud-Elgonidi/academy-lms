@@ -19,6 +19,7 @@ use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\Site\Actions\SubmitJoinRequest;
+use Modules\Site\Domain\Page\Audience;
 use Modules\Site\Domain\Page\LegacyContent;
 use Modules\Site\Domain\Page\LegacyImport;
 use Modules\Site\Domain\Page\Localize;
@@ -167,8 +168,9 @@ final class SiteController
                     }
                 }
             }
+            $audience = (string) ($doc['settings']['audience'] ?? Audience::FAMILIES);
             foreach (array_slice($chosen, 0, (int) ($teachersBlock['data']['max'] ?? 12)) as $teacher) {
-                $teachers[] = $this->teacher($teacher);
+                $teachers[] = $this->teacher($teacher, $audience);
             }
         }
 
@@ -238,7 +240,7 @@ final class SiteController
                 /**
                  * The visible blocks in order; each block's `data` is its type's own shape (site-builder.md, 8.3).
                  *
-                 * @var list<array{id: string, type: 'hero'|'features'|'subjects'|'teachers'|'pricing'|'steps'|'app'|'testimonials'|'faq'|'stats'|'rich_text'|'image_text'|'gallery'|'video'|'logos'|'cta'|'form'|'contact'|'spacer', variant: string, anchor: string, nav: string|null, style: array{tone: 'paper'|'white'|'tint'|'brand'|'night', align: 'start'|'center', space: 'compact'|'normal'|'roomy', width: 'narrow'|'normal'|'wide'|'full', eyebrow: bool}, data: array<string, mixed>}>
+                 * @var list<array{id: string, type: 'hero'|'features'|'subjects'|'teachers'|'pricing'|'steps'|'app'|'testimonials'|'faq'|'stats'|'rich_text'|'image_text'|'gallery'|'video'|'logos'|'cards'|'cta'|'form'|'contact'|'spacer', variant: string, anchor: string, nav: string|null, style: array{tone: 'paper'|'white'|'tint'|'brand'|'night', align: 'start'|'center', space: 'compact'|'normal'|'roomy', width: 'narrow'|'normal'|'wide'|'full', eyebrow: bool}, data: array<string, mixed>}>
                  */
                 'blocks' => $localized['blocks'],
             ],
@@ -304,7 +306,7 @@ final class SiteController
     }
 
     /** @return array{id: string, name: string, bio: ?string, photo_url: ?string, gender: ?string, languages: list<string>, age_groups: list<string>, subjects: list<array{name: string, level_from: ?string, level_to: ?string}>, accepts_trials: bool, accepts_groups: bool} */
-    private function teacher(PublicTeacher $teacher): array
+    private function teacher(PublicTeacher $teacher, string $audience): array
     {
         $subjects = [];
         foreach ($teacher->subjects as $subject) {
@@ -321,8 +323,8 @@ final class SiteController
             'gender' => $teacher->gender,
             /** ISO 639-1 codes they explain in. */
             'languages' => $teacher->languages,
-            /** kids, middle, teen, adults: the ages they teach (none: any age). */
-            'age_groups' => $teacher->ageGroups,
+            /** kids, middle, teen, adults: the ages they teach (none: any age). A page for adults names adults alone. */
+            'age_groups' => Audience::ageGroups($teacher->ageGroups, $audience),
             'subjects' => $subjects,
             /** Whether they take free trial lessons. */
             'accepts_trials' => $teacher->acceptsTrials,

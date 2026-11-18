@@ -56,11 +56,15 @@ final class Templates
                 ]),
                 self::block('stats', 'band', ['space' => 'compact'], ['items' => self::items("{$k}.stats", 3, ['value', 'label'])]),
                 self::block('subjects', 'cards', [], ['title' => self::t("{$k}.subjects.title"), 'lead' => self::t("{$k}.subjects.lead")], self::t("{$k}.subjects.nav")),
-                self::block('features', 'icons', [], [
+                self::block('cards', 'list', ['tone' => 'white'], [
+                    'title' => self::t("{$k}.cards.title"), 'lead' => self::t("{$k}.cards.lead"),
+                    'items' => self::cards("{$k}.cards", 3, null), 'columns' => 3,
+                ]),
+                self::block('features', 'icons', ['tone' => 'tint'], [
                     'title' => self::t("{$k}.features.title"), 'lead' => self::t("{$k}.features.lead"),
                     'items' => self::icons("{$k}.features", ['laptop', 'users', 'clock', 'report', 'award', 'chat']),
                 ], self::t("{$k}.features.nav")),
-                self::block('teachers', 'portraits', ['tone' => 'paper'], ['title' => self::t("{$k}.teachers.title")], self::t("{$k}.teachers.nav")),
+                self::block('teachers', 'portraits', ['tone' => 'paper'], ['title' => self::t("{$k}.teachers.title"), 'show_ages' => false], self::t("{$k}.teachers.nav")),
                 self::block('pricing', 'cards', [], [], self::t("{$k}.pricing.nav")),
                 self::block('testimonials', 'grid', ['tone' => 'paper'], ['items' => []]),
                 self::block('faq', 'two_columns', [], ['items' => self::items("{$k}.faq", 5, ['q', 'a'])], self::t("{$k}.faq.nav")),
@@ -87,6 +91,10 @@ final class Templates
                     'secondary' => null, 'trust' => [], 'scrim' => 'strong',
                 ]),
                 self::block('logos', 'row', ['space' => 'compact'], ['eyebrow' => self::t("{$k}.logos.title"), 'items' => []], null, hidden: true),
+                self::block('cards', 'grid', ['tone' => 'paper'], [
+                    'title' => self::t("{$k}.cards.title"), 'lead' => self::t("{$k}.cards.lead"),
+                    'items' => self::cards("{$k}.cards", 3, self::t("{$k}.cards.button")), 'columns' => 3,
+                ], self::t("{$k}.cards.nav")),
                 self::block('features', 'list', [], [
                     'title' => self::t("{$k}.features.title"), 'lead' => self::t("{$k}.features.lead"),
                     'items' => self::icons("{$k}.features", ['check', 'check', 'check', 'check']), 'columns' => 2,
@@ -134,7 +142,7 @@ final class Templates
                     'title' => self::t("{$k}.features.title"), 'lead' => self::t("{$k}.features.lead"),
                     'items' => self::icons("{$k}.features", ['chat', 'globe', 'book', 'clock', 'users', 'award']),
                 ], self::t("{$k}.features.nav")),
-                self::block('teachers', 'cards', [], ['title' => self::t("{$k}.teachers.title")], self::t("{$k}.teachers.nav")),
+                self::block('teachers', 'cards', [], ['title' => self::t("{$k}.teachers.title"), 'show_ages' => false], self::t("{$k}.teachers.nav")),
                 self::block('gallery', 'masonry', ['tone' => 'paper'], ['title' => self::t("{$k}.gallery.title"), 'items' => []], null, hidden: true),
                 self::block('pricing', 'table', [], [], self::t("{$k}.pricing.nav")),
                 self::block('faq', 'accordion', ['tone' => 'paper'], ['items' => self::items("{$k}.faq", 4, ['q', 'a'])]),
@@ -190,6 +198,28 @@ final class Templates
                 $item[$field] = self::t("{$key}.items.{$i}.{$field}");
             }
             $out[] = $item;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Cards of the academy's own courses or programmes, with no pictures (the academy adds its own).
+     *
+     * @param  array{ar: string, en: string}|null  $button  each card's button to the form, or none
+     * @return list<array<string, mixed>>
+     */
+    private static function cards(string $key, int $count, ?array $button): array
+    {
+        $out = [];
+        for ($i = 0; $i < $count; $i++) {
+            $out[] = [
+                'media' => null,
+                'label' => self::t("{$key}.items.{$i}.label"),
+                'title' => self::t("{$key}.items.{$i}.title"),
+                'text' => self::t("{$key}.items.{$i}.text"),
+                'link' => $button === null ? null : ['label' => $button, 'action' => ['kind' => 'trial']],
+            ];
         }
 
         return $out;

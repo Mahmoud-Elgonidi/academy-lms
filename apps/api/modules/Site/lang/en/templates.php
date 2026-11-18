@@ -15,6 +15,15 @@ return [
             ['value' => '7', 'label' => 'Days a week to choose your times from'],
         ]],
         'subjects' => ['title' => 'Our courses', 'lead' => 'Choose the course that fits your goal, and start at the level that suits you.', 'nav' => 'Courses'],
+        'cards' => [
+            'title' => 'Choose how you learn',
+            'lead' => 'Every course is live online with a specialist teacher. Choose the format that fits your goal and your time.',
+            'items' => [
+                ['label' => 'One-to-one', 'title' => 'A one-to-one course', 'text' => 'A teacher just for you, and a plan that starts at your level and moves at your pace.'],
+                ['label' => 'Small groups', 'title' => 'A group course', 'text' => 'Learn with a few other learners at fixed times, for a lower price.'],
+                ['label' => 'For organisations', 'title' => 'Training for your team', 'text' => 'A programme designed for your team, at times that suit work, with progress reports.'],
+            ],
+        ],
         'features' => [
             'title' => 'Why learners choose us',
             'lead' => 'Everything you need to learn with confidence: a teacher who knows you, a time that suits you, and progress you can see after every lesson.',
@@ -52,11 +61,22 @@ return [
             'title' => 'Training programmes that build your team\'s skills and show in its work',
             'lead' => 'Live training by specialists, a plan built on what you need, and follow-up that measures the result after every stage.',
         ],
+        'cards' => [
+            'title' => 'Our training programmes',
+            'lead' => 'Practical programmes led by specialists. Choose the one that fits your team, or we design one for you.',
+            'nav' => 'Programmes',
+            'button' => 'Ask for details',
+            'items' => [
+                ['label' => '4 weeks', 'title' => 'Leadership and team management', 'text' => 'Leading a team, sharing out work and following performance, with cases from real workplaces.'],
+                ['label' => '6 weeks', 'title' => 'Project management', 'text' => 'Planning and scheduling a project, managing resources and risks, and reporting on progress.'],
+                ['label' => 'On request', 'title' => 'A programme designed for your organisation', 'text' => 'We start by analysing your team\'s needs, then design a programme with goals and results you can measure.'],
+            ],
+        ],
         'logos' => ['title' => 'Organisations that trained with us'],
         'features' => [
             'title' => 'What sets our programmes apart',
             'lead' => 'We design each programme around a clear goal, and measure what it achieved.',
-            'nav' => 'Programmes',
+            'nav' => 'Why us',
             'items' => [
                 ['title' => 'Needs first', 'text' => 'We start by understanding what your team needs before we suggest anything.'],
                 ['title' => 'Specialist trainers', 'text' => 'Every programme is led by a trainer with real experience in the field.'],

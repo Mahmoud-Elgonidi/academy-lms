@@ -49,7 +49,7 @@ final class BlockForms
         'app' => Heroicon::OutlinedDevicePhoneMobile, 'testimonials' => Heroicon::OutlinedChatBubbleBottomCenterText,
         'faq' => Heroicon::OutlinedQuestionMarkCircle, 'stats' => Heroicon::OutlinedChartBar, 'rich_text' => Heroicon::OutlinedDocumentText,
         'image_text' => Heroicon::OutlinedPhoto, 'gallery' => Heroicon::OutlinedSquares2x2, 'video' => Heroicon::OutlinedPlayCircle,
-        'logos' => Heroicon::OutlinedBuildingOffice2, 'cta' => Heroicon::OutlinedMegaphone, 'form' => Heroicon::OutlinedEnvelopeOpen,
+        'logos' => Heroicon::OutlinedBuildingOffice2, 'cards' => Heroicon::OutlinedRectangleGroup, 'cta' => Heroicon::OutlinedMegaphone, 'form' => Heroicon::OutlinedEnvelopeOpen,
         'contact' => Heroicon::OutlinedPhone, 'spacer' => Heroicon::OutlinedArrowsUpDown,
     ];
 
@@ -284,6 +284,17 @@ final class BlockForms
                     TextInput::make('url')->label(__(self::B.'fields.url'))->url()->maxLength(500)->prefix('https://')->extraInputAttributes(['dir' => 'ltr']),
                 ], 'name', grid: 2),
             ],
+            'cards' => [
+                Callout::make(__(self::B.'live.cards'))->info()->icon(Heroicon::OutlinedInformationCircle),
+                ...$heading(),
+                self::items($c.'items', Blocks::MAX_CARDS, [
+                    self::media('media.media', __(self::B.'fields.media'), 'image')->helperText(__(self::B.'fields.card_media_hint')),
+                    self::pair('label', __(self::B.'fields.badge'), 40, placeholder: __(self::B.'fields.badge_hint')),
+                    self::pair('title', __(self::B.'fields.title'), 80),
+                    self::pair('text', __(self::B.'fields.text'), 300, long: true),
+                    Section::make(__(self::B.'fields.link'))->compact()->collapsible()->collapsed()->schema([self::link('link', __(self::B.'fields.link'))]),
+                ]),
+            ],
             'cta' => [
                 self::pair($c.'title', __(self::B.'fields.title'), 120),
                 self::pair($c.'lead', __(self::B.'fields.lead'), 300, long: true),
@@ -348,6 +359,7 @@ final class BlockForms
                 )),
             ],
             'features' => [$buttons('columns', 'columns', ['2', '3'])],
+            'cards' => [$buttons('columns', 'columns', ['2', '3', '4'])->visible(fn (Get $get) => $get('variant') !== 'list')],
             'image_text' => [$buttons('media_side', 'media_side', ['start', 'end'])],
             'gallery' => [$buttons('ratio', 'ratio', ['auto', '1:1', '4:3', '3:2', '16:9'])->visible(fn (Get $get) => $get('variant') === 'grid')],
             'video' => [

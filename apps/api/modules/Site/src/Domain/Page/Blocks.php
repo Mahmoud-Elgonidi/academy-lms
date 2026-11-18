@@ -31,6 +31,9 @@ final class Blocks
 {
     public const MAX_BLOCKS = 40;
 
+    /** The most items a cards block holds. */
+    public const MAX_CARDS = 12;
+
     /** Types a page holds one of at most. */
     public const SINGLE = ['hero', 'form', 'pricing', 'teachers', 'subjects', 'app'];
 
@@ -159,6 +162,17 @@ final class Blocks
             'logos' => ['variants' => ['row', 'marquee', 'grid'], 'tone' => 'white', 'fields' => $h + [
                 'items' => ['items', 2, 24, ['media' => ['media', 'image', 'req'], 'name' => ['plain', 60, 'req'], 'url' => ['url']]],
                 'mono' => ['bool', true],
+            ]],
+            // Courses, programmes or topics the academy writes itself (not the catalogue's subjects).
+            'cards' => ['variants' => ['grid', 'list', 'overlay'], 'tone' => 'white', 'fields' => $h + [
+                'items' => ['items', 1, self::MAX_CARDS, [
+                    'media' => ['media', 'image'],
+                    'label' => ['text', 40],
+                    'title' => ['text', 80, 'req'],
+                    'text' => ['text', 300],
+                    'link' => ['link'],
+                ]],
+                'columns' => ['enum', [3, 2, 4]],
             ]],
             'cta' => ['variants' => ['banner', 'card', 'split'], 'tone' => 'brand', 'fields' => [
                 'title' => ['text', 120, 'req'],

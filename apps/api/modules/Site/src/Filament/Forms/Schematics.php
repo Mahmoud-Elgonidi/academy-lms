@@ -76,6 +76,14 @@ final class Schematics
             'logos.row' => self::box(3, 15, 11, 10, self::SOFT, 1.5).self::box(16, 15, 11, 10, self::SOFT, 1.5).self::box(29, 15, 11, 10, self::SOFT, 1.5).self::box(42, 15, 11, 10, self::SOFT, 1.5).self::box(55, 15, 8, 10, self::SOFT, 1.5),
             'form.split' => self::lines(4, 10, [22, 16, 18], 3, 5).'<rect x="32" y="4" width="28" height="32" rx="3" fill="white" stroke="currentColor" stroke-opacity=".25"/>'.self::box(35, 9, 22, 4, self::SOFT, 1).self::box(35, 16, 22, 4, self::SOFT, 1).self::button(35, 26, 22),
             'form.centered' => self::lines(20, 4, [24, 0], 3).'<rect x="14" y="10" width="36" height="27" rx="3" fill="white" stroke="currentColor" stroke-opacity=".25"/>'.self::box(18, 14, 28, 4, self::SOFT, 1).self::box(18, 21, 28, 4, self::SOFT, 1).self::button(18, 29, 28),
+            'cards.grid' => self::box(3, 4, 18, 32, self::SOFT, 2.5).self::box(23, 4, 18, 32, self::SOFT, 2.5).self::box(43, 4, 18, 32, self::SOFT, 2.5)
+                .self::box(3, 4, 18, 13, 'fill="currentColor" opacity=".3"', 2.5).self::box(23, 4, 18, 13, 'fill="currentColor" opacity=".3"', 2.5).self::box(43, 4, 18, 13, 'fill="currentColor" opacity=".3"', 2.5)
+                .self::lines(5, 21, [12, 9]).self::lines(25, 21, [12, 9]).self::lines(45, 21, [12, 9]).self::button(5, 30, 8).self::button(25, 30, 8).self::button(45, 30, 8),
+            'cards.list' => self::box(3, 4, 58, 9, self::SOFT, 2).self::box(3, 15.5, 58, 9, self::SOFT, 2).self::box(3, 27, 58, 9, self::SOFT, 2)
+                .self::box(3, 4, 13, 9, 'fill="currentColor" opacity=".3"', 2).self::box(3, 15.5, 13, 9, 'fill="currentColor" opacity=".3"', 2).self::box(3, 27, 13, 9, 'fill="currentColor" opacity=".3"', 2)
+                .self::lines(19, 6.5, [22, 0]).self::lines(19, 18, [26, 0]).self::lines(19, 29.5, [18, 0]).self::button(50, 6.5, 8).self::button(50, 18, 8).self::button(50, 29.5, 8),
+            'cards.overlay' => '<rect x="3" y="4" width="18" height="32" rx="2.5" fill="currentColor" opacity=".7"/><rect x="23" y="4" width="18" height="32" rx="2.5" fill="currentColor" opacity=".7"/><rect x="43" y="4" width="18" height="32" rx="2.5" fill="currentColor" opacity=".7"/>'
+                .self::lines(5, 25, [12, 8], 2.4, 4.4, 'fill="white" opacity=".9"').self::lines(25, 25, [12, 8], 2.4, 4.4, 'fill="white" opacity=".9"').self::lines(45, 25, [12, 8], 2.4, 4.4, 'fill="white" opacity=".9"'),
             'spacer.space' => '<path d="M32 8v24M28 12l4-4 4 4M28 28l4 4 4-4" stroke="currentColor" stroke-opacity=".5" stroke-width="1.4" fill="none"/>',
             'spacer.divider' => '<path d="M6 20h52" stroke="currentColor" stroke-opacity=".5" stroke-width="1.4"/>',
             default => self::lines(8, 12, [40, 30, 36], 3, 6),

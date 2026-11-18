@@ -15,8 +15,9 @@ namespace Modules\Site\Domain\Page;
  * page, or to an address the rules refuse; no visible block at all.
  *
  * Warnings: no visible form; a text in one language only; images smaller
- * than they will be shown; a JPEG logo; testimonials with none; the opening
- * not first; a button to a hidden block (it is left out).
+ * than they will be shown; a JPEG logo; testimonials with none; cards some
+ * with a picture and some without; the opening not first; a button to a
+ * hidden block (it is left out).
  */
 final class PublishRules
 {
@@ -72,6 +73,9 @@ final class PublishRules
             }
             if ($type === 'testimonials' && ($block['data']['items'] ?? []) === []) {
                 $warnings[] = $issue('testimonials_empty', $block);
+            }
+            if ($type === 'cards' && self::mixedPictures($block['data']['items'] ?? [])) {
+                $warnings[] = $issue('cards_mixed', $block, 'items');
             }
             self::fields(Blocks::fields($type), $block['data'] ?? [], '', $block, $facts, $all, $blockers, $warnings, $language, $issue);
             self::posters($block, $blockers, $issue);
@@ -160,7 +164,7 @@ final class PublishRules
                     if ($block['type'] === 'hero' && $name === 'media' && $width < self::HERO_MIN_WIDTH) {
                         $warnings[] = $issue('image_small', $block, $field, ['width' => self::HERO_MIN_WIDTH]);
                     }
-                    if ($block['type'] === 'gallery' && $name === 'media' && $width < self::GALLERY_MIN_WIDTH) {
+                    if (in_array($block['type'], ['gallery', 'cards'], true) && $name === 'media' && $width < self::GALLERY_MIN_WIDTH) {
                         $warnings[] = $issue('image_small', $block, $field, ['width' => self::GALLERY_MIN_WIDTH]);
                     }
                     if ($block['type'] === 'logos' && $file['mime'] === 'image/jpeg') {
@@ -197,6 +201,21 @@ final class PublishRules
                     break;
             }
         }
+    }
+
+    /** Some cards with a picture and some without: they will not line up. */
+    private static function mixedPictures(mixed $items): bool
+    {
+        $with = 0;
+        $count = 0;
+        foreach (is_array($items) ? $items : [] as $item) {
+            $count++;
+            if (is_array($item) && ($item['media'] ?? null) !== null) {
+                $with++;
+            }
+        }
+
+        return $with > 0 && $with < $count;
     }
 
     /** A video the academy uploaded needs a poster: the first paint, and the picture while it does not play. */
