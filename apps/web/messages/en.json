@@ -1223,8 +1223,14 @@
           {
             "name": "Data analysis",
             "value": "35%"
+          },
+          {
+            "name": "Presenting",
+            "value": "90%"
           }
         ],
+        "task": "This week's assignment",
+        "taskLine": "A risk analysis of a project from your work",
         "certificates": "Certificates",
         "certificatesValue": "1 earned"
       },
@@ -1527,6 +1533,7 @@
         "A report after every lesson"
       ],
       "floating": {
+        "report": "Last session's notes",
         "reportValue": "Excellent progress"
       },
       "phonesLabel": "The app: your times, reports and homework in one place",

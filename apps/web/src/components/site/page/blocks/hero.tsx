@@ -71,7 +71,7 @@ function PhonesHero({ block, ctx }: { block: HeroBlock; ctx: PageCtx }) {
               <Phone position="center">{screens.center}</Phone>
               <Phone position="end">{screens.end}</Phone>
               <div className="ls-float-card" data-at="top" aria-hidden="true">
-                <span>{ctx.t('floating.report')}</span>
+                <span>{audienceSay(ctx, 'floating.report')}</span>
                 <b>{audienceSay(ctx, 'floating.reportValue')}</b>
                 <div className="ls-stars-row">{[0, 1, 2, 3, 4].map((i) => <Icon key={i} name="star" />)}</div>
               </div>

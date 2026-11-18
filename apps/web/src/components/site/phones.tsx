@@ -20,7 +20,7 @@ export type PhoneWords = {
   teacher: { today: string; live: string; lessons: [string, string, string]; times: [string, string, string]; voice: string; drafted: string };
   /** A page for adults: the learner's own screens (no guardian, no child, no game), and the teacher's day with adult learners. */
   adults: {
-    learner: { hello: string; title: string; next: string; course: string; when: string; soon: string; progress: string; courses: { name: string; value: string }[]; certificates: string; certificatesValue: string };
+    learner: { hello: string; title: string; next: string; course: string; when: string; soon: string; progress: string; courses: { name: string; value: string }[]; task: string; taskLine: string; certificates: string; certificatesValue: string };
     session: { title: string; course: string; feedback: string; feedbackLine: string; units: string; unitsValue: string; unitsDone: string; task: string; taskLine: string; certificate: string; certificateLine: string };
     lessons: [string, string, string];
   };
@@ -150,6 +150,10 @@ export function LearnerScreen({ w }: { w: PhoneWords['adults']['learner'] }) {
               <div className="ls-meter"><i style={{ inlineSize: course.value }} /></div>
             </div>
           ))}
+        </div>
+        <div className="ls-s-card">
+          <h4>{w.task}</h4>
+          <p>{w.taskLine}</p>
         </div>
         <div className="ls-s-card ls-s-row">
           <h4>{w.certificates}</h4>

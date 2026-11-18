@@ -292,7 +292,7 @@ final class BlockForms
                     self::pair('label', __(self::B.'fields.badge'), 40, placeholder: __(self::B.'fields.badge_hint')),
                     self::pair('title', __(self::B.'fields.title'), 80),
                     self::pair('text', __(self::B.'fields.text'), 300, long: true),
-                    Section::make(__(self::B.'fields.link'))->compact()->collapsible()->collapsed()->schema([self::link('link', __(self::B.'fields.link'))]),
+                    Section::make(__(self::B.'fields.link'))->compact()->collapsible()->collapsed()->schema([self::link('link', __(self::B.'fields.action'))]),
                 ]),
             ],
             'cta' => [

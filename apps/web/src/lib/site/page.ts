@@ -123,7 +123,7 @@ export function isKnownBlock(block: { type: string }): block is PageBlock {
 
 /** The messages under `site` that differ for adults (`site.adults.*`). */
 const ADULT_KEYS = new Set([
-  'trust', 'why.title', 'why.lead', 'subjects.lead', 'steps.items', 'app.lead', 'app.steps', 'testimonials.title', 'join.points', 'phonesLabel', 'floating.reportValue', 'pricing.shared',
+  'trust', 'why.title', 'why.lead', 'subjects.lead', 'steps.items', 'app.lead', 'app.steps', 'testimonials.title', 'join.points', 'phonesLabel', 'floating.report', 'floating.reportValue', 'pricing.shared',
 ]);
 
 /** The message key (under `site`) a page for this audience says when the academy left a field unset. */

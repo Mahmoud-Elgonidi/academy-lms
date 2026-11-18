@@ -83,11 +83,14 @@ final class Templates
         $k = 'training';
 
         return PageDoc::normalize([
-            'settings' => ['audience' => 'adults', 'mood' => 'light', 'motion' => 'subtle', 'header' => ['style' => 'overlay'], 'corners' => 'sharp'],
+            'settings' => ['audience' => 'adults', 'mood' => 'light', 'motion' => 'subtle', 'corners' => 'sharp',
+                'header' => ['style' => 'overlay', 'cta' => ['label' => self::t("{$k}.cta.button"), 'action' => ['kind' => 'trial']]]],
             'blocks' => [
                 self::block('hero', 'video', ['space' => 'roomy'], [
                     'title' => self::t("{$k}.hero.title"), 'lead' => self::t("{$k}.hero.lead"),
                     'kicker' => self::t("{$k}.hero.kicker"),
+                    // The page asks for a first meeting, not a trial lesson: every button says so.
+                    'primary' => ['label' => self::t("{$k}.cta.button"), 'action' => ['kind' => 'trial']],
                     'secondary' => null, 'trust' => [], 'scrim' => 'strong',
                 ]),
                 self::block('logos', 'row', ['space' => 'compact'], ['eyebrow' => self::t("{$k}.logos.title"), 'items' => []], null, hidden: true),
