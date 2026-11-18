@@ -34,7 +34,7 @@ export type HeroBlock = Base<'hero', 'centered' | 'split' | 'video' | 'phones' |
   show: { kicker: boolean; lead: boolean; buttons: boolean; trust: boolean; media: boolean };
 }>;
 export type FeaturesBlock = Base<'features', 'cards' | 'icons' | 'list' | 'numbers', Heading & {
-  items: { icon: string; title: string; text: string }[]; columns: 2 | 3;
+  items: { icon: string; title: string; text: string }[]; columns: 2 | 3 | 4;
 }>;
 export type SubjectsBlock = Base<'subjects', 'cards' | 'list' | 'chips', Heading & {
   subject_ids: string[]; show_levels: boolean; show_programs: boolean; show_categories: boolean; ask_label: string | null;

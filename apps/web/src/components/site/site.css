@@ -63,7 +63,8 @@
 }
 .ls-header-row { display: flex; align-items: center; gap: 1rem; block-size: 4.25rem; }
 .ls-brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.1rem; text-decoration: none; }
-.ls-brand img { block-size: 2.25rem; inline-size: auto; border-radius: 0.5rem; background: white; padding: 0.15rem; }
+/* The academy's logo as it is: a transparent PNG keeps its transparency, never a white tile. */
+.ls-brand img { block-size: 2.25rem; inline-size: auto; }
 .ls-nav { display: none; gap: 1.4rem; margin-inline-start: auto; font-size: 0.95rem; }
 .ls-nav a { text-decoration: none; opacity: 0.85; }
 .ls-nav a:hover { opacity: 1; }

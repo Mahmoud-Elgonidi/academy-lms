@@ -150,3 +150,15 @@ it('refuses a page larger than 256 KB', function () {
 
     expect(pdProblems(['blocks' => $big]))->toHaveKey('blocks');
 });
+
+it('keeps eight reasons in four columns, each with its own icon, and the first count for one it does not know', function () {
+    $reasons = array_map(fn (string $icon) => ['icon' => $icon, 'title' => ['ar' => 'مدرّبون معتمدون', 'en' => 'Certified trainers'], 'text' => ['ar' => 'خبرة في المجال', 'en' => '']],
+        ['shield', 'award', 'laptop', 'clock', 'globe', 'chat', 'report', 'book']);
+    $doc = fn (mixed $columns) => PageDoc::normalize(['blocks' => [['type' => 'features', 'variant' => 'cards', 'data' => ['items' => $reasons, 'columns' => $columns]]]])['blocks'][0]['data'];
+
+    expect($doc(4)['columns'])->toBe(4)
+        ->and($doc(4)['items'])->toHaveCount(8)
+        ->and(array_column($doc(4)['items'], 'icon'))->toBe(['shield', 'award', 'laptop', 'clock', 'globe', 'chat', 'report', 'book'])
+        ->and($doc('2')['columns'])->toBe(2)
+        ->and($doc(5)['columns'])->toBe(3);
+});

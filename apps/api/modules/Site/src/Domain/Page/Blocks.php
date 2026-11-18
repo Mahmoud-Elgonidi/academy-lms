@@ -89,7 +89,7 @@ final class Blocks
             ]],
             'features' => ['variants' => ['cards', 'icons', 'list', 'numbers'], 'tone' => 'white', 'fields' => $h + [
                 'items' => ['items', 1, 9, ['icon' => ['icon'], 'title' => ['text', 60, 'req'], 'text' => ['text', 200]]],
-                'columns' => ['enum', [3, 2]],
+                'columns' => ['enum', [3, 2, 4]],
             ]],
             'subjects' => ['variants' => ['cards', 'list', 'chips'], 'tone' => 'paper', 'fields' => $h + [
                 'only' => ['ids', 50],

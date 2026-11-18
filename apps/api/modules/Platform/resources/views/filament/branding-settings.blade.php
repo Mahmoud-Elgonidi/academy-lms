@@ -40,7 +40,8 @@
         .lms-preview h3, .lms-preview .pv-num, .lms-preview .pv-brand { font-family: '{{ $t->headingFont }}', '{{ $t->bodyFont }}', sans-serif; }
         .pv-top { display: flex; align-items: center; gap: .6rem; padding: .7rem .9rem; background: white; border-bottom: 1px solid rgb(0 0 0 / .08); }
         .pv-logo { width: 2rem; height: 2rem; border-radius: var(--r-lg); background: var(--p); color: white; display: grid; place-items: center; font-weight: 700; overflow: hidden; }
-        .pv-logo img { width: 100%; height: 100%; object-fit: contain; background: white; }
+        .pv-logo:has(img) { background: transparent; }
+        .pv-logo img { width: 100%; height: 100%; object-fit: contain; }
         .pv-brand { font-weight: 700; }
         .pv-body { padding: 1rem; display: flex; flex-direction: column; gap: .8rem; }
         .pv-body h3 { margin: 0; font-size: 1.35rem; font-weight: 600; }

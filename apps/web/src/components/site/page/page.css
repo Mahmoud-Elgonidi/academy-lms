@@ -129,6 +129,8 @@
 .ls-section[data-tone='brand'] { background: var(--accent); color: var(--sp-on-accent); }
 .ls-section[data-tone='brand'] .ls-head p { color: color-mix(in oklab, var(--sp-on-accent) 78%, var(--accent)); }
 .ls-cards[data-columns='2'] { grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
+@media (min-width: 760px) { .ls-cards[data-columns='4'] { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1180px) { .ls-cards[data-columns='4'] { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (min-width: 900px) {
   .ls-steps[style*='--ls-steps'] { grid-template-columns: repeat(var(--ls-steps), 1fr); }
 }
@@ -258,8 +260,10 @@
 .sp-features { display: grid; gap: clamp(2rem, 3vw, 3rem) clamp(1.5rem, 3vw, 3rem); grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); }
 @media (min-width: 900px) {
   .sp-features[data-columns='3'] { grid-template-columns: repeat(3, 1fr); }
-  .sp-features[data-columns='2'] { grid-template-columns: repeat(2, 1fr); }
+  .sp-features:is([data-columns='2'], [data-columns='4']) { grid-template-columns: repeat(2, 1fr); }
 }
+/* Four in a row once there is room for them (eight reasons sit in two even rows). */
+@media (min-width: 1180px) { .sp-features[data-columns='4'] { grid-template-columns: repeat(4, 1fr); } }
 .sp-features h3 { margin-block: 1.1rem 0.5rem; font-size: var(--fs-1); font-weight: 700; line-height: 1.35; }
 .sp-features p { color: var(--soft); line-height: 1.7; }
 [dir='rtl'] .sp-features p { line-height: 1.85; }

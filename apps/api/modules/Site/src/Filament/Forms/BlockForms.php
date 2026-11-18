@@ -358,7 +358,7 @@ final class BlockForms
                     ['kicker', 'lead', 'buttons', 'trust', 'media'],
                 )),
             ],
-            'features' => [$buttons('columns', 'columns', ['2', '3'])],
+            'features' => [$buttons('columns', 'columns', ['2', '3', '4'])],
             'cards' => [$buttons('columns', 'columns', ['2', '3', '4'])->visible(fn (Get $get) => $get('variant') !== 'list')],
             'image_text' => [$buttons('media_side', 'media_side', ['start', 'end'])],
             'gallery' => [$buttons('ratio', 'ratio', ['auto', '1:1', '4:3', '3:2', '16:9'])->visible(fn (Get $get) => $get('variant') === 'grid')],
