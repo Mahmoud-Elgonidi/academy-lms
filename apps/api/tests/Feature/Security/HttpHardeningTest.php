@@ -42,7 +42,7 @@ it('lets a page run only its own scripts and those carrying the request\'s nonce
         $response = $this->get("http://huda.lms.test{$path}")->assertOk();
         $policy = (string) $response->headers->get('Content-Security-Policy');
 
-        expect($policy)->toMatch("/^base-uri 'self'; object-src 'none'; frame-ancestors 'self'; script-src 'self' 'nonce-[A-Za-z0-9]{40}' 'unsafe-eval'\$/", $path);
+        expect($policy)->toMatch("/^base-uri 'self'; object-src 'none'; frame-ancestors 'self'; script-src 'self' 'nonce-[A-Za-z0-9]{40}' 'unsafe-eval'; worker-src 'self' blob:\$/", $path);
         preg_match("/'nonce-([A-Za-z0-9]+)'/", $policy, $m);
         $nonces[] = $m[1];
         $html = $response->getContent();

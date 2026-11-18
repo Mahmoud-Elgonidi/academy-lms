@@ -136,7 +136,9 @@ final class BrandingSettings extends Page
                                 ->image()
                                 ->acceptedFileTypes(['image/png'])
                                 ->rules([new CleanFile])
-                                ->maxSize(256)
+                                // Any square PNG up to 2 MB; the browser shrinks it to 256 px before it is sent.
+                                ->maxSize(2048)
+                                ->imageResizeMode('contain')->imageResizeTargetWidth('256')->imageResizeTargetHeight('256')->imageResizeUpscale(false)
                                 ->disk('public')->directory($directory)->visibility('public')
                                 ->getUploadedFileUsing(self::uploadedOnThisHost(...)),
                         ]),
