@@ -142,12 +142,12 @@ final class DemoSiteSeeder extends Seeder
                     ['value' => $t('+20', '20+'), 'label' => $t('معلّمًا ومعلّمة', 'Teachers')],
                     ['value' => $t('100%', '100%'), 'label' => $t('حصص مباشرة', 'Live lessons')],
                 ]]),
-                ['id' => 'courses1'] + $block('subjects', 'cards', ['tone' => 'white'], [
+                ['id' => 'courses1', 'anchor' => 'subjects'] + $block('subjects', 'cards', ['tone' => 'white'], [
                     'title' => $t('دوراتنا', 'Our courses'),
                     'lead' => $t('اختر الدورة التي تناسب هدفك، وابدأ من المستوى الذي يناسبك.', 'Choose the course that fits your goal, and start at the level that suits you.'),
                     'only' => $courses,
                 ], $t('الدورات', 'Courses')),
-                $block('features', 'icons', ['tone' => 'paper'], [
+                ['anchor' => 'why'] + $block('features', 'icons', ['tone' => 'paper'], [
                     'title' => $t('لماذا يختارنا المتعلّمون وأولياء الأمور', 'Why learners and parents choose us'),
                     'items' => [
                         ['icon' => 'laptop', 'title' => $t('تعلّم من أي مكان', 'Learn from anywhere'), 'text' => $t('حصص مباشرة بالصوت والصورة من الحاسوب أو الهاتف.', 'Live lessons with sound and video, from a computer or a phone.')],
@@ -169,14 +169,14 @@ final class DemoSiteSeeder extends Seeder
                     'bullets' => [$t('مستويات واضحة من البداية إلى الإتقان', 'Clear levels from the start to mastery'), $t('واجب قصير بعد كل حصة', 'Short homework after every lesson'), $t('متابعة يراها ولي الأمر في التطبيق', 'Progress parents see in the app')],
                     'link' => ['label' => $t('ابدأ بحصة مجانية', 'Start with a free lesson'), 'action' => ['kind' => 'trial']],
                 ]),
-                $block('teachers', 'portraits', ['tone' => 'paper'], ['title' => $t('تعرّف إلى معلّمينا', 'Meet our teachers'), 'max' => 8], $t('المعلّمون', 'Teachers')),
+                ['anchor' => 'teachers'] + $block('teachers', 'portraits', ['tone' => 'paper'], ['title' => $t('تعرّف إلى معلّمينا', 'Meet our teachers'), 'max' => 8], $t('المعلّمون', 'Teachers')),
                 $block('video', 'framed', ['tone' => 'night', 'align' => 'center'], [
                     'title' => $t('جولة قصيرة في حصصنا', 'A short tour of our lessons'),
                     'lead' => $t('شاهد كيف تسير الحصة المباشرة من البداية إلى التقرير.', 'See how a live lesson runs, from the start to the report.'),
                     'source' => ['kind' => 'upload', 'video' => $ref('intro'), 'poster' => $ref('poster')],
                     'caption' => $t('ثلاث ثوانٍ من أجواء حصصنا.', 'Three seconds from our lessons.'), 'ratio' => '16:9',
                 ]),
-                $block('pricing', 'cards', ['tone' => 'white'], ['per_lesson' => true, 'note' => $t('الأسعار بعملة منطقتك، والدفع عبر الإنترنت أو بالتحويل.', 'Prices in your region\'s currency, paid online or by transfer.')], $t('الأسعار', 'Prices')),
+                ['anchor' => 'pricing'] + $block('pricing', 'cards', ['tone' => 'white'], ['per_lesson' => true, 'note' => $t('الأسعار بعملة منطقتك، والدفع عبر الإنترنت أو بالتحويل.', 'Prices in your region\'s currency, paid online or by transfer.')], $t('الأسعار', 'Prices')),
                 $block('testimonials', 'grid', ['tone' => 'paper'], ['items' => [
                     ['name' => 'سارة م.', 'role' => $t('تتعلّم الإنجليزية للعمل', 'Learning English for work'), 'quote' => $t('أصبحت أتحدّث في الاجتماعات بثقة بعد ثلاثة أشهر. المعلّمة تعرف ما أحتاجه بالضبط.', 'I speak up in meetings with confidence after three months. My teacher knows exactly what I need.'), 'photo' => null, 'rating' => 5],
                     ['name' => 'أبو عمر', 'role' => $t('ولي أمر طالب في الرياض', 'A student\'s father in Riyadh'), 'quote' => $t('التقرير بعد كل حصة يطمئنني، والمواعيد تناسب يومنا المزدحم.', 'The report after every lesson reassures me, and the times fit our busy day.'), 'photo' => null, 'rating' => 5],
@@ -192,7 +192,7 @@ final class DemoSiteSeeder extends Seeder
                     'items' => [['media' => $ref('logo1'), 'name' => 'Nova', 'url' => null], ['media' => $ref('logo2'), 'name' => 'Atlas', 'url' => null], ['media' => $ref('logo3'), 'name' => 'Orbit', 'url' => null]],
                     'mono' => true,
                 ]),
-                $block('faq', 'two_columns', ['tone' => 'paper'], ['items' => [
+                ['anchor' => 'faq'] + $block('faq', 'two_columns', ['tone' => 'paper'], ['items' => [
                     ['q' => $t('هل الحصة التجريبية مجانية فعلًا؟', 'Is the trial lesson really free?'), 'a' => $t('نعم. حصة كاملة مع معلّم دون دفع أو التزام، ثم نقترح عليك الخطة المناسبة.', 'Yes. A full lesson with a teacher, no payment and no commitment; then we suggest the right plan.')],
                     ['q' => $t('هل الحصص فردية أم جماعية؟', 'Are lessons one to one or in groups?'), 'a' => $t('الاثنان. اختر معلّمًا لك وحدك أو مجموعة صغيرة بسعر أقل.', 'Both. Choose a teacher of your own, or a small group at a lower price.')],
                     ['q' => $t('كيف أعرف المستوى المناسب؟', 'How do I find the right level?'), 'a' => $t('نحدّده في الحصة التجريبية، ويبدأ المنهج من حيث أنت.', 'We find it in the trial lesson, and the course starts where you are.')],

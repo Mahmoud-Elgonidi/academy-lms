@@ -15,8 +15,8 @@ test('the migrated demo page keeps its sections, anchors and menu', async ({ pag
     await expect(page.locator(`#${anchor}`)).toHaveCount(1);
   }
   // Old links keep working: the menu and /ar#pricing land on the same blocks.
-  const menu = page.getByRole('banner').getByRole('navigation');
-  await expect(menu.getByRole('link', { name: 'الأسعار' })).toHaveAttribute('href', '#pricing');
+  // The migrated night header shows its menu on wide screens only (none on a phone, as before): its link is there all the same.
+  await expect(page.locator('header nav.ls-nav a', { hasText: 'الأسعار' })).toHaveAttribute('href', '#pricing');
   await page.goto('/ar#pricing');
   await expect(page.locator('#pricing')).toBeInViewport();
   // One structured-data script for the academy, and the FAQ's.

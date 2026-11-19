@@ -60,6 +60,7 @@ use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantRef;
 use Modules\Site\Models\JoinRequest;
+use Modules\Site\Models\SitePage;
 use Modules\Site\Models\SiteSettings;
 use Modules\Site\Support\PickLinks;
 use RuntimeException;
@@ -135,6 +136,9 @@ final class E2eResetSeeder extends Seeder
                 E2eCollection::dueSoon();
                 // Families book their own free trials, as the demo has it (a test may have switched the academy to booking them).
                 SiteSettings::query()->where('trial_booking', '!=', 'family')->update(['trial_booking' => 'family']);
+                // The page the specs read is the academy's migrated one (its old sections and anchors), not the demo's
+                // designed page: without a saved page the academy reads its old page as blocks (SitePage::current()).
+                SitePage::query()->delete();
             } finally {
                 CarbonImmutable::setTestNow();
                 AuditActor::forget();
