@@ -65,32 +65,36 @@ export function BackgroundVideo({ video, poster }: { video: Media; poster: Media
 /**
  * An uploaded video in a frame: the poster with a play button, the player
  * with its controls once asked for. With autoplay, it plays muted in view
- * (motion allowed) and keeps its controls.
+ * (motion allowed) and keeps its controls. Ambient (a section's own media:
+ * the opening, image beside text), it plays muted and loops in view without
+ * controls, like a moving picture; where it cannot play by itself (reduced
+ * motion, saving data) the play button stays.
  */
-export function FramedVideo({ video, poster, label, ratio, autoplay = false }: {
+export function FramedVideo({ video, poster, label, ratio, autoplay = false, ambient = false }: {
   video: Media;
   poster: Media | null;
   label: string;
   ratio: string;
   autoplay?: boolean;
+  ambient?: boolean;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [asked, setAsked] = useState(false);
-  useAutoplay(ref, autoplay && !asked);
+  const playing = useAutoplay(ref, (autoplay || ambient) && !asked);
   useEffect(() => {
     if (asked) void ref.current?.play().catch(() => undefined);
   }, [asked]);
-  const showCover = !asked && !autoplay;
+  const showCover = !asked && (ambient ? !playing : !autoplay);
   return (
-    <div className="sp-frame sp-video" style={{ aspectRatio: ratio } as CSSProperties}>
+    <div className="sp-frame sp-video" style={{ aspectRatio: ratio } as CSSProperties} data-ambient={ambient ? '' : undefined}>
       <video
         ref={ref}
         playsInline
         preload="none"
         poster={poster?.url}
-        controls={asked || autoplay}
-        muted={autoplay && !asked}
-        loop={autoplay && !asked}
+        controls={asked || (autoplay && !ambient)}
+        muted={(autoplay || ambient) && !asked}
+        loop={autoplay || ambient}
         aria-label={label}
       >
         <source src={video.url} type={video.mime} />

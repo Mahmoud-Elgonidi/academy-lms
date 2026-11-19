@@ -18,6 +18,7 @@ use Modules\Site\Actions\UploadSiteMedia;
 use Modules\Site\Models\SiteMedia;
 use Modules\Site\Models\SitePage;
 use Modules\Site\Models\SitePagePublish;
+use Modules\Site\Queries\MediaInUse;
 use Tests\Support\AcademySite;
 use Tests\Support\SitePages;
 
@@ -156,6 +157,18 @@ it('keeps a file the draft, the page or a kept version uses, saying where; delet
     app(DeleteSiteMedia::class)->handle($clip->id);
     expect(SiteMedia::query()->find($clip->id))->toBeNull();
     Storage::disk('public')->assertMissing($clip->path);
+});
+
+it('deletes a file the page no longer uses once published without it, though an older version still names it', function () {
+    $hero = upload('hero.webp');
+    $this->publishPage([['type' => 'hero', 'variant' => 'split', 'data' => ['title' => ['ar' => 'x'], 'media' => $hero->id]], ['type' => 'form']]);
+    $this->travel(1)->minutes();
+    $this->publishPage([['type' => 'hero', 'variant' => 'split', 'data' => ['title' => ['ar' => 'x']]], ['type' => 'form']]);
+
+    expect(MediaInUse::live())->not->toHaveKey($hero->id)
+        ->and(MediaInUse::all())->toHaveKey($hero->id);   // the sweep keeps it for a restore
+    app(DeleteSiteMedia::class)->handle($hero->id);
+    expect(SiteMedia::query()->find($hero->id))->toBeNull();
 });
 
 it('lets site:sweep mark unused files, unmark used ones, and delete what stayed unused a week; it keeps 20 versions', function () {

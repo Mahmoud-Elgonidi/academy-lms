@@ -30,7 +30,7 @@ final class DeleteSiteMedia
         if ($media === null) {
             throw ValidationException::withMessages(['media' => __('site::builder.media.missing')]);
         }
-        $where = MediaInUse::all()[$media->id] ?? null;
+        $where = MediaInUse::live()[$media->id] ?? null;
         if ($where !== null) {
             $names = [];
             foreach ($where as $type) {

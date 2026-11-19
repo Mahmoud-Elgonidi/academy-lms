@@ -65,6 +65,16 @@ describe('the page as blocks', () => {
     }
   });
 
+  it('hides the subjects block from visitors while the academy has no subjects, and says why in the preview', () => {
+    const { site, page: doc } = page('all');
+    const bare = { ...site, subjects: [] };
+    const subjects = doc.blocks.find((b) => b.type === 'subjects')!;
+    expect(render(bare, doc)).not.toContain(`id="${subjects.anchor}"`);
+    const preview = render(bare, doc, { preview: { revision: 2, published_revision: 1, enabled: true } });
+    expect(preview).toContain(`id="${subjects.anchor}"`);
+    expect(preview).toContain(ar.site.preview.subjectsEmpty);
+  });
+
   it('has exactly one h1, the hero’s title', () => {
     for (const name of ['all', 'courses', 'training', 'legacy']) {
       const { site, page: doc } = page(name);

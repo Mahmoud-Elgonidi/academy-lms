@@ -328,9 +328,9 @@ The editor is Filament's `RichEditor` with the toolbar limited to bold, italic, 
 ### 1.6 Media references and unused files
 
 `Domain\Page\MediaRefs::of(PageDoc): list<uuid>` lists every media id a document uses, posters and the SEO image included.
-A file is **in use** when its id appears in the draft, the published page, or any of the 20 kept `site_page_publishes` rows.
-- The library's delete (`DeleteSiteMedia`) refuses a file in use and says which block uses it ("مستخدم في: الواجهة، معرض الصور").
-- `site:sweep` (already daily) sets `unused_since` on files not in use and clears it on files in use again. Files unused for **7 days** are deleted: the row now, the file after commit (`DB::afterCommit` → `Storage::disk('public')->delete`).
+A file is **in use** when its id appears in the draft or the published page (`MediaInUse::live()`).
+- The library's delete (`DeleteSiteMedia`) refuses a file in use and says which block uses it ("مستخدم في: الواجهة، معرض الصور"). A file only an older kept publish names can be deleted: that version then shows without it (a missing id is dropped, below).
+- `site:sweep` (already daily) sets `unused_since` on files that neither the page nor any of the 20 kept `site_page_publishes` rows names (`MediaInUse::all()`) and clears it on files in use again. Files unused for **7 days** are deleted: the row now, the file after commit (`DB::afterCommit` → `Storage::disk('public')->delete`).
 - When a page is read, a missing media id is dropped (the block renders without it, or with the variant's fallback). It never causes an error.
 
 ### 1.7 Publish rules (`Domain\Page\PublishRules`, pure)

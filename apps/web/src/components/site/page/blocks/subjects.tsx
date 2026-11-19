@@ -17,7 +17,16 @@ export function subjectsOf(block: SubjectsBlock, ctx: PageCtx) {
 /** What the academy teaches (live: Catalog and Curriculum): today's cards with levels and programs, compact rows, or names only. */
 export function Subjects({ block, ctx, tone }: { block: SubjectsBlock; ctx: PageCtx; tone: Tone }) {
   const subjects = subjectsOf(block, ctx);
-  if (subjects.length === 0) return null;
+  if (subjects.length === 0) {
+    // Hidden from visitors until the academy has subjects; the builder's preview says so, so its words are not lost.
+    if (!ctx.preview) return null;
+    return (
+      <Section block={block} tone={tone}>
+        <Head block={block} ctx={ctx} defaults={DEFAULTS} />
+        <p className="sp-preview-note" role="status">{ctx.t('preview.subjectsEmpty')}</p>
+      </Section>
+    );
+  }
   const { show_levels, show_programs, show_categories } = block.data;
   const ask = ctx.links.form ? say(block.data.ask_label, () => ctx.t('subjects.ask')) : null;
   const askHref = (id: string) => `?subject=${encodeURIComponent(id)}#join`;

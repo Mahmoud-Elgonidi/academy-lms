@@ -420,7 +420,7 @@ final class SiteBuilder extends Page
     /** @return array{files: list<array<string, mixed>>, count: int, used: string, limit: string} */
     public function library(): array
     {
-        $inUse = MediaInUse::all();
+        $inUse = MediaInUse::live();
         $files = [];
         $query = SiteMedia::query()->latest();
         if (in_array($this->mediaKind, ['image', 'video'], true)) {

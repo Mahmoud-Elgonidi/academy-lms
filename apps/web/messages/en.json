@@ -2207,6 +2207,7 @@
       "live": "Preview: this version is live",
       "off": "The page is off right now",
       "formNote": "This is a preview: the form sends nothing.",
+      "subjectsEmpty": "Visitors do not see this section yet: add your subjects under «Subjects» in the dashboard, and they show here with their levels and programs.",
       "expired": "This preview has expired.",
       "invalid": "This preview link is not valid.",
       "again": "Open it again from the control panel."

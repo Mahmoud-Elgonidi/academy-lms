@@ -21,7 +21,13 @@ final class CatalogService implements CatalogApi
     {
         $column = $this->column();
 
-        return Subject::query()->orderBy($column)->pluck($column, 'id')->all();
+        // A subject without an English name reads in Arabic on the English page rather than vanishing.
+        $names = [];
+        foreach (Subject::query()->orderByRaw("coalesce(nullif({$column}, ''), name_ar)")->get(['id', 'name_ar', 'name_en']) as $subject) {
+            $names[(string) $subject->id] = (string) ($subject->{$column} ?: $subject->name_ar);
+        }
+
+        return $names;
     }
 
     public function levels(string $subjectId): array

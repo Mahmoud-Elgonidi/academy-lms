@@ -8,13 +8,27 @@ use Modules\Site\Models\SitePagePublish;
 
 /**
  * The current academy's files in use, and where (site-builder.md, 1.6): a
- * file named by the draft, the published page or any kept publish is in use
- * and cannot be deleted; site:sweep leaves it in place.
+ * file named by the draft or the published page is in use and cannot be
+ * deleted. site:sweep also keeps a file a kept publish names (all()), so a
+ * restore finds it; the academy may still delete one only an older version
+ * names (live()), and that version then shows without it.
  */
 final class MediaInUse
 {
-    /** @return array<string, list<string>> media id => the block types (and "seo") that use it */
+    /** @return array<string, list<string>> media id => the block types (and "seo") the draft and the published page use it in */
+    public static function live(): array
+    {
+        return self::of(false);
+    }
+
+    /** @return array<string, list<string>> media id => the block types (and "seo") that use it, kept publishes included */
     public static function all(): array
+    {
+        return self::of(true);
+    }
+
+    /** @return array<string, list<string>> */
+    private static function of(bool $kept): array
     {
         $page = SitePage::query()->first();
         $docs = [];
@@ -24,8 +38,10 @@ final class MediaInUse
                 $docs[] = $page->published;
             }
         }
-        foreach (SitePagePublish::query()->orderByDesc('published_at')->limit(SitePagePublish::KEEP)->pluck('page') as $kept) {
-            $docs[] = $kept;
+        if ($kept) {
+            foreach (SitePagePublish::query()->orderByDesc('published_at')->limit(SitePagePublish::KEEP)->pluck('page') as $old) {
+                $docs[] = $old;
+            }
         }
         $out = [];
         foreach ($docs as $doc) {

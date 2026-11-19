@@ -83,6 +83,13 @@ it('lists the subjects with their levels, tracks and published programs', functi
         ->and($subjects['Arabic']['programs'])->toBe([]);
 });
 
+it('names a subject with no English name in Arabic on the English page, never leaving it out', function () {
+    $this->inNoor(fn () => DB::table('subjects')->where('id', $this->quran)->update(['name_en' => '']));
+    $names = collect($this->getJson('http://noor.lms.test/api/v1/site', ['Accept-Language' => 'en'])->json('data.subjects'))->pluck('name', 'id');
+
+    expect($names[$this->quran])->toBe($this->inNoor(fn () => DB::table('subjects')->where('id', $this->quran)->value('name_ar')));
+});
+
 it('shows only the teachers who chose to show, teach now and were not taken off, never how to reach them', function () {
     $page = $this->getJson('http://noor.lms.test/api/v1/site', ['Accept-Language' => 'en'])->assertOk();
     $teachers = $page->json('data.teachers');
