@@ -58,7 +58,7 @@ jobs:
             echo "::error::Add the repository secret DEPLOY_SSH_KEY (or DEPLOY_PASSWORD), as for the deploy."; exit 1
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Make them an owner on the server
         run: |
