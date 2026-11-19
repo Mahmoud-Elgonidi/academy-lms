@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { closeSync, fstatSync, openSync, readFileSync, readSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { Page } from '@playwright/test';
+import type { Page, Route } from '@playwright/test';
 
 /**
  * The API's side of the end-to-end tests: artisan in apps/api (E2E_API_DIR),
@@ -82,7 +82,12 @@ export async function serveAcademyHost(page: Page, portal: string): Promise<stri
   // The portal's session goes along, as it is on the academy's host on a server.
   const session = await page.context().cookies(portal);
   await page.context().addCookies(session.map(({ name, value, expires, httpOnly, secure, sameSite }) => ({ name, value, expires, httpOnly, secure, sameSite, url: origin })));
-  await page.route(`${origin}/**`, async (route) => {
+  await page.route(`${origin}/**`, (route) => relay(route).catch((error: unknown) => {
+    // A request still on its way when the test ends (a page's background refresh) meets a closed page: nothing to answer.
+    if (page.isClosed() || /has been closed/.test(String(error))) return;
+    throw error;
+  }));
+  async function relay(route: Route) {
     const url = new URL(route.request().url());
     const toPortal = /^\/(ar|en|_next|bff)(\/|$)/.test(url.pathname);
     const headers = { ...(await route.request().allHeaders()), host };
@@ -96,7 +101,7 @@ export async function serveAcademyHost(page: Page, portal: string): Promise<stri
       return;
     }
     await route.fulfill({ response });
-  });
+  }
   // The academy's logo is at the API's APP_URL, which a page here does not reach (a failed load, tolerated): from a
   // page on this host Chromium would refuse it outright as a loopback address, so it fails the same way here.
   await page.route(
