@@ -39,7 +39,7 @@
             <button type="button" class="cb-move" wire:click="move('{{ $lesson->id }}', 'up')" title="{{ __($b.'up') }}" aria-label="{{ __($b.'up') }}">▲</button>
             <button type="button" class="cb-move" wire:click="move('{{ $lesson->id }}', 'down')" title="{{ __($b.'down') }}" aria-label="{{ __($b.'down') }}">▼</button>
             {{ ($this->editNodeAction)(['node' => $lesson->id]) }}
-            @unless ($published) {{ ($this->deleteNodeAction)(['node' => $lesson->id]) }} @endunless
+            {{ ($this->deleteNodeAction)(['node' => $lesson->id]) }}
         </span>
     </div>
     @if ($open)

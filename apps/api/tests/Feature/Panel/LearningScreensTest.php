@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\CarbonImmutable;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -46,11 +47,14 @@ it('builds a program: adds a lesson to a unit and lists it with its students', f
 
     Livewire::test(EditCurriculum::class, ['record' => $this->program->id])
         ->assertSee('Lesson 1')
-        ->callAction('addChild', data: ['title_ar' => 'درس جديد', 'title_en' => 'New lesson', 'weight' => 1, 'est_sessions' => 1, 'mastery_rule' => 'mastered_once'], arguments: ['node' => $unit->id, 'kind' => 'lesson'])
+        ->set("quick.{$unit->id}", 'New lesson')
+        ->mountAction(TestAction::make('addChild')->arguments(['node' => $unit->id, 'kind' => 'lesson', 'details' => true]))
+        ->assertSchemaStateSet(['title_ar' => 'New lesson', 'title_en' => 'New lesson'])
+        ->setActionData(['weight' => 1, 'est_sessions' => 1, 'mastery_rule' => 'mastered_once'])
+        ->callMountedAction()
         ->assertHasNoActionErrors()
         ->assertSee('New lesson')
-        ->assertActionHidden('deleteNode', arguments: ['node' => $unit->id])   // published: no deleting
-        ->assertDontSeeHtml("mountAction('deleteNode'");
+        ->assertActionDisabled(TestAction::make('deleteNode')->arguments(['node' => $unit->id]));   // Published: students' progress prevents deleting.
 
     Livewire::test(ManagePrograms::class)->assertCanSeeTableRecords([$this->program]);
 });

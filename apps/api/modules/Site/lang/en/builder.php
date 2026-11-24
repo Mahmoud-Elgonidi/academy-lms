@@ -230,7 +230,7 @@ return [
         'teachers' => 'Each teacher writes their own card and chooses to show it. You can hide a card in "The academy\'s page".',
         'pricing' => 'Plans and prices are managed in Plans and Price regions.',
         'app' => 'Store links come from the platform; the academy\'s code is its code in the app.',
-        'form' => 'Who books the free trial and how fast you answer are set in "The academy\'s page".',
+        'form' => 'Edit the heading, text and points beside the form in the Content tab. Set who books, response time, booking notice and default subject in The academy’s page → Free trial. The form’s steps and fields are fixed by the booking flow. Here you can show the “Teach with us” form and a WhatsApp button.',
         'testimonials' => 'Write real words only, with the person\'s consent.',
         'stats' => 'Numbers you write yourself. The page never counts anything from your data.',
         'video' => 'MP4 (H.264), under a minute for a background video, 1080p or less. No captions in this version: put the key words on screen.',

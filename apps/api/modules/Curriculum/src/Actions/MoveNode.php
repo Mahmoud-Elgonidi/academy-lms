@@ -15,21 +15,31 @@ use Modules\Curriculum\Models\Node;
  */
 final class MoveNode
 {
-    /** Swaps a node with its neighbour in the same parent. */
+    /** Moves a node one place among its siblings and normalizes their ordinals. */
     public function handle(Node $node, string $direction): void
     {
+        if (! in_array($direction, ['up', 'down'], true)) {
+            throw ValidationException::withMessages(['node' => __('curriculum::curriculum.errors.move')]);
+        }
+
         DB::transaction(function () use ($node, $direction) {
-            $neighbour = Node::query()->where('version_id', $node->version_id)->where('parent_id', $node->parent_id)
-                ->where('ordinal', $direction === 'up' ? '<' : '>', $node->ordinal)
-                ->orderBy('ordinal', $direction === 'up' ? 'desc' : 'asc')
-                ->lockForUpdate()->first();
-            if ($neighbour === null) {
+            if ($node->version()->value('status') === 'retired') {
+                throw ValidationException::withMessages(['node' => __('curriculum::curriculum.errors.retired')]);
+            }
+
+            $siblings = Node::query()->where('version_id', $node->version_id)->where('parent_id', $node->parent_id)
+                ->orderBy('ordinal')->orderBy('id')->lockForUpdate()->get();
+            $index = $siblings->search(fn (Node $sibling) => $sibling->is($node));
+            if ($index === false) {
                 return;
             }
 
-            [$node->ordinal, $neighbour->ordinal] = [$neighbour->ordinal, $node->ordinal];
-            $node->save();
-            $neighbour->save();
+            $position = $index + ($direction === 'up' ? -1 : 1);
+            if ($position < 0 || $position >= $siblings->count()) {
+                return;
+            }
+
+            $this->place($node, $node->parent_id, $position);
         });
     }
 

@@ -5,6 +5,7 @@ use Filament\Facades\Filament;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Modules\Catalog\Contracts\CatalogApi;
+use Modules\Curriculum\Actions\DeleteNode;
 use Modules\Curriculum\Actions\MoveNode;
 use Modules\Curriculum\Actions\PublishVersion;
 use Modules\Curriculum\Actions\SaveNode;
@@ -137,6 +138,33 @@ it('moves by drag and drop within a parent and between the units of a level, nev
     // The arrows still step within the parent.
     $page->call('move', $b->id, 'up');
     expect(bOrder($u1, $this->version->id))->toBe(['B', 'C']);
+});
+
+it('reorders lessons and normalizes their ordinals after a draft lesson is deleted', function () {
+    $level = bNode($this->program, 'level', null, 'Beginner');
+    [$a, $b, $c] = array_map(fn ($title) => bNode($this->program, 'lesson', $level, $title), ['A', 'B', 'C']);
+    app(DeleteNode::class)->handle($a);
+
+    Livewire::test(EditCurriculum::class, ['record' => $this->program->id])
+        ->call('move', $c->id, 'up')
+        ->assertSee('C')
+        ->assertSee('B');
+
+    expect(bOrder($level, $this->version->id))->toBe(['C', 'B'])
+        ->and(Node::query()->where('version_id', $this->version->id)->where('parent_id', $level->id)->orderBy('ordinal')->pluck('ordinal')->all())->toBe([1, 2]);
+});
+
+it('shows the delete control but disables it on a published curriculum', function () {
+    $level = bNode($this->program, 'level', null, 'Beginner');
+    $lesson = bNode($this->program, 'lesson', $level, 'Alif');
+
+    Livewire::test(EditCurriculum::class, ['record' => $this->program->id])
+        ->assertActionEnabled(TestAction::make('deleteNode')->arguments(['node' => $lesson->id]));
+
+    app(PublishVersion::class)->handle($this->version, (string) $this->admin->id);
+
+    Livewire::test(EditCurriculum::class, ['record' => $this->program->id])
+        ->assertActionDisabled(TestAction::make('deleteNode')->arguments(['node' => $lesson->id]));
 });
 
 it('previews the levels as islands and the lessons as stations, with no learner', function () {

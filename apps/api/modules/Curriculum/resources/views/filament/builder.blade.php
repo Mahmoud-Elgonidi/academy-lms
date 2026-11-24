@@ -236,7 +236,7 @@
                                 <button type="button" class="cb-move" wire:click="move('{{ $level->id }}', 'up')" title="{{ __($b.'up') }}" aria-label="{{ __($b.'up') }}">▲</button>
                                 <button type="button" class="cb-move" wire:click="move('{{ $level->id }}', 'down')" title="{{ __($b.'down') }}" aria-label="{{ __($b.'down') }}">▼</button>
                                 {{ ($this->editNodeAction)(['node' => $level->id]) }}
-                                @unless ($published) {{ ($this->deleteNodeAction)(['node' => $level->id]) }} @endunless
+                                {{ ($this->deleteNodeAction)(['node' => $level->id]) }}
                             </span>
                         </div>
 
@@ -254,7 +254,7 @@
                                                 <button type="button" class="cb-move" wire:click="move('{{ $child->id }}', 'up')" title="{{ __($b.'up') }}" aria-label="{{ __($b.'up') }}">▲</button>
                                                 <button type="button" class="cb-move" wire:click="move('{{ $child->id }}', 'down')" title="{{ __($b.'down') }}" aria-label="{{ __($b.'down') }}">▼</button>
                                                 {{ ($this->editNodeAction)(['node' => $child->id]) }}
-                                                @unless ($published) {{ ($this->deleteNodeAction)(['node' => $child->id]) }} @endunless
+                                                {{ ($this->deleteNodeAction)(['node' => $child->id]) }}
                                             </span>
                                         </div>
                                         <div class="cb-lessons" wire:sort="sortNode" wire:sort:config="{ handle: '.cb-grip-lesson' }" wire:sort:group-id="{{ $child->id }}" wire:sort:group="lessons-{{ $level->id }}">

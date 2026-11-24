@@ -47,6 +47,7 @@ return [
         'up' => 'Up',
         'down' => 'Down',
         'delete' => 'Delete',
+        'delete_published' => 'An item cannot be deleted from a published version because students’ progress depends on it.',
         'delete_confirm' => 'This and everything under it will be deleted. Sure?',
         'publish' => 'Publish version',
         'publish_hint' => 'Once published, new students follow it; you can add lessons but not delete them.',

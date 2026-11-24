@@ -578,8 +578,9 @@ final class EditCurriculum extends Page
         return Action::make('deleteNode')
             ->label(__('curriculum::curriculum.builder.delete'))
             ->icon(Heroicon::OutlinedTrash)
-            ->iconButton()->color('danger')->size('sm')
-            ->visible(fn () => $this->version()->status === 'draft')
+            ->button()->color('danger')->size('sm')
+            ->disabled(fn () => $this->version()->status !== 'draft')
+            ->tooltip(fn () => $this->version()->status === 'draft' ? null : __('curriculum::curriculum.builder.delete_published'))
             ->requiresConfirmation()
             ->modalDescription(__('curriculum::curriculum.builder.delete_confirm'))
             ->action(function (array $arguments) {

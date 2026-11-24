@@ -265,6 +265,7 @@ Default tone `brand`.
 Variants: `split` (today's: text and points beside the form), `centered` (the form alone in a card under the heading).
 Data: heading (**(d)**: today's `join.title` and `join.lead`/`join.leadBook`); `points: Lines<120,5>` **(d)**; `teach: bool` (false; replaces the old `teach` section: shows the "teach with us" tab and its footer link); `whatsapp_button: bool` (true: "chat on WhatsApp" beside the text when the page has a number).
 The form itself (`JoinAcademyForm`, `lib/site/actions`, the trial flows) is unchanged. Its anchor is always `join` (and `teach` for the teach tab), whatever the block id.
+The block's Content tab edits the heading, supporting text and points beside the form. The booking steps and fields stay tied to the trial flow; who books, response time, booking notice and the default subject are set in SiteSettings → Free trial.
 A page with no visible form block takes no requests from the page. Buttons with `trial` or `teach` actions are dropped, and the builder warns before publishing (1.7, a warning, not a blocker). `POST v1/site/requests` keeps working, because the app sends trials too.
 
 #### `contact`

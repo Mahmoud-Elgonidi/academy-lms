@@ -56,6 +56,14 @@ it('opens for the owner and admins only, on the academy\'s page as it is', funct
         ->and($page->get('previewToken'))->not->toBe('');
 });
 
+it('explains where to edit the trial-booking section', function () {
+    $this->actingAs($this->owner);
+    $page = Livewire::test(SiteBuilder::class);
+
+    $form = array_values(array_filter($page->get('data.blocks'), fn (array $block) => $block['type'] === 'form'))[0];
+    $page->call('edit', $form['data']['id'])->assertSee(__('site::builder.live.form'));
+});
+
 it('saves the draft as blocks are added, copied, hidden and moved, and publishes it for the page', function () {
     $this->actingAs($this->owner);
     $screen = Livewire::test(SiteBuilder::class);

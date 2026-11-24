@@ -28,19 +28,48 @@ function useAutoplay(ref: React.RefObject<HTMLVideoElement | null>, on: boolean)
   useEffect(() => {
     const video = ref.current;
     if (!on || !video || still() || saving() || !('IntersectionObserver' in window)) return;
+    let active = true;
+    let inView = false;
+    let waitingForData = false;
+    const play = () => {
+      video.removeEventListener('canplay', play);
+      waitingForData = false;
+      if (!active || !inView) return;
+      void video.play().then(
+        () => { if (active) setPlaying(inView); },
+        () => { if (active) setPlaying(false); },
+      );
+    };
     const seen = new IntersectionObserver(([entry]) => {
+      if (!active) return;
       if (entry?.isIntersecting) {
-        if (video.preload === 'none') {
-          video.preload = 'auto';
-          video.load();
+        inView = true;
+        if (video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) {
+          if (!waitingForData) {
+            waitingForData = true;
+            video.addEventListener('canplay', play, { once: true });
+          }
+          if (video.preload === 'none') {
+            video.preload = 'auto';
+            video.load();
+          }
+        } else {
+          play();
         }
-        video.play().then(() => setPlaying(true), () => undefined);
       } else {
+        inView = false;
         video.pause();
+        video.removeEventListener('canplay', play);
+        waitingForData = false;
+        setPlaying(false);
       }
     }, { rootMargin: '200px 0px' });
     seen.observe(video);
-    return () => seen.disconnect();
+    return () => {
+      active = false;
+      seen.disconnect();
+      video.removeEventListener('canplay', play);
+    };
   }, [ref, on]);
   return playing;
 }
