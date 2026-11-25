@@ -29,7 +29,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
-    messages: await messagesFor(locale, await academyAudience()),
+    messages: await messagesFor(locale, await academyAudience(locale)),
     // Times come from the API already written for the viewer ({label}); nothing is converted here.
     timeZone: 'UTC',
   };

@@ -35,6 +35,8 @@ type Options = {
   idempotencyKey?: string;
   /** More headers to pass on (a Range for a recording). */
   headers?: Record<string, string>;
+  /** The language when it is already known: next-intl's own request config asks with it, since getLocale() would wait for that very config. */
+  locale?: string;
 };
 
 /**
@@ -43,8 +45,8 @@ type Options = {
  * resolves it as it resolves its own pages (subdomain, custom domain, or
  * PLATFORM_HOME_ACADEMY). ACADEMY names one by slug on a laptop.
  */
-async function outgoing(token?: string): Promise<Record<string, string>> {
-  const [jar, incoming, locale] = await Promise.all([cookies(), headers(), getLocale()]);
+async function outgoing(token?: string, known?: string): Promise<Record<string, string>> {
+  const [jar, incoming, locale] = await Promise.all([cookies(), headers(), known ?? getLocale()]);
   const sent: Record<string, string> = { Accept: 'application/json', 'Accept-Language': locale };
 
   const bearer = token ?? jar.get(SESSION_COOKIE)?.value;
@@ -74,7 +76,7 @@ function urlOf(path: string, params?: Record<string, string>, query?: Query): st
 
 /** One call to the API, as this person. */
 export async function call<M extends Method>(method: M, path: PathFor<M>, options: Options = {}): Promise<Response> {
-  const sent = { ...(options.headers ?? {}), ...(await outgoing(options.token)) };
+  const sent = { ...(options.headers ?? {}), ...(await outgoing(options.token, options.locale)) };
   if (options.body !== undefined) sent['Content-Type'] = 'application/json';
   if (options.idempotencyKey) sent['Idempotency-Key'] = options.idempotencyKey;
   // A read that meets the rate limit waits a moment and asks once more (lib/api/retry.ts); writes are sent once.

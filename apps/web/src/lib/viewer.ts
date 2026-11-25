@@ -37,13 +37,17 @@ export const FALLBACK_BRANDING: Branding = {
 // The look changes rarely: kept five minutes per host, as GET /branding asks (Cache-Control 300).
 const looks = new Map<string, { at: number; branding: Branding }>();
 
-/** The academy's look for this host (its colours, corners and fonts). */
-export const branding = cache(async (): Promise<Branding> => {
+/**
+ * The academy's look for this host (its colours, corners and fonts). The
+ * request config (i18n/request.ts) passes its locale: there getLocale() would
+ * wait for the config itself, and the page would never answer.
+ */
+export const branding = cache(async (locale?: string): Promise<Branding> => {
   const host = (await headers()).get('host') ?? '';
   const kept = looks.get(host);
   if (kept && Date.now() - kept.at < 300_000) return kept.branding;
   try {
-    const response = await call('get', '/v1/branding');
+    const response = await call('get', '/v1/branding', { locale });
     if (!response.ok) return kept?.branding ?? FALLBACK_BRANDING;
     const found = ((await response.json()) as { data: Branding }).data;
     looks.set(host, { at: Date.now(), branding: found });

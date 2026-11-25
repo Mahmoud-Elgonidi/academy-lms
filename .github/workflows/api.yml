@@ -19,6 +19,8 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # About half an hour when it passes; a hang fails instead of waiting GitHub's six hours.
+    timeout-minutes: 50
     defaults:
       run:
         working-directory: apps/api
@@ -107,6 +109,7 @@ jobs:
       (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'api-breaking'))
       || (github.event_name == 'push' && !contains(github.event.head_commit.message, 'Api-Breaking:'))
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:

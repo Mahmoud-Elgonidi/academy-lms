@@ -44,6 +44,7 @@ jobs:
   checks:
     if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       actions: read
     outputs:
@@ -75,6 +76,8 @@ jobs:
     needs: checks
     if: needs.checks.outputs.go == 'true'
     runs-on: ubuntu-latest
+    # A hang fails within the hour instead of GitHub's six; the image's own checks wait at most 20 seconds a request.
+    timeout-minutes: 60
     outputs:
       image: ${{ steps.name.outputs.image }}
       publish: ${{ steps.name.outputs.publish }}
@@ -132,7 +135,7 @@ jobs:
           check() {
             local want="$1" host="$2" path="$3"; shift 3
             local got
-            got="$(curl -s -o /tmp/body -w '%{http_code}' -H "Host: $host" "$@" "$base$path" || true)"
+            got="$(curl -s -m 20 -o /tmp/body -w '%{http_code}' -H "Host: $host" "$@" "$base$path" || true)"
             echo "$got $host$path"
             [ "$got" = "$want" ] || { head -c 3000 /tmp/body; echo; exit 1; }
           }
@@ -175,7 +178,7 @@ jobs:
           # The security headers: on the app's pages (with HSTS over https), and from Caddy on static files.
           secured() {
             local host="$1" path="$2"; shift 2
-            curl -s -o /dev/null -D /tmp/headers -H "Host: $host" "$@" "$base$path"
+            curl -s -m 20 -o /dev/null -D /tmp/headers -H "Host: $host" "$@" "$base$path"
             for want in 'x-content-type-options: nosniff' 'x-frame-options: SAMEORIGIN' 'referrer-policy: strict-origin-when-cross-origin' \
                         "content-security-policy: base-uri 'self'; object-src 'none'; frame-ancestors 'self'"; do
               grep -qiF "$want" /tmp/headers || { echo "no '$want' on $host$path"; cat /tmp/headers; exit 1; }
@@ -199,7 +202,7 @@ jobs:
             --data '{"login":"owner@demo.test","password":"password","device_name":"rehearsal"}'
 
           # Live screens: a browser's WebSocket reaches Reverb through the web container (/app/<key>).
-          ws="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 -H 'Host: demo.lms.example' \
+          ws="$(curl -s -m 20 -o /dev/null -w '%{http_code}' --max-time 5 -H 'Host: demo.lms.example' \
             -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' \
             -H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' \
             "$base/app/$(setting REVERB_APP_KEY)?protocol=7&client=js&version=8.4.0" || true)"
@@ -210,7 +213,7 @@ jobs:
           # assets, a redirect to sign in that stays on https, and a teacher's day, which
           # the portal reads from the API back through the web container.
           for _ in $(seq 1 30); do
-            [ "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: demo.lms.example' "$base/ar/sign-in")" = 200 ] && break
+            [ "$(curl -s -m 20 -o /dev/null -w '%{http_code}' -H 'Host: demo.lms.example' "$base/ar/sign-in")" = 200 ] && break
             sleep 1
           done
           check 302 demo.lms.example / -H 'Accept: text/html'
@@ -222,7 +225,7 @@ jobs:
           secured demo.lms.example /ar/sign-in -H 'X-Forwarded-Proto: https'
           grep -qi '^strict-transport-security: max-age=' /tmp/headers || { echo "no HSTS on the portal over https"; exit 1; }
           check 307 demo.lms.example /ar/teach -H 'X-Forwarded-Proto: https'
-          location="$(curl -s -o /dev/null -w '%{redirect_url}' -H 'Host: demo.lms.example' -H 'X-Forwarded-Proto: https' "$base/ar/teach")"
+          location="$(curl -s -m 20 -o /dev/null -w '%{redirect_url}' -H 'Host: demo.lms.example' -H 'X-Forwarded-Proto: https' "$base/ar/teach")"
           echo "-> $location"
           [ "$location" = "https://demo.lms.example/ar/sign-in?next=%2Far%2Fteach" ] || { echo "the portal's redirect is not on https"; exit 1; }
           check 200 demo.lms.example /api/v1/auth/login -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' \
@@ -289,7 +292,7 @@ jobs:
           check 404 lms.example /health
           healthy=""
           for _ in $(seq 1 30); do
-            got="$(curl -s -o /tmp/body -w '%{http_code}' -H 'Host: lms.example' -H "Authorization: Bearer $(setting HEALTH_TOKEN)" "$base/health" || true)"
+            got="$(curl -s -m 20 -o /tmp/body -w '%{http_code}' -H 'Host: lms.example' -H "Authorization: Bearer $(setting HEALTH_TOKEN)" "$base/health" || true)"
             [ "$got" = 200 ] && { healthy=1; break; }
             sleep 6
           done
@@ -335,6 +338,7 @@ jobs:
     needs: image
     if: needs.image.outputs.publish == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     environment: production
     permissions:
       contents: read
