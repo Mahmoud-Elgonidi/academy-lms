@@ -122,6 +122,8 @@ trait HoldsConversations
                 array_values(array_filter($members, fn (array $m) => $m['id'] !== $me && $m['id'] !== $withId)))),
             'lines' => $c === null ? [] : ChatView::lines(ChatView::messages($c), $me, app(ViewerTimezone::class)->effective(), look: $this->look()),
             'whyNot' => $why === null ? null : __('messaging::chat.why_not.'.$why),
+            // Whether the student's guardians are in it too: the teacher is told so only then.
+            'guardians' => $rules->guardiansOf($studentId) !== [],
         ];
     }
 

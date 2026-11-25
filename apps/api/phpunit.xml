@@ -22,18 +22,33 @@
         </include>
     </source>
     <php>
-        <env name="APP_ENV" value="testing"/>
+        <ini name="memory_limit" value="2G"/>
+        <!-- Forced: the dev container sets APP_ENV=local, its own academy host, mail and broadcasting; tests must not use them (Filament's test helpers only fill forms while running unit tests). -->
+        <env name="APP_ENV" value="testing" force="true"/>
+        <server name="APP_ENV" value="testing" force="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="BROADCAST_CONNECTION" value="null"/>
-        <env name="CACHE_STORE" value="array"/>
+        <env name="BROADCAST_CONNECTION" value="null" force="true"/>
+        <server name="BROADCAST_CONNECTION" value="null" force="true"/>
+        <env name="CACHE_STORE" value="array" force="true"/>
+        <server name="CACHE_STORE" value="array" force="true"/>
         <env name="DB_CONNECTION" value="pgsql"/>
         <env name="DB_DATABASE" value="lms_test"/>
         <env name="DB_URL" value=""/>
-        <env name="PLATFORM_DOMAIN" value="lms.test"/>
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="SESSION_DRIVER" value="array"/>
+        <env name="PLATFORM_DOMAIN" value="lms.test" force="true"/>
+        <env name="PLATFORM_DEV_ACADEMY" value="" force="true"/>
+        <server name="PLATFORM_DOMAIN" value="lms.test" force="true"/>
+        <server name="PLATFORM_DEV_ACADEMY" value="" force="true"/>
+        <env name="MAIL_MAILER" value="array" force="true"/>
+        <server name="MAIL_MAILER" value="array" force="true"/>
+        <env name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <server name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <env name="SESSION_DRIVER" value="array" force="true"/>
+        <server name="SESSION_DRIVER" value="array" force="true"/>
+        <env name="REVERB_APP_KEY" value="" force="true"/>
+        <server name="REVERB_APP_KEY" value="" force="true"/>
+        <env name="REVERB_HOST" value="" force="true"/>
+        <server name="REVERB_HOST" value="" force="true"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>

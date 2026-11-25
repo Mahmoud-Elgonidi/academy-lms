@@ -8,6 +8,7 @@ use Modules\Site\Actions\SubmitJoinRequest;
 use Modules\Site\Contracts\DTOs\JoinRequestData;
 use Modules\Site\Contracts\DTOs\TrialSettings;
 use Modules\Site\Contracts\SiteApi;
+use Modules\Site\Domain\Page\Audience;
 use Modules\Site\Models\JoinRequest;
 use Modules\Site\Models\SiteSettings;
 use Modules\Site\Support\PickLinks;
@@ -42,6 +43,7 @@ final class SiteService implements SiteApi
             responseHours: (int) $settings->response_hours,
             defaultSubjectId: $settings->default_trial_subject_id,
             noticeHours: (int) $settings->trial_notice_hours,
+            forAdults: Audience::of(SubmitJoinRequest::publishedPage()) === Audience::ADULTS,
         );
     }
 

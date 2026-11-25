@@ -9,6 +9,7 @@ use Modules\People\Contracts\CheckKind;
 use Modules\People\Contracts\DTOs\TeacherClearance;
 use Modules\People\Models\PeopleSettings;
 use Modules\People\Models\TeacherCheck;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
@@ -16,7 +17,9 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * (docs/architecture/02, section 15): a pause for a safeguarding concern
  * always keeps them away; otherwise, when the academy asks for a check, they
  * need a verified criminal record check that has not run out on the
- * academy's calendar. One read for many teachers.
+ * academy's calendar. One read for many teachers. An academy of adults only
+ * asks for no check (it teaches nobody under 18; the rule stays as saved for
+ * if that ever changes), so only a pause keeps a teacher away there.
  */
 final class Clearances
 {
@@ -44,7 +47,7 @@ final class Clearances
         if ($teacherIds === []) {
             return [];
         }
-        $required = PeopleSettings::current()->require_minor_check;
+        $required = PeopleSettings::current()->require_minor_check && ! app(AcademyAudience::class)->adultsOnly();
         $today = $this->today($now);
         $paused = $withPause ? DB::table('teacher_profiles')->whereIn('user_id', $teacherIds)->whereNotNull('minors_paused_at')->pluck('user_id')->flip() : collect();
         $checks = TeacherCheck::query()->whereIn('teacher_id', $teacherIds)->where('kind', CheckKind::CriminalRecord->value)

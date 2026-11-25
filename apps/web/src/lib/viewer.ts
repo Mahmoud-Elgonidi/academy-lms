@@ -15,6 +15,12 @@ export type Branding = {
   favicon_url?: string | null;
   /** How the academy writes a clock for everyone who has not chosen their own (the pages before signing in). */
   time_format?: string | null;
+  /**
+   * Whom the academy serves (lib/audience.ts): families (as at first) or
+   * adults. Typed here until the next `npm run api:types` brings it from the
+   * OpenAPI document; an older API leaves it out (families).
+   */
+  audience?: 'families' | 'adults';
 };
 
 /** The product's own look, until (or unless) the academy's arrives. */
@@ -80,7 +86,7 @@ export type Me = {
   /** The academy's modules that are on (paid in its plan, optional not hidden; the core is not listed): lib/modules.ts. */
   modules?: string[];
   /** The academy's own clock is the one for everyone who has not chosen theirs. */
-  academy: { id: string; slug: string; name_ar: string; name_en: string; default_timezone: string; timezone_label: string; time_format: TimeFormat } | null;
+  academy: { id: string; slug: string; name_ar: string; name_en: string; default_timezone: string; timezone_label: string; time_format: TimeFormat; audience?: 'families' | 'adults' } | null;
 };
 
 /** The signed-in person (their roles decide their portal). */

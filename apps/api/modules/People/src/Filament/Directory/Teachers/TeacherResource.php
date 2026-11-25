@@ -34,6 +34,7 @@ use Modules\People\Filament\Directory\DirectoryForm;
 use Modules\People\Queries\Models\Person;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Filament\NavGroup;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use UnitEnum;
 
 /**
@@ -95,7 +96,9 @@ final class TeacherResource extends Resource
                 ToggleButtons::make('gender')->label(__($l.'gender'))->inline()->required()->options(__($o.'genders')),
                 CheckboxList::make('languages')->label(__($l.'languages'))->columns(3)->required()->default(['ar'])->options(__($o.'languages')),
                 TextInput::make('dialect')->label(__($l.'dialect'))->helperText(__($l.'dialect_hint'))->maxLength(40),
-                CheckboxList::make('age_groups')->label(__($l.'age_groups'))->helperText(__($l.'age_groups_hint'))->columns(2)->options(AgeGroup::options()),
+                CheckboxList::make('age_groups')->label(__($l.'age_groups'))->helperText(__($l.'age_groups_hint'))->columns(2)->options(AgeGroup::options())
+                    // Everyone is an adult in an academy of adults only: no ages to choose.
+                    ->hidden(fn () => app(AcademyAudience::class)->adultsOnly()),
                 Toggle::make('accepts_new')->label(__($l.'accepts_new'))->default(true),
                 Toggle::make('accepts_trials')->label(__($l.'accepts_trials'))->default(true),
                 // Group lessons beside the private ones: the switch, then how many one lesson may hold.
@@ -155,7 +158,7 @@ final class TeacherResource extends Resource
                 TextColumn::make('subject_names')->label(__($c.'subjects'))->badge()->separator('|'),
                 TextColumn::make('gender')->label(__($c.'gender'))->visibleFrom('md')
                     ->state(fn (Person $p) => $p->teacherProfile ? __('people::directory.options.genders.'.$p->teacherProfile->gender) : null),
-                TextColumn::make('age_groups')->label(__($c.'age_groups'))->visibleFrom('md')->badge()->color('gray')
+                TextColumn::make('age_groups')->label(__($c.'age_groups'))->visibleFrom('md')->badge()->color('gray')->hidden(fn () => app(AcademyAudience::class)->adultsOnly())
                     ->state(fn (Person $p) => array_map(fn (string $g) => AgeGroup::from($g)->label(), $p->teacherProfile->age_groups ?? [])),
                 TextColumn::make('weekly')->label(__($c.'weekly'))->visibleFrom('md')
                     ->state(fn (Person $p) => $p->teacherProfile?->max_weekly_min ? __('people::directory.hours', ['hours' => round($p->teacherProfile->max_weekly_min / 60, 1)]) : null),

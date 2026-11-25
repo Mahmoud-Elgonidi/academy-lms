@@ -1,5 +1,5 @@
 import { countriesIn } from '@/lib/site/countries';
-import { sayList, whatsappUrl, type FormBlock, type Tone } from '@/lib/site/page';
+import { bookersOf, say, sayList, whatsappUrl, type FormBlock, type Tone } from '@/lib/site/page';
 import { timeFormatOf } from '@/lib/time';
 import { Icon, WhatsAppIcon } from '../../icons';
 import { JoinAcademyForm } from '../../join-academy';
@@ -18,10 +18,13 @@ const NO_TRIALS = { booking: 'staff', response_hours: 24, notice_hours: 3, help_
 export function Form({ block, ctx, tone }: { block: FormBlock; ctx: PageCtx; tone: Tone }) {
   const { site, t, locale } = ctx;
   const subjects = site.subjects.filter((s) => s.name);
+  const who = bookersOf(block, ctx.audience);
   const lead = site.trials?.booking === 'family' ? 'join.leadBook' : 'join.lead';
   const words = headingOf(block, ctx, { title: 'join.title', lead, eyebrow: 'join.eyebrow' });
-  const points = sayList(block.data.points, () => audienceRaw<string[]>(ctx, 'join.points'));
+  // A page for adults says its own points; a families page whose form takes adults alone, the learner's (no child's level).
+  const points = sayList(block.data.points, () => (ctx.audience !== 'adults' && who === 'adults' ? (t.raw('join.pointsSelf') as string[]) : audienceRaw<string[]>(ctx, 'join.points')));
   const whatsapp = block.data.whatsapp_button ? whatsappUrl(site.whatsapp ?? ctx.page.settings.whatsapp) : null;
+  const talkLabel = say(block.data.whatsapp_label, () => t('cta.talk'));
   const form = (
     <JoinAcademyForm
       token={site.form_token}
@@ -34,13 +37,14 @@ export function Form({ block, ctx, tone }: { block: FormBlock; ctx: PageCtx; ton
       whatsapp={site.whatsapp}
       academy={site.academy.name}
       timeFormat={timeFormatOf(ctx.look.time_format)}
-      adults={ctx.audience === 'adults'}
+      who={who}
+      adultsWords={ctx.audience === 'adults'}
     />
   );
   const guarded = ctx.preview ? <PreviewGuard note={t('preview.formNote')}>{form}</PreviewGuard> : form;
   const talk = whatsapp ? (
     <div className="ls-cta">
-      <a className="ls-btn ls-btn-ghost" href={whatsapp} target="_blank" rel="noopener"><WhatsAppIcon />{t('cta.talk')}</a>
+      <a className="ls-btn ls-btn-ghost" href={whatsapp} target="_blank" rel="noopener"><WhatsAppIcon />{talkLabel}</a>
     </div>
   ) : null;
 
@@ -89,7 +93,7 @@ export function Form({ block, ctx, tone }: { block: FormBlock; ctx: PageCtx; ton
         <div className="sp-form-card" data-reveal="">{guarded}</div>
         {whatsapp ? (
           <p className="sp-form-alt">
-            <a className="sp-btn sp-btn-secondary" href={whatsapp} target="_blank" rel="noopener"><WhatsAppIcon /><span>{t('cta.talk')}</span></a>
+            <a className="sp-btn sp-btn-secondary" href={whatsapp} target="_blank" rel="noopener"><WhatsAppIcon /><span>{talkLabel}</span></a>
           </p>
         ) : null}
       </div>

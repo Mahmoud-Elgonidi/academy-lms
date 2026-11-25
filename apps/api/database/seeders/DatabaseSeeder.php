@@ -70,7 +70,7 @@ use Modules\Support\Database\Seeders\DemoTicketsSeeder;
  * paid renewals behind them (the revenue screen),
  * curricula, lesson reports with homework, its public page (on, with three teachers' cards), teacher time off with a substitute
  * and an academy holiday, ratings, teachers' pay with last month closed, imports from sheets, and the notifications all of that sent;
- * a second academy (suspended) and the platform team's console with past support sign-ins, the academies on their SaaS plans (the demo on Pro, nine of its ten teachers' places taken). Every password is "password" (DEMO_PASSWORD on a server). `composer demo` rebuilds it.
+ * a second academy (suspended), a training office for adult professionals (DemoTrainingSeeder: no guardians, no children), and the platform team's console with past support sign-ins, the academies on their SaaS plans (the demo on Pro, nine of its ten teachers' places taken). Every password is "password" (DEMO_PASSWORD on a server). `composer demo` rebuilds it.
  */
 class DatabaseSeeder extends Seeder
 {
@@ -139,6 +139,9 @@ class DatabaseSeeder extends Seeder
                 $identity->createUser(new NewUser(name: $name, roles: [Role::Student], email: 'student'.($i + 1).'@rawda.test', password: $password));
             }
         });
+
+        // A training office for adult professionals (academies.audience = adults): training.owner@demo.test.
+        $this->call(DemoTrainingSeeder::class);
 
         // The platform team: admin@platform.test (the demo password) at /console, with past support sign-ins in the demo academy.
         $this->call(DemoPlatformSeeder::class);

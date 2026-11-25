@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\Site\Domain\Page\Templates;
 use Modules\Site\Models\SitePage;
 
@@ -15,7 +16,8 @@ use Modules\Site\Models\SitePage;
  * The owner or an admin starts the draft again from a template (online
  * courses, training, children and families, a language school, blank). Only
  * the draft changes: nothing goes live until it is published. Audited with
- * the template's key.
+ * the template's key. An academy that trains adults only has no page for
+ * children and families to start from (Templates::keysFor).
  */
 final class ApplySiteTemplate
 {
@@ -27,7 +29,8 @@ final class ApplySiteTemplate
         if (! Gate::allows(Ability::ManageSite->value)) {
             throw new AuthorizationException;
         }
-        if (! in_array($key, Templates::KEYS, true)) {
+        // An academy that trains adults only never starts from the page for children and their families.
+        if (! in_array($key, Templates::keysFor(app(AcademyAudience::class)->adultsOnly()), true)) {
             throw ValidationException::withMessages(['template' => __('site::builder.errors.template')]);
         }
 

@@ -7,8 +7,8 @@ import { NotNow, ReportView, StartWays } from '@/components/site/trial/report';
 import { Link } from '@/i18n/navigation';
 import { get, read } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
-import { seesMoney } from '@/lib/family/rules';
-import { momentNow, type FamilyTrial, type TrialReport } from '@/lib/site/report';
+import { readsAsSelf, seesMoney } from '@/lib/family/rules';
+import { momentNow, selfWords, type FamilyTrial, type TrialReport } from '@/lib/site/report';
 import { academySite } from '@/lib/site/server';
 import { hasModule, modulesOf } from '@/lib/modules';
 import { me, viewerTimeFormat } from '@/lib/viewer';
@@ -27,6 +27,9 @@ export default async function FamilyTrial({ params }: Props) {
   if (!/^[0-9a-f-]{36}$/i.test(session)) notFound();
   const [fam, locale, t, site, timeFormat, person] = await Promise.all([family(), getLocale(), getTranslations('site.report'), academySite(), viewerTimeFormat(), me()]);
   const classic = seesMoney(fam.stage);
+  // A learner reading their own trial (an academy for adults, or an adult's own): the first person.
+  const self = classic && readsAsSelf(fam.adults, fam.current);
+  const say = selfWords(t, self);
   const found = await read<{ data: TrialReport; viewer_stage: string }>('/v1/family/trials/{session}', { params: { session } });
   const now = momentNow();
   const whatsapp = site?.whatsapp ?? null;
@@ -45,7 +48,7 @@ export default async function FamilyTrial({ params }: Props) {
     if (!trial || (trial.status !== 'missed' && trial.status !== 'cancelled')) notFound();
     const ours = trial.outcome === 'teacher_absent' || trial.outcome === 'academy';
     const learner = fam.current?.name.split(' ')[0] ?? '';
-    const happened = t(ours ? `rebook.${trial.outcome as 'academy'}` : 'rebook.student_absent', { learner, subject: trial.subject.name, when: trial.starts_at?.label ?? '' });
+    const happened = say(ours ? `rebook.${trial.outcome as 'academy'}` : 'rebook.student_absent', { learner, subject: trial.subject.name, when: trial.starts_at?.label ?? '' });
     return (
       <div className="ls ls-academy lr-embed">
         {back}
@@ -60,7 +63,7 @@ export default async function FamilyTrial({ params }: Props) {
           </section>
           {classic && trial.next ? (trial.next.available ? (
             <NextTrialPanel source={{ from: 'family', session }} kind="rebook" learner={learner} subject={trial.subject.name}
-              academy={academy} whatsapp={whatsapp} timeFormat={timeFormat} zone={trial.starts_at?.timezone} done={done} />
+              academy={academy} whatsapp={whatsapp} timeFormat={timeFormat} zone={trial.starts_at?.timezone} done={done} self={self} />
           ) : (
             <NotNow title={t('rebook.cantTitle')} text={trial.next.why_not ?? ''} whatsapp={whatsapp} />
           )) : null}
@@ -77,14 +80,15 @@ export default async function FamilyTrial({ params }: Props) {
       <ReportView
         report={report}
         look={classic ? 'family' : 'student'}
+        self={self}
         locale={locale}
         now={now}
-        start={classic ? <StartWays report={report} whatsapp={whatsapp} locale={locale} family help={hasModule(modulesOf(person), 'support')} /> : null}
+        start={classic ? <StartWays report={report} whatsapp={whatsapp} locale={locale} family help={hasModule(modulesOf(person), 'support')} self={self} /> : null}
         next={next ? (
           <div id="next" className="scroll-mt-24">
             {next.available ? (
               <NextTrialPanel source={{ from: 'family', session }} kind="second" learner={report.learner} subject={report.subject.name}
-                academy={academy} whatsapp={whatsapp} timeFormat={timeFormat} zone={report.held_at?.timezone} until={next.until?.label} done={done} />
+                academy={academy} whatsapp={whatsapp} timeFormat={timeFormat} zone={report.held_at?.timezone} until={next.until?.label} done={done} self={self} />
             ) : (
               <NotNow title={t('next.notNow')} text={next.why_not ?? ''} whatsapp={whatsapp} />
             )}

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'age_groups' => ['kids' => 'Kids (under 12)', 'middle' => 'Middle school (12–14)', 'teen' => 'Secondary (15–18)', 'adults' => 'Adults'],
+    'age_groups' => ['kids' => 'Kids (under 12)', 'middle' => 'Middle school (12–14)', 'teen' => 'Secondary (15–17)', 'adults' => 'Adults (18+)'],
     'errors' => [
         'gender' => 'Choose the teacher\'s gender.',
         'age_groups' => 'Choose the ages from the list.',

@@ -93,8 +93,7 @@ class _Privacy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final account = context.watch<SessionCubit>().state.current;
-    if (account == null || !account.isGuardian) return const SizedBox.shrink();
+    if (!context.watch<SessionCubit>().state.guardian) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

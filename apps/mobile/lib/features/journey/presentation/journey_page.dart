@@ -95,7 +95,9 @@ class _JourneyState extends State<_Journey> {
   /// The academy has the curriculum off: its map answered 403 `feature-not-in-plan`.
   static bool _off(LoadState<JourneyMap> s) => s.data == null && (s.problem?.isFeatureOff ?? false);
 
-  bool _fresh(JourneyMap? m) => m != null && !m.guardian && m.cheers.any((c) => !_shown.contains(c.id));
+  /// Cheers a guardian sent (never in an academy for adults: nobody there has a guardian).
+  bool _fresh(JourneyMap? m) =>
+      m != null && !m.guardian && !context.read<SessionCubit>().state.adults && m.cheers.any((c) => !_shown.contains(c.id));
 
   Future<void> _cheers(BuildContext context, JourneyMap m) async {
     final fresh = m.cheers.where((c) => !_shown.contains(c.id)).toList();

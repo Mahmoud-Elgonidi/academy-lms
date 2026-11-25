@@ -5,7 +5,9 @@ namespace Modules\Crm\Support;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Modules\Crm\Enums\LeadSource;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Time\Timezones;
 
 /** A lead's fields as the form and the API send them: cleaned, then checked. */
@@ -40,6 +42,10 @@ final class LeadFields
         $data['preferred_days'] = array_values(array_map('intval', $data['preferred_days'] ?? []));
         foreach (['email', 'country', 'learner_name', 'learner_birth_year', 'subject_id', 'preferred_from', 'preferred_to', 'teacher_gender', 'utm_source', 'utm_medium', 'utm_campaign', 'notes'] as $optional) {
             $data[$optional] = blank($data[$optional] ?? null) ? null : $data[$optional];
+        }
+        // An academy that trains adults only takes no lead for a child (no guardians there).
+        if ($data['for_child'] && app(AcademyAudience::class)->adultsOnly()) {
+            throw ValidationException::withMessages(['for_child' => __('crm::leads.errors.adults_only')]);
         }
         if (! $data['for_child']) {
             [$data['learner_name'], $data['learner_birth_year']] = [null, null];

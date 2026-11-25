@@ -4233,6 +4233,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trialWhoTitle => 'Who is the lesson for?';
 
   @override
+  String get trialNameTitle => 'What\'s your name?';
+
+  @override
   String get trialWhoMe => 'For me';
 
   @override
@@ -5715,4 +5718,989 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get startAddChildHint => 'They join your account, then you choose their course straight away.';
+}
+
+/// The translations for English, as used in Private use (`en_ZZ`).
+class AppLocalizationsEnZz extends AppLocalizationsEn {
+  AppLocalizationsEnZz() : super('en_ZZ');
+
+  @override
+  String get journeyOffLead => 'Your sessions and tasks are always here.';
+
+  @override
+  String lessonsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n sessions', one: '1 session', zero: 'No sessions');
+    return '$_temp0';
+  }
+
+  @override
+  String get intro1Title => 'Live sessions with your trainer';
+
+  @override
+  String get intro1Body => 'One-to-one sessions with sound and video, from anywhere.';
+
+  @override
+  String get intro2Body => 'Every session brings the goal closer, and the whole road is in front of you.';
+
+  @override
+  String get intro3Title => 'Times, tasks and payments in one place';
+
+  @override
+  String get introHomework => 'New task';
+
+  @override
+  String get roleStudent => 'Trainee';
+
+  @override
+  String get roleTeacher => 'Trainer';
+
+  @override
+  String get myDataLead =>
+      'Everything the academy keeps about you: correct your details, download a copy, or ask for your account to be erased.';
+
+  @override
+  String get navLessons => 'Sessions';
+
+  @override
+  String get navMyLessons => 'Sessions';
+
+  @override
+  String get navMyHomework => 'My tasks';
+
+  @override
+  String get navHomework => 'Tasks';
+
+  @override
+  String get navStudents => 'Trainees';
+
+  @override
+  String get nextLesson => 'Next session';
+
+  @override
+  String get noNextLesson => 'No sessions in the next four weeks.';
+
+  @override
+  String roomOpensIn(String time) {
+    return 'The session room opens in $time';
+  }
+
+  @override
+  String get roomOpen => 'The session room is open';
+
+  @override
+  String get lessonOn => 'The session is on now';
+
+  @override
+  String get joinLesson => 'Join the session';
+
+  @override
+  String get allLessons => 'All sessions';
+
+  @override
+  String roomOpensAt(String time) {
+    return 'The session room opens at $time';
+  }
+
+  @override
+  String get allHomework => 'All tasks';
+
+  @override
+  String homeworkLine(String title) {
+    return 'Task: $title';
+  }
+
+  @override
+  String lessonsOf(String name) {
+    return '$name\'s sessions';
+  }
+
+  @override
+  String get noUpcoming => 'No sessions in the next four weeks.';
+
+  @override
+  String get noPast => 'No sessions in the last four weeks.';
+
+  @override
+  String get refuseSubstituteBody =>
+      'The session is cancelled on the academy\'s account and its minutes come back as a makeup session to book later.';
+
+  @override
+  String roomOpensOn(String when) {
+    return 'The session room opens $when';
+  }
+
+  @override
+  String get lessonDetails => 'Session details';
+
+  @override
+  String get cancelLesson => 'Cancel the session';
+
+  @override
+  String get disputeTitle => 'Dispute this session\'s outcome';
+
+  @override
+  String disputeIntroFamily(String outcome) {
+    return 'The session is recorded as \"$outcome\". If that is not what happened, tell us within 48 hours of its end; the academy checks the attendance and answers you.';
+  }
+
+  @override
+  String disputeIntroTeacher(String outcome) {
+    return 'The session is recorded as \"$outcome\". If that is not what happened, tell us within 48 hours of its end; the academy checks the attendance and answers you.';
+  }
+
+  @override
+  String get disputeSent => 'Your dispute reached the academy; the session is under review.';
+
+  @override
+  String cancelTitle(String day) {
+    return 'Cancel the session on $day?';
+  }
+
+  @override
+  String get cancelled => 'The session is cancelled.';
+
+  @override
+  String groupSeatsSpoken(int taken, int capacity) {
+    return 'Group session, $taken of $capacity seats taken';
+  }
+
+  @override
+  String groupWithCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'With $n other trainees',
+      one: 'With 1 other trainee',
+      zero: 'No other trainees in this one',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupStudentsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n trainees', one: '1 trainee', zero: 'No trainees yet');
+    return '$_temp0';
+  }
+
+  @override
+  String get groupClassmates => 'Taking part with you';
+
+  @override
+  String get groupStudents => 'Trainees';
+
+  @override
+  String get skipLesson => 'I won\'t attend this session';
+
+  @override
+  String skipTitle(String day) {
+    return 'Missing the group session on $day';
+  }
+
+  @override
+  String get skipGoesOn => 'A group session isn\'t cancelled: it goes on for the others, and only your seat is excused.';
+
+  @override
+  String get skipDone => 'Noted. The session goes on for the group.';
+
+  @override
+  String get groupForming => 'The group is still forming: its sessions start once enough trainees join.';
+
+  @override
+  String get rateLesson => 'Rate the session';
+
+  @override
+  String get rateTitle => 'How was the session?';
+
+  @override
+  String get rateAnonymous => 'The trainer sees the rating without your name.';
+
+  @override
+  String homeworkOpen(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n open tasks', one: '1 open task');
+    return '$_temp0';
+  }
+
+  @override
+  String get homeworkTitle => 'Tasks';
+
+  @override
+  String get noHomework => 'No tasks right now.';
+
+  @override
+  String get handedIn => 'Handed in. The trainer will mark it.';
+
+  @override
+  String get teacherFeedback => 'Trainer\'s feedback';
+
+  @override
+  String get lessonsLeftTitle => 'Sessions left';
+
+  @override
+  String get extraAction => 'Extra sessions';
+
+  @override
+  String extraHint(String price, int minutes) {
+    return 'An extra session is $price ($minutes min).';
+  }
+
+  @override
+  String extraTitle(String subject) {
+    return 'Extra sessions in $subject';
+  }
+
+  @override
+  String get extraBody =>
+      'Choose how many; you get an invoice to pay like any other. Once it is paid, the academy books the sessions with you.';
+
+  @override
+  String extraWaiting(String number) {
+    return 'Invoice $number for extra sessions is waiting to be paid.';
+  }
+
+  @override
+  String get openedOutside => 'The session opened in another app.';
+
+  @override
+  String get leave => 'Leave the session';
+
+  @override
+  String get rejoinHint => 'Left by mistake? Join again from the same button until the session ends.';
+
+  @override
+  String get roomShowBars => 'Show the session controls';
+
+  @override
+  String get familyInvoice => 'combined invoice';
+
+  @override
+  String get moreStudy => 'Training';
+
+  @override
+  String get zoneHint => 'Your sessions and their reminders show on this time zone. Tap to change it.';
+
+  @override
+  String todayCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Today: $n sessions',
+      one: 'Today: 1 session',
+      zero: 'No sessions today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeworkToMark(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n tasks to mark', one: '1 task to mark');
+    return '$_temp0';
+  }
+
+  @override
+  String get noLessonsDay => 'No sessions';
+
+  @override
+  String get noLessonsWeek => 'No sessions this week.';
+
+  @override
+  String get noLessonsLater => 'No sessions from this day to the end of the week.';
+
+  @override
+  String get restDay => 'No sessions today. Your next ones are in the week.';
+
+  @override
+  String get markingTile => 'Tasks to mark';
+
+  @override
+  String get studentsTitle => 'My trainees';
+
+  @override
+  String get noStudents => 'No trainees yet.';
+
+  @override
+  String studentsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n trainees', one: '1 trainee', zero: 'no trainees');
+    return '$_temp0';
+  }
+
+  @override
+  String subjectsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n programmes', one: '1 programme', zero: 'no programmes');
+    return '$_temp0';
+  }
+
+  @override
+  String get noStudentsFound => 'No trainee by that name.';
+
+  @override
+  String get markHomework => 'Mark tasks';
+
+  @override
+  String get lessonPay => 'Sessions';
+
+  @override
+  String unpricedNote(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n sessions have no price yet', one: '1 session has no price yet');
+    return '$_temp0. The academy will set it and they count in this month.';
+  }
+
+  @override
+  String get noEarnings => 'No sessions this month.';
+
+  @override
+  String get meetingLinkTitle => 'Your session link';
+
+  @override
+  String get meetingLinkNeeded => 'The academy runs sessions on outside links, and no session can open without yours.';
+
+  @override
+  String get teacherCardLead =>
+      'The card visitors see about you on the academy\'s page. You write it, and you decide whether it shows. Your phone number and email never show.';
+
+  @override
+  String get teacherCardPreview => 'How visitors will see your card';
+
+  @override
+  String get teacherCardSubjectsFrom => 'Programmes from your profile at the academy';
+
+  @override
+  String performanceLead(int days) {
+    String _temp0 = intl.Intl.pluralLogic(days, locale: localeName, other: 'The last $days days', one: 'The last day');
+    return '$_temp0 · sessions lost to the platform do not count';
+  }
+
+  @override
+  String get performanceRatings => 'Trainee ratings';
+
+  @override
+  String get reasonFamily => 'Personal';
+
+  @override
+  String coverState(int covered, int total) {
+    return '$covered of $total sessions covered';
+  }
+
+  @override
+  String streak(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n in a row', one: '1 session', zero: 'None in a row yet');
+    return '$_temp0';
+  }
+
+  @override
+  String homeworkCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n tasks', one: '1 task', zero: 'no tasks');
+    return '$_temp0';
+  }
+
+  @override
+  String get markingRow => 'Tasks to mark';
+
+  @override
+  String get reportLesson => 'Session report';
+
+  @override
+  String get reportTitle => 'Session report';
+
+  @override
+  String get voiceHint =>
+      'Say what the session covered, how the trainee did, and the task. The draft fills only the empty fields; you check it before sending.';
+
+  @override
+  String get notesForFamily => 'Notes for the trainee';
+
+  @override
+  String get notesInternalHint => 'For the academy only; the trainee never sees them.';
+
+  @override
+  String get questionsHint => 'Questions your academy asks in every report of this programme.';
+
+  @override
+  String get teachersOnly => 'Trainers only';
+
+  @override
+  String get recordingsTitle => 'Session recordings';
+
+  @override
+  String get recordingsMine => 'My session recordings';
+
+  @override
+  String get recordingsOff => 'The academy does not record sessions now.';
+
+  @override
+  String recordingsOf(String name) {
+    return '$name\'s session recordings';
+  }
+
+  @override
+  String get recordingsTeacherList => 'Your sessions\' recordings';
+
+  @override
+  String get recordingAgreedDone => 'Thank you. Sessions may be recorded from now on.';
+
+  @override
+  String get recordStart => 'Record the session';
+
+  @override
+  String get absenceHint => 'The trainee didn\'t come. Say what happened and anything they should know.';
+
+  @override
+  String get giveHomework => 'Give a task';
+
+  @override
+  String get homeworkField => 'Task';
+
+  @override
+  String get homeworkLocked => 'The trainee handed this task in, so it stays as it is.';
+
+  @override
+  String get groupReportTitle => 'Group session report';
+
+  @override
+  String get groupReportShared =>
+      'What was covered, the questions and the task here are for the whole group; the task goes to every trainee.';
+
+  @override
+  String get groupReportRowsHint => 'A row for each trainee: focus, overall and a note for them, or the note for their absence.';
+
+  @override
+  String get groupRowNote => 'A note for them';
+
+  @override
+  String get groupRowAbsence => 'A note on their absence';
+
+  @override
+  String get groupRowsMissing => 'Finish the row of every trainee who came.';
+
+  @override
+  String get groupVoiceShared => 'The voice note fills the shared part only; each trainee\'s row is yours to write.';
+
+  @override
+  String get groupLessonRow => 'Group session';
+
+  @override
+  String get disputeWhose => 'Which trainee is it about?';
+
+  @override
+  String get disputeWhoseHint => 'In a group session, a dispute is about one trainee\'s seat.';
+
+  @override
+  String get noHomeworkToMark => 'No tasks to mark.';
+
+  @override
+  String get feedbackLabel => 'Your words for the trainee';
+
+  @override
+  String get helpLead =>
+      'Write to the academy about a session, a payment, a technical problem or anything else. The answers come here and in a message.';
+
+  @override
+  String get ticketHintComplaint => 'About a trainer or a session. The academy looks into it and tells you what it did.';
+
+  @override
+  String get ticketHintTechnical => 'The session room, the app or signing in not working.';
+
+  @override
+  String get ticketLesson => 'Which session? (if any)';
+
+  @override
+  String get ticketNoLesson => 'No particular session';
+
+  @override
+  String get tellUsLead =>
+      'If anything about a session, a trainer or anyone on the platform worries you, tell us here. Only the people in charge of safety and conduct at the academy read it.';
+
+  @override
+  String get tellUsLeadStudent =>
+      'If someone made you feel uncomfortable, scared or unsafe, tell us. Only the people in charge of safety and conduct at the academy read it.';
+
+  @override
+  String get concernTeacherLead =>
+      'If something about a trainee\'s safety or wellbeing worries you, or someone else\'s behaviour, tell the academy\'s safety leads here; only they read it. Don\'t look into it yourself.';
+
+  @override
+  String get concernLesson => 'In which session (if any)?';
+
+  @override
+  String get concernNoLesson => 'Not about a session';
+
+  @override
+  String get concernStudent => 'Which trainee?';
+
+  @override
+  String get concernNoStudent => 'Not about one trainee';
+
+  @override
+  String get documentsLead =>
+      'The academy checks these documents against the original; a criminal record check is what teaching trainees under 18 needs.';
+
+  @override
+  String get messagesFamilyTitle => 'Messages with trainers';
+
+  @override
+  String get messagesStudentTitle => 'Messages with your trainers';
+
+  @override
+  String get messagesEmptyTeacher => 'When you have trainees, you will find them here to talk to them.';
+
+  @override
+  String get messagesEmptyFamily => 'When you have a trainer, you will find them here.';
+
+  @override
+  String get messagesFirst => 'Start the conversation: the academy can read what is said here.';
+
+  @override
+  String get gamesHomeworkPin => 'Task';
+
+  @override
+  String get gamesBadgeHomework => 'Task';
+
+  @override
+  String gamesHomeworkDone(String title) {
+    return 'The task “$title” is handed in with this practice.';
+  }
+
+  @override
+  String journeyChestHint(int n) {
+    return 'Attend every session of the week and hand in its tasks: the chest opens with $n stars';
+  }
+
+  @override
+  String get journeyLastLesson => 'Your last session';
+
+  @override
+  String journeyLastLessonOf(String name) {
+    return '$name\'s last session';
+  }
+
+  @override
+  String journeyLessonStars(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n stars from your last session!',
+      one: '1 star from your last session',
+      zero: 'No stars from your last session',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeworkByPlaying => 'This task is handed in by playing its round.';
+
+  @override
+  String get homeworkNoGame => 'No game for this task right now.';
+
+  @override
+  String get trialEntryTitle => 'New here? Book a free trial session';
+
+  @override
+  String get trialTitle => 'Free trial session';
+
+  @override
+  String get trialAcademyTitle => 'Which academy is the session with?';
+
+  @override
+  String get trialAcademyLead => 'Type the academy\'s code to see its programmes and times.';
+
+  @override
+  String get trialWhoTitle => 'Who is the session for?';
+
+  @override
+  String get trialWhoMissing => 'Choose who the session is for.';
+
+  @override
+  String get trialSubjectTitle => 'Choose the programme';
+
+  @override
+  String get trialHelpChooseHint => 'We\'ll get in touch to choose the right programme and level together.';
+
+  @override
+  String trialHelpChooseWith(String subject) {
+    return 'We\'ll start with a session in $subject and choose together what suits after it.';
+  }
+
+  @override
+  String get trialNoSubjects => 'The academy hasn\'t listed its programmes yet. Ask for help choosing and we\'ll get in touch.';
+
+  @override
+  String get trialWishesLead => 'All optional; they help us find the trainer and the time.';
+
+  @override
+  String get trialTeacher => 'Trainer';
+
+  @override
+  String get trialTeacherFemale => 'A woman trainer';
+
+  @override
+  String get trialTeacherMale => 'A man trainer';
+
+  @override
+  String trialNoTimesBody(String hours) {
+    return 'No trainer is free for this programme in the next two weeks. Send your request and we\'ll agree on a time within $hours.';
+  }
+
+  @override
+  String get trialNoTimesGender => 'Nobody you chose is free now; another trainer may be.';
+
+  @override
+  String get trialAnyTeacher => 'Show times with any trainer';
+
+  @override
+  String get trialPhoneHint => 'The code and the session details come to it.';
+
+  @override
+  String get trialSummaryHelp => 'We\'ll choose the programme together';
+
+  @override
+  String get trialBookedNext4 => 'Sign in to the app with this number any time to see the session and join it.';
+
+  @override
+  String trialRequestedHelp(String hours) {
+    return 'We\'ll get in touch on WhatsApp within $hours to choose the programme and the time together.';
+  }
+
+  @override
+  String get trialsRowHint => 'The trainers\' reports and what they recommend';
+
+  @override
+  String trialsLead(String name) {
+    return '$name\'s free trial sessions and the trainers\' reports on them.';
+  }
+
+  @override
+  String get trialsLeadSelf => 'Your free trial sessions and the trainers\' reports on them.';
+
+  @override
+  String get trialsEmptyBody => 'After each free trial the trainer writes what they found and what they recommend, and you find it here.';
+
+  @override
+  String get trialStateTeacherAbsent => 'The trainer was away';
+
+  @override
+  String get trialKindSecond => 'Second trial, another trainer';
+
+  @override
+  String get trialWritingNote => 'The trainer is writing the report; you\'ll be told when it\'s ready.';
+
+  @override
+  String get trialBookedNote => 'It\'s under Sessions; join it from there when it\'s time.';
+
+  @override
+  String get trialTryAnother => 'Try another trainer for free';
+
+  @override
+  String get trialReportTitle => 'Trial session report';
+
+  @override
+  String get trialReportTeacher => 'Trainer';
+
+  @override
+  String get trialReportLevel => 'The level the trainer found';
+
+  @override
+  String get trialReportNote => 'The trainer\'s words';
+
+  @override
+  String get trialReportNotReadyBody =>
+      'The trainer is writing the trial report; you\'ll be told when it\'s ready. All your trials are under Free trials.';
+
+  @override
+  String get trialPlanTitle => 'What the trainer recommends';
+
+  @override
+  String trialPlanPerWeek(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n sessions', one: '1 session');
+    return '$_temp0 a week';
+  }
+
+  @override
+  String trialPlanLength(String minutes) {
+    return '$minutes a session';
+  }
+
+  @override
+  String get trialPlanPrivate => 'One-to-one sessions';
+
+  @override
+  String get trialPlanGroup => 'Group sessions';
+
+  @override
+  String trialPlanOnlyPerWeek(String perWeek) {
+    return 'The trainer recommends $perWeek.';
+  }
+
+  @override
+  String get trialPlanWithdrawn => 'The academy no longer offers the plan the trainer chose; its team will help you pick one that suits.';
+
+  @override
+  String get trialOfferFamilyBigger => 'You have a bigger discount than this offer, so it applies instead: the two never add up.';
+
+  @override
+  String trialStarted(String subject) {
+    return 'Your training in $subject has begun. We wish you every success.';
+  }
+
+  @override
+  String get trialCourseActive => 'The course is running; its sessions are under Sessions.';
+
+  @override
+  String get trialSecondTitle => 'Not the right trainer?';
+
+  @override
+  String trialSecondBody(String label) {
+    return 'Try a second free trial with another trainer, until $label.';
+  }
+
+  @override
+  String get trialSecondBodyNoDate => 'Try a second free trial with another trainer.';
+
+  @override
+  String get trialSecondPick => 'Pick a time with another trainer';
+
+  @override
+  String trialNextLeadSecond(String teacher, String zone) {
+    return 'With a trainer other than $teacher. Times are on $zone time, soonest first.';
+  }
+
+  @override
+  String get trialNextBookedSecond => 'Your second trial with another trainer is booked';
+
+  @override
+  String get trialNextBooked2 => 'The session is under Sessions; join it from there when it\'s time.';
+
+  @override
+  String get trialNextBooked3 => 'After it, the trainer writes a new report, and you find it here.';
+
+  @override
+  String get trialOpenLessons => 'Open Sessions';
+
+  @override
+  String trialHomeSecond(String subject) {
+    return 'Try another trainer for $subject';
+  }
+
+  @override
+  String get startNewCourseHint => 'Choose the plan, the trainer and the times, and pay in the app.';
+
+  @override
+  String get startOffTitle => 'The academy enrols trainees itself';
+
+  @override
+  String get startWhoLead => 'Choose who will train; each trainee has their own course and invoice.';
+
+  @override
+  String startSubjectTitle(String name) {
+    return 'Which programme will $name take?';
+  }
+
+  @override
+  String get startSubjectLead => 'Programmes with trainers taking new trainees now.';
+
+  @override
+  String get startSubjectNone => 'No programme is open to start right now. Message the academy for help.';
+
+  @override
+  String get startOpenLessons => 'Open Sessions';
+
+  @override
+  String get startPlanPrivateLine => 'One-to-one sessions, at times you choose';
+
+  @override
+  String get startRecommended => 'The trainer recommends it';
+
+  @override
+  String startPerLesson(String price) {
+    return '$price a session';
+  }
+
+  @override
+  String startRenews(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n sessions are', one: '1 session is');
+    return 'The next invoice comes when $_temp0 left, and you can stop any time.';
+  }
+
+  @override
+  String get startTeacherTitle => 'Choose the trainer';
+
+  @override
+  String startTeacherLead(String subject) {
+    return 'All of them take new trainees in $subject.';
+  }
+
+  @override
+  String get startTrialTeacher => 'Your trial trainer';
+
+  @override
+  String get startTrialTeacherGone => 'Your trial trainer no longer takes new trainees, so choose another trainer.';
+
+  @override
+  String get startTeacherNone => 'No trainer takes new trainees in this programme now. Try a group plan, or message the academy.';
+
+  @override
+  String startGroupToStart(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Starts when $n more trainees join',
+      one: 'Starts when 1 more trainee joins',
+      zero: 'Starts as you join',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String startGroupNext(String when) {
+    return 'Next session: $when';
+  }
+
+  @override
+  String startGroupHeld(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n sessions were', one: '1 session was');
+    return '$_temp0 held before you joined; the academy makes up for them the way it chooses.';
+  }
+
+  @override
+  String get startTimesLead => 'Each on a different day, every week. The times are on your clock, each with its first session.';
+
+  @override
+  String startTimesFirst(String day) {
+    return 'First session $day';
+  }
+
+  @override
+  String get startSkippedTitle => 'Days with no session';
+
+  @override
+  String get startSkippedNote => 'No session is booked on these days; the times carry on as usual after them.';
+
+  @override
+  String get startTimesNone => 'This trainer has no times free over the next four weeks.';
+
+  @override
+  String get startOtherTeacher => 'Choose another trainer';
+
+  @override
+  String get startTimesTooFew =>
+      'This trainer\'s free days are too few for this plan: each weekly session needs a day of its own. Choose another trainer, or a plan with fewer sessions a week.';
+
+  @override
+  String get startReviewSubject => 'Programme';
+
+  @override
+  String get startReviewTeacher => 'Trainer';
+
+  @override
+  String get startReviewFirst => 'First session';
+
+  @override
+  String startReviewPayBy(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n hours', one: '1 hour');
+    return 'Pay at least $_temp0 before the first session; a session still unpaid by then is cancelled.';
+  }
+
+  @override
+  String get startReviewPayAny => 'Pay before the first session to keep the sessions.';
+
+  @override
+  String get startCancelBody => 'Its sessions and invoice are cancelled with nothing charged, and you can start again any time.';
+
+  @override
+  String payCreatedLead(String subject, String name) {
+    return 'Pay the invoice to keep $name\'s $subject sessions.';
+  }
+
+  @override
+  String get paidLeadPlain => 'The payment arrived; the sessions are under Sessions.';
+
+  @override
+  String get paidTeacher => 'Trainer';
+
+  @override
+  String get paidFirst => 'First session';
+
+  @override
+  String get paidJoinHow => 'Open the session under Sessions a few minutes before it starts and tap Join.';
+
+  @override
+  String get paidPlainLead => 'Nothing is left to pay on it. Its printable copy is below, and the sessions are under Sessions.';
+
+  @override
+  String get balanceNone => 'No sessions left';
+
+  @override
+  String balanceMakeup(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'and $n makeup sessions besides',
+      one: 'and 1 makeup session besides',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String balancePerWeek(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n sessions a week', one: '1 session a week');
+    return '$_temp0';
+  }
+
+  @override
+  String balancePerLesson(String minutes) {
+    return '$minutes a session';
+  }
+
+  @override
+  String get balanceGroup => 'Group sessions';
+
+  @override
+  String get balanceShared => 'Shared across programmes';
+
+  @override
+  String get balanceNotPayer => 'This invoice goes to whoever pays for the course, from their account.';
+
+  @override
+  String balanceNextWhen(int n, String day) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Goes out when $n sessions are left, around $day.',
+      one: 'Goes out when 1 session is left, around $day.',
+      zero: 'Goes out when the paid sessions run out, around $day.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String balanceNextAfter(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'after $n sessions', one: 'after 1 session');
+    return '$_temp0';
+  }
+
+  @override
+  String get balanceEstimate => 'An estimate from your times; a session cancelled or moved shifts it.';
+
+  @override
+  String get balanceHowTaken => 'Each session comes off the balance once it takes place; makeup sessions are counted on their own.';
+
+  @override
+  String balanceHowMark(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'When $n sessions are left, the next package\'s invoice goes out, so the sessions go on without a break.',
+      one: 'When 1 session is left, the next package\'s invoice goes out, so the sessions go on without a break.',
+      zero: 'The next package\'s invoice goes out when the paid sessions run out, so the sessions go on without a break.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get balanceHowExpiry => 'Sessions not booked yet expire on their day; booked sessions are never lost.';
+
+  @override
+  String get payCardNotSaved =>
+      'The payment arrived, but the gateway did not keep the card: the next invoice comes for you to pay yourself.';
+
+  @override
+  String get cardsAutoOff => 'Off: each next package\'s invoice comes for you to pay yourself.';
 }

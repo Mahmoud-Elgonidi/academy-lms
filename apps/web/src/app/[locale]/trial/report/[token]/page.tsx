@@ -5,6 +5,7 @@ import { NotNow, ReportView, StartWays } from '@/components/site/trial/report';
 import { CalmCard, TrialShell } from '@/components/site/trial/shell';
 import { read } from '@/lib/api/server';
 import { momentNow, type TrialReport } from '@/lib/site/report';
+import { audienceOf } from '@/lib/audience';
 import { academySite } from '@/lib/site/server';
 import { timeFormatOf } from '@/lib/time';
 import { branding } from '@/lib/viewer';
@@ -45,14 +46,17 @@ export default async function TrialReportPage({ params }: Props) {
   }
   const report = found.data.data;
   const next = report.next_trial;
+  // An academy for adults: the trainee reads their own report, in the first person.
+  const self = audienceOf(look.audience) === 'adults';
   return (
     <TrialShell look={look} path={path}>
       <ReportView
         report={report}
         look="family"
+        self={self}
         locale={locale}
         now={now}
-        start={<StartWays report={report} whatsapp={whatsapp} locale={locale} />}
+        start={<StartWays report={report} whatsapp={whatsapp} locale={locale} self={self} />}
         next={next ? (next.available ? (
           <NextTrialPanel
             source={{ from: 'report', token }}
@@ -64,6 +68,7 @@ export default async function TrialReportPage({ params }: Props) {
             timeFormat={timeFormatOf(look.time_format)}
             zone={report.held_at?.timezone}
             until={next.until?.label}
+            self={self}
           />
         ) : (
           <NotNow title={t('next.notNow')} text={next.why_not ?? ''} whatsapp={whatsapp} />

@@ -55,6 +55,7 @@ use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
 use Modules\Scheduling\Contracts\OwnCourseStart;
 use Modules\Scheduling\Contracts\ScheduleImport;
 use Modules\Scheduling\Contracts\StartOffers;
+use Modules\Scheduling\Contracts\TrialAudience;
 use Modules\Scheduling\Contracts\TrialBooking;
 use Modules\Scheduling\Contracts\TrialConversionRates;
 use Modules\Scheduling\Domain\AttendancePolicy;
@@ -119,6 +120,14 @@ final class SchedulingServiceProvider extends ServiceProvider
             public function forTeachers(array $teacherIds): array
             {
                 return [];
+            }
+        });
+        // Whom trials speak to is the academy's page's (the CRM binds it); without it, families as before.
+        $this->app->bindIf(TrialAudience::class, fn () => new class implements TrialAudience
+        {
+            public function forAdults(): bool
+            {
+                return false;
             }
         });
     }

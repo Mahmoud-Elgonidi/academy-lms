@@ -154,6 +154,8 @@ return [
         'teacher_busy' => 'This teacher has running courses or lessons ahead. Move them to another teacher first (from each student\'s account, or from teachers\' time off).',
         'student_busy' => 'This student has running courses. End them first from their account.',
         'guardian_busy' => 'This is the only guardian of a child with running courses. Add another guardian or end the courses first.',
+        'adults_no_guardians' => 'This academy trains adults only: each trainee has their own account, never linked to someone else\'s.',
+        'adults_own_contact' => 'Add the trainee\'s email or number: every trainee signs in to their own account.',
         'already_linked' => 'This student is already linked to this guardian.',
     ],
 ];

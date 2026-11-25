@@ -31,6 +31,7 @@ use Modules\Platform\Contracts\BrandingApi;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Filament\NavGroup;
 use Modules\SharedKernel\Files\CleanFile;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Time\Clock;
 use Modules\Site\Actions\ApplySiteTemplate;
 use Modules\Site\Actions\DeleteSiteMedia;
@@ -228,7 +229,10 @@ final class SiteBuilder extends Page
                 ->headerActions([Action::make('branding')->label(__($p.'branding'))->link()->icon(Heroicon::OutlinedArrowTopRightOnSquare)
                     ->url(fn () => route('filament.academy.pages.settings.branding'))->visible(fn () => app('router')->has('filament.academy.pages.settings.branding'))])
                 ->schema([
-                    ToggleButtons::make('audience')->label(__($p.'audience'))->helperText(__($p.'audience_hint'))
+                    // An academy that trains adults only speaks to adults on its page (SitePage::read): the choice is shown, locked.
+                    ToggleButtons::make('audience')->label(__($p.'audience'))
+                        ->helperText(fn () => app(AcademyAudience::class)->adultsOnly() ? __($p.'audience_locked') : __($p.'audience_hint'))
+                        ->disabled(fn () => app(AcademyAudience::class)->adultsOnly())
                         ->options($words('audiences', PageDoc::AUDIENCES))->inline()->live()->afterStateUpdated($save),
                     Grid::make(['default' => 1, 'lg' => 2])->schema([
                         Select::make('fonts.heading')->label(__($p.'font_heading'))->native(false)->live()->afterStateUpdated($save)
@@ -617,7 +621,7 @@ final class SiteBuilder extends Page
     {
         $out = [];
         $audience = (string) ($this->settings['audience'] ?? 'families');
-        foreach (Templates::KEYS as $key) {
+        foreach (Templates::keysFor(app(AcademyAudience::class)->adultsOnly()) as $key) {
             $blocks = [];
             foreach (Templates::make($key, $audience)['blocks'] as $block) {
                 if (! $block['hidden']) {

@@ -203,8 +203,9 @@ GoRouter buildRouter(SessionCubit session) {
           if (loc.startsWith('/open/')) return targetOf(state.pathParameters['screen'], state.pathParameters['id'], area, s.modules);
           if (loc == '/' || loc == '/splash' || loc == '/intro' || welcome) return area.home;
           final elsewhere = Area.values.any((a) => a != area && loc.startsWith(a.prefix));
-          // A place of an area the academy has off (messages, help, the games…) goes home rather than to a broken screen.
-          return elsewhere || !s.modules.allows(loc) ? area.home : null;
+          // A place of an area the academy has off (messages, help, the games…) goes home rather than to a broken screen;
+          // so does a guardian's own (adding a child, the children's privacy) for anyone who follows no child.
+          return elsewhere || !s.modules.allows(loc) || (!s.guardian && guardianOnly(loc)) ? area.home : null;
       }
     },
     routes: [
@@ -519,4 +520,10 @@ class _StreamListenable extends ChangeNotifier {
     unawaited(_sub.cancel());
     super.dispose();
   }
+}
+
+/// A guardian's own places: adding a child, and the children's privacy (their consent to each child's account).
+bool guardianOnly(String location) {
+  final path = Uri.parse(location).path;
+  return path.startsWith('/family/children') || path.startsWith('/family/me/privacy');
 }

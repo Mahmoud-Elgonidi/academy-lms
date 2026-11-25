@@ -1294,6 +1294,7 @@ s('trialAcademyOpening', 'نفتح صفحة الأكاديمية…', "Opening t
 s('trialAcademyNotFound', 'لم نجد أكاديمية تستقبل طلبات الحصص التجريبية بهذا الرمز. تأكّد من الرمز مع الأكاديمية، أو اكتبه كما يصلك منها.', "We couldn't find an academy taking free trial requests with this code. Check the code with the academy, or type it exactly as they sent it.")
 s('trialAcademyChange', 'أكاديمية أخرى', 'Another academy')
 s('trialWhoTitle', 'لمن الحصة؟', 'Who is the lesson for?')
+s('trialNameTitle', 'ما اسمك؟', "What's your name?")  # an academy for adults: the trial is the reader's own
 s('trialWhoMe', 'لي', 'For me')
 s('trialWhoMeHint', 'أنا من سيتعلّم.', "I'm the one learning.")
 s('trialWhoChild', 'لطفلي', 'For my child')
@@ -1741,6 +1742,291 @@ s('startAddChild', 'طفل آخر؟ أضيفوه', 'Another child? Add them')
 s('startAddChildHint', 'يُضاف إلى حسابكم، ثم تختارون له الدورة مباشرة.', 'They join your account, then you choose their course straight away.')
 
 
+# ---------------------------------------------------------------------------
+# Academies for adults and professionals (`audience: adults` in GET branding
+# and GET me; docs/architecture/02, section 29): no guardians, no children, no
+# kids' looks, and none of a school's words. Each string a trainee or a trainer
+# reads takes the training words: المتدرّب (never الطالب), المدرّب (never
+# المعلّم), الجلسة (never الحصة), المهمة (never الواجب), قاعة الجلسة (never
+# الفصل), and speaks to the reader alone, in the singular (never a family's
+# plural). Most come from the base string by TRAINING (the nouns swapped where
+# the grammar holds); the rest are written by hand with a(key, ar, en) at the
+# end of this file. FAMILIES_ONLY lists what an adults academy never shows (a
+# guardian's, a child's or the kids' screens). Written to app_{ar,en}_ZZ.arb:
+# only what differs, the rest falls back to the base (lib/core/l10n/words.dart).
+A = {}  # key: (ar, en), written by hand
+
+
+def a(key, ar, en):
+    assert key not in A, key
+    A[key] = (ar, en)
+
+
+# Keys an adults academy never shows: the kids' look ("kids" in the key), a
+# guardian's screens (children's privacy and consent, adding a child, cheering,
+# play limits), a student waiting for a guardian, and the trial's "for my child".
+FAMILIES_ONLY = re.compile('|'.join([
+    r'.*[Kk]ids.*',
+    r'consent.*', r'privacy(Title|Lead|None|Child|Ask|Grant|Granted|Withdraw|Pending|Waiting|Row|State).*', r'addChild.*', r'startAddChild.*',
+    r'guardianOf', r'moreChildren', r'roleGuardian', r'myDataYoung', r'contactManaged', r'cheer.*',
+    r'trialWhoChild.*', r'trialChild.*', r'trialAge.*', r'trialAnotherChild', r'trialYourNameParent', r'startWhoConsent',
+    r'startConsent.*', r'gamesRefusedPaused', r'gamesHardest', r'gamesQuiet', r'gamesTogether', r'guardian.*', r'limits.*',
+]) + '$')
+
+_L = '\u0621-\u064A\u0671'
+_PRE = f'(?<![{_L}])((?:[وف]?(?:[بلك]?ال|لل|[بلك])?))'
+TRAINING = [
+    (re.compile(_PRE + 'حصص'), r'\1جلسات'),
+    (re.compile(_PRE + 'حصت'), r'\1جلست'),
+    (re.compile(_PRE + 'حصة'), r'\1جلسة'),
+    (re.compile(_PRE + 'معلّم'), r'\1مدرّب'),
+    (re.compile(_PRE + 'طالب(?!ت)'), r'\1متدرّب'),
+]
+TRAINING_EN = [
+    (re.compile(r'(?<![{\w])lesson'), 'session'), (re.compile(r'(?<![{\w])Lesson'), 'Session'),
+]
+TRAINING_EN_ALWAYS = [
+    (re.compile(r'(?<![{\w])teacher'), 'trainer'), (re.compile(r'(?<![{\w])Teacher'), 'Trainer'),
+    (re.compile(r'(?<![{\w])student'), 'trainee'), (re.compile(r'(?<![{\w])Student'), 'Trainee'),
+]
+
+
+def trained(ar, en):
+    """The training words in place of a school's, where nothing else in the sentence changes."""
+    out = ar
+    for rule, to in TRAINING:
+        out = rule.sub(to, out)
+    out_en = en
+    if re.search('حص', ar):
+        for rule, to in TRAINING_EN:
+            out_en = rule.sub(to, out_en)
+    for rule, to in TRAINING_EN_ALWAYS:
+        out_en = rule.sub(to, out_en)
+    return out, out_en
+
+
+# A school's or a family's words, which an adults academy never shows (checked
+# on the text without its diacritics, with or without ال and a letter before).
+SCHOOL = [
+    'ولي الأمر', 'ولي أمر', 'أولياء', 'طفل', 'أطفال', 'ابن', 'ابنة', 'ابنت', 'أبناء', 'أبنائ', 'أسرة', 'أسرت', 'أسر', 'الأسر',
+    'عائلة', 'عائلت', 'عائلي', 'أهلك', 'أهله', 'أهلكم', 'الأهل', 'مدرسة', 'مدرست', 'جامعة', 'الصف(?![' + _L + '])', 'صفوف', 'الفصل', 'فصلك',
+    'محاضرة', 'محاضرات', 'واجب', 'طالب', 'طالبة', 'طلاب', 'طلبة', 'معلم', 'معلمة', 'معلمين', 'معلمون', 'معلمي', 'حصة',
+    'حصص', 'حصت', 'زميل', 'زملاء', 'زميلين', 'زميلان', 'إخوة', 'الإخوة',
+]
+SCHOOL_RULE = re.compile(f'(?<![{_L}])(?:[وف]?(?:[بلك]?ال|لل|[بلك])?)(?:' + '|'.join(SCHOOL) + f')(?:[{_L}]*)')
+SCHOOL_EN = re.compile(r'(?<![{\w])(homework|parents?|child|children|kids?|guardians?|famil(y|ies)|school|classmates?|class|sons?|daughters?|students?|teachers?|pupils?|lectures?|siblings?)\b', re.I)
+# The singular, to one reader: no plural "you" (a family's), whatever the verb.
+PLURAL_YOU = re.compile(
+    f'(?<![{_L}])(?:[{_L}]{{1,}}(?:كم|كما)|أنتم'  # فاتورتكم، لديكم، لكم
+    f'|[وفس]?ت[{_L}]{{2,}}(?:ون|ونه|ونها)'  # تجدون، تدفعونها
+    f'|[{_L}]{{2,}}تم'  # دفعتم، اخترتم
+    f'|(?![وف]?ل?ي)[{_L}]{{2,}}وا)(?![{_L}])'  # اختاروا، ادفعوا (not they: يوافقوا، ليدخلوا)
+)
+NOT_PLURAL_YOU = {'تكون', 'يمكن', 'يحكم', 'تراكم', 'حكم', 'يتم', 'تتم', 'خاتم'}
+DIACRITICS = re.compile('[\u064B-\u0652\u0670]')
+
+
+# Adults academies, by hand: what TRAINING cannot swap on its own (the task for
+# homework, the session's room for the class, the trainees in the plural, a
+# family's words) and every family's plural "you" said to one reader.
+a('journeyOffLead', 'تجد جلساتك ومهامك هنا دائمًا.', 'Your sessions and tasks are always here.')
+a('intro3Title', 'المواعيد والمهام والمدفوعات في مكان واحد', 'Times, tasks and payments in one place')
+a('introHomework', 'مهمة جديدة', 'New task')
+a('myDataLead', 'كل ما تحتفظ به الأكاديمية عنك: صحّح بياناتك، أو نزّل نسخة، أو اطلب حذف حسابك.', 'Everything the academy keeps about you: correct your details, download a copy, or ask for your account to be erased.')
+a('navMyHomework', 'مهامي', 'My tasks')
+a('navHomework', 'المهام', 'Tasks')
+a('navStudents', 'المتدرّبون', 'Trainees')
+a('roomOpensIn', 'تُفتح قاعة الجلسة بعد {time}', 'The session room opens in {time}')
+a('roomOpen', 'قاعة الجلسة مفتوحة', 'The session room is open')
+a('roomOpensAt', 'تُفتح قاعة الجلسة {time}', 'The session room opens at {time}')
+a('roomOpensOn', 'تُفتح قاعة الجلسة {when}', 'The session room opens {when}')
+a('allHomework', 'كل المهام', 'All tasks')
+a('homeworkLine', 'مهمة: {title}', 'Task: {title}')
+a('refuseSubstituteTitle', 'ألا توافق على البديل؟', 'Turn down the substitute?')
+a('disputeIntroFamily', 'الجلسة مسجّلة "{outcome}". إن لم يكن هذا ما حدث، فأخبرنا خلال 48 ساعة من انتهائها، وستراجع الأكاديمية الحضور في قاعة الجلسة وترد عليك.', 'The session is recorded as "{outcome}". If that is not what happened, tell us within 48 hours of its end; the academy checks the attendance and answers you.')
+a('disputeIntroTeacher', 'الجلسة مسجّلة "{outcome}". إن لم يكن هذا ما حدث، فأخبرنا خلال 48 ساعة من انتهائها، وستراجع الأكاديمية الحضور في قاعة الجلسة وترد عليك.', 'The session is recorded as "{outcome}". If that is not what happened, tell us within 48 hours of its end; the academy checks the attendance and answers you.')
+a('groupWithCount', '{n, plural, =0{لا متدرّبين معك في هذه الجلسة} =1{مع متدرّب واحد آخر} =2{مع متدرّبَين آخرَين} few{مع {n} متدرّبين آخرين} other{مع {n} متدرّبًا آخر}}', '{n, plural, =0{No other trainees in this one} =1{With 1 other trainee} other{With {n} other trainees}}')
+a('groupStudentsCount', '{n, plural, =0{لا متدرّبين بعد} =1{متدرّب واحد} =2{متدرّبان} few{{n} متدرّبين} other{{n} متدرّبًا}}', '{n, plural, =0{No trainees yet} =1{1 trainee} other{{n} trainees}}')
+a('groupClassmates', 'المشاركون معك', 'Taking part with you')
+a('groupStudents', 'المتدرّبون', 'Trainees')
+a('rateGood', 'ما الذي أعجبك؟', 'What went well?')
+a('rateBad', 'ما الذي لم يعجبك؟', 'What could be better?')
+a('homeworkOpen', '{n, plural, =1{مهمة مفتوحة} =2{مهمتان مفتوحتان} few{{n} مهام مفتوحة} other{{n} مهمة مفتوحة}}', '{n, plural, =1{1 open task} other{{n} open tasks}}')
+a('homeworkTitle', 'المهام', 'Tasks')
+a('homeworkWaitingOnYou', '{n, plural, =1{مهمة تنتظرك} =2{مهمتان تنتظرانك} few{{n} مهام تنتظرك} other{{n} مهمة تنتظرك}}', '{n, plural, =1{1 waiting on you} other{{n} waiting on you}}')
+a('homeworkNoneWaiting', 'لا توجد مهام تنتظرك الآن.', 'Nothing is waiting on you.')
+a('homeworkNoneSent', 'لا توجد مهام تنتظر التصحيح.', 'Nothing is waiting to be marked.')
+a('homeworkNoneMarked', 'لم تُصحَّح أي مهمة بعد.', 'Nothing marked yet.')
+a('homeworkHandIn', 'سلّم المهمة', 'Hand it in')
+a('noHomework', 'لا توجد مهام الآن.', 'No tasks right now.')
+a('familyInvoice', 'فاتورة مجمّعة', 'combined invoice')
+a('homeworkToMark', '{n, plural, =1{مهمة تصحّحها} =2{مهمتان تصحّحهما} few{{n} مهام تصحّحها} other{{n} مهمة تصحّحها}}', '{n, plural, =1{1 task to mark} other{{n} tasks to mark}}')
+a('markingTile', 'مهام للتصحيح', 'Tasks to mark')
+a('studentsTitle', 'متدرّبيّ', 'My trainees')
+a('noStudents', 'لا يوجد متدرّبون بعد.', 'No trainees yet.')
+a('studentsCount', '{n, plural, =0{لا يوجد متدرّبون} =1{متدرّب واحد} =2{متدرّبان} few{{n} متدرّبين} other{{n} متدرّبًا}}', '{n, plural, =0{no trainees} =1{1 trainee} other{{n} trainees}}')
+a('markHomework', 'صحّح المهام', 'Mark tasks')
+a('teacherCardLead', 'البطاقة التي يراها الزوّار عنك في صفحة الأكاديمية. أنت من يكتبها، وأنت من يقرّر أن تظهر أو لا. رقمك وبريدك الإلكتروني لا يظهران أبدًا.', 'The card visitors see about you on the academy\'s page. You write it, and you decide whether it shows. Your phone number and email never show.')
+a('teacherCardPreview', 'هكذا سيرى الزوّار بطاقتك', 'How visitors will see your card')
+a('performanceRatings', 'تقييمات المتدرّبين', 'Trainee ratings')
+a('reasonFamily', 'ظرف شخصي', 'Personal')
+a('homeworkCount', '{n, plural, =0{لا توجد مهام} =1{مهمة واحدة} =2{مهمتان} few{{n} مهام} other{{n} مهمة}}', '{n, plural, =0{no tasks} =1{1 task} other{{n} tasks}}')
+a('markingRow', 'مهام تنتظر التصحيح', 'Tasks to mark')
+a('markingNone', 'لا توجد مهام تنتظر الآن', 'Nothing to mark now')
+a('voiceHint', 'قل ما الذي تناولته الجلسة، وكيف كان أداء المتدرّب، والمهمة. المسودة تملأ الخانات الفارغة فقط، وأنت تراجعها قبل أن ترسل.', 'Say what the session covered, how the trainee did, and the task. The draft fills only the empty fields; you check it before sending.')
+a('notesForFamily', 'ملاحظات للمتدرّب', 'Notes for the trainee')
+a('notesInternalHint', 'للأكاديمية فقط، ولا يراها المتدرّب.', 'For the academy only; the trainee never sees them.')
+a('absenceHint', 'لم يحضر المتدرّب. اكتب ما حدث وأي شيء يحتاج المتدرّب إلى معرفته.', "The trainee didn't come. Say what happened and anything they should know.")
+a('giveHomework', 'أعطِ مهمة', 'Give a task')
+a('homeworkField', 'المهمة', 'Task')
+a('homeworkLocked', 'سلّم المتدرّب هذه المهمة، فلن تتغيّر.', 'The trainee handed this task in, so it stays as it is.')
+a('groupReportShared', 'ما تناولته الجلسة والأسئلة والمهمة هنا للمجموعة كلها، وتصل المهمة إلى كل متدرّب.', 'What was covered, the questions and the task here are for the whole group; the task goes to every trainee.')
+a('groupRowNote', 'ملاحظة له', 'A note for them')
+a('groupRowAbsence', 'ملاحظة غيابه', 'A note on their absence')
+a('markTitle', 'تصحيح المهام', 'Marking')
+a('noHomeworkToMark', 'لا توجد مهام تنتظر التصحيح.', 'No tasks to mark.')
+a('ticketHintTechnical', 'قاعة الجلسة أو التطبيق أو الدخول لا يعمل.', 'The session room, the app or signing in not working.')
+a('tellUsLead', 'إن أقلقك أي شيء في جلسة، أو من مدرّب، أو من أي شخص على المنصة، فأخبرنا هنا. لا يقرؤه إلا المسؤولون عن السلامة والسلوك في الأكاديمية.', 'If anything about a session, a trainer or anyone on the platform worries you, tell us here. Only the people in charge of safety and conduct at the academy read it.')
+a('tellUsLeadStudent', 'إن جعلك أحد تشعر بعدم الارتياح، أو بالخوف، أو بأنك لست في أمان، فأخبرنا. لا يقرؤه إلا المسؤولون عن السلامة والسلوك في الأكاديمية.', 'If someone made you feel uncomfortable, scared or unsafe, tell us. Only the people in charge of safety and conduct at the academy read it.')
+a('concernTeacherLead', 'إن أقلقك شيء في سلامة متدرّب أو حاله، أو تصرّف شخص آخر، فأخبر مسؤولي السلامة في الأكاديمية هنا، فهم وحدهم من يطّلع عليه. لا تحقّق فيه بنفسك.', "If something about a trainee's safety or wellbeing worries you, or someone else's behaviour, tell the academy's safety leads here; only they read it. Don't look into it yourself.")
+a('messagesEmptyTeacher', 'عندما يصبح لديك متدرّبون، ستجدهم هنا وتستطيع التحدث معهم.', 'When you have trainees, you will find them here to talk to them.')
+a('messagesEmptyFamily', 'عندما يصبح لك مدرّب، ستجده هنا.', 'When you have a trainer, you will find them here.')
+a('messagesAlsoHere', 'في المحادثة أيضًا: {names}', 'Also here: {names}')
+a('messagesFirst', 'ابدأ المحادثة: تستطيع الأكاديمية قراءة ما يُكتب هنا.', 'Start the conversation: the academy can read what is said here.')
+a('gamesHomeworkPin', 'مهمة', 'Task')
+a('gamesBadgeHomework', 'مهمة', 'Task')
+a('gamesHomeworkDone', 'سُلّمت المهمة «{title}» بهذا التدريب.', 'The task “{title}” is handed in with this practice.')
+a('journeyChestHint', 'احضر كل جلسات الأسبوع وسلّم مهامه، وسيُفتح الصندوق بـ {n, plural, =1{نجمة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}', 'Attend every session of the week and hand in its tasks: the chest opens with {n} stars')
+a('homeworkByPlaying', 'تُسلَّم هذه المهمة عندما تلعب جولتها.', 'This task is handed in by playing its round.')
+a('homeworkNoGame', 'لا توجد لعبة لهذه المهمة الآن.', 'No game for this task right now.')
+a('trialWishesTitle', 'ما الأوقات التي تناسبك؟', 'When suits you?')
+a('trialOnlySuiting', 'ما يناسبك فقط', 'Only what suits you')
+a('trialBookedNext2', 'في الرسالة نفسها رابط لتغيير الموعد، ورابط إن لم تستطع الحضور.', "The same message has a link to change the time, and one if you can't come.")
+a('trialNotCounted', 'لا تُحسب من جلستك التجريبية المجانية.', "It doesn't count against your free trial.")
+a('trialWritingNote', 'يكتب المدرّب التقرير الآن، ويصلك إشعار حين يجهز.', "The trainer is writing the report; you'll be told when it's ready.")
+a('trialBookedNote', 'تجدها في «الجلسات» وتدخلها من هناك في موعدها.', "It's under Sessions; join it from there when it's time.")
+a('trialReportNotReadyBody', 'يكتب المدرّب تقرير الجلسة التجريبية، ويصلك إشعار حين يجهز. تجد جلساتك التجريبية كلها في «الجلسات التجريبية».', "The trainer is writing the trial report; you'll be told when it's ready. All your trials are under Free trials.")
+a('trialPlanWithdrawn', 'لم تعد الأكاديمية تقدّم الباقة التي اقترحها المدرّب، وسيساعدك فريقها في اختيار باقة مناسبة.', 'The academy no longer offers the plan the trainer chose; its team will help you pick one that suits.')
+a('trialNoPrice', 'يخبرك فريق الأكاديمية بالسعر حين تتواصل معه.', "The academy's team tells you the price when you get in touch.")
+a('trialOfferSaving', 'توفّر {amount}', 'You save {amount}')
+a('trialOfferNoPrice', 'يُطبَّق الخصم على أول فاتورة من أي باقة تختارها.', 'The discount goes on the first invoice of any plan you choose.')
+a('trialOfferFamilyBigger', 'لديك خصم أكبر من هذا العرض، فيُطبَّق هو بدلًا منه، فالخصمان لا يجتمعان.', 'You have a bigger discount than this offer, so it applies instead: the two never add up.')
+a('trialCourseWaiting', 'الدورة بانتظار الدفع، وتجد الفاتورة في «المدفوعات».', 'The course is waiting for payment; the invoice is under Payments.')
+a('trialCourseActive', 'الدورة جارية، وتجد جلساتها في «الجلسات».', 'The course is running; its sessions are under Sessions.')
+a('trialStartAsk', 'اختر باقة وابدأ', 'Choose a plan and start')
+a('trialSecondTitle', 'لم يناسبك المدرّب؟', 'Not the right trainer?')
+a('trialSecondBody', 'جرّب جلسة تجريبية ثانية مجانية مع مدرّب آخر، حتى {label}.', 'Try a second free trial with another trainer, until {label}.')
+a('trialSecondBodyNoDate', 'جرّب جلسة تجريبية ثانية مجانية مع مدرّب آخر.', 'Try a second free trial with another trainer.')
+a('trialRebookTitle', 'لم تتم الجلسة؟ احجز موعدًا آخر', "Didn't happen? Book another time")
+a('trialRebookBody', 'اختر موعدًا جديدًا للجلسة التجريبية المجانية.', 'Pick a new time for the free trial.')
+a('trialNextNoTimes', 'لا توجد مواعيد متاحة خلال الأسبوعين القادمين. اكتب إلينا في «المساعدة» وسنرتّب لك موعدًا.', "No free times in the next two weeks. Write to us under Help and we'll arrange one.")
+a('trialNextBooked1', 'يصلك إشعار ورسالة فيهما الموعد ورابط دخول الجلسة.', 'A notification and a message bring the time and the link to join.')
+a('trialNextBooked2', 'تجد الجلسة في «الجلسات»، وتدخلها من هناك في موعدها.', "The session is under Sessions; join it from there when it's time.")
+a('trialNextBooked3', 'بعد الجلسة يكتب المدرّب تقريرًا جديدًا، وتجده هنا.', 'After it, the trainer writes a new report, and you find it here.')
+a('trialHomeRebookBody', 'احجز موعدًا آخر متى شئت.', 'Book another time whenever you like.')
+a('trialHomeSecond', 'جرّب مدرّبًا آخر في {subject}', 'Try another trainer for {subject}')
+a('trialsRowHint', 'تقارير المدرّبين وما يقترحه كلٌّ منهم', 'The trainers\' reports and what they recommend')
+a('startNewCourseHint', 'اختر الباقة والمدرّب والمواعيد، وادفع من التطبيق.', 'Choose the plan, the trainer and the times, and pay in the app.')
+a('startOffHelp', 'راسل الأكاديمية', 'Message the academy')
+a('startWhoLead', 'اختر من سيتدرّب؛ لكل متدرّب دورته وفاتورته.', 'Choose who will train; each trainee has their own course and invoice.')
+a('startSubjectLead', 'البرامج التي فيها مدرّبون يستقبلون متدرّبين جددًا الآن.', 'Programmes with trainers taking new trainees now.')
+a('startSubjectNone', 'لا يوجد برنامج متاح للبدء الآن. راسل الأكاديمية لتساعدك.', 'No programme is open to start right now. Message the academy for help.')
+a('startPlanTitle', 'اختر الباقة', 'Choose a plan')
+a('startPlanLead', 'الأسعار بعملة منطقتك ({region}).', 'Prices in your region ({region}).')
+a('startPlanLeadAny', 'اختر ما يناسب وقتك وميزانيتك.', 'Choose what suits your time and budget.')
+a('startPlanNone', 'لا توجد باقة بسعر في منطقتك بعد. راسل الأكاديمية.', 'No plan has a price in your region yet. Message the academy.')
+a('startPlanPrivateLine', 'جلسات فردية، بمواعيد تختارها', 'One-to-one sessions, at times you choose')
+a('startRenews', 'تصل فاتورة الباقة التالية {n, plural, =1{حين تبقى جلسة واحدة} =2{حين تبقى جلستان} few{حين تبقى {n} جلسات} other{حين تبقى {n} جلسة}}، ويمكنك التوقف متى شئت.', 'The next invoice comes when {n, plural, =1{1 session is} other{{n} sessions are}} left, and you can stop any time.')
+a('startTeacherTitle', 'اختر المدرّب', 'Choose the trainer')
+a('startTeacherLead', 'يستقبل كل هؤلاء متدرّبين جددًا في {subject}.', 'All of them take new trainees in {subject}.')
+a('startTrialTeacherGone', 'لم يعد مدرّب الجلسة التجريبية يستقبل متدرّبين جددًا، فاختر مدرّبًا آخر.', 'Your trial trainer no longer takes new trainees, so choose another trainer.')
+a('startTeacherNone', 'لا يوجد مدرّب يستقبل متدرّبين جددًا في هذا البرنامج الآن. جرّب باقة جماعية، أو راسل الأكاديمية.', 'No trainer takes new trainees in this programme now. Try a group plan, or message the academy.')
+a('startGroupTitle', 'اختر المجموعة', 'Choose a group')
+a('startGroupNone', 'لا توجد مجموعة مفتوحة لهذه الباقة الآن. اختر باقة فردية، أو راسل الأكاديمية.', 'No group is open for this plan now. Choose a one-to-one plan, or message the academy.')
+a('startGroupToStart', '{n, plural, =0{تبدأ بانضمامك} =1{تبدأ حين ينضم متدرّب واحد آخر} =2{تبدأ حين ينضم متدرّبان آخران} few{تبدأ حين ينضم {n} متدرّبين آخرين} other{تبدأ حين ينضم {n} متدرّبًا آخر}}', '{n, plural, =0{Starts as you join} =1{Starts when 1 more trainee joins} other{Starts when {n} more trainees join}}')
+a('startGroupHeld', '{n, plural, =1{عُقدت جلسة واحدة قبل انضمامك} =2{عُقدت جلستان قبل انضمامك} few{عُقدت {n} جلسات قبل انضمامك} other{عُقدت {n} جلسة قبل انضمامك}}، وتعوّض الأكاديمية ما فات بالطريقة التي تختارها.', '{n, plural, =1{1 session was} other{{n} sessions were}} held before you joined; the academy makes up for them the way it chooses.')
+a('startTimesTitle', '{n, plural, =1{اختر موعدًا أسبوعيًا} =2{اختر موعدين أسبوعيين} few{اختر {n} مواعيد أسبوعية} other{اختر {n} موعدًا أسبوعيًا}}', '{n, plural, =1{Choose a weekly time} other{Choose {n} weekly times}}')
+a('startTimesTitleShared', 'اختر مواعيدك الأسبوعية', 'Choose your weekly times')
+a('startTimesLead', 'كل موعد في يوم مختلف، ويتكرر كل أسبوع. المواعيد بتوقيتك، ولكل موعد أول جلسة فيه.', 'Each on a different day, every week. The times are on your clock, each with its first session.')
+a('startTimesSuggested', 'اخترنا لك مواعيد مقترحة، ويمكنك تغييرها.', 'We picked suggested times; change them as you like.')
+a('startTimesDayFull', 'اخترت كل المواعيد. ألغِ موعدًا أولًا لتختار يومًا آخر.', 'You have chosen them all. Let one go to choose another day.')
+a('startOtherTeacher', 'اختر مدرّبًا آخر', 'Choose another trainer')
+a('startTimesTooFew', 'لا تكفي الأيام المتاحة لدى هذا المدرّب لهذه الباقة، فلكل جلسة في الأسبوع يوم مختلف. اختر مدرّبًا آخر، أو باقة بجلسات أقل في الأسبوع.', "This trainer's free days are too few for this plan: each weekly session needs a day of its own. Choose another trainer, or a plan with fewer sessions a week.")
+a('startOtherPlan', 'اختر باقة أخرى', 'Choose another plan')
+a('startReviewTitle', 'راجع قبل التأكيد', 'Check before confirming')
+a('startReviewLead', 'لن يُسحب أي مبلغ الآن: تصدر الفاتورة، وتدفعها في الخطوة التالية.', 'Nothing is charged now: the invoice is issued and you pay it next.')
+a('startReviewMoney', 'ما ستدفعه', 'What you pay')
+a('startReviewPayBy', 'ادفع قبل أول جلسة {n, plural, =1{بساعة} =2{بساعتين} few{بـ{n} ساعات} other{بـ{n} ساعة}} على الأقل؛ فالجلسة التي لم تُدفع قبل موعدها بهذه المدة تُلغى.', 'Pay at least {n, plural, =1{1 hour} other{{n} hours}} before the first session; a session still unpaid by then is cancelled.')
+a('startReviewPayAny', 'ادفع قبل أول جلسة لتثبيت الجلسات.', 'Pay before the first session to keep the sessions.')
+a('startReviewCancel', 'ويمكنك إلغاء الدورة قبل الدفع دون أي رسوم.', 'You can call the course off before paying, free of charge.')
+a('startConfirm', 'أكّد وانتقل إلى الدفع', 'Confirm and go to payment')
+a('startConfirmAgain', 'أكّد بالسعر الجديد', 'Confirm at the new price')
+a('startBlockedOver', 'ابدأ من جديد', 'Start over')
+a('startCancelTitle', 'أتلغي هذه الدورة؟', 'Call this course off?')
+a('startCancelBody', 'تُلغى جلساتها وفاتورتها دون أي رسوم، ويمكنك البدء من جديد متى شئت.', 'Its sessions and invoice are cancelled with nothing charged, and you can start again any time.')
+a('payCreatedLead', 'ادفع الفاتورة لتثبيت جلسات {subject} لـ{name}.', "Pay the invoice to keep {name}'s {subject} sessions.")
+a('payCouponTitle', 'لديك قسيمة خصم؟', 'Have a coupon?')
+a('payCouponField', 'رمز القسيمة', 'Coupon code')
+a('payCouponOn', 'القسيمة {code} مطبّقة', 'Coupon {code} applied')
+a('payNoGateway', 'لا تقبل الأكاديمية الدفع الإلكتروني لهذه الفاتورة. حوّل المبلغ وأرسل الإيصال من «المدفوعات».', 'The academy takes no online payment for this invoice. Transfer the amount and send the receipt from Payments.')
+a('payTransferInstead', 'دفعت بالتحويل؟ أرسل الإيصال', 'Paid by transfer? Send the receipt')
+a('payTryAgain', 'حاول الدفع مرة أخرى', 'Try paying again')
+a('payReadInvoice', 'اقرأ الفاتورة', 'Read the invoice')
+a('payVoid', 'أُلغيت هذه الفاتورة، فلا شيء عليك لدفعه.', 'This invoice was cancelled; there is nothing to pay.')
+a('payCancelCourse', 'ألغِ الدورة قبل الدفع', 'Call the course off before paying')
+a('paidLead', 'أهلًا بك في {subject} يا {name}. هذا ما ينتظرك:', 'Welcome to {subject}, {name}. Here is what comes next:')
+a('paidLeadPlain', 'وصل الدفع، وتجد الجلسات في «الجلسات».', 'The payment arrived; the sessions are under Sessions.')
+a('paidFirstLater', 'حين تكتمل المجموعة، ونرسل إليك موعدها ورابطها.', 'When the group is complete; we will send you its time and link.')
+a('paidJoin', 'كيف تنضم', 'How to join')
+a('paidJoinHow', 'افتح الجلسة من «الجلسات» قبل موعدها ببضع دقائق، واضغط «انضم».', 'Open the session under Sessions a few minutes before it starts and tap Join.')
+a('packageTitle', 'انضمت الدورة إلى باقتك المشتركة', 'The course joined your shared package')
+a('paidPlainLead', 'لا شيء عليك فيها. تجد نسختها للطباعة أدناه، والجلسات في «الجلسات».', 'Nothing is left to pay on it. Its printable copy is below, and the sessions are under Sessions.')
+a('payDueOn', 'ادفع قبل {day}', 'Pay by {day}')
+a('balanceNotPayer', 'تصل هذه الفاتورة إلى من يدفع للدورة، ويدفعها من حسابه.', 'This invoice goes to whoever pays for the course, from their account.')
+a('balanceEstimate', 'تقدير بحسب مواعيدك؛ إلغاء جلسة أو نقلها يغيّره.', 'An estimate from your times; a session cancelled or moved shifts it.')
+a('paySaveCardLead', 'تُدفع فاتورة كل باقة تالية من هذه البطاقة وحدها، بعد أن نخبرك بالمبلغ وموعد الخصم قبله بثلاثة أيام. ويمكنك إيقاف ذلك متى شئت بضغطة واحدة.', 'Each next package is paid from this card on its own, after we tell you the amount and the moment three days before. Stop it whenever you like, in one tap.')
+a('paySaveCardRead', 'اقرأ نص الموافقة', 'Read what you agree to')
+a('paySaveCardHide', 'أخفِ نص الموافقة', 'Hide the wording')
+a('payCardSavedTitle', 'حُفظت بطاقتك، وصار التجديد تلقائيًا', 'Your card is saved: renewals are automatic')
+a('payCardSavedBody', 'تُدفع الباقة التالية من البطاقة بعد أن نخبرك قبلها بثلاثة أيام، ويمكنك إيقاف ذلك متى شئت.', 'The next package is paid from the card after we tell you three days before; stop it whenever you like.')
+a('payCardNotSaved', 'وصل الدفع، لكن بوابة الدفع لم تحفظ البطاقة، فتصلك الفاتورة التالية لتدفعها بنفسك.', 'The payment arrived, but the gateway did not keep the card: the next invoice comes for you to pay yourself.')
+a('cardsAutoOn', 'يعمل: تُدفع فاتورة كل باقة تالية من بطاقتك، بعد أن نخبرك بالمبلغ وموعد الخصم قبله بثلاثة أيام.', 'On: each next package is paid from your card, after we tell you the amount and the moment three days before.')
+a('cardsAutoOff', 'متوقف: تصلك فاتورة كل باقة تالية لتدفعها بنفسك.', "Off: each next package's invoice comes for you to pay yourself.")
+a('cardsAutoNeedsCard', 'يعمل التجديد التلقائي ببطاقة محفوظة. احفظ بطاقة عند دفع فاتورتك التالية.', 'Automatic renewal needs a saved card. Save one when you pay your next invoice.')
+a('cardsOffBody', 'لن تُخصم الفواتير التالية من بطاقتك، وتصلك لتدفعها بنفسك. وإن كان خصم جاريًا الآن فإنه يكتمل.', 'The next invoices will not be charged to your card; they come for you to pay. A charge already under way finishes.')
+a('cardsExpiresSoon', 'تنتهي هذه البطاقة قريبًا. ادفع فاتورتك التالية ببطاقة جديدة وضع علامة «احفظ بطاقتي وجدّد تلقائيًا» لتحلّ محلها.', 'This card expires soon. Pay your next invoice with a new card and tick "Save my card and renew automatically" to put it in its place.')
+a('cardsRemove', 'أزِل البطاقة', 'Remove the card')
+a('cardsRemoveBodyLast', 'إنها بطاقتك الوحيدة، فيتوقف التجديد التلقائي وتُلغى الخصومات القادمة.', 'It is your only card: automatic renewal stops and the charges to come are cancelled.')
+a('cardsEmptyBody', 'عند دفع فاتورتك التالية، ضع علامة «احفظ بطاقتي وجدّد تلقائيًا» قبل الانتقال إلى بوابة الدفع، فتُدفع الباقات التالية وحدها بعد إبلاغك بثلاثة أيام.', 'When you pay your next invoice, tick "Save my card and renew automatically" before going to the gateway: the next packages are then paid on their own, three days after we tell you.')
+a('cardsSafe', 'لا نرى رقم بطاقتك ولا نحفظه: تحفظه بوابة الدفع وحدها، ونعرض نوعها وآخر أربعة أرقام منها فقط.', 'We never see or keep your card number: the gateway alone keeps it, and we show only its brand and last four digits.')
+a('cardsMandateTitle', 'ما وافقت عليه', 'What you agreed to')
+a('moneyCardsNone', 'ادفع الباقات التالية تلقائيًا ببطاقة محفوظة', 'Pay the next packages automatically with a saved card')
+
+# The programme (a training field) for the subject, where a school's reads.
+a('intro1Body', 'جلسة فردية بالصوت والصورة، من أي مكان.', 'One-to-one sessions with sound and video, from anywhere.')
+a('moreStudy', 'التدريب', 'Training')
+a('subjectsCount', '{n, plural, =0{لا توجد برامج} =1{برنامج واحد} =2{برنامجان} few{{n} برامج} other{{n} برنامجًا}}', '{n, plural, =0{no programmes} =1{1 programme} other{{n} programmes}}')
+a('teacherCardSubjectsFrom', 'البرامج من ملفك في الأكاديمية', 'Programmes from your profile at the academy')
+a('questionsHint', 'أسئلة تطرحها الأكاديمية في كل تقرير لهذا البرنامج.', 'Questions your academy asks in every report of this programme.')
+a('trialAcademyLead', 'اكتب رمز الأكاديمية لنعرض لك برامجها ومواعيدها.', "Type the academy's code to see its programmes and times.")
+a('trialSubjectTitle', 'اختر البرنامج', 'Choose the programme')
+a('trialHelpChooseHint', 'نتواصل معك لنختار معًا البرنامج والمستوى المناسبين.', "We'll get in touch to choose the right programme and level together.")
+a('trialNoSubjects', 'لم تعرض الأكاديمية برامجها بعد. اطلب المساعدة في الاختيار، وسنتواصل معك.', "The academy hasn't listed its programmes yet. Ask for help choosing and we'll get in touch.")
+a('trialNoTimesBody', 'لا يوجد مدرّب متاح لهذا البرنامج خلال الأسبوعين القادمين. أرسل طلبك، وسنتفق معك على موعد خلال {hours}.', "No trainer is free for this programme in the next two weeks. Send your request and we'll agree on a time within {hours}.")
+a('trialSummaryHelp', 'نختار البرنامج معًا', "We'll choose the programme together")
+a('trialRequestedHelp', 'نتواصل معك على واتساب خلال {hours} لنختار معًا البرنامج والموعد.', "We'll get in touch on WhatsApp within {hours} to choose the programme and the time together.")
+a('trialStarted', 'بدأ تدريبك في {subject}. نتمنّى لك التوفيق.', 'Your training in {subject} has begun. We wish you every success.')
+a('startSubjectTitle', 'في أي برنامج يتدرّب {name}؟', 'Which programme will {name} take?')
+a('startReviewSubject', 'البرنامج', 'Programme')
+a('balanceShared', 'باقة مشتركة بين البرامج', 'Shared across programmes')
+a('trialStateStudentAbsent', 'لم تحضرها', 'Missed')
+
+a('trialOfferTitle', 'خصم {percent}٪ لك', '{percent}% off for you')
+a('startTimesFrom', 'أقرب بداية {day}، ليبقى لك وقت للدفع.', 'The earliest start is {day}, leaving you time to pay.')
+a('paidJustTitle', 'وصل الدفع، شكرًا لك!', 'Payment received: thank you!')
+a('trialOfferUsed', 'استخدمت العرض على أول فاتورة.', 'You used the offer on your first invoice.')
+a('startTimesCount', 'اخترت {picked} من {total}', 'Chosen {picked} of {total}')
+
 def plurals(text):
     """Each `{x, plural, ...}` in [text]: the name and its branches as one string."""
     for m in re.finditer(r'\{(\w+), plural,', text):
@@ -1796,3 +2082,48 @@ for lang in ('ar', 'en'):
         json.dump(doc, f, ensure_ascii=False, indent=2)
         f.write('\n')
 print(len(S), 'strings')
+
+
+# Adults academies: the variants (by hand, else TRAINING), held to the same
+# rules as the base, plus no school's word and no plural "you".
+base = {key: (ar, en, ph) for key, ar, en, ph in S}
+for key in A:
+    assert key in base, (key, 'an adults variant of no string')
+    assert not FAMILIES_ONLY.match(key), (key, 'an adults academy never shows it')
+ADULTS = {}
+trouble = []
+for key, ar, en, ph in S:
+    if FAMILIES_ONLY.match(key):
+        continue
+    ar2, en2 = A[key] if key in A else trained(ar, en)
+    for lang, text, was in (('ar', ar2, ar), ('en', en2, en)):
+        assert braces(text) - set(ph) == set(), (key, lang, 'adults: a placeholder the base has not')
+        assert braces(was) <= braces(text) | {n for n, _ in plurals(was)}, (key, lang, 'adults: a placeholder lost')
+    bare = DIACRITICS.sub('', ar2)
+    found = [m.group(0) for m in SCHOOL_RULE.finditer(bare)] + [m.group(0) for m in SCHOOL_EN.finditer(en2)]
+    found += [w for w in PLURAL_YOU.findall(bare) if w not in NOT_PLURAL_YOU]
+    found += [rule.search(ar2).group(0) for rule, _ in RULES if rule.search(ar2)]
+    if found:
+        trouble.append(f'{key}: {", ".join(found)} | {ar2} | {en2}')
+    bare_counts = ar2
+    for name, body in plurals(ar2):
+        bare_counts = bare_counts.replace(body, '')
+        if '{' + name + '}' in body:
+            assert ('=2{' in body or 'two{' in body) and 'few{' in body, (key, 'adults: a counted plural needs =2 and few', ar2)
+    for name, kind in ph.items():
+        if kind in ('int', 'num'):
+            assert not re.search(r'\{' + name + r'\} (' + COUNTED + r'|جلسة|جلسات|مهام)(?!\w)', bare_counts), (key, 'adults: a count goes in a plural', ar2)
+    if (ar2, en2) != (ar, en):
+        ADULTS[key] = (ar2, en2)
+assert not trouble, 'Adults academies read no school or family word, and are spoken to alone:\n' + '\n'.join(trouble)
+
+for lang in ('ar', 'en'):
+    doc = {'@@locale': f'{lang}_ZZ'}
+    for key, (ar2, en2) in ADULTS.items():
+        text = ar2 if lang == 'ar' else en2
+        if text != (base[key][0] if lang == 'ar' else base[key][1]):
+            doc[key] = text
+    with open(os.path.join(out, f'app_{lang}_ZZ.arb'), 'w', encoding='utf-8') as f:
+        json.dump(doc, f, ensure_ascii=False, indent=2)
+        f.write('\n')
+print(len(ADULTS), 'adults variants')

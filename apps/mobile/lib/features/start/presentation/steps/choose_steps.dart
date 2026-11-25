@@ -83,7 +83,7 @@ class LearnerStep extends StatelessWidget {
           const Gap(Space.m),
         ],
         // A guardian's child not on the account yet: added here, then chosen.
-        if (context.read<SessionCubit>().state.current?.isGuardian ?? false)
+        if (context.read<SessionCubit>().state.guardian)
           ChoiceCard(
             key: const Key('learner-add'),
             title: l.startAddChild,
@@ -139,7 +139,7 @@ class SubjectStep extends StatelessWidget {
         ],
         if (state.busy) const Center(child: CircularProgressIndicator.adaptive()),
         // One child on the account (no learner step): another one is added from here.
-        if (!self && (state.options?.learners.length ?? 0) == 1 && (context.read<SessionCubit>().state.current?.isGuardian ?? false))
+        if (!self && (state.options?.learners.length ?? 0) == 1 && (context.read<SessionCubit>().state.guardian))
           Align(
             alignment: AlignmentDirectional.centerStart,
             child: TextButton.icon(

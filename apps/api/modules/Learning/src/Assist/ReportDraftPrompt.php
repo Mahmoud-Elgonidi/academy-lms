@@ -5,6 +5,7 @@ namespace Modules\Learning\Assist;
 use Modules\Learning\Domain\MasteryRule;
 use Modules\Learning\Templates\TemplateField;
 use Modules\SharedKernel\Ai\AiPrompt;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 
 /**
  * What the language model is asked to turn a teacher's voice note into a
@@ -33,7 +34,7 @@ final class ReportDraftPrompt
         $user[] = "What the teacher said after the lesson:\n\"\"\"\n{$said}\n\"\"\"";
 
         return new AiPrompt(
-            system: $kind === 'absence' ? self::ABSENCE : self::LESSON,
+            system: ($kind === 'absence' ? self::ABSENCE : self::LESSON).(app(AcademyAudience::class)->adultsOnly() ? self::ADULTS : ''),
             user: implode("\n\n", $user),
             schema: $kind === 'absence' ? self::absenceSchema() : self::lessonSchema(array_keys($lessons), $fields),
             tier: 'fast',
@@ -71,6 +72,13 @@ final class ReportDraftPrompt
         Fields:
         - absence_note: what the teacher said about the absence, for the family (that {child} did not come, and what to do next if they said).
         - notes_internal: only what the teacher meant for the academy alone.
+        TXT;
+
+    /** An adults academy (docs/architecture/02, section 29): no family reads it, and the words are a training's. */
+    private const ADULTS = <<<'TXT'
+
+
+        This academy trains adult professionals: {child} is an adult trainee and there is no family or guardian. Write notes_for_student and absence_note to {child} alone, as one adult to another; call the lesson a session and homework a task, and never mention parents, family or school.
         TXT;
 
     private static function kind(TemplateField $field): string

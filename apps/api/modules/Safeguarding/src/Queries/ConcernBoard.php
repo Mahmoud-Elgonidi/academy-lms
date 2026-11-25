@@ -8,6 +8,7 @@ use Modules\Safeguarding\Enums\ConcernStatus;
 use Modules\Safeguarding\Models\Concern;
 use Modules\Safeguarding\Models\ConcernEntry;
 use Modules\Scheduling\Contracts\AttendanceApi;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 
 /**
  * The leads' view of concerns: the ones still open (urgent first, then the
@@ -56,7 +57,8 @@ final class ConcernBoard
             'student' => $c->student_id ? ($names[$c->student_id] ?? '—') : null,
             'teacher' => $c->teacher_id ? ($names[$c->teacher_id] ?? '—') : null,
             'lesson' => $lesson,
-            'clearance' => $c->teacher_id ? ($this->people->clearances([$c->teacher_id])[$c->teacher_id] ?? null) : null,
+            // Whether the teacher may teach under-18s, with a pause at hand; none in an academy of adults only (nobody under 18 there).
+            'clearance' => $c->teacher_id && ! app(AcademyAudience::class)->adultsOnly() ? ($this->people->clearances([$c->teacher_id])[$c->teacher_id] ?? null) : null,
             'entries' => $entries->map(fn (ConcernEntry $e) => [
                 'kind' => $e->kind, 'event' => $e->event, 'body' => $e->body, 'data' => $e->data,
                 'by' => $e->author_id ? ($names[$e->author_id] ?? '—') : null, 'at' => $e->created_at,

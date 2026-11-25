@@ -89,7 +89,7 @@ class _Home extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       children: staggered(context, [
         // A guardian's child waiting for their consent to sign in.
-        if (context.read<SessionCubit>().state.current?.isGuardian ?? false) const ConsentNudge(),
+        if (context.read<SessionCubit>().state.guardian) const ConsentNudge(),
         // Fresh from a free trial with no lesson ahead: its report (or one more trial) comes first.
         if (home.trial != null && home.next == null) ...[TrialHomeCard(trial: home.trial!), const Gap(Space.m)],
         NextLessonCard(lesson: home.next),

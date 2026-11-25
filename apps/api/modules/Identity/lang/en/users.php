@@ -6,6 +6,7 @@ return [
     'name_required' => 'Enter the name (255 characters at most).',
     'erased' => 'This account was erased at its owner\'s request: it cannot be changed or opened again.',
     'identifier_required' => 'A user needs an email, a phone number or a username.',
+    'adults_only' => 'This academy trains adults only: each trainee has their own account and signs in with their own email or number; no account is added under someone else.',
     'preference_invalid' => 'That choice is not available.',
     'roles' => [
         'owner' => 'Owner', 'admin' => 'Admin', 'supervisor' => 'Supervisor', 'scheduler' => 'Scheduler', 'accountant' => 'Accountant',

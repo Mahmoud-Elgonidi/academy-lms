@@ -19,7 +19,7 @@ const WHY_ICONS: IconName[] = ['users', 'report', 'calendar', 'map', 'shield', '
 const ACCENTS = ['', 'gold', 'blue', 'rose', 'violet', ''];
 
 /** The page's words that differ for adults (site.adults in the messages). */
-type AudienceKey = 'phonesLabel' | 'floating.reportValue' | 'why.title' | 'why.lead' | 'subjects.lead' | 'app.lead' | 'pricing.shared' | 'testimonials.title';
+type AudienceKey = 'phonesLabel' | 'floating.reportValue' | 'why.title' | 'why.lead' | 'subjects.lead' | 'app.lead' | 'pricing.shared' | 'testimonials.title' | 'join.title' | 'join.lead' | 'join.leadBook';
 type AudienceList = 'trust' | 'steps.items' | 'app.steps' | 'join.points';
 
 type Words = { title: string; text: string; points: string[] };
@@ -44,7 +44,7 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
   const { content } = site;
   const shown = (section: string) => content.sections.includes(section);
   // A page for adults says "you" where one for families says "your child": site.adults holds only the words that differ.
-  const adults = content.audience === 'adults';
+  const adults = content.audience === 'adults' || look.audience === 'adults';
   const say = (key: AudienceKey) => (adults ? t(`adults.${key}`) : t(key));
   const sayAll = (key: AudienceList) => (adults ? t.raw(`adults.${key}`) : t.raw(key));
   const words = all.raw('sitePhones') as PhoneWords;
@@ -370,8 +370,8 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
             <div className="ls-wrap ls-join-grid">
               <div data-reveal="start">
                 <span className="ls-eyebrow">{t('join.eyebrow')}</span>
-                <h2>{t('join.title')}</h2>
-                <p className="ls-lead" style={{ marginBlockStart: '1rem' }}>{t(site.trials?.booking === 'family' ? 'join.leadBook' : 'join.lead')}</p>
+                <h2>{say('join.title')}</h2>
+                <p className="ls-lead" style={{ marginBlockStart: '1rem' }}>{say(site.trials?.booking === 'family' ? 'join.leadBook' : 'join.lead')}</p>
                 <ul className="ls-join-points">
                   {(sayAll('join.points') as string[]).map((p) => <li key={p}><Icon name="star" />{p}</li>)}
                 </ul>
@@ -393,7 +393,8 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
                   whatsapp={site.whatsapp}
                   academy={site.academy.name}
                   timeFormat={timeFormatOf(look.time_format)}
-                  adults={adults}
+                  who={adults ? 'adults' : 'both'}
+                  adultsWords={adults}
                 />
               </div>
             </div>

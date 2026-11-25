@@ -16,11 +16,13 @@ class TrialRepository {
   Future<AcademyPage> page(String academy, {DateTime? now}) async =>
       AcademyPage.fromJson(academy, await _api.get('site', academy: academy, anonymous: true), now ?? DateTime.now());
 
-  /// The academy's colours, logo and name (null when they cannot be read: the app's own look stays).
+  /// The academy's colours, logo and name, with whom it teaches under `audience` (null when they cannot be read:
+  /// the app's own look stays).
   Future<Map<String, dynamic>?> branding(String academy) async {
     try {
       final json = await _api.get('branding', academy: academy, anonymous: true);
-      return json['data'] as Map<String, dynamic>?;
+      final data = json['data'] as Map<String, dynamic>?;
+      return data == null ? null : {...data, 'audience': json['audience']};
     } on Object {
       return null;
     }

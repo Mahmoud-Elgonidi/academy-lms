@@ -49,7 +49,7 @@ import './start.css';
  * the rest, a changed price is confirmed again, the guardian's consent is
  * asked for here and the start sent again by itself.
  */
-export function StartFlow({ options, choice, step, slots, slotsProblem, zoneLabel, help, whatsapp, recommended, trial }: {
+export function StartFlow({ options, choice, step, slots, slotsProblem, zoneLabel, help, whatsapp, recommended, trial, canAddChild = false }: {
   options: StartOptions;
   choice: Choice;
   step: Step;
@@ -64,6 +64,8 @@ export function StartFlow({ options, choice, step, slots, slotsProblem, zoneLabe
   recommended: string | null;
   /** The free trial the family came from (back to its report). */
   trial: string | null;
+  /** «إضافة طفل» may be offered here (rules.mayAddChild: a guardian, never in an academy for adults). */
+  canAddChild?: boolean;
 }) {
   const t = useTranslations('start');
   const locale = useLocale();
@@ -85,8 +87,8 @@ export function StartFlow({ options, choice, step, slots, slotsProblem, zoneLabe
   const teacher = options.teachers.find((x) => x.id === choice.teacher);
   const group = slots?.groups.find((g) => g.id === choice.group) ?? null;
   const steps = stepsFor(options.learners.length, plan);
-  // A guardian (whoever follows a child) may add another child here and come back to this flow for them.
-  const guardian = options.learners.some((l) => !l.is_self);
+  // A guardian (whoever follows a child; never in an academy for adults) may add another child here and come back to this flow for them.
+  const guardian = canAddChild && options.learners.some((l) => !l.is_self);
   const free = timesByKey(slots);
   // The times chosen: what was pressed here (still free), else those in the address or the suggested pattern.
   const picks = keepFree(picked ?? initialPicks(choice.times, slots), [...free.keys()]);

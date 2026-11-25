@@ -82,8 +82,9 @@ function taught(int $n, array $items = [], string $outcome = 'completed'): Sessi
 }
 
 it('picks the look from the age unless the academy chose one, for students only', function () {
-    expect(array_map(fn ($age) => LearnerStage::forAge($age)->value, [null, 6, 11, 12, 14, 15, 18, 19, 40]))
-        ->toBe(['classic', 'kids', 'kids', 'middle', 'middle', 'teen', 'teen', 'classic', 'classic']);
+    // 18 is an adult, as everywhere (AgeGroup::ADULT_AGE, the minors' bound): secondary is 15 to 17.
+    expect(array_map(fn ($age) => LearnerStage::forAge($age)->value, [null, 6, 11, 12, 14, 15, 17, 18, 19, 40]))
+        ->toBe(['classic', 'kids', 'kids', 'middle', 'middle', 'teen', 'teen', 'classic', 'classic', 'classic']);
 
     aged($this->student, 9);
     $profile = app(PeopleApi::class)->studentProfile($this->student->id);

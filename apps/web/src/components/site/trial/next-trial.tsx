@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { bookNextTrial, nextTrialTimes, type BookedTrial, type NextTrialSource } from '@/lib/site/actions';
+import { selfWords } from '@/lib/site/report';
 import { byDay, nextFrom, stillOffered, whatsappLink } from '@/lib/site/trial';
 import type { LocalTime, TimeFormat } from '@/lib/time';
 import { Icon, WhatsAppIcon } from '../icons';
@@ -25,6 +26,8 @@ type Props = {
   until?: string | null;
   /** Where to go once it is booked (the family's list), if anywhere. */
   done?: { href: string; label: string };
+  /** Booked by the learner themself (rules.readsAsSelf): "your second session", not the learner by name. */
+  self?: boolean;
 };
 
 type Step = { at: 'closed' } | { at: 'picking' } | { at: 'booked'; trial: BookedTrial & { starts_at: LocalTime } } | { at: 'refused'; text: string } | { at: 'gone'; text: string };
@@ -36,8 +39,9 @@ type Step = { at: 'closed' } | { at: 'picking' } | { at: 'booked'; trial: Booked
  * clock as the API wrote them; booking needs no code (the link went to their
  * number, or they are signed in), and every refusal says what to do next.
  */
-export function NextTrialPanel({ source, kind, learner, subject, academy, whatsapp, timeFormat, zone: fallback, until, done }: Props) {
-  const t = useTranslations('site.report');
+export function NextTrialPanel({ source, kind, learner, subject, academy, whatsapp, timeFormat, zone: fallback, until, done, self = false }: Props) {
+  const words = useTranslations('site.report');
+  const t = selfWords(words, self);
   const tt = useTranslations('site.trial');
   const browser = useBrowserZone();
   const zone = browser || fallback || '';

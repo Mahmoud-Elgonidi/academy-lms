@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getLocale } from 'next-intl/server';
 import { CalmCard, TrialShell } from '@/components/site/trial/shell';
+import { TrialWords } from '@/components/site/trial/words';
+import { speaksToAdults } from '@/components/site/trial/words-path';
+import { trialWordsOnServer } from '@/components/site/trial/words-server';
 import { ChangeTrial } from '@/components/site/trial/trial-pages';
 import { academySite } from '@/lib/site/server';
 import { timeFormatOf } from '@/lib/time';
@@ -10,7 +13,8 @@ import { lessonOf } from '../lesson';
 type Props = { params: Promise<{ locale: string; token: string }> };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('site.trial.lesson.change');
+  // In the published page's words (a page for adults says a session, not a lesson).
+  const t = await trialWordsOnServer(speaksToAdults(await academySite(), await branding()), 'lesson.change');
   return { title: t('title'), robots: { index: false, follow: false }, referrer: 'no-referrer' };
 }
 
@@ -20,14 +24,18 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function ChangeTrialPage({ params }: Props) {
   const { token } = await params;
-  const [locale, t, look, site, lesson] = await Promise.all([getLocale(), getTranslations('site.trial'), branding(), academySite(), lessonOf(token)]);
+  const [locale, look, site, lesson] = await Promise.all([getLocale(), branding(), academySite(), lessonOf(token)]);
+  const adults = speaksToAdults(site, look);
+  const t = await trialWordsOnServer(adults);
   const whatsapp = site?.whatsapp ?? null;
   const academy = site?.academy.name ?? (locale === 'en' ? look.name.en : look.name.ar);
   const path = `/trial/lesson/${token}/change`;
   return (
     <TrialShell look={look} path={path}>
       {lesson ? (
-        <ChangeTrial lesson={lesson} token={token} academy={academy} whatsapp={whatsapp} timeFormat={timeFormatOf(look.time_format)} locale={locale} />
+        <TrialWords adults={adults}>
+          <ChangeTrial lesson={lesson} token={token} academy={academy} whatsapp={whatsapp} timeFormat={timeFormatOf(look.time_format)} locale={locale} />
+        </TrialWords>
       ) : (
         <CalmCard icon="clock" title={t('lesson.gone.title')} text={t('lesson.gone.text')} whatsapp={whatsapp} whatsappWords={t('whatsappWords')}
           home={site ? `/${locale}#join` : undefined} homeLabel={t('lesson.gone.again')} />

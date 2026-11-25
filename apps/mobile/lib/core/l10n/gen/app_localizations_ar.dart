@@ -4494,6 +4494,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get trialWhoTitle => 'لمن الحصة؟';
 
   @override
+  String get trialNameTitle => 'ما اسمك؟';
+
+  @override
   String get trialWhoMe => 'لي';
 
   @override
@@ -6032,4 +6035,1499 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get startAddChildHint => 'يُضاف إلى حسابكم، ثم تختارون له الدورة مباشرة.';
+}
+
+/// The translations for Arabic, as used in Private use (`ar_ZZ`).
+class AppLocalizationsArZz extends AppLocalizationsAr {
+  AppLocalizationsArZz() : super('ar_ZZ');
+
+  @override
+  String get journeyOffLead => 'تجد جلساتك ومهامك هنا دائمًا.';
+
+  @override
+  String lessonsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n جلسة',
+      few: '$n جلسات',
+      two: 'جلستان',
+      one: 'جلسة واحدة',
+      zero: 'لا توجد جلسات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get intro1Title => 'جلسات مباشرة مع مدرّبك';
+
+  @override
+  String get intro1Body => 'جلسة فردية بالصوت والصورة، من أي مكان.';
+
+  @override
+  String get intro2Body => 'كل جلسة تقرّبك من الهدف، والطريق كله أمامك.';
+
+  @override
+  String get intro3Title => 'المواعيد والمهام والمدفوعات في مكان واحد';
+
+  @override
+  String get introHomework => 'مهمة جديدة';
+
+  @override
+  String get roleStudent => 'متدرّب';
+
+  @override
+  String get roleTeacher => 'مدرّب';
+
+  @override
+  String get myDataLead => 'كل ما تحتفظ به الأكاديمية عنك: صحّح بياناتك، أو نزّل نسخة، أو اطلب حذف حسابك.';
+
+  @override
+  String get navLessons => 'الجلسات';
+
+  @override
+  String get navMyLessons => 'جلساتي';
+
+  @override
+  String get navMyHomework => 'مهامي';
+
+  @override
+  String get navHomework => 'المهام';
+
+  @override
+  String get navStudents => 'المتدرّبون';
+
+  @override
+  String get nextLesson => 'الجلسة القادمة';
+
+  @override
+  String get noNextLesson => 'لا توجد جلسات قادمة في الأسابيع الأربعة المقبلة.';
+
+  @override
+  String roomOpensIn(String time) {
+    return 'تُفتح قاعة الجلسة بعد $time';
+  }
+
+  @override
+  String get roomOpen => 'قاعة الجلسة مفتوحة';
+
+  @override
+  String get lessonOn => 'الجلسة جارية الآن';
+
+  @override
+  String get joinLesson => 'ادخل الجلسة';
+
+  @override
+  String get allLessons => 'كل الجلسات';
+
+  @override
+  String roomOpensAt(String time) {
+    return 'تُفتح قاعة الجلسة $time';
+  }
+
+  @override
+  String get allHomework => 'كل المهام';
+
+  @override
+  String homeworkLine(String title) {
+    return 'مهمة: $title';
+  }
+
+  @override
+  String lessonsOf(String name) {
+    return 'جلسات $name';
+  }
+
+  @override
+  String get noUpcoming => 'لا توجد جلسات قادمة في الأسابيع الأربعة المقبلة.';
+
+  @override
+  String get noPast => 'لا توجد جلسات في الأسابيع الأربعة الماضية.';
+
+  @override
+  String substituteFor(String name) {
+    return 'مدرّب بديل: $name في إجازة';
+  }
+
+  @override
+  String get refuseSubstituteTitle => 'ألا توافق على البديل؟';
+
+  @override
+  String get refuseSubstituteBody => 'ستُلغى الجلسة على حساب الأكاديمية، وتعود دقائقها إليك جلسة تعويضية تحجزها لاحقًا.';
+
+  @override
+  String roomOpensOn(String when) {
+    return 'تُفتح قاعة الجلسة $when';
+  }
+
+  @override
+  String get lessonDetails => 'تفاصيل الجلسة';
+
+  @override
+  String refusedSubstitute(int days) {
+    String _temp0 = intl.Intl.pluralLogic(days, locale: localeName, other: '$days يومًا', few: '$days أيام', two: 'يومان', one: 'يوم واحد');
+    return 'أُلغيت. لديك $_temp0 لتحجز فيها جلسة التعويض.';
+  }
+
+  @override
+  String get cancelLesson => 'إلغاء الجلسة';
+
+  @override
+  String get disputeTitle => 'اعتراض على نتيجة الجلسة';
+
+  @override
+  String disputeIntroFamily(String outcome) {
+    return 'الجلسة مسجّلة \"$outcome\". إن لم يكن هذا ما حدث، فأخبرنا خلال 48 ساعة من انتهائها، وستراجع الأكاديمية الحضور في قاعة الجلسة وترد عليك.';
+  }
+
+  @override
+  String disputeIntroTeacher(String outcome) {
+    return 'الجلسة مسجّلة \"$outcome\". إن لم يكن هذا ما حدث، فأخبرنا خلال 48 ساعة من انتهائها، وستراجع الأكاديمية الحضور في قاعة الجلسة وترد عليك.';
+  }
+
+  @override
+  String get disputeSent => 'وصل الاعتراض، والجلسة قيد المراجعة.';
+
+  @override
+  String cancelTitle(String day) {
+    return 'أتلغي جلسة $day؟';
+  }
+
+  @override
+  String get cancelled => 'أُلغيت الجلسة.';
+
+  @override
+  String groupSeatsSpoken(int taken, int capacity) {
+    return 'جلسة جماعية، المقاعد المشغولة $taken من $capacity';
+  }
+
+  @override
+  String groupWithCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'مع $n متدرّبًا آخر',
+      few: 'مع $n متدرّبين آخرين',
+      two: 'مع متدرّبَين آخرَين',
+      one: 'مع متدرّب واحد آخر',
+      zero: 'لا متدرّبين معك في هذه الجلسة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupStudentsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n متدرّبًا',
+      few: '$n متدرّبين',
+      two: 'متدرّبان',
+      one: 'متدرّب واحد',
+      zero: 'لا متدرّبين بعد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupClassmates => 'المشاركون معك';
+
+  @override
+  String get groupStudents => 'المتدرّبون';
+
+  @override
+  String get skipLesson => 'لن أحضر هذه الجلسة';
+
+  @override
+  String skipTitle(String day) {
+    return 'الاعتذار عن جلسة $day الجماعية';
+  }
+
+  @override
+  String get skipGoesOn => 'الجلسة جماعية فلا تُلغى: تستمر لبقية المجموعة، ويُعفى مقعدك وحدك.';
+
+  @override
+  String get skipDone => 'سجّلنا الاعتذار، وتستمر الجلسة للمجموعة.';
+
+  @override
+  String get groupForming => 'المجموعة قيد التكوين، وتبدأ جلساتها حين يكتمل عددها.';
+
+  @override
+  String get rateLesson => 'قيّم الجلسة';
+
+  @override
+  String get rateTitle => 'كيف كانت الجلسة؟';
+
+  @override
+  String get rateGood => 'ما الذي أعجبك؟';
+
+  @override
+  String get rateBad => 'ما الذي لم يعجبك؟';
+
+  @override
+  String get rateAnonymous => 'يرى المدرّب التقييم دون اسمك.';
+
+  @override
+  String homeworkOpen(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n مهمة مفتوحة',
+      few: '$n مهام مفتوحة',
+      two: 'مهمتان مفتوحتان',
+      one: 'مهمة مفتوحة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeworkTitle => 'المهام';
+
+  @override
+  String homeworkWaitingOnYou(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n مهمة تنتظرك',
+      few: '$n مهام تنتظرك',
+      two: 'مهمتان تنتظرانك',
+      one: 'مهمة تنتظرك',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeworkNoneWaiting => 'لا توجد مهام تنتظرك الآن.';
+
+  @override
+  String get homeworkNoneSent => 'لا توجد مهام تنتظر التصحيح.';
+
+  @override
+  String get homeworkNoneMarked => 'لم تُصحَّح أي مهمة بعد.';
+
+  @override
+  String get homeworkHandIn => 'سلّم المهمة';
+
+  @override
+  String get noHomework => 'لا توجد مهام الآن.';
+
+  @override
+  String get handedIn => 'سُلّم. سيصحّحه المدرّب.';
+
+  @override
+  String get teacherFeedback => 'رأي المدرّب';
+
+  @override
+  String get lessonsLeftTitle => 'الجلسات المتبقية';
+
+  @override
+  String get extraAction => 'جلسات إضافية';
+
+  @override
+  String extraHint(String price, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes دقيقة',
+      few: '$minutes دقائق',
+      two: 'دقيقتان',
+      one: 'دقيقة',
+    );
+    return 'سعر الجلسة الإضافية $price ($_temp0).';
+  }
+
+  @override
+  String extraTitle(String subject) {
+    return 'جلسات إضافية في $subject';
+  }
+
+  @override
+  String get extraBody => 'اختر العدد، وستصدر لك فاتورة تدفعها مثل أي فاتورة. بعد أن تدفع، تحجز الأكاديمية الجلسات معك.';
+
+  @override
+  String extraWaiting(String number) {
+    return 'فاتورة الجلسات الإضافية $number بانتظار الدفع.';
+  }
+
+  @override
+  String get joining => 'ندخلك إلى الجلسة…';
+
+  @override
+  String get openedOutside => 'فُتحت الجلسة في تطبيق آخر.';
+
+  @override
+  String get leave => 'اخرج من الجلسة';
+
+  @override
+  String get rejoinHint => 'إن خرجت بالخطأ، فادخل مرة أخرى من الزر نفسه حتى تنتهي الجلسة.';
+
+  @override
+  String get roomShowBars => 'أظهر أزرار الجلسة';
+
+  @override
+  String get familyInvoice => 'فاتورة مجمّعة';
+
+  @override
+  String lessonUntil(String time) {
+    return 'الجلسة حتى $time';
+  }
+
+  @override
+  String get moreStudy => 'التدريب';
+
+  @override
+  String get zoneHint => 'تظهر مواعيد جلساتك وتذكيراتها بهذا التوقيت، واضغط لتغييره.';
+
+  @override
+  String todayCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'اليوم: $n جلسة',
+      few: 'اليوم: $n جلسات',
+      two: 'اليوم: جلستان',
+      one: 'اليوم: جلسة واحدة',
+      zero: 'لا توجد جلسات اليوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeworkToMark(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n مهمة تصحّحها',
+      few: '$n مهام تصحّحها',
+      two: 'مهمتان تصحّحهما',
+      one: 'مهمة تصحّحها',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noLessonsDay => 'لا توجد جلسات';
+
+  @override
+  String get noLessonsWeek => 'لا توجد جلسات هذا الأسبوع.';
+
+  @override
+  String get noLessonsLater => 'لا توجد جلسات من هذا اليوم حتى آخر الأسبوع.';
+
+  @override
+  String get restDay => 'لا توجد جلسات اليوم. جلساتك القادمة خلال الأسبوع.';
+
+  @override
+  String get markingTile => 'مهام للتصحيح';
+
+  @override
+  String get studentsTitle => 'متدرّبيّ';
+
+  @override
+  String get noStudents => 'لا يوجد متدرّبون بعد.';
+
+  @override
+  String studentsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n متدرّبًا',
+      few: '$n متدرّبين',
+      two: 'متدرّبان',
+      one: 'متدرّب واحد',
+      zero: 'لا يوجد متدرّبون',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subjectsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n برنامجًا',
+      few: '$n برامج',
+      two: 'برنامجان',
+      one: 'برنامج واحد',
+      zero: 'لا توجد برامج',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noStudentsFound => 'لا يوجد متدرّب بهذا الاسم.';
+
+  @override
+  String get markHomework => 'صحّح المهام';
+
+  @override
+  String get lessonPay => 'الجلسات';
+
+  @override
+  String unpricedNote(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n جلسة لم يُحدَّد سعرها بعد',
+      few: '$n جلسات لم يُحدَّد سعرها بعد',
+      two: 'جلستان لم يُحدَّد سعرهما بعد',
+      one: 'جلسة لم يُحدَّد سعرها بعد',
+    );
+    return '$_temp0. ستحدّد الأكاديمية السعر، وتُحسب في هذا الشهر.';
+  }
+
+  @override
+  String get noEarnings => 'لا توجد جلسات في هذا الشهر.';
+
+  @override
+  String get meetingLinkTitle => 'رابط جلستك';
+
+  @override
+  String get meetingLinkNeeded => 'تعمل الأكاديمية بروابط خارجية، ولن تُفتح أي جلسة دون رابطك.';
+
+  @override
+  String get teacherCardLead =>
+      'البطاقة التي يراها الزوّار عنك في صفحة الأكاديمية. أنت من يكتبها، وأنت من يقرّر أن تظهر أو لا. رقمك وبريدك الإلكتروني لا يظهران أبدًا.';
+
+  @override
+  String get teacherCardPreview => 'هكذا سيرى الزوّار بطاقتك';
+
+  @override
+  String get teacherCardSubjectsFrom => 'البرامج من ملفك في الأكاديمية';
+
+  @override
+  String performanceLead(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'آخر $days يومًا',
+      few: 'آخر $days أيام',
+      two: 'آخر يومين',
+      one: 'آخر يوم',
+    );
+    return '$_temp0 · الجلسات التي كان سببها المنصة لا تُحسب';
+  }
+
+  @override
+  String get performanceRatings => 'تقييمات المتدرّبين';
+
+  @override
+  String get reasonFamily => 'ظرف شخصي';
+
+  @override
+  String coverState(int covered, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total جلسة',
+      few: '$total جلسات',
+      two: 'جلستين',
+      one: 'جلسة واحدة',
+    );
+    return '$covered من $_temp0 لها بديل';
+  }
+
+  @override
+  String streak(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n جلسة متتالية',
+      few: '$n جلسات متتالية',
+      two: 'جلستان متتاليتان',
+      one: 'جلسة واحدة',
+      zero: 'لا توجد جلسات متتالية بعد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeworkCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n مهمة',
+      few: '$n مهام',
+      two: 'مهمتان',
+      one: 'مهمة واحدة',
+      zero: 'لا توجد مهام',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get markingRow => 'مهام تنتظر التصحيح';
+
+  @override
+  String get markingNone => 'لا توجد مهام تنتظر الآن';
+
+  @override
+  String get reportLesson => 'تقرير جلسة';
+
+  @override
+  String get reportTitle => 'تقرير الجلسة';
+
+  @override
+  String get howItWent => 'كيف كانت الجلسة';
+
+  @override
+  String get voiceHint =>
+      'قل ما الذي تناولته الجلسة، وكيف كان أداء المتدرّب، والمهمة. المسودة تملأ الخانات الفارغة فقط، وأنت تراجعها قبل أن ترسل.';
+
+  @override
+  String get notesForFamily => 'ملاحظات للمتدرّب';
+
+  @override
+  String get notesInternalHint => 'للأكاديمية فقط، ولا يراها المتدرّب.';
+
+  @override
+  String get questionsHint => 'أسئلة تطرحها الأكاديمية في كل تقرير لهذا البرنامج.';
+
+  @override
+  String get teachersOnly => 'للمدرّب فقط';
+
+  @override
+  String get recordingsTitle => 'تسجيلات الجلسات';
+
+  @override
+  String get recordingsMine => 'تسجيلات جلساتي';
+
+  @override
+  String get recordingsOff => 'لا تسجّل الأكاديمية الجلسات الآن.';
+
+  @override
+  String recordingsOf(String name) {
+    return 'تسجيلات جلسات $name';
+  }
+
+  @override
+  String get recordingsTeacherList => 'تسجيلات جلساتك';
+
+  @override
+  String get recordingAgreedDone => 'شكرًا. يمكن تسجيل الجلسات من الآن.';
+
+  @override
+  String get recordStart => 'سجّل الجلسة';
+
+  @override
+  String get absenceHint => 'لم يحضر المتدرّب. اكتب ما حدث وأي شيء يحتاج المتدرّب إلى معرفته.';
+
+  @override
+  String get giveHomework => 'أعطِ مهمة';
+
+  @override
+  String get homeworkField => 'المهمة';
+
+  @override
+  String get homeworkLocked => 'سلّم المتدرّب هذه المهمة، فلن تتغيّر.';
+
+  @override
+  String get groupReportTitle => 'تقرير الجلسة الجماعية';
+
+  @override
+  String get groupReportShared => 'ما تناولته الجلسة والأسئلة والمهمة هنا للمجموعة كلها، وتصل المهمة إلى كل متدرّب.';
+
+  @override
+  String get groupReportRowsHint => 'لكل متدرّب سطر: التركيز والمستوى العام وملاحظة له، أو ملاحظة غيابه.';
+
+  @override
+  String get groupRowNote => 'ملاحظة له';
+
+  @override
+  String get groupRowAbsence => 'ملاحظة غيابه';
+
+  @override
+  String get groupRowsMissing => 'أكمل سطر كل متدرّب حضر.';
+
+  @override
+  String get groupVoiceShared => 'يملأ التسجيل الجزء المشترك فقط، وسطر كل متدرّب تكتبه بنفسك.';
+
+  @override
+  String get groupLessonRow => 'جلسة جماعية';
+
+  @override
+  String get disputeWhose => 'عن أي متدرّب الاعتراض؟';
+
+  @override
+  String get disputeWhoseHint => 'يكون الاعتراض في الجلسة الجماعية على مقعد متدرّب واحد.';
+
+  @override
+  String get markTitle => 'تصحيح المهام';
+
+  @override
+  String get noHomeworkToMark => 'لا توجد مهام تنتظر التصحيح.';
+
+  @override
+  String get feedbackLabel => 'كلمتك للمتدرّب';
+
+  @override
+  String get helpLead => 'اكتب للأكاديمية عن جلسة، أو دفعة، أو مشكلة تقنية، أو أي شيء آخر. يصلك الرد هنا وفي رسالة.';
+
+  @override
+  String get ticketHintComplaint => 'عن مدرّب أو جلسة. تبحث الأكاديمية في الأمر وتخبرك بما فعلت.';
+
+  @override
+  String get ticketHintTechnical => 'قاعة الجلسة أو التطبيق أو الدخول لا يعمل.';
+
+  @override
+  String get ticketLesson => 'أي جلسة؟ (إن وُجدت)';
+
+  @override
+  String get ticketNoLesson => 'ليست جلسة معيّنة';
+
+  @override
+  String get tellUsLead =>
+      'إن أقلقك أي شيء في جلسة، أو من مدرّب، أو من أي شخص على المنصة، فأخبرنا هنا. لا يقرؤه إلا المسؤولون عن السلامة والسلوك في الأكاديمية.';
+
+  @override
+  String get tellUsLeadStudent =>
+      'إن جعلك أحد تشعر بعدم الارتياح، أو بالخوف، أو بأنك لست في أمان، فأخبرنا. لا يقرؤه إلا المسؤولون عن السلامة والسلوك في الأكاديمية.';
+
+  @override
+  String get concernTeacherTitle => 'بلّغ عن قلق على سلامة متدرّب';
+
+  @override
+  String get concernTeacherLead =>
+      'إن أقلقك شيء في سلامة متدرّب أو حاله، أو تصرّف شخص آخر، فأخبر مسؤولي السلامة في الأكاديمية هنا، فهم وحدهم من يطّلع عليه. لا تحقّق فيه بنفسك.';
+
+  @override
+  String get concernLesson => 'في أي جلسة (إن وُجدت)؟';
+
+  @override
+  String get concernNoLesson => 'ليس عن جلسة';
+
+  @override
+  String get concernStudent => 'أي متدرّب؟';
+
+  @override
+  String get concernNoStudent => 'ليس عن متدرّب معيّن';
+
+  @override
+  String get messagesFamilyTitle => 'الرسائل مع المدرّبين';
+
+  @override
+  String get messagesStudentTitle => 'الرسائل مع مدرّبيك';
+
+  @override
+  String get messagesEmptyTeacher => 'عندما يصبح لديك متدرّبون، ستجدهم هنا وتستطيع التحدث معهم.';
+
+  @override
+  String get messagesEmptyFamily => 'عندما يصبح لك مدرّب، ستجده هنا.';
+
+  @override
+  String messagesAlsoHere(String names) {
+    return 'في المحادثة أيضًا: $names';
+  }
+
+  @override
+  String get messagesFirst => 'ابدأ المحادثة: تستطيع الأكاديمية قراءة ما يُكتب هنا.';
+
+  @override
+  String get gamesHomeworkPin => 'مهمة';
+
+  @override
+  String get gamesBadgeHomework => 'مهمة';
+
+  @override
+  String gamesHomeworkDone(String title) {
+    return 'سُلّمت المهمة «$title» بهذا التدريب.';
+  }
+
+  @override
+  String journeyChestHint(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n نجمة', few: '$n نجوم', two: 'نجمتين', one: 'نجمة');
+    return 'احضر كل جلسات الأسبوع وسلّم مهامه، وسيُفتح الصندوق بـ $_temp0';
+  }
+
+  @override
+  String get journeyLastLesson => 'آخر جلسة';
+
+  @override
+  String journeyLastLessonOf(String name) {
+    return 'آخر جلسة لـ $name';
+  }
+
+  @override
+  String journeyLessonStars(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'أخذت $n نجمة في آخر جلسة!',
+      few: 'أخذت $n نجوم في آخر جلسة!',
+      two: 'أخذت نجمتين في آخر جلسة!',
+      one: 'أخذت نجمة في آخر جلسة',
+      zero: 'لم تأخذ نجومًا في آخر جلسة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeworkByPlaying => 'تُسلَّم هذه المهمة عندما تلعب جولتها.';
+
+  @override
+  String get homeworkNoGame => 'لا توجد لعبة لهذه المهمة الآن.';
+
+  @override
+  String get trialEntryTitle => 'جديد معنا؟ احجز جلسة تجريبية مجانية';
+
+  @override
+  String get trialTitle => 'جلسة تجريبية مجانية';
+
+  @override
+  String get trialAcademyTitle => 'في أي أكاديمية تريد الجلسة؟';
+
+  @override
+  String get trialAcademyLead => 'اكتب رمز الأكاديمية لنعرض لك برامجها ومواعيدها.';
+
+  @override
+  String get trialAcademyNotFound =>
+      'لم نجد أكاديمية تستقبل طلبات الجلسات التجريبية بهذا الرمز. تأكّد من الرمز مع الأكاديمية، أو اكتبه كما يصلك منها.';
+
+  @override
+  String get trialWhoTitle => 'لمن الجلسة؟';
+
+  @override
+  String get trialWhoMissing => 'اختر لمن الجلسة.';
+
+  @override
+  String get trialSubjectTitle => 'اختر البرنامج';
+
+  @override
+  String get trialHelpChooseHint => 'نتواصل معك لنختار معًا البرنامج والمستوى المناسبين.';
+
+  @override
+  String trialHelpChooseWith(String subject) {
+    return 'نبدأ بجلسة في $subject، ونختار معًا ما يناسب بعدها.';
+  }
+
+  @override
+  String get trialNoSubjects => 'لم تعرض الأكاديمية برامجها بعد. اطلب المساعدة في الاختيار، وسنتواصل معك.';
+
+  @override
+  String get trialWishesTitle => 'ما الأوقات التي تناسبك؟';
+
+  @override
+  String get trialWishesLead => 'كلها اختيارية، وتساعدنا في اختيار المدرّب والموعد.';
+
+  @override
+  String get trialTeacher => 'المدرّب';
+
+  @override
+  String get trialTeacherFemale => 'مدرّبة';
+
+  @override
+  String get trialTeacherMale => 'مدرّب';
+
+  @override
+  String get trialTimeTitle => 'اختر موعد الجلسة';
+
+  @override
+  String get trialOnlySuiting => 'ما يناسبك فقط';
+
+  @override
+  String trialNoTimesBody(String hours) {
+    return 'لا يوجد مدرّب متاح لهذا البرنامج خلال الأسبوعين القادمين. أرسل طلبك، وسنتفق معك على موعد خلال $hours.';
+  }
+
+  @override
+  String get trialNoTimesGender => 'لا توجد مواعيد مع من اخترت الآن، وقد تجد موعدًا مع مدرّب آخر.';
+
+  @override
+  String get trialAnyTeacher => 'أظهر مواعيد كل المدرّبين';
+
+  @override
+  String get trialPhoneHint => 'يصلك عليه الرمز وتفاصيل الجلسة.';
+
+  @override
+  String trialSummaryFor(String name) {
+    return 'الجلسة لـ$name';
+  }
+
+  @override
+  String get trialSummaryHelp => 'نختار البرنامج معًا';
+
+  @override
+  String get trialRefusedTitle => 'لا يمكن حجز هذه الجلسة من هنا';
+
+  @override
+  String get trialBookedTitle => 'حُجزت الجلسة التجريبية';
+
+  @override
+  String get trialBookedNext1 => 'تصلك رسالة على واتساب فيها الموعد ورابط دخول الجلسة.';
+
+  @override
+  String get trialBookedNext2 => 'في الرسالة نفسها رابط لتغيير الموعد، ورابط إن لم تستطع الحضور.';
+
+  @override
+  String get trialBookedNext3 => 'نذكّرك بالجلسة قبلها بيوم.';
+
+  @override
+  String get trialBookedNext4 => 'ادخل إلى التطبيق بهذا الرقم متى شئت لترى الجلسة وتدخلها.';
+
+  @override
+  String get trialAnotherTrial => 'احجز جلسة تجريبية أخرى';
+
+  @override
+  String trialRequestedBody(String hours) {
+    return 'نتواصل معك على واتساب خلال $hours لنتفق على موعد الجلسة.';
+  }
+
+  @override
+  String trialRequestedHelp(String hours) {
+    return 'نتواصل معك على واتساب خلال $hours لنختار معًا البرنامج والموعد.';
+  }
+
+  @override
+  String get trialRequestedNext3 => 'بعد الاتفاق يصلك الموعد ورابط دخول الجلسة.';
+
+  @override
+  String get trialsTitle => 'الجلسات التجريبية';
+
+  @override
+  String get trialsRowHint => 'تقارير المدرّبين وما يقترحه كلٌّ منهم';
+
+  @override
+  String trialsLead(String name) {
+    return 'جلسات $name التجريبية المجانية وتقارير المدرّبين عنها.';
+  }
+
+  @override
+  String get trialsLeadSelf => 'جلساتك التجريبية المجانية وتقارير المدرّبين عنها.';
+
+  @override
+  String get trialsEmptyTitle => 'لا توجد جلسات تجريبية';
+
+  @override
+  String get trialsEmptyBody => 'بعد كل جلسة تجريبية يكتب المدرّب تقريرًا عمّا وجده وما يقترحه، وتجده هنا.';
+
+  @override
+  String get trialStateStudentAbsent => 'لم تحضرها';
+
+  @override
+  String get trialStateTeacherAbsent => 'تغيّب المدرّب';
+
+  @override
+  String get trialKindSecond => 'الجلسة الثانية مع مدرّب آخر';
+
+  @override
+  String get trialNotCounted => 'لا تُحسب من جلستك التجريبية المجانية.';
+
+  @override
+  String get trialWritingNote => 'يكتب المدرّب التقرير الآن، ويصلك إشعار حين يجهز.';
+
+  @override
+  String get trialBookedNote => 'تجدها في «الجلسات» وتدخلها من هناك في موعدها.';
+
+  @override
+  String get trialTryAnother => 'جرّب مدرّبًا آخر مجانًا';
+
+  @override
+  String get trialReportTitle => 'تقرير الجلسة التجريبية';
+
+  @override
+  String get trialReportSecond => 'الجلسة التجريبية الثانية';
+
+  @override
+  String get trialReportTeacher => 'المدرّب';
+
+  @override
+  String get trialReportLevel => 'المستوى الذي وجده المدرّب';
+
+  @override
+  String get trialReportNote => 'كلمة المدرّب';
+
+  @override
+  String get trialReportNotReadyBody =>
+      'يكتب المدرّب تقرير الجلسة التجريبية، ويصلك إشعار حين يجهز. تجد جلساتك التجريبية كلها في «الجلسات التجريبية».';
+
+  @override
+  String get trialReportAllTrials => 'كل الجلسات التجريبية';
+
+  @override
+  String get trialPlanTitle => 'ما يقترحه المدرّب';
+
+  @override
+  String trialPlanPerWeek(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n جلسة', few: '$n جلسات', two: 'جلستان', one: 'جلسة واحدة');
+    return '$_temp0 في الأسبوع';
+  }
+
+  @override
+  String trialPlanLength(String minutes) {
+    return 'الجلسة $minutes';
+  }
+
+  @override
+  String get trialPlanPrivate => 'جلسات فردية';
+
+  @override
+  String get trialPlanGroup => 'جلسات جماعية';
+
+  @override
+  String trialPlanOnlyPerWeek(String perWeek) {
+    return 'يقترح المدرّب $perWeek.';
+  }
+
+  @override
+  String get trialPlanWithdrawn => 'لم تعد الأكاديمية تقدّم الباقة التي اقترحها المدرّب، وسيساعدك فريقها في اختيار باقة مناسبة.';
+
+  @override
+  String get trialNoPrice => 'يخبرك فريق الأكاديمية بالسعر حين تتواصل معه.';
+
+  @override
+  String trialOfferTitle(String percent) {
+    return 'خصم $percent٪ لك';
+  }
+
+  @override
+  String trialOfferSaving(String amount) {
+    return 'توفّر $amount';
+  }
+
+  @override
+  String get trialOfferNoPrice => 'يُطبَّق الخصم على أول فاتورة من أي باقة تختارها.';
+
+  @override
+  String get trialOfferFamilyBigger => 'لديك خصم أكبر من هذا العرض، فيُطبَّق هو بدلًا منه، فالخصمان لا يجتمعان.';
+
+  @override
+  String get trialOfferUsed => 'استخدمت العرض على أول فاتورة.';
+
+  @override
+  String trialStarted(String subject) {
+    return 'بدأ تدريبك في $subject. نتمنّى لك التوفيق.';
+  }
+
+  @override
+  String get trialCourseWaiting => 'الدورة بانتظار الدفع، وتجد الفاتورة في «المدفوعات».';
+
+  @override
+  String get trialCourseActive => 'الدورة جارية، وتجد جلساتها في «الجلسات».';
+
+  @override
+  String get trialStartAsk => 'اختر باقة وابدأ';
+
+  @override
+  String get trialSecondTitle => 'لم يناسبك المدرّب؟';
+
+  @override
+  String trialSecondBody(String label) {
+    return 'جرّب جلسة تجريبية ثانية مجانية مع مدرّب آخر، حتى $label.';
+  }
+
+  @override
+  String get trialSecondBodyNoDate => 'جرّب جلسة تجريبية ثانية مجانية مع مدرّب آخر.';
+
+  @override
+  String get trialSecondPick => 'اختر موعدًا مع مدرّب آخر';
+
+  @override
+  String get trialRebookTitle => 'لم تتم الجلسة؟ احجز موعدًا آخر';
+
+  @override
+  String get trialRebookBody => 'اختر موعدًا جديدًا للجلسة التجريبية المجانية.';
+
+  @override
+  String get trialNextPickSecond => 'اختر موعد الجلسة الثانية';
+
+  @override
+  String trialNextLeadSecond(String teacher, String zone) {
+    return 'مع مدرّب آخر غير $teacher. المواعيد بتوقيت $zone، والأقرب أولًا.';
+  }
+
+  @override
+  String get trialNextNoTimes => 'لا توجد مواعيد متاحة خلال الأسبوعين القادمين. اكتب إلينا في «المساعدة» وسنرتّب لك موعدًا.';
+
+  @override
+  String get trialNextBookedTitle => 'حُجزت الجلسة';
+
+  @override
+  String get trialNextBookedSecond => 'حُجزت الجلسة الثانية مع مدرّب آخر';
+
+  @override
+  String get trialNextBooked1 => 'يصلك إشعار ورسالة فيهما الموعد ورابط دخول الجلسة.';
+
+  @override
+  String get trialNextBooked2 => 'تجد الجلسة في «الجلسات»، وتدخلها من هناك في موعدها.';
+
+  @override
+  String get trialNextBooked3 => 'بعد الجلسة يكتب المدرّب تقريرًا جديدًا، وتجده هنا.';
+
+  @override
+  String get trialOpenLessons => 'افتح الجلسات';
+
+  @override
+  String get trialHomeReady => 'تقرير الجلسة التجريبية جاهز';
+
+  @override
+  String trialHomeReadyBody(String subject, String teacher) {
+    return '$subject مع $teacher: ما وجده المدرّب وما يقترحه.';
+  }
+
+  @override
+  String trialHomeRebook(String subject) {
+    return 'لم تتم الجلسة التجريبية في $subject';
+  }
+
+  @override
+  String get trialHomeRebookBody => 'احجز موعدًا آخر متى شئت.';
+
+  @override
+  String trialHomeSecond(String subject) {
+    return 'جرّب مدرّبًا آخر في $subject';
+  }
+
+  @override
+  String get startNewCourseHint => 'اختر الباقة والمدرّب والمواعيد، وادفع من التطبيق.';
+
+  @override
+  String get startOffHelp => 'راسل الأكاديمية';
+
+  @override
+  String get startWhoLead => 'اختر من سيتدرّب؛ لكل متدرّب دورته وفاتورته.';
+
+  @override
+  String startSubjectTitle(String name) {
+    return 'في أي برنامج يتدرّب $name؟';
+  }
+
+  @override
+  String get startSubjectLead => 'البرامج التي فيها مدرّبون يستقبلون متدرّبين جددًا الآن.';
+
+  @override
+  String get startSubjectNone => 'لا يوجد برنامج متاح للبدء الآن. راسل الأكاديمية لتساعدك.';
+
+  @override
+  String get startOpenLessons => 'افتح الجلسات';
+
+  @override
+  String get startPlanTitle => 'اختر الباقة';
+
+  @override
+  String startPlanLead(String region) {
+    return 'الأسعار بعملة منطقتك ($region).';
+  }
+
+  @override
+  String get startPlanLeadAny => 'اختر ما يناسب وقتك وميزانيتك.';
+
+  @override
+  String get startPlanNone => 'لا توجد باقة بسعر في منطقتك بعد. راسل الأكاديمية.';
+
+  @override
+  String get startPlanPrivateLine => 'جلسات فردية، بمواعيد تختارها';
+
+  @override
+  String get startRecommended => 'اقترحها المدرّب';
+
+  @override
+  String startPerLesson(String price) {
+    return '$price للجلسة';
+  }
+
+  @override
+  String startOfferApplied(String percent) {
+    return 'عرض الجلسة التجريبية ($percent٪)';
+  }
+
+  @override
+  String startOfferUntil(String percent, String when) {
+    return 'يُطبَّق عرض الجلسة التجريبية ($percent٪) على أول فاتورة حتى $when.';
+  }
+
+  @override
+  String startRenews(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'حين تبقى $n جلسة',
+      few: 'حين تبقى $n جلسات',
+      two: 'حين تبقى جلستان',
+      one: 'حين تبقى جلسة واحدة',
+    );
+    return 'تصل فاتورة الباقة التالية $_temp0، ويمكنك التوقف متى شئت.';
+  }
+
+  @override
+  String get startTeacherTitle => 'اختر المدرّب';
+
+  @override
+  String startTeacherLead(String subject) {
+    return 'يستقبل كل هؤلاء متدرّبين جددًا في $subject.';
+  }
+
+  @override
+  String get startTrialTeacher => 'مدرّب الجلسة التجريبية';
+
+  @override
+  String get startTrialTeacherGone => 'لم يعد مدرّب الجلسة التجريبية يستقبل متدرّبين جددًا، فاختر مدرّبًا آخر.';
+
+  @override
+  String get startTeacherNone => 'لا يوجد مدرّب يستقبل متدرّبين جددًا في هذا البرنامج الآن. جرّب باقة جماعية، أو راسل الأكاديمية.';
+
+  @override
+  String get startGroupTitle => 'اختر المجموعة';
+
+  @override
+  String get startGroupNone => 'لا توجد مجموعة مفتوحة لهذه الباقة الآن. اختر باقة فردية، أو راسل الأكاديمية.';
+
+  @override
+  String get startGroupRunning => 'بدأت جلساتها';
+
+  @override
+  String startGroupToStart(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'تبدأ حين ينضم $n متدرّبًا آخر',
+      few: 'تبدأ حين ينضم $n متدرّبين آخرين',
+      two: 'تبدأ حين ينضم متدرّبان آخران',
+      one: 'تبدأ حين ينضم متدرّب واحد آخر',
+      zero: 'تبدأ بانضمامك',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String startGroupNext(String when) {
+    return 'الجلسة القادمة: $when';
+  }
+
+  @override
+  String startGroupHeld(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'عُقدت $n جلسة قبل انضمامك',
+      few: 'عُقدت $n جلسات قبل انضمامك',
+      two: 'عُقدت جلستان قبل انضمامك',
+      one: 'عُقدت جلسة واحدة قبل انضمامك',
+    );
+    return '$_temp0، وتعوّض الأكاديمية ما فات بالطريقة التي تختارها.';
+  }
+
+  @override
+  String startTimesTitle(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'اختر $n موعدًا أسبوعيًا',
+      few: 'اختر $n مواعيد أسبوعية',
+      two: 'اختر موعدين أسبوعيين',
+      one: 'اختر موعدًا أسبوعيًا',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get startTimesTitleShared => 'اختر مواعيدك الأسبوعية';
+
+  @override
+  String get startTimesLead => 'كل موعد في يوم مختلف، ويتكرر كل أسبوع. المواعيد بتوقيتك، ولكل موعد أول جلسة فيه.';
+
+  @override
+  String get startTimesSuggested => 'اخترنا لك مواعيد مقترحة، ويمكنك تغييرها.';
+
+  @override
+  String startTimesCount(int picked, int total) {
+    return 'اخترت $picked من $total';
+  }
+
+  @override
+  String get startTimesDayFull => 'اخترت كل المواعيد. ألغِ موعدًا أولًا لتختار يومًا آخر.';
+
+  @override
+  String startTimesFirst(String day) {
+    return 'أول جلسة $day';
+  }
+
+  @override
+  String get startSkippedTitle => 'أيام بلا جلسة';
+
+  @override
+  String get startSkippedNote => 'لا تُحجز جلسة في هذه الأيام، وتستمر المواعيد بعدها كالمعتاد.';
+
+  @override
+  String startTimesFrom(String day) {
+    return 'أقرب بداية $day، ليبقى لك وقت للدفع.';
+  }
+
+  @override
+  String get startTimesNone => 'لا مواعيد متاحة مع هذا المدرّب في الأسابيع الأربعة القادمة.';
+
+  @override
+  String get startOtherTeacher => 'اختر مدرّبًا آخر';
+
+  @override
+  String get startTimesTooFew =>
+      'لا تكفي الأيام المتاحة لدى هذا المدرّب لهذه الباقة، فلكل جلسة في الأسبوع يوم مختلف. اختر مدرّبًا آخر، أو باقة بجلسات أقل في الأسبوع.';
+
+  @override
+  String get startOtherPlan => 'اختر باقة أخرى';
+
+  @override
+  String get startReviewTitle => 'راجع قبل التأكيد';
+
+  @override
+  String get startReviewLead => 'لن يُسحب أي مبلغ الآن: تصدر الفاتورة، وتدفعها في الخطوة التالية.';
+
+  @override
+  String get startReviewSubject => 'البرنامج';
+
+  @override
+  String get startReviewTeacher => 'المدرّب';
+
+  @override
+  String get startReviewFirst => 'أول جلسة';
+
+  @override
+  String get startReviewMoney => 'ما ستدفعه';
+
+  @override
+  String startReviewPayBy(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'بـ$n ساعة', few: 'بـ$n ساعات', two: 'بساعتين', one: 'بساعة');
+    return 'ادفع قبل أول جلسة $_temp0 على الأقل؛ فالجلسة التي لم تُدفع قبل موعدها بهذه المدة تُلغى.';
+  }
+
+  @override
+  String get startReviewPayAny => 'ادفع قبل أول جلسة لتثبيت الجلسات.';
+
+  @override
+  String get startReviewCancel => 'ويمكنك إلغاء الدورة قبل الدفع دون أي رسوم.';
+
+  @override
+  String get startConfirm => 'أكّد وانتقل إلى الدفع';
+
+  @override
+  String get startConfirmAgain => 'أكّد بالسعر الجديد';
+
+  @override
+  String get startBlockedOver => 'ابدأ من جديد';
+
+  @override
+  String get startCancelTitle => 'أتلغي هذه الدورة؟';
+
+  @override
+  String get startCancelBody => 'تُلغى جلساتها وفاتورتها دون أي رسوم، ويمكنك البدء من جديد متى شئت.';
+
+  @override
+  String payCreatedLead(String subject, String name) {
+    return 'ادفع الفاتورة لتثبيت جلسات $subject لـ$name.';
+  }
+
+  @override
+  String get payCouponTitle => 'لديك قسيمة خصم؟';
+
+  @override
+  String get payCouponField => 'رمز القسيمة';
+
+  @override
+  String payCouponOn(String code) {
+    return 'القسيمة $code مطبّقة';
+  }
+
+  @override
+  String get payOfferStays => 'عرض الجلسة التجريبية مطبّق، ويبقى على الفاتورة.';
+
+  @override
+  String get payNoGateway => 'لا تقبل الأكاديمية الدفع الإلكتروني لهذه الفاتورة. حوّل المبلغ وأرسل الإيصال من «المدفوعات».';
+
+  @override
+  String get payTransferInstead => 'دفعت بالتحويل؟ أرسل الإيصال';
+
+  @override
+  String get payTryAgain => 'حاول الدفع مرة أخرى';
+
+  @override
+  String get payReadInvoice => 'اقرأ الفاتورة';
+
+  @override
+  String get payVoid => 'أُلغيت هذه الفاتورة، فلا شيء عليك لدفعه.';
+
+  @override
+  String get payCancelCourse => 'ألغِ الدورة قبل الدفع';
+
+  @override
+  String paidLead(String name, String subject) {
+    return 'أهلًا بك في $subject يا $name. هذا ما ينتظرك:';
+  }
+
+  @override
+  String get paidLeadPlain => 'وصل الدفع، وتجد الجلسات في «الجلسات».';
+
+  @override
+  String get paidTeacher => 'المدرّب';
+
+  @override
+  String get paidFirst => 'أول جلسة';
+
+  @override
+  String get paidFirstLater => 'حين تكتمل المجموعة، ونرسل إليك موعدها ورابطها.';
+
+  @override
+  String get paidJoin => 'كيف تنضم';
+
+  @override
+  String get paidJoinHow => 'افتح الجلسة من «الجلسات» قبل موعدها ببضع دقائق، واضغط «انضم».';
+
+  @override
+  String get packageTitle => 'انضمت الدورة إلى باقتك المشتركة';
+
+  @override
+  String get paidJustTitle => 'وصل الدفع، شكرًا لك!';
+
+  @override
+  String get paidPlainLead => 'لا شيء عليك فيها. تجد نسختها للطباعة أدناه، والجلسات في «الجلسات».';
+
+  @override
+  String payDueOn(String day) {
+    return 'ادفع قبل $day';
+  }
+
+  @override
+  String get balanceNone => 'لم تبقَ جلسات';
+
+  @override
+  String balanceMakeup(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'و$n جلسة تعويضية أيضًا',
+      few: 'و$n جلسات تعويضية أيضًا',
+      two: 'وجلستان تعويضيتان أيضًا',
+      one: 'وجلسة تعويضية واحدة أيضًا',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String balancePerWeek(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n جلسة في الأسبوع',
+      few: '$n جلسات في الأسبوع',
+      two: 'جلستان في الأسبوع',
+      one: 'جلسة واحدة في الأسبوع',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String balancePerLesson(String minutes) {
+    return 'الجلسة $minutes';
+  }
+
+  @override
+  String get balanceGroup => 'جلسات جماعية';
+
+  @override
+  String get balanceShared => 'باقة مشتركة بين البرامج';
+
+  @override
+  String get balanceNotPayer => 'تصل هذه الفاتورة إلى من يدفع للدورة، ويدفعها من حسابه.';
+
+  @override
+  String balanceNextWhen(int n, String day) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'تصدر عندما تبقى $n جلسة، في $day تقريبًا.',
+      few: 'تصدر عندما تبقى $n جلسات، في $day تقريبًا.',
+      two: 'تصدر عندما تبقى جلستان، في $day تقريبًا.',
+      one: 'تصدر عندما تبقى جلسة واحدة، في $day تقريبًا.',
+      zero: 'تصدر عندما تنتهي الجلسات المدفوعة، في $day تقريبًا.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String balanceNextAfter(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'بعد $n جلسة',
+      few: 'بعد $n جلسات',
+      two: 'بعد جلستين',
+      one: 'بعد جلسة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get balanceEstimate => 'تقدير بحسب مواعيدك؛ إلغاء جلسة أو نقلها يغيّره.';
+
+  @override
+  String get balanceHowTaken => 'تُخصم كل جلسة من الرصيد حين تتم، والجلسات التعويضية تُحسب وحدها.';
+
+  @override
+  String balanceHowMark(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'عندما تبقى $n جلسة تصدر فاتورة الباقة التالية، لتستمر الجلسات دون انقطاع.',
+      few: 'عندما تبقى $n جلسات تصدر فاتورة الباقة التالية، لتستمر الجلسات دون انقطاع.',
+      two: 'عندما تبقى جلستان تصدر فاتورة الباقة التالية، لتستمر الجلسات دون انقطاع.',
+      one: 'عندما تبقى جلسة واحدة تصدر فاتورة الباقة التالية، لتستمر الجلسات دون انقطاع.',
+      zero: 'تصدر فاتورة الباقة التالية حين تنتهي الجلسات المدفوعة، لتستمر الجلسات دون انقطاع.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get balanceHowExpiry => 'للجلسات غير المحجوزة صلاحية تنتهي في موعدها، أما الجلسات المحجوزة فلا تضيع.';
+
+  @override
+  String get paySaveCardLead =>
+      'تُدفع فاتورة كل باقة تالية من هذه البطاقة وحدها، بعد أن نخبرك بالمبلغ وموعد الخصم قبله بثلاثة أيام. ويمكنك إيقاف ذلك متى شئت بضغطة واحدة.';
+
+  @override
+  String get paySaveCardRead => 'اقرأ نص الموافقة';
+
+  @override
+  String get paySaveCardHide => 'أخفِ نص الموافقة';
+
+  @override
+  String get payCardSavedTitle => 'حُفظت بطاقتك، وصار التجديد تلقائيًا';
+
+  @override
+  String get payCardSavedBody => 'تُدفع الباقة التالية من البطاقة بعد أن نخبرك قبلها بثلاثة أيام، ويمكنك إيقاف ذلك متى شئت.';
+
+  @override
+  String get payCardNotSaved => 'وصل الدفع، لكن بوابة الدفع لم تحفظ البطاقة، فتصلك الفاتورة التالية لتدفعها بنفسك.';
+
+  @override
+  String get cardsAutoOn => 'يعمل: تُدفع فاتورة كل باقة تالية من بطاقتك، بعد أن نخبرك بالمبلغ وموعد الخصم قبله بثلاثة أيام.';
+
+  @override
+  String get cardsAutoOff => 'متوقف: تصلك فاتورة كل باقة تالية لتدفعها بنفسك.';
+
+  @override
+  String get cardsAutoNeedsCard => 'يعمل التجديد التلقائي ببطاقة محفوظة. احفظ بطاقة عند دفع فاتورتك التالية.';
+
+  @override
+  String get cardsOffBody => 'لن تُخصم الفواتير التالية من بطاقتك، وتصلك لتدفعها بنفسك. وإن كان خصم جاريًا الآن فإنه يكتمل.';
+
+  @override
+  String get cardsExpiresSoon =>
+      'تنتهي هذه البطاقة قريبًا. ادفع فاتورتك التالية ببطاقة جديدة وضع علامة «احفظ بطاقتي وجدّد تلقائيًا» لتحلّ محلها.';
+
+  @override
+  String get cardsRemove => 'أزِل البطاقة';
+
+  @override
+  String get cardsRemoveBodyLast => 'إنها بطاقتك الوحيدة، فيتوقف التجديد التلقائي وتُلغى الخصومات القادمة.';
+
+  @override
+  String get cardsEmptyBody =>
+      'عند دفع فاتورتك التالية، ضع علامة «احفظ بطاقتي وجدّد تلقائيًا» قبل الانتقال إلى بوابة الدفع، فتُدفع الباقات التالية وحدها بعد إبلاغك بثلاثة أيام.';
+
+  @override
+  String get cardsMandateTitle => 'ما وافقت عليه';
+
+  @override
+  String get cardsSafe => 'لا نرى رقم بطاقتك ولا نحفظه: تحفظه بوابة الدفع وحدها، ونعرض نوعها وآخر أربعة أرقام منها فقط.';
+
+  @override
+  String get moneyCardsNone => 'ادفع الباقات التالية تلقائيًا ببطاقة محفوظة';
 }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore, useTran
 import { useTranslations } from 'next-intl';
 import { cheersSeen, openChest } from '@/app/[locale]/family/actions';
 import { hatchEgg } from '@/app/[locale]/family/games/actions';
+import { useAdults } from '@/components/audience';
 import { CHEERS } from '@/components/family/cheers';
 import { EggIcon } from '@/components/games/art';
 import { Hatch } from '@/components/games/results';
@@ -483,12 +484,13 @@ export function LastLessonStars({ last, stars }: { last: LastLesson; stars: bool
   );
 }
 
-/** The guardians' cheers the student has not seen yet; thanking marks them seen. */
+/** The guardians' cheers the student has not seen yet; thanking marks them seen. An academy for adults has no guardians to cheer. */
 export function CheersCard({ cheers }: { cheers: JourneyMap['cheers'] }) {
   const t = useTranslations('journey');
+  const adults = useAdults();
   const [hidden, setHidden] = useState(false);
   const [pending, begin] = useTransition();
-  if (hidden || cheers.length === 0) return null;
+  if (adults || hidden || cheers.length === 0) return null;
   const kinds = [...new Set(cheers.map((c) => c.kind))];
   return (
     <section className="pop flex flex-wrap items-center gap-3 rounded-card border border-brand-line bg-brand-soft p-4" aria-live="polite">

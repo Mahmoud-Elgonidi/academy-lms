@@ -8,7 +8,9 @@ use Modules\Communication\Contracts\DTOs\TemplateDefinition;
 use Modules\Communication\Contracts\DTOs\Translatable;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\Site\Actions\SubmitJoinRequest;
 use Modules\Site\Contracts\Events\JoinRequested;
+use Modules\Site\Domain\Page\Audience;
 use Modules\Site\Models\JoinRequest;
 use Modules\Site\Models\SiteSettings;
 use Modules\Site\Support\PickLinks;
@@ -20,9 +22,11 @@ use Modules\Site\Support\RequestAccess;
  * number, which the requests screen shows to those allowed. Whoever asked
  * for a free trial hears back at once by WhatsApp and email (they have no
  * account yet): the academy answers within its hours, and, while families
- * book their own, their link to pick a time. A family that booked its trial
- * already hears Scheduling's message (the time, the class link, change or
- * cancel), not this one.
+ * book their own, their link to pick a time. A page for adults (an academy
+ * that trains professionals: settings.audience) says it in training words, a
+ * session and not a lesson (`site.request_received_adults`, its own template
+ * the academy edits apart). A family that booked its trial already hears
+ * Scheduling's message (the time, the class link, change or cancel), not this one.
  */
 final class SendSiteNotifications
 {
@@ -45,6 +49,12 @@ final class SendSiteNotifications
             audience: 'site::notifications.audience.requester', channels: ['whatsapp', 'email'],
             sample: ['name' => 'مروة', 'hours' => '4', 'next' => 'وإن شئتم فاختاروا موعد الحصة بأنفسكم من هنا: https://demo.lms.test/ar/trial/…'],
         ));
+        $notifications->define(new TemplateDefinition(
+            key: 'site.request_received_adults', category: 'lessons',
+            title: 'site::notifications.request_received_adults.title', body: 'site::notifications.request_received_adults.body',
+            audience: 'site::notifications.audience.requester_adults', channels: ['whatsapp', 'email'],
+            sample: ['name' => 'مروة', 'hours' => '4', 'next' => 'وإن شئت فاختر موعد جلستك بنفسك من هنا: https://demo.lms.test/ar/trial/…'],
+        ));
     }
 
     /** The visitor who asked for a free trial hears back at once (unless they booked it already). */
@@ -55,11 +65,12 @@ final class SendSiteNotifications
             return;
         }
         $settings = SiteSettings::current();
+        $template = Audience::of(SubmitJoinRequest::publishedPage()) === Audience::ADULTS ? 'request_received_adults' : 'request_received';
         $next = $settings->familyBooks() && $request->subject_id !== null
-            ? new Translatable('site::notifications.request_received.pick', ['link' => $this->picks->url($request)])
-            : new Translatable('site::notifications.request_received.wait');
+            ? new Translatable("site::notifications.{$template}.pick", ['link' => $this->picks->url($request)])
+            : new Translatable("site::notifications.{$template}.wait");
         $this->notifications->sendToContact(new ContactMessage(
-            template: 'site.request_received',
+            template: 'site.'.$template,
             name: $request->name,
             phone: $request->phone,
             email: $request->email,

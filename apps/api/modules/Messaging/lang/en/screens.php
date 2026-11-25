@@ -26,6 +26,7 @@ return [
     ],
     'start' => 'Nobody has written yet',
     'first' => [
+        'teacher_alone' => 'Start the conversation with the student.',
         'teacher' => 'Start the conversation: the guardians will see it too.',
         'classic' => 'Start the conversation with the teacher.',
         'student' => 'Start the conversation with your teacher.',
@@ -35,6 +36,7 @@ return [
     'you' => 'You',
     'back' => 'All conversations',
     'write' => [
+        'teacher_alone' => 'Write to the student…',
         'teacher' => 'Write to the student and their family…',
         'classic' => 'Write to the teacher…',
         'student' => 'Write to your teacher…',

@@ -673,7 +673,8 @@
     "conversation": "Conversation",
     "first": "Start the conversation: guardians and the academy can read what is said here.",
     "write": "Write a message…",
-    "send": "Send"
+    "send": "Send",
+    "firstNoGuardians": "Start the conversation: the academy can read what is said here."
   },
   "support": {
     "title": "Help",
@@ -1598,7 +1599,118 @@
           "No commitment",
           "A time on your clock",
           "A report on your level afterwards"
-        ]
+        ],
+        "title": "Your first session is on us",
+        "lead": "Leave your number and we will message you on WhatsApp to set a time for an introductory session with the right trainer.",
+        "leadBook": "Choose a time for your free introductory session now on your own clock, or leave your number and we will agree it with you on WhatsApp.",
+        "tabs": {
+          "trial": "Free introductory session",
+          "teach": "Join our trainers"
+        },
+        "teachLead": "You train online and would like to join our team? Write to us and we will call you.",
+        "fields": {
+          "subject_ids": "Areas you train in",
+          "years_teaching": "Years of training experience"
+        },
+        "doneTrial": {
+          "text": "We will message you soon on WhatsApp to set a time for the introductory session."
+        }
+      },
+      "trial": {
+        "privacy": "We use your details only to arrange the session.",
+        "whatsappWords": "Hello, I asked for a free introductory session on your page.",
+        "steps": {
+          "who": "About you"
+        },
+        "who": {
+          "leadAdults": "Your name and the area you would like training in, so we can match the right trainer.",
+          "subject": "Which area would you like training in?",
+          "helpChooseStart": "We will start with a {subject} session; the trainer will then advise you on the programme that suits you best.",
+          "helpChooseTeam": "Our team will choose the right training programme with you and agree the time, within {hours, plural, one {an hour} other {# hours}}."
+        },
+        "when": {
+          "gender": "The trainer",
+          "genders": {
+            "female": "A woman trainer",
+            "male": "A man trainer"
+          }
+        },
+        "time": {
+          "title": "Pick a time for your free introductory session"
+        },
+        "contact": {
+          "lead": "We send a 6-digit code to your WhatsApp to confirm the booking. The session's details reach you on the same number."
+        },
+        "booked": {
+          "title": "Your free introductory session is booked",
+          "eventTitle": "Free introductory session: {subject} · {academy}",
+          "next": {
+            "message": "Our WhatsApp message is on its way now, with the session's time and your link to join.",
+            "reminder": "We remind you on WhatsApp the day before the session.",
+            "change": "Need another time? The message has a link to change it (up to 6 hours before the session) and one to cancel.",
+            "after": "After the session, the trainer sends you a short assessment of your level and needs."
+          },
+          "anotherSubject": "Book another area"
+        },
+        "sent": {
+          "next": {
+            "call": "Within {hours, plural, one {an hour} other {# hours}} someone from the academy contacts you to agree the time with the right trainer.",
+            "lesson": "You get the session's time and the link to join on WhatsApp, with a reminder the day before."
+          }
+        },
+        "refused": {
+          "title": "This session cannot be booked from here",
+          "text": "This session cannot be booked from here. Message us and we will arrange it with you."
+        },
+        "errors": {
+          "subject": "Choose an area, or «Help me choose»."
+        },
+        "pick": {
+          "title": "Choose your free introductory session's time",
+          "gone": {
+            "again": "Ask for a free introductory session"
+          },
+          "noSubject": {
+            "title": "We will choose the area with you",
+            "text": "Our team will contact you within {hours, plural, one {an hour} other {# hours}} to choose the right area and agree the time."
+          }
+        },
+        "lesson": {
+          "kicker": "Your free introductory session",
+          "change": {
+            "title": "Change the time of your introductory session",
+            "pickNew": "Pick the new time (the same trainer)",
+            "noTimes": "The trainer has no other free time in these two weeks. Look at the weeks after, or message us.",
+            "toCancel": "I cannot attend",
+            "moved": {
+              "title": "Done: your session has its new time",
+              "text": "We sent the new time to your WhatsApp, and the trainer knows.",
+              "next": {
+                "reminder": "We remind you on WhatsApp the day before the session.",
+                "last": "This was the last change. If the time stops suiting you, cancel it and ask for a new session."
+              }
+            }
+          },
+          "cancel": {
+            "title": "Cancel the introductory session?",
+            "lead": "The session is cancelled and the trainer is told. You can ask for a new introductory session whenever you like.",
+            "confirm": "Yes, cancel the session",
+            "keep": "Keep the session",
+            "kept": {
+              "title": "Your session stays as it is",
+              "text": "Nothing has changed. See you at the session."
+            },
+            "done": {
+              "title": "The session is cancelled",
+              "text": "We have told the trainer. When you are ready, ask for a new introductory session from our page, or message us.",
+              "again": "Ask for a new introductory session"
+            }
+          },
+          "gone": {
+            "text": "The session may have started or ended, been cancelled, or the link is old. For anything about your session, message us on WhatsApp.",
+            "again": "Ask for a free introductory session"
+          }
+        }
       }
     },
     "subjects": {
@@ -1715,6 +1827,11 @@
         "A time on your clock",
         "A report on your child's level afterwards"
       ],
+      "pointsSelf": [
+        "No commitment",
+        "A time on your clock",
+        "A report on your level afterwards"
+      ],
       "tabs": {
         "trial": "Free trial lesson",
         "teach": "Teach with us"
@@ -1775,6 +1892,8 @@
         "lead": "Tell us a little about the learner, and we will match the right teacher.",
         "titleAdults": "Tell us about you",
         "leadAdults": "Your name and what you would like to learn, so we can match the right teacher.",
+        "titleChildren": "For your child",
+        "leadChildren": "Your name and your child's name and age, so we can choose the right teacher.",
         "child": "My child",
         "childHint": "A son or a daughter",
         "me": "Me",
@@ -2154,6 +2273,36 @@
         "nextRebook": "Book another time",
         "back": "All free trials",
         "missedTitle": "The {subject} lesson did not take place"
+      },
+      "self": {
+        "title": "Your report in {subject}",
+        "started": {
+          "title": "You have started with us",
+          "text": "You are enrolled in {subject}, so there is no new offer. Lessons and payments are in your account.",
+          "openFamily": "My lessons"
+        },
+        "start": {
+          "words": "Hello, I would like to start {subject} with the plan \"{plan}\".",
+          "wordsAny": "Hello, I would like to start {subject}."
+        },
+        "next": {
+          "pickLead": "Other teachers' times in {subject}.",
+          "booked": {
+            "title": "Your second trial is booked"
+          }
+        },
+        "rebook": {
+          "title": "Book another time",
+          "student_absent": "We missed you in the {subject} lesson on {when}. No problem: pick another time that suits you.",
+          "teacher_absent": "We are sorry: your {subject} lesson on {when} did not take place because the teacher could not attend.",
+          "academy": "We are sorry: the academy cancelled your {subject} lesson on {when}.",
+          "booked": {
+            "title": "Your new time is booked"
+          }
+        },
+        "offer": {
+          "used": "The offer was used on your first payment. Thank you for your trust."
+        }
       }
     },
     "blocks": {

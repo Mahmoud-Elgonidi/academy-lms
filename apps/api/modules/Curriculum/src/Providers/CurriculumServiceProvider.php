@@ -6,8 +6,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Curriculum\Contracts\CurriculumApi;
+use Modules\Curriculum\Contracts\NodeUses;
 use Modules\Curriculum\CurriculumService;
 use Modules\Curriculum\Http\ResourcePreviewController;
+use Modules\Curriculum\Queries\AllNodeUses;
 use Modules\Curriculum\Setup\ProgramStep;
 use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Ai\Capabilities;
@@ -21,6 +23,8 @@ final class CurriculumServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(CurriculumApi::class, CurriculumService::class);
+        // What learners left on a node, from every module that keeps some (tagged NodeUses::SOURCES), asked together.
+        $this->app->bind(NodeUses::class, AllNodeUses::class);
     }
 
     public function boot(): void

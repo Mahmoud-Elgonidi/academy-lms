@@ -6,6 +6,7 @@ use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Privacy\PrivacyRules;
 use Modules\Privacy\Subjects;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 
 /**
  * What a person may put right on their own, and for whom: their name, and
@@ -13,7 +14,8 @@ use Modules\Privacy\Subjects;
  * guardian) gender, country, school grade and who should teach them. A
  * teacher corrects their name; the rest of a teacher's profile is the
  * academy's. Children and younger students ask their guardian (PrivacyRules).
- * Anything else goes through a correction request.
+ * Anything else goes through a correction request. An academy of adults
+ * only keeps no school grade, so it is not offered there.
  */
 final class EditableDetails
 {
@@ -28,7 +30,9 @@ final class EditableDetails
     /** @return list<string> the fields $side may correct for this subject */
     public function fields(string $subjectId, string $side): array
     {
-        return $side !== 'teacher' && $this->isStudent($subjectId) ? ['name', ...self::STUDENT_FIELDS] : ['name'];
+        $student = app(AcademyAudience::class)->adultsOnly() ? array_values(array_diff(self::STUDENT_FIELDS, ['school_grade'])) : self::STUDENT_FIELDS;
+
+        return $side !== 'teacher' && $this->isStudent($subjectId) ? ['name', ...$student] : ['name'];
     }
 
     /**

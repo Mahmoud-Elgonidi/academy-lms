@@ -168,6 +168,7 @@ return [
             'created' => 'إنشاء الأكاديمية، والمالك :owner',
             'suspended' => 'إيقاف الأكاديمية: :reason',
             'reactivated' => 'إعادة تشغيل الأكاديمية',
+            'audience_changed' => 'أصبحت الأكاديمية تعلّم :academy_audience (كانت تعلّم :previous_audience): :reason',
             'plan_changed' => 'أصبحت باقة الأكاديمية :plan: :reason',
             'topup_requested' => 'طلب رصيد إضافي: :limit (+:amount)',
             'topup_cancelled' => 'إلغاء طلب رصيد إضافي: :limit (+:amount)',
@@ -248,6 +249,8 @@ return [
         ],
     ],
     'values' => [
+        'academy_audience' => ['families' => 'العائلات', 'adults' => 'الكبار فقط'],
+        'previous_audience' => ['families' => 'العائلات', 'adults' => 'الكبار فقط'],
         'template' => ['online_courses' => 'أكاديمية دورات أونلاين', 'training' => 'تدريب وتطوير مهني', 'kids_families' => 'مدرسة للأطفال والعائلات', 'language_school' => 'معهد لغات', 'blank' => 'صفحة فارغة'],
         'types' => ['hero' => 'الواجهة', 'features' => 'لماذا نحن', 'subjects' => 'المواد', 'teachers' => 'المعلّمون', 'pricing' => 'الأسعار', 'steps' => 'كيف نبدأ', 'app' => 'التطبيق', 'testimonials' => 'الآراء', 'faq' => 'الأسئلة', 'stats' => 'أرقام', 'rich_text' => 'نص', 'image_text' => 'صورة ونص', 'gallery' => 'معرض', 'video' => 'فيديو', 'logos' => 'شعارات', 'cta' => 'دعوة', 'form' => 'النموذج', 'contact' => 'تواصل', 'spacer' => 'فاصل'],
         'offer' => ['applied' => 'طُبّق', 'ended' => 'انتهى', 'family_discount_bigger' => 'خصم الإخوة أكبر', 'not_for_plan' => 'لا يشمل الباقة', 'package' => 'باقة مشتركة', 'none' => 'لا يوجد'],

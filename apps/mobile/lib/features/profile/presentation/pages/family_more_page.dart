@@ -29,8 +29,7 @@ class FamilyMorePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final s = context.watch<SessionCubit>().state;
-    final account = s.current;
-    final guardian = account?.isGuardian ?? false;
+    final guardian = s.guardian;
     return Scaffold(
       body: SafeArea(
         bottom: false,
@@ -188,10 +187,11 @@ class _Who extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final account = context.watch<SessionCubit>().state.current;
+    final s = context.watch<SessionCubit>().state;
+    final account = s.current;
     if (account == null) return const SizedBox.shrink();
     final children = context.watch<LearnerCubit>().state.learners.where((x) => !x.isSelf).map((x) => x.firstName).toList();
-    final who = account.isGuardian && children.isNotEmpty
+    final who = s.guardian && children.isNotEmpty
         ? l.guardianOf(children.join('، '))
         : {for (final r in account.roles) roleLabel(context, r)}.join('، ');
     return MoreWho(line: [if (who.isNotEmpty) who, account.academyName(context.locale)].join(' · '));

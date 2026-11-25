@@ -210,6 +210,7 @@ return [
         'duplicate' => 'This number is already on ":name", who is still being followed.',
         'no_phone' => 'This enquiry has no number any more (the account it came with was erased); start a new one.',
         'phone_taken' => 'This number belongs to ":name" in the academy and cannot be used this way. Change the number or carry on from their account.',
+        'adults_only' => 'This academy trains adults only: enter the trainee themself as the contact, with their own name and number.',
         'owner' => 'The owner must be on the sales team.',
         'kind' => 'Choose how you were in touch.',
         'note' => 'Write the note.',
@@ -225,5 +226,16 @@ return [
         'had_trial' => 'This learner has already had their free trial in this subject. Message us and we will help you choose the right plan, or choose another subject.',
         'no_subject' => 'Choose a subject.',
         'other_learner' => 'We have another request with this number for another learner. Send your request without a time and we will be in touch to book it.',
+    ],
+    // A page for adults (Site's settings.audience): BookOwnTrial's refusals in training words (a session, an area, the one asking).
+    'errors_adults' => [
+        'booking_off' => 'Free introductory sessions are not booked from the page right now. Send us your request and we will be in touch.',
+        'trial_open' => 'You already have an introductory session booked in this area; its time is in our WhatsApp message, and you can change it from the link there.',
+        'too_many_open' => 'This number already has :count introductory sessions booked that have not taken place yet. Please wait until one of them does, or message us and we will book it for you.',
+        'number_in_use' => 'This number is registered with us in a way that cannot book from here. Please message the academy on WhatsApp and we will book the session for you.',
+        'already_student' => 'You are already enrolled with us in this area. Sign in to follow your sessions, or choose another area for the introductory session.',
+        'had_trial' => 'You have already had your free introductory session in this area. Message us and we will help you choose the right programme, or choose another area.',
+        'no_subject' => 'Choose an area.',
+        'other_learner' => 'We have another request with this number for someone else. Send your request without a time and we will be in touch to book it.',
     ],
 ];

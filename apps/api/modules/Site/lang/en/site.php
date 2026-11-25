@@ -164,6 +164,15 @@ return [
             'preferred_to' => 'until',
             'teacher_gender' => 'preferred teacher',
         ],
+        // A page for adults (settings.audience) names these in training words; the rest as above.
+        'fields_adults' => [
+            'subject_id' => 'area',
+            'subject_ids' => 'areas you train in',
+            'subject_ids.*' => 'area',
+            'years_teaching' => 'years of training experience',
+            'help_choose' => 'help me choose the area',
+            'teacher_gender' => 'preferred trainer',
+        ],
     ],
     'requests' => [
         'nav' => 'Page requests',
@@ -215,6 +224,8 @@ return [
     'errors' => [
         'phone' => 'Enter a valid mobile number with the country code, such as +201001234567.',
         'cannot_handle' => 'Answering this request is not yours to do.',
+        'adults_only' => 'This form is for booking for yourself: enter your own name and send it, or contact the academy to arrange anything else.',
+        'children_only' => 'This form is for booking a lesson for a child: enter the child\'s name and age and send it. If the lesson is for you, contact the academy.',
     ],
     'setup' => [
         'title' => "The academy's page",

@@ -28,7 +28,7 @@ export async function FamilyShell({ person, look, locale, fam, fontClasses, chil
   const [t, live, jar] = await Promise.all([getTranslations('common'), liveOf(), cookies()]);
   const academy = locale === 'ar' ? look.name.ar : look.name.en;
   const money = seesMoney(fam.stage);
-  const guardian = isGuardian(fam.learners);
+  const guardian = isGuardian(fam.learners, fam.adults);
   const modules = modulesOf(person);
   return (
     <div data-stage={fam.stage} className={`${fontClasses} min-h-dvh lg:grid lg:grid-cols-[16rem_1fr]`}>

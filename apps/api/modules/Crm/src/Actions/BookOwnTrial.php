@@ -97,7 +97,7 @@ final class BookOwnTrial
     private function ensureOpen(): void
     {
         if (! $this->site->trialSettings()->familyBooks) {
-            throw ValidationException::withMessages(['starts_at' => __('crm::leads.errors.booking_off')]);
+            throw ValidationException::withMessages(['starts_at' => $this->refusal('booking_off')]);
         }
     }
 
@@ -105,9 +105,9 @@ final class BookOwnTrial
     {
         $request = $this->site->joinRequest($requestId) ?? throw new NotFoundHttpException;
         if ($request->subjectId === null) {
-            throw ValidationException::withMessages(['subject_id' => __('crm::leads.errors.no_subject')]);
+            throw ValidationException::withMessages(['subject_id' => $this->refusal('no_subject')]);
         }
-        $refuse = fn (string $why, array $replace = []) => throw ValidationException::withMessages(['starts_at' => __('crm::leads.errors.'.$why, $replace)]);
+        $refuse = fn (string $why, array $replace = []) => throw ValidationException::withMessages(['starts_at' => $this->refusal($why, $replace)]);
 
         return DB::transaction(function () use ($request, $startsAt, $refuse) {
             $this->facts->lockNumber($request->phone);
@@ -169,7 +169,21 @@ final class BookOwnTrial
         $same = $lead->for_child === $request->forChild
             && (! $request->forChild || mb_strtolower(trim((string) $lead->learner_name)) === mb_strtolower(trim((string) $request->childName)));
         if (! $same) {
-            throw ValidationException::withMessages(['starts_at' => __('crm::leads.errors.other_learner')]);
+            throw ValidationException::withMessages(['starts_at' => $this->refusal('other_learner')]);
         }
+    }
+
+    /**
+     * Why it cannot be booked, in the page's words: a page for adults (an
+     * academy that trains professionals) says a session and an area, not a
+     * lesson, a student or a subject (`errors_adults`, else the usual).
+     *
+     * @param  array<string, mixed>  $replace
+     */
+    private function refusal(string $why, array $replace = []): string
+    {
+        $adults = 'crm::leads.errors_adults.'.$why;
+
+        return (string) __($this->site->trialSettings()->forAdults && trans()->has($adults) ? $adults : 'crm::leads.errors.'.$why, $replace);
     }
 }

@@ -6,7 +6,7 @@
     $text = $this->texts[$lesson->id] ?? null;
     $hasObjective = trim((string) $lesson->objectives) !== '';
 @endphp
-<div class="cb-lesson" id="node-{{ $lesson->id }}" wire:key="les-{{ $lesson->id }}" wire:sort:item="'{{ $lesson->id }}'">
+<div class="cb-lesson" id="node-{{ $lesson->id }}" wire:key="les-{{ $lesson->id }}" wire:sort:item="{{ $lesson->id }}">
     <div class="cb-head">
         <span class="cb-grip {{ $gripClass }}" title="{{ __($b.'drag') }}">{!! $grip !!}</span>
         <span class="cb-num">{{ $n }}</span>

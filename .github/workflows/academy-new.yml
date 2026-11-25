@@ -74,6 +74,12 @@ on:
         required: false
         type: string
         default: ''
+      audience:
+        description: Who it teaches — families (children, guardians and adults) or adults (professionals only, no guardians or children)
+        required: true
+        type: choice
+        options: [families, adults]
+        default: families
       reason:
         description: Why (the contract, the request…); kept with the plan
         required: true
@@ -112,6 +118,7 @@ jobs:
       PLAN: ${{ inputs.plan }}
       FEATURES_OFF: ${{ inputs.features_off }}
       HIDDEN: ${{ inputs.hidden }}
+      AUDIENCE: ${{ inputs.audience }}
       REASON: ${{ inputs.reason }}
     steps:
       - name: The academy's details, and the server's settings
@@ -133,6 +140,7 @@ jobs:
           [[ "$PLAN" =~ ^[a-z0-9_-]{1,40}$ ]] || bad "The plan's code (growth)."
           [[ "$FEATURES_OFF" =~ ^[a-z_,\ ]*$ ]] || bad "Areas taken away: names separated by commas (payroll,ai)."
           [[ "$HIDDEN" =~ ^[a-z_,\ ]*$ ]] || bad "Hidden areas: names separated by commas (games,messaging)."
+          [[ "$AUDIENCE" =~ ^(families|adults)$ ]] || bad "Who it teaches: families or adults."
           [ "${#REASON}" -ge 5 ] || bad "A reason of 5 characters or more."
           line "The reason" "$REASON" 300
           if [ -z "$SSH_KEY" ] && [ -z "$SSH_PASSWORD" ]; then
@@ -150,12 +158,12 @@ jobs:
             --arg country "$COUNTRY" --arg currency "$CURRENCY" --arg timezone "$TIMEZONE" --arg locale "$LOCALE" \
             --arg owner_name "$OWNER_NAME" --arg owner_email "$OWNER_EMAIL" --arg owner_phone "$OWNER_PHONE" \
             --arg plan "$PLAN" --argjson features_off "$(list "$FEATURES_OFF")" --argjson hidden "$(list "$HIDDEN")" \
-            --arg reason "$REASON" \
+            --arg audience "$AUDIENCE" --arg reason "$REASON" \
             '{slug: $slug, name_ar: $name_ar, name_en: $name_en, country: ($country | ascii_upcase),
               currency: ($currency | ascii_upcase), timezone: $timezone, locale: $locale,
               owner_name: $owner_name, owner_email: $owner_email,
               owner_phone: (if $owner_phone == "" then null else $owner_phone end),
-              plan: $plan, features_off: $features_off, hidden: $hidden, reason: $reason}')"
+              plan: $plan, features_off: $features_off, hidden: $hidden, audience: $audience, reason: $reason}')"
 
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           if [ -n "$KNOWN_HOSTS" ]; then

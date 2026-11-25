@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { AddChildForm } from '@/components/family/add-child';
 import { Icon } from '@/components/icons';
@@ -6,8 +7,9 @@ import { Notice, buttonLook, join } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import { read } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
-import { isGuardian, seesMoney } from '@/lib/family/rules';
+import { mayAddChild } from '@/lib/family/rules';
 import type { Consents } from '@/lib/family/types';
+import { me } from '@/lib/viewer';
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
@@ -25,12 +27,13 @@ export async function generateMetadata(): Promise<Metadata> {
  * start flow (?from=start) it goes back there.
  */
 export default async function AddChild({ searchParams }: Props) {
-  const [params, t, fam] = await Promise.all([searchParams, getTranslations('addChild'), family()]);
+  const [params, t, fam, person] = await Promise.all([searchParams, getTranslations('addChild'), family(), me()]);
   const fromStart = params.from === 'start';
   const back = fromStart ? '/family/start' : '/family';
-  // A guardian follows children (or none yet); an adult studying for themselves alone is no guardian (the API says so again).
-  const guardian = seesMoney(fam.stage) && (isGuardian(fam.learners) || fam.learners.length === 0);
-  if (!guardian) {
+  // A guardian follows children (or, with none yet, has the guardian role); an adult studying for themselves alone is no
+  // guardian, and an academy for adults has none: not found there, as the API answers (rules.mayAddChild).
+  if (fam.adults) notFound();
+  if (!mayAddChild({ ...fam, roles: person.roles })) {
     return (
       <section className="mx-auto max-w-xl rounded-card border border-line bg-white p-6 text-center" data-add-child="closed">
         <span className="mx-auto grid size-14 place-items-center rounded-full bg-info-soft text-info" aria-hidden="true"><Icon name="people" size={26} /></span>

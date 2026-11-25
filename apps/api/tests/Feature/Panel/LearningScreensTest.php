@@ -54,7 +54,11 @@ it('builds a program: adds a lesson to a unit and lists it with its students', f
         ->callMountedAction()
         ->assertHasNoActionErrors()
         ->assertSee('New lesson')
-        ->assertActionDisabled(TestAction::make('deleteNode')->arguments(['node' => $unit->id]));   // Published: students' progress prevents deleting.
+        // Published: open too; what no learner started goes (DeleteNode refuses the rest with why).
+        ->assertActionEnabled(TestAction::make('deleteNode')->arguments(['node' => $unit->id]))
+        ->callAction(TestAction::make('deleteNode')->arguments(['node' => Node::query()->where('title_en', 'New lesson')->sole()->id]))
+        ->assertNotified(__('curriculum::curriculum.builder.deleted'));
+    expect(Node::query()->where('title_en', 'New lesson')->exists())->toBeFalse();
 
     Livewire::test(ManagePrograms::class)->assertCanSeeTableRecords([$this->program]);
 });

@@ -31,13 +31,16 @@ use Modules\People\Queries\Models\Person;
 use Modules\People\Support\Countries;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Filament\NavGroup;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use UnitEnum;
 
 /**
  * Students (docs/architecture/01, section 6): an older student with their
  * own email or number signs in themselves; a child's account is under a
  * guardian. Their age, gender, country, grade and who should teach them;
- * their guardians on their page. Courses start from "Find a teacher".
+ * their guardians on their page. Courses start from "Find a teacher". In an
+ * academy of adults only everyone signs in themselves: no guardians, no
+ * looks by stage and no school grade (docs/architecture/02, section 29).
  */
 final class StudentResource extends Resource
 {
@@ -89,13 +92,14 @@ final class StudentResource extends Resource
         $l = 'people::directory.fields.';
         $o = 'people::directory.options.';
         [$name, $email, $phone, $timezone, $locale] = DirectoryForm::contact();
-        $own = fn (Get $get) => (bool) $get('own_contact');
+        $adults = self::adultsOnly();
+        $own = fn (Get $get) => $adults || (bool) $get('own_contact');
 
         return $schema->columns(1)->components([
             Section::make(__('people::directory.sections.contact'))->columns(2)->schema([
                 $name,
-                Toggle::make('own_contact')->label(__($l.'own_contact'))->helperText(__($l.'own_contact_hint'))->live()->default(false)
-                    ->visibleOn('create'),
+                Toggle::make('own_contact')->label(__($l.'own_contact'))->helperText(__($l.'own_contact_hint'))->live()->default($adults)
+                    ->visible(fn (string $operation) => $operation === 'create' && ! $adults),
                 Hidden::make('managed'),
                 $email->visible(fn (Get $get, string $operation) => $operation === 'create' ? $own($get) : ! $get('managed')),
                 $phone->visible(fn (Get $get, string $operation) => $operation === 'create' ? $own($get) : ! $get('managed')),
@@ -105,14 +109,14 @@ final class StudentResource extends Resource
             Section::make(__('people::directory.sections.student'))->columns(2)->schema([
                 DatePicker::make('birth_date')->label(__($l.'birth_date'))->native(false)->maxDate(now())->minDate(now()->subYears(100)),
                 Select::make('stage')->label(__($l.'stage'))->helperText(__($l.'stage_hint'))->default('auto')->selectablePlaceholder(false)
-                    ->options(__($o.'stages')),
+                    ->options(__($o.'stages'))->hidden($adults),
                 ToggleButtons::make('gender')->label(__($l.'student_gender'))->inline()->options(__($o.'student_genders')),
                 Select::make('country')->label(__($l.'country'))->searchable()->options(fn () => Countries::options()),
-                Select::make('school_grade')->label(__($l.'school_grade'))->options(__($o.'grades')),
+                Select::make('school_grade')->label(__($l.'school_grade'))->options(__($o.'grades'))->hidden($adults),
                 Select::make('teacher_gender')->label(__($l.'teacher_gender'))->helperText(__($l.'teacher_gender_hint'))->default('any')->selectablePlaceholder(false)
                     ->options(__($o.'teacher_genders')),
             ]),
-            Section::make(__('people::directory.sections.guardian'))->visibleOn('create')->columns(2)->schema([
+            Section::make(__('people::directory.sections.guardian'))->visible(fn (string $operation) => $operation === 'create' && ! $adults)->columns(2)->schema([
                 ToggleButtons::make('guardian_mode')->label(__($l.'guardian_mode'))->inline()->live()->default('new')->columnSpanFull()
                     ->options(fn (Get $get) => $own($get) ? __($o.'guardian_modes') : array_diff_key(__($o.'guardian_modes'), ['none' => true])),
                 Select::make('guardian_id')->label(__($l.'guardian'))->searchable()->columnSpanFull()
@@ -150,7 +154,7 @@ final class StudentResource extends Resource
                     ->description(fn (Person $p) => $p->is_managed_minor ? __('people::directory.under_guardian') : $p->contact()),
                 TextColumn::make('age')->label(__($c.'age'))->visibleFrom('md')
                     ->state(fn (Person $p) => $p->studentProfile?->birth_date ? __('people::directory.age', ['years' => (int) $p->studentProfile->birth_date->diffInYears(CarbonImmutable::now())]) : null),
-                TextColumn::make('guardian_names')->label(__($c.'guardians'))->badge()->color('gray')->separator('|'),
+                TextColumn::make('guardian_names')->label(__($c.'guardians'))->badge()->color('gray')->separator('|')->hidden(self::adultsOnly()),
                 TextColumn::make('country')->label(__($c.'country'))->visibleFrom('md')
                     ->state(fn (Person $p) => $p->studentProfile?->country ? Countries::name($p->studentProfile->country) : null),
                 TextColumn::make('running_courses')->label(__($c.'courses'))->visibleFrom('md')->numeric()->alignCenter(),
@@ -177,6 +181,12 @@ final class StudentResource extends Resource
             ->emptyStateIcon(Heroicon::OutlinedUserGroup);
     }
 
+    /** Whether the academy teaches adults only (no guardians, stages or grades on these screens). */
+    public static function adultsOnly(): bool
+    {
+        return app(AcademyAudience::class)->adultsOnly();
+    }
+
     /** @return array<string, string> guardians matching what was typed (name, email or number) */
     public static function guardianOptions(string $search, array $except = []): array
     {
@@ -195,6 +205,10 @@ final class StudentResource extends Resource
     /** @param  array<string, mixed>  $data */
     public static function stage(array $data): ?LearnerStage
     {
+        if (self::adultsOnly()) {
+            return null;
+        }
+
         return LearnerStage::tryFrom((string) ($data['stage'] ?? ''));
     }
 
@@ -215,6 +229,10 @@ final class StudentResource extends Resource
     public static function guardian(array $data): ?NewGuardian
     {
         $relationship = (string) ($data['relationship'] ?? 'parent');
+
+        if (self::adultsOnly()) {
+            return null;
+        }
 
         return match ($data['guardian_mode'] ?? 'none') {
             'existing' => new NewGuardian(existingId: $data['guardian_id'] ?? null, relationship: $relationship),
@@ -241,7 +259,7 @@ final class StudentResource extends Resource
 
     public static function getRelations(): array
     {
-        return [GuardiansRelationManager::class];
+        return self::adultsOnly() ? [] : [GuardiansRelationManager::class];
     }
 
     public static function getPages(): array

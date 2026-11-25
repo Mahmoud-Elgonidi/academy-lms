@@ -16,6 +16,7 @@ class Account extends Equatable {
     this.logoUrl,
     this.expiresAt,
     this.stage,
+    this.followsChildren,
   });
 
   factory Account.fromJson(Map<String, dynamic> json) => Account(
@@ -30,6 +31,7 @@ class Account extends Equatable {
     token: json['token'] as String,
     expiresAt: json['expires_at'] == null ? null : DateTime.parse(json['expires_at'] as String),
     stage: json['stage'] as String?,
+    followsChildren: json['follows_children'] as bool?,
   );
 
   final String academySlug;
@@ -48,12 +50,19 @@ class Account extends Equatable {
   /// Guardians and teachers are classic.
   final String? stage;
 
+  /// Whether they follow a learner who is not themself (`family/learners`:
+  /// one with `is_self` false), as the portal decides it; null until asked.
+  final bool? followsChildren;
+
   /// Unique on the device: the same user id never appears in two academies.
   String get id => '$academySlug:$userId';
 
   bool get isTeacher => roles.contains('teacher');
   bool get isFamily => roles.contains('student') || roles.contains('guardian');
-  bool get isGuardian => roles.contains('guardian');
+
+  /// Follows a child of their own: from the learners list once known, the
+  /// guardian role until then. An adults academy has none (`SessionState.guardian`).
+  bool get isGuardian => followsChildren ?? roles.contains('guardian');
 
   /// Staff without a teaching or family role use the web back office.
   bool get hasAppArea => isTeacher || isFamily;
@@ -62,7 +71,7 @@ class Account extends Equatable {
 
   bool expired(DateTime now) => expiresAt != null && !expiresAt!.isAfter(now);
 
-  Account copyWith({String? academyColour, String? logoUrl, String? stage}) => Account(
+  Account copyWith({String? academyColour, String? logoUrl, String? stage, bool? followsChildren}) => Account(
     academySlug: academySlug,
     academyNameAr: academyNameAr,
     academyNameEn: academyNameEn,
@@ -74,6 +83,7 @@ class Account extends Equatable {
     token: token,
     expiresAt: expiresAt,
     stage: stage ?? this.stage,
+    followsChildren: followsChildren ?? this.followsChildren,
   );
 
   Map<String, dynamic> toJson() => {
@@ -88,10 +98,11 @@ class Account extends Equatable {
     'token': token,
     'expires_at': expiresAt?.toIso8601String(),
     'stage': stage,
+    'follows_children': followsChildren,
   };
 
   @override
-  List<Object?> get props => [id, token, roles, userName, academyColour, logoUrl, stage];
+  List<Object?> get props => [id, token, roles, userName, academyColour, logoUrl, stage, followsChildren];
 }
 
 /// A chosen account its academy would not open at sign-in (a guardian's

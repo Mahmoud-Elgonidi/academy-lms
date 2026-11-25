@@ -5,10 +5,12 @@ namespace Modules\Games\Providers;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Modules\Curriculum\Contracts\NodeUses;
 use Modules\Games\Filament\Family\GamesFamilyPlugin;
 use Modules\Games\Listeners\HatchOnMastery;
 use Modules\Games\Privacy\GamesData;
 use Modules\Games\Queries\GamesForJourney;
+use Modules\Games\Queries\PlayedNodeUses;
 use Modules\Games\Queries\PracticePool;
 use Modules\Learning\Contracts\Events\NodeMastered;
 use Modules\Learning\Contracts\JourneyGames;
@@ -28,6 +30,8 @@ final class GamesServiceProvider extends ServiceProvider
         $this->app->scoped(PracticePool::class);
         // The games on the learner's journey (Learning's contract): per request, like the practice pool it reads through.
         $this->app->scoped(JourneyGames::class, GamesForJourney::class);
+        // Rounds played on a lesson and creatures it hatched keep it in its published version (Curriculum's DeleteNode asks).
+        $this->app->tag([PlayedNodeUses::class], NodeUses::SOURCES);
     }
 
     public function boot(): void

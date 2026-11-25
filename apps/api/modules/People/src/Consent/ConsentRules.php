@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\People\Contracts\DTOs\ConsentState;
 use Modules\People\Models\PeopleSettings;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
@@ -14,10 +15,13 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * chose 16 or 13) on their birthday in the academy's calendar; with no birth
  * date, a student the academy manages for a guardian (no contact of their
  * own) or who has a guardian at all. Teachers, staff and guardians never do.
+ * An academy that teaches adults only (AcademyAudience, docs/architecture/02,
+ * section 29) asks nobody's guardian: no account there waits for consent,
+ * and a student with no birth date is an adult.
  */
 final class ConsentRules
 {
-    public function __construct(private readonly TenantContext $tenants) {}
+    public function __construct(private readonly TenantContext $tenants, private readonly AcademyAudience $audience) {}
 
     public function consentAge(): int
     {
@@ -38,6 +42,7 @@ final class ConsentRules
         if ($userIds === []) {
             return [];
         }
+        $adults = $this->audience->adultsOnly();
         $under = $this->under($userIds, $this->consentAge(), $now);
         $consents = DB::table('guardian_consents as c')
             ->leftJoin('users as g', fn ($j) => $j->on('g.id', '=', 'c.guardian_id')->on('g.academy_id', '=', 'c.academy_id'))
@@ -50,7 +55,7 @@ final class ConsentRules
             $consent = $consents->get($id);
             $states[$id] = new ConsentState(
                 studentId: $id,
-                needed: $needed,
+                needed: $needed && ! $adults,
                 granted: $consent !== null,
                 consentId: $consent?->id,
                 guardianId: $consent?->guardian_id,
@@ -66,8 +71,9 @@ final class ConsentRules
     /**
      * Which of these people are students younger than $age: by their birth
      * date on the academy's calendar, or, with none, a student the academy
-     * manages for a guardian or who has a guardian at all. Anyone else (staff,
-     * teachers, guardians, adults) is not.
+     * manages for a guardian or who has a guardian at all (in an academy of
+     * adults only, by the birth date alone). Anyone else (staff, teachers,
+     * guardians, adults) is not.
      *
      * @param  list<string>  $userIds
      * @return array<string, bool>
@@ -86,11 +92,12 @@ final class ConsentRules
             ->selectRaw('exists (select 1 from guardian_student g where g.academy_id = u.academy_id and g.student_id = u.id) as has_guardian')
             ->get();
 
+        $adults = $this->audience->adultsOnly();
         $under = [];
         foreach ($people as $person) {
             $under[$person->id] = (bool) $person->is_student && ($person->birth_date !== null
                 ? CarbonImmutable::parse($person->birth_date, $today->timezone)->addYears($age)->greaterThan($today)
-                : ((bool) $person->is_managed_minor || (bool) $person->has_guardian));
+                : ! $adults && ((bool) $person->is_managed_minor || (bool) $person->has_guardian));
         }
 
         return $under;

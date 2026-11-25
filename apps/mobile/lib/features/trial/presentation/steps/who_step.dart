@@ -10,7 +10,8 @@ import '../trial_cubit.dart';
 import '../widgets.dart';
 
 /// Who is learning: me, or my child (their name and age); and the name of
-/// whoever we talk to. What is typed is kept as it is typed.
+/// whoever we talk to. What is typed is kept as it is typed. In an academy
+/// for adults the trial is the reader's own: their name alone.
 class WhoStep extends StatefulWidget {
   const WhoStep({super.key});
 
@@ -66,8 +67,9 @@ class _WhoStepState extends State<WhoStep> {
         final draft = state.draft;
         final p = state.problem;
         String? error(String field) => _missing[field] ?? p?.field(field);
+        final own = state.adults;
         return StepBody(
-          title: l.trialWhoTitle,
+          title: own ? l.trialNameTitle : l.trialWhoTitle,
           // Another academy than the one remembered on this phone.
           lead: Align(
             alignment: AlignmentDirectional.centerStart,
@@ -81,32 +83,34 @@ class _WhoStepState extends State<WhoStep> {
           ),
           bottom: SizedBox(height: 56, child: PrimaryAction(l.trialNext, onPressed: _next)),
           children: [
-            ChoiceCard(
-              key: const Key('trial-who-me'),
-              title: l.trialWhoMe,
-              subtitle: l.trialWhoMeHint,
-              icon: Icons.person_rounded,
-              selected: draft.learner == Learner.me,
-              trailing: const SizedBox.shrink(),
-              onTap: () {
-                setState(() => _missing = {..._missing}..remove('learner'));
-                _cubit.chooseLearner(Learner.me);
-              },
-            ),
-            const Gap(Space.m),
-            ChoiceCard(
-              key: const Key('trial-who-child'),
-              title: l.trialWhoChild,
-              subtitle: l.trialWhoChildHint,
-              icon: Icons.child_care_rounded,
-              selected: draft.learner == Learner.child,
-              trailing: const SizedBox.shrink(),
-              onTap: () {
-                setState(() => _missing = {..._missing}..remove('learner'));
-                _cubit.chooseLearner(Learner.child);
-              },
-            ),
-            FieldError(_missing['learner']),
+            if (!own) ...[
+              ChoiceCard(
+                key: const Key('trial-who-me'),
+                title: l.trialWhoMe,
+                subtitle: l.trialWhoMeHint,
+                icon: Icons.person_rounded,
+                selected: draft.learner == Learner.me,
+                trailing: const SizedBox.shrink(),
+                onTap: () {
+                  setState(() => _missing = {..._missing}..remove('learner'));
+                  _cubit.chooseLearner(Learner.me);
+                },
+              ),
+              const Gap(Space.m),
+              ChoiceCard(
+                key: const Key('trial-who-child'),
+                title: l.trialWhoChild,
+                subtitle: l.trialWhoChildHint,
+                icon: Icons.child_care_rounded,
+                selected: draft.learner == Learner.child,
+                trailing: const SizedBox.shrink(),
+                onTap: () {
+                  setState(() => _missing = {..._missing}..remove('learner'));
+                  _cubit.chooseLearner(Learner.child);
+                },
+              ),
+              FieldError(_missing['learner']),
+            ],
             AnimatedSize(
               duration: context.calm ? Duration.zero : const Duration(milliseconds: 260),
               curve: Curves.easeOutCubic,

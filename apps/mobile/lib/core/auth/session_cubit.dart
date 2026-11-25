@@ -11,6 +11,7 @@ import '../push/push.dart';
 import '../time/clock_style.dart';
 import 'account.dart';
 import 'account_store.dart';
+import 'audience.dart';
 import 'modules.dart';
 import 'session_holder.dart';
 import 'session_repository.dart';
@@ -39,6 +40,7 @@ class SessionState extends Equatable {
     this.policy,
     this.appVersion,
     this.modules = Modules.all,
+    this.audience = Audience.families,
   });
 
   final SessionStatus status;
@@ -80,6 +82,17 @@ class SessionState extends Equatable {
   /// profile); everything before anyone signs in or from an older server.
   final Modules modules;
 
+  /// Whom the open academy teaches (from its look, cached, then the profile).
+  final Audience audience;
+
+  /// An academy for adults and professionals: no guardians, no children, no
+  /// kids' looks, and the training words (`AppWords`).
+  bool get adults => audience == Audience.adults;
+
+  /// The open account follows a child of their own (never in an adults academy):
+  /// the children's group under More, adding a child, their consent.
+  bool get guardian => !adults && (current?.isGuardian ?? false);
+
   /// Whether [feature] is on for the open academy: its tabs, rows and cards show only then.
   bool has(Feature feature) => modules.has(feature);
 
@@ -90,10 +103,10 @@ class SessionState extends Equatable {
   String? get timezone => clock ?? deviceTimezone;
 
   /// The look of the open account's area: a student's stage; classic for
-  /// teachers, guardians and adults.
+  /// teachers, guardians and adults (everyone in an academy for adults).
   Stage get stage {
     final a = current;
-    if (a == null || a.isTeacher || a.isGuardian) return Stage.classic;
+    if (a == null || a.isTeacher || a.roles.contains('guardian') || adults) return Stage.classic;
     return Stage.parse(a.stage);
   }
 
@@ -116,6 +129,7 @@ class SessionState extends Equatable {
     bool? greeting,
     AppPolicy? policy,
     Modules? modules,
+    Audience? audience,
   }) => SessionState(
     status: status ?? this.status,
     accounts: accounts ?? this.accounts,
@@ -134,6 +148,7 @@ class SessionState extends Equatable {
     policy: policy ?? this.policy,
     appVersion: appVersion,
     modules: modules ?? this.modules,
+    audience: audience ?? this.audience,
   );
 
   @override
@@ -162,6 +177,7 @@ class SessionState extends Equatable {
     greeting,
     policy?.minVersion,
     modules,
+    audience,
   ];
 }
 
@@ -361,16 +377,17 @@ class SessionCubit extends Cubit<SessionState> {
               branding: Branding.fromJson(json),
               policy: AppPolicy.fromJson(json['app']),
               modules: Modules.fromJson(json['modules']),
+              audience: Audience.parse(json['audience']),
             ),
           );
         }
       }),
       if (account.isFamily && !account.isTeacher)
         _quietly(() async {
-          final stage = await _repo.viewerStage();
+          final (:stage, :children) = await _repo.viewerStage();
           final latest = state.current;
-          if (latest?.id != account.id || latest!.stage == stage) return;
-          final updated = latest.copyWith(stage: stage);
+          if (latest?.id != account.id || (latest!.stage == stage && latest.followsChildren == children)) return;
+          final updated = latest.copyWith(stage: stage, followsChildren: children);
           final accounts = [for (final a in state.accounts) a.id == updated.id ? updated : a];
           await _store.save(accounts, updated.id);
           _set(state.copyWith(accounts: accounts, current: () => updated));
@@ -391,7 +408,7 @@ class SessionCubit extends Cubit<SessionState> {
     final id = state.current?.id;
     final me = await _repo.me();
     if (id == null || state.current?.id != id) return;
-    _set(state.copyWith(me: () => me, timeFormat: me.timeFormat, modules: me.modules));
+    _set(state.copyWith(me: () => me, timeFormat: me.timeFormat, modules: me.modules, audience: me.audience));
     await _prefs.setTimeFormat(id, me.timeFormat);
   });
 
@@ -406,6 +423,7 @@ class SessionCubit extends Cubit<SessionState> {
           timeFormat: TimeFormat.h12,
           branding: Branding.fallback,
           modules: Modules.all,
+          audience: Audience.families,
         ),
       );
       return;
@@ -416,7 +434,8 @@ class SessionCubit extends Cubit<SessionState> {
     if (account.isFamily && !account.isTeacher && !account.isGuardian && account.stage == null) {
       _holder.account = account;
       try {
-        account = account.copyWith(stage: await _repo.viewerStage());
+        final (:stage, :children) = await _repo.viewerStage();
+        account = account.copyWith(stage: stage, followsChildren: children);
         final opened = account;
         final accounts = [for (final a in state.accounts) a.id == opened.id ? opened : a];
         await _store.save(accounts, opened.id);
@@ -439,6 +458,7 @@ class SessionCubit extends Cubit<SessionState> {
         timeFormat: timeFormat ?? TimeFormat.h12,
         me: () => null,
         modules: Modules.fromJson(cached?['modules']),
+        audience: Audience.parse(cached?['audience']),
       ),
     );
     unawaited(refresh());

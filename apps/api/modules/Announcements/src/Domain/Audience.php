@@ -11,6 +11,9 @@ use InvalidArgumentException;
  * courses, or the teachers. Only "students", chosen outright, reaches a
  * child the academy manages under a guardian; no audience ever reaches a
  * child still waiting for a guardian's consent (Queries\AudienceMembers).
+ * An adults academy has no families, guardians or stages: there it is the
+ * trainees (students, all of them) or the trainers (docs/architecture/02,
+ * section 29).
  */
 final readonly class Audience
 {
@@ -25,6 +28,9 @@ final readonly class Audience
     public const TEACHERS = 'teachers';
 
     public const KINDS = [self::FAMILIES, self::GUARDIANS, self::STUDENTS, self::SUBJECT, self::TEACHERS];
+
+    /** What an adults academy may choose: every trainee, or the trainers. */
+    public const ADULTS_KINDS = [self::STUDENTS, self::TEACHERS];
 
     /** The stages a students' announcement may keep to: People's looks, "adult" being the classic one. */
     public const STAGES = ['kids', 'middle', 'teen', 'adult'];
@@ -51,6 +57,18 @@ final readonly class Audience
         }
 
         return new self($kind, $stage, $subjectId);
+    }
+
+    /** @return list<string> the kinds an academy may choose: all of them, or an adults academy's two */
+    public static function kinds(bool $adultsOnly): array
+    {
+        return $adultsOnly ? self::ADULTS_KINDS : self::KINDS;
+    }
+
+    /** Whether an adults academy may send to it: the trainees all together, or the trainers. */
+    public function fitsAdults(): bool
+    {
+        return in_array($this->kind, self::ADULTS_KINDS, true) && $this->stage === null;
     }
 
     public function forTeachers(): bool

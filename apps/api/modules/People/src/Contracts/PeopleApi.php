@@ -18,7 +18,8 @@ interface PeopleApi
      * Links a guardian to a student. A child waiting for consent has the new
      * guardian asked for it, unless $askConsent is false (a free trial, which
      * the guardian brings the child to by their own link: the consent is
-     * asked when it is first needed, requestConsent()).
+     * asked when it is first needed, requestConsent()). Refused (a
+     * ValidationException) in an academy of adults only: nobody has a guardian there.
      */
     public function linkGuardian(string $guardianId, string $studentId, string $relationship = 'parent', bool $isPrimary = true, bool $askConsent = true): void;
 
@@ -61,6 +62,7 @@ interface PeopleApi
     /**
      * The look of each of these students' areas (the one chosen, or the one
      * their age gives), in one read: studentProfile()'s stage for many.
+     * Classic for everyone in an academy of adults only.
      *
      * @param  list<string>  $studentIds
      * @return array<string, LearnerStage>

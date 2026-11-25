@@ -37,7 +37,27 @@ export function lessonActionsFor(
   return found.cancel || found.refuse || found.rate || found.dispute ? found : null;
 }
 
-/** A guardian follows at least one child (not only themself): their children's privacy is theirs to answer. */
-export function isGuardian(learners: readonly { is_self: boolean }[]): boolean {
-  return learners.some((l) => !l.is_self);
+/**
+ * A guardian follows at least one child (not only themself): their
+ * children's privacy is theirs to answer. Never in an academy for adults
+ * (`adults`), where nobody follows a child.
+ */
+export function isGuardian(learners: readonly { is_self: boolean }[], adults = false): boolean {
+  return !adults && learners.some((l) => !l.is_self);
+}
+
+/**
+ * Whether «إضافة طفل» is offered (J5a): a guardian in the classic look, one
+ * who follows a child or, with no learner yet, has the guardian role; never
+ * an adult who studies for themselves alone, and never in an academy for
+ * adults (the API answers 404 there too).
+ */
+export function mayAddChild(who: { stage: Stage; learners: readonly { is_self: boolean }[]; roles: readonly string[]; adults: boolean }): boolean {
+  if (who.adults || !seesMoney(who.stage)) return false;
+  return isGuardian(who.learners) || (who.learners.length === 0 && who.roles.includes('guardian'));
+}
+
+/** A report, a start or a trial read in the first person ("your report"): an adult academy's trainee, or a learner reading about themself. */
+export function readsAsSelf(adults: boolean, learner: { is_self: boolean } | null | undefined): boolean {
+  return adults || learner?.is_self === true;
 }

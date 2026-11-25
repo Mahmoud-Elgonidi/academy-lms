@@ -126,6 +126,7 @@ final class TeacherChecks extends Page
                     Notification::make()->success()->title(__($l.'done.added'))->send();
                 }),
             Action::make('rule')->label(__($l.'actions.rule'))->icon(Heroicon::OutlinedAdjustmentsHorizontal)->color('gray')
+                ->visible(fn () => $this->board['minors'])
                 ->modalDescription(__($l.'actions.rule_hint'))->modalWidth(Width::Large)
                 ->fillForm(fn () => ['required' => $this->board['required']])
                 ->schema([Toggle::make('required')->label(__($l.'actions.rule_toggle'))])

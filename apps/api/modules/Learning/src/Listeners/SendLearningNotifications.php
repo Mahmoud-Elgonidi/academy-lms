@@ -18,12 +18,14 @@ use Modules\Learning\Contracts\Events\SessionReportOverdue;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
 use Modules\Learning\Domain\Journey\LessonStars;
 use Modules\Learning\Models\Homework;
+use Modules\Learning\Models\LearningSettings;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\RoadmapQuery;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\DTOs\LessonCard;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 
 /**
  * What the family and the teacher hear about reports, homework and progress
@@ -72,11 +74,12 @@ final class SendLearningNotifications
 
     /**
      * The student hears the stars a lesson brought on their journey: on time or how late, and staying to the end
-     * (Domain\Journey\LessonStars). Once per lesson.
+     * (Domain\Journey\LessonStars). Once per lesson. Never when the academy's journey is plain (no stars
+     * to speak of) nor in an adults academy (docs/architecture/02, section 29).
      */
     public function lessonStars(SessionFinalized $event): void
     {
-        if ($event->outcome !== 'completed') {
+        if ($event->outcome !== 'completed' || app(AcademyAudience::class)->adultsOnly() || LearningSettings::current()->journey_style === 'plain') {
             return;
         }
         $card = app(AttendanceApi::class)->lesson($event->sessionId);

@@ -11,11 +11,14 @@ use Modules\Identity\Models\User;
 use Modules\Identity\Queries\ActiveTeachers;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Limit;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
  * Creates a user, with roles, in the current academy. A new teacher needs
- * room in the academy's plan (its teacher limit).
+ * room in the academy's plan (its teacher limit). An academy of adults
+ * only (docs/architecture/02, section 29) takes no guardian and no child
+ * under a guardian: every account there is its owner's own.
  */
 final class CreateUser
 {
@@ -23,6 +26,7 @@ final class CreateUser
         private readonly TenantContext $tenants,
         private readonly AcademyPlan $plan,
         private readonly ActiveTeachers $teachers,
+        private readonly AcademyAudience $audience,
     ) {}
 
     public function handle(NewUser $data): User
@@ -45,6 +49,9 @@ final class CreateUser
         ])->after(function ($validator) use ($data): void {
             if ($data->email === null && $data->phoneE164 === null && $data->username === null) {
                 $validator->errors()->add('email', __('identity::users.identifier_required'));
+            }
+            if ($this->audience->adultsOnly() && (in_array(Role::Guardian, $data->roles, true) || $data->isManagedMinor)) {
+                $validator->errors()->add('roles', __('identity::users.adults_only'));
             }
         })->validate();
 

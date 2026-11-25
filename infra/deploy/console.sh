@@ -12,7 +12,8 @@
 #                            never on a command line, and is never printed.
 #   bash console.sh academy  one JSON object on stdin (infra/deploy/RUNBOOKS.md, "Open a client
 #                            academy from GitHub"): `php artisan platform:onboard` opens the
-#                            academy with its owner, plan, areas off and hidden, and emails the
+#                            academy with its owner, plan, areas off and hidden, audience
+#                            (families or adults), and emails the
 #                            owner their welcome link (never printed). Checked whole first: a
 #                            refusal makes nothing.
 set -euo pipefail

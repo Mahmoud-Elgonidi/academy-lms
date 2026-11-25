@@ -70,6 +70,7 @@ return [
         'subject' => 'Choose one of the academy\'s subjects.',
         'nobody' => 'Nobody would receive it: no active account fits this audience.',
         'daily_cap' => 'The academy has sent :n announcements today; the next one can go out tomorrow.',
+        'adults_audience' => 'This academy\'s announcements go to all the trainees or to the trainers.',
         'impersonating' => 'The platform team does not send announcements on the academy\'s behalf.',
     ],
 ];

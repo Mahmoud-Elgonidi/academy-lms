@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getLocale } from 'next-intl/server';
 import { CalmCard, TrialShell } from '@/components/site/trial/shell';
+import { TrialWords } from '@/components/site/trial/words';
+import { speaksToAdults } from '@/components/site/trial/words-path';
+import { trialWordsOnServer } from '@/components/site/trial/words-server';
 import { PickTrial, type PickRequest } from '@/components/site/trial/trial-pages';
 import { read } from '@/lib/api/server';
 import { academySite } from '@/lib/site/server';
@@ -10,7 +13,8 @@ import { branding } from '@/lib/viewer';
 type Props = { params: Promise<{ locale: string; token: string }> };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('site.trial.pick');
+  // In the published page's words (a page for adults says a session, not a lesson).
+  const t = await trialWordsOnServer(speaksToAdults(await academySite(), await branding()), 'pick');
   return { title: t('title'), robots: { index: false, follow: false }, referrer: 'no-referrer' };
 }
 
@@ -23,8 +27,10 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function PickTrialPage({ params }: Props) {
   const { token } = await params;
-  const [locale, t, look, site] = await Promise.all([getLocale(), getTranslations('site.trial'), branding(), academySite()]);
+  const [locale, look, site] = await Promise.all([getLocale(), branding(), academySite()]);
   const found = await read<{ data: PickRequest }>('/v1/site/trials/pick/{token}', { params: { token } });
+  const adults = speaksToAdults(site, look);
+  const t = await trialWordsOnServer(adults);
   const whatsapp = site?.whatsapp ?? null;
   const academy = site?.academy.name ?? (locale === 'en' ? look.name.en : look.name.ar);
   const path = `/trial/${token}`;
@@ -48,7 +54,9 @@ export default async function PickTrialPage({ params }: Props) {
   }
   return (
     <TrialShell look={look} path={path}>
-      <PickTrial request={request} token={token} academy={academy} whatsapp={whatsapp} timeFormat={timeFormatOf(look.time_format)} locale={locale} />
+      <TrialWords adults={adults}>
+        <PickTrial request={request} token={token} academy={academy} whatsapp={whatsapp} timeFormat={timeFormatOf(look.time_format)} locale={locale} />
+      </TrialWords>
     </TrialShell>
   );
 }

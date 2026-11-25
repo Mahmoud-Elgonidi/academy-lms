@@ -1,11 +1,18 @@
+import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { ConsentCard } from '@/components/family/consent';
 import { Empty, Heading } from '@/components/ui';
 import { get } from '@/lib/api/server';
+import { adultsAcademy } from '@/lib/audience-server';
 import type { Consents } from '@/lib/family/types';
 
-/** A guardian's consent to each child's account: read and agree, or take it back. Live through LiveRefresh (consents.changed). */
+/**
+ * A guardian's consent to each child's account: read and agree, or take it
+ * back. Live through LiveRefresh (consents.changed). An academy for adults
+ * has no guardians: not found there.
+ */
 export default async function Privacy() {
+  if (await adultsAcademy()) notFound();
   const [t, consents] = await Promise.all([getTranslations('privacy'), get<Consents>('/v1/family/consents')]);
   return (
     <div>

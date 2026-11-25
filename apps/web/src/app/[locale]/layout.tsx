@@ -7,6 +7,8 @@ import type { CSSProperties, ReactNode } from 'react';
 import { routing } from '@/i18n/routing';
 import { NONCE_HEADER } from '@/lib/csp';
 import { TIMEZONE_COOKIE } from '@/lib/session';
+import { AudienceProvider } from '@/components/audience';
+import { audienceOf } from '@/lib/audience';
 import { branding, neutralOf } from '@/lib/viewer';
 import '../globals.css';
 
@@ -78,7 +80,10 @@ export default async function LocaleLayout({ children, params }: Props) {
         ) : null}
       </head>
       <body className="font-sans text-[15px] leading-relaxed">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          {/* Whom the academy serves, for client components (useAdults); its words already come overlaid (i18n/request.ts). */}
+          <AudienceProvider audience={audienceOf(look.audience)}>{children}</AudienceProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

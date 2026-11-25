@@ -67,7 +67,8 @@ use Modules\SharedKernel\Games\ItemKind;
 
 /**
  * The content of a program: levels, units and lessons in teaching order.
- * Add, edit, move and (while a draft) delete; then publish so enrollments
+ * Add, edit, move and delete (in a published version, only what no learner
+ * started: DeleteNode); then publish so enrollments
  * follow it. Each lesson opens its materials: files and links, for
  * everyone or for teachers only, added, renamed, moved or taken off at any
  * time (published or not), and its practice: the questions, orders and
@@ -80,7 +81,9 @@ use Modules\SharedKernel\Games\ItemKind;
  * Built quickly: a title typed under a level or unit and Enter adds it
  * (quickAdd, through SaveNode) with the field kept for the next one; rows are
  * dragged within their parent and lessons between the units of a level
- * (wire:sort, MoveNode::place), the arrows staying for the keyboard. A
+ * (wire:sort, MoveNode::place; an item's key is its bare id), the arrows
+ * staying for the keyboard and walking a lesson across the units of its
+ * level (MoveNode::handle). A
  * readiness bar (Domain\PublishReadiness, the same reading as PublishVersion)
  * says what stops publishing and what is only worth a look, each item leading
  * to its node; "Preview" draws the levels as the journey's islands.
@@ -579,13 +582,15 @@ final class EditCurriculum extends Page
             ->label(__('curriculum::curriculum.builder.delete'))
             ->icon(Heroicon::OutlinedTrash)
             ->button()->color('danger')->size('sm')
-            ->disabled(fn () => $this->version()->status !== 'draft')
-            ->tooltip(fn () => $this->version()->status === 'draft' ? null : __('curriculum::curriculum.builder.delete_published'))
+            // In a published version too: DeleteNode removes only what no learner started, else says why and what to do instead.
+            ->disabled(fn () => ! in_array($this->version()->status, ['draft', 'published'], true))
             ->requiresConfirmation()
-            ->modalDescription(__('curriculum::curriculum.builder.delete_confirm'))
+            ->modalHeading(fn (array $arguments) => __('curriculum::curriculum.builder.delete_title', ['title' => $this->node($arguments['node'])->toData()->title()]))
+            ->modalDescription(fn () => __('curriculum::curriculum.builder.'.($this->version()->status === 'published' ? 'delete_published' : 'delete_confirm')))
             ->action(function (array $arguments) {
                 app(DeleteNode::class)->handle($this->node($arguments['node']));
                 $this->forget();
+                Notification::make()->success()->title(__('curriculum::curriculum.builder.deleted'))->send();
             });
     }
 

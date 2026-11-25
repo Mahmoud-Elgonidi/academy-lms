@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { initialOf } from '@/lib/site/initial';
-import { formatMinor, hasPlan, itemsOf, offerStateAt, perLessonMinor, startPathOf, type Money, type TrialReport } from '@/lib/site/report';
+import { formatMinor, hasPlan, itemsOf, offerStateAt, perLessonMinor, selfWords, startPathOf, type Money, type TrialReport } from '@/lib/site/report';
 import { whatsappLink } from '@/lib/site/trial';
 import { Icon, WhatsAppIcon } from '../icons';
 import { OfferTimer } from './offer-timer';
@@ -16,10 +16,11 @@ import './report.css';
  * on, the teacher's words; then, in the classic look, the plan they recommend
  * with its price, the academy's offer and the time left on it, the way to
  * start, and the free second trial. A student's own look reads the report
- * alone, in their own words. Written on the server, whole without script; the
- * countdown ticks once it runs.
+ * alone, in their own words; a learner reading about themself (`self`: an
+ * academy for adults, or an adult's own trial) reads it in the first person.
+ * Written on the server, whole without script; the countdown ticks once it runs.
  */
-export async function ReportView({ report, look, locale, now, start, next }: {
+export async function ReportView({ report, look, locale, now, start, next, self = false }: {
   report: TrialReport;
   /** family: a guardian or an adult (classic); student: a child or teen reading their own report. */
   look: 'family' | 'student';
@@ -30,8 +31,11 @@ export async function ReportView({ report, look, locale, now, start, next }: {
   start?: ReactNode;
   /** The second trial's card (classic), or nothing. */
   next?: ReactNode;
+  /** Read by the learner themself (rules.readsAsSelf): "your report", not the learner by name. */
+  self?: boolean;
 }) {
   const t = await getTranslations('site.report');
+  const say = selfWords(t, self);
   const student = look === 'student';
   const strengths = itemsOf(report.strengths);
   const work = itemsOf(report.to_work_on);
@@ -43,7 +47,7 @@ export async function ReportView({ report, look, locale, now, start, next }: {
       <article className="lt-card lr-sheet" aria-labelledby="lr-title">
         <header className="lr-hero">
           <p className="lt-kicker">{student ? t('student.title') : report.second ? t('kickerSecond') : t('kicker')}</p>
-          <h1 id="lr-title">{t('title', { learner: report.learner, subject: report.subject.name })}</h1>
+          <h1 id="lr-title">{say('title', { learner: report.learner, subject: report.subject.name })}</h1>
           <ul className="lt-facts lr-facts">
             {report.held_at ? <li><Icon name="calendar" /><span>{report.held_at.label}</span></li> : null}
             {report.teacher.name ? <li><Icon name="user" /><span>{t('with', { teacher: report.teacher.name })}</span></li> : null}
@@ -102,7 +106,7 @@ export async function ReportView({ report, look, locale, now, start, next }: {
         {!strengths.length && !work.length && !report.note ? <p className="lt-muted">{t('nothingWritten')}</p> : null}
       </article>
 
-      {look === 'family' ? <Recommendation report={report} locale={locale} now={now} start={start} /> : null}
+      {look === 'family' ? <Recommendation report={report} locale={locale} now={now} start={start} self={self} /> : null}
       {/* Once a course started, the academy changes the teacher itself: no second trial to offer. */}
       {look === 'family' && report.course === null && report.offer_state !== 'started' ? next : null}
     </div>
@@ -144,8 +148,9 @@ function Price({ money, lessons, locale, perLessonWords, className }: { money: M
  * offer (open with the time left, ended, used), a course already started, a
  * plan no longer offered or no price known, and the way to start.
  */
-async function Recommendation({ report, locale, now, start }: { report: TrialReport; locale: string; now: number; start?: ReactNode }) {
-  const t = await getTranslations('site.report');
+async function Recommendation({ report, locale, now, start, self }: { report: TrialReport; locale: string; now: number; start?: ReactNode; self: boolean }) {
+  const words = await getTranslations('site.report');
+  const t = Object.assign(selfWords(words, self), { rich: words.rich });
   const { recommendation: rec, offer } = report;
   const state = offerStateAt(report.offer_state, offer, now);
   const lessons = rec.plan?.sessions_per_block ?? null;
@@ -239,7 +244,7 @@ async function Recommendation({ report, locale, now, start }: { report: TrialRep
  * (else writing from Help, or signing in). A course already started leads to
  * the family's lessons, or to its invoice while it waits for payment.
  */
-export async function StartWays({ report, whatsapp, locale, family, help = true }: {
+export async function StartWays({ report, whatsapp, locale, family, help = true, self = false }: {
   report: TrialReport;
   whatsapp: string | null;
   locale: string;
@@ -247,8 +252,10 @@ export async function StartWays({ report, whatsapp, locale, family, help = true 
   family?: boolean;
   /** Whether the academy has Help on (writing to it is the last way; without it, none). */
   help?: boolean;
+  /** Read by the learner themself: the chat's words and the buttons in the first person. */
+  self?: boolean;
 }) {
-  const t = await getTranslations('site.report');
+  const t = selfWords(await getTranslations('site.report'), self);
   const signIn = `/${locale}/sign-in?next=${encodeURIComponent(`/${locale}/family/trials/${report.id}`)}`;
   const at = (path: string) => `/${locale}${path}`;
   const started = report.offer_state === 'started' || report.course !== null;

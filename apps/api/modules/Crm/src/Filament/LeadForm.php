@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Support\Facades\DB;
 use Modules\Crm\Enums\LeadSource;
 use Modules\Crm\Support\Countries;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 
@@ -43,7 +44,8 @@ final class LeadForm
                 ToggleButtons::make('locale')->label(__($l.'fields.locale'))->options(__($l.'locales'))->inline()->required()->default('ar'),
             ]),
             Fieldset::make(__($l.'sections.learner'))->columns(2)->schema([
-                Toggle::make('for_child')->label(__($l.'fields.for_child'))->live()->columnSpanFull(),
+                // An academy that trains adults only has no child to ask for: the learner is the contact.
+                Toggle::make('for_child')->label(__($l.'fields.for_child'))->live()->columnSpanFull()->visible(fn () => ! app(AcademyAudience::class)->adultsOnly()),
                 TextInput::make('learner_name')->label(__($l.'fields.learner_name'))->maxLength(120)->visible($child)->required($child),
                 Select::make('learner_birth_year')->label(__($l.'fields.learner_birth_year'))->visible($child)
                     ->options(array_combine(range($year - 3, $year - 25), range($year - 3, $year - 25))),

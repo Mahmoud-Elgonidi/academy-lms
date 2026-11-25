@@ -17,13 +17,17 @@ use Modules\Import\Support\Text;
 use Modules\People\Contracts\DTOs\StudentDetails;
 use Modules\People\Contracts\PeopleApi;
 use Modules\SharedKernel\Contact\Phone;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 
 /**
  * Students and their guardians from a sheet, a student a row. A guardian is
  * found by number or email, else made, so brothers and sisters on several
  * rows share one parent. A child with no number or email of their own gets
  * an account under the parent (no sign-in of their own); an adult student
- * signs in with theirs. A student already here is left as they are.
+ * signs in with theirs. A student already here is left as they are. An
+ * academy of adults only (docs/architecture/02, section 29) imports trainees
+ * alone: no guardian columns, and every row needs the trainee's own email or
+ * number.
  */
 final class FamiliesImporter implements Importer
 {
@@ -31,6 +35,7 @@ final class FamiliesImporter implements Importer
         private readonly IdentityApi $identity,
         private readonly PeopleApi $people,
         private readonly Directory $directory,
+        private readonly AcademyAudience $audience,
     ) {}
 
     public function kind(): string
@@ -40,6 +45,18 @@ final class FamiliesImporter implements Importer
 
     public function fields(): array
     {
+        if ($this->audience->adultsOnly()) {
+            return [
+                new Field('student_name', true, ['المتدرّب', 'اسم المتدرّب', 'المتدرب', 'اسم المتدرب', 'المشارك', 'اسم المشارك', 'الطالب', 'اسم الطالب', 'الموظف', 'اسم الموظف', 'trainee', 'trainee name', 'participant', 'employee', 'student', 'student name', 'name', 'الاسم']),
+                new Field('student_email', false, ['بريد المتدرّب الإلكتروني', 'بريد المتدرب', 'إيميل المتدرب', 'trainee email', 'student email', 'email', 'البريد الإلكتروني', 'الإيميل', 'الايميل']),
+                new Field('student_phone', false, ['هاتف المتدرّب', 'رقم المتدرب', 'جوال المتدرب', 'موبايل المتدرب', 'trainee phone', 'student phone', 'phone', 'mobile', 'whatsapp', 'الهاتف', 'الموبايل', 'الجوال', 'واتساب', 'رقم الواتساب']),
+                new Field('gender', false, ['النوع', 'الجنس', 'gender', 'sex']),
+                new Field('birth_date', false, ['تاريخ الميلاد', 'سنة الميلاد', 'الميلاد', 'birth date', 'birthday', 'date of birth', 'birth year', 'dob']),
+                new Field('timezone', false, ['التوقيت', 'المنطقة الزمنية', 'البلد', 'الدولة', 'المدينة', 'time zone', 'country', 'city']),
+                new Field('language', false, ['لغة الرسائل', 'اللغة', 'language']),
+            ];
+        }
+
         return [
             new Field('student_name', true, ['الطالب', 'اسم الطالب', 'الطالبة', 'اسم الطالبة', 'student', 'student name', 'name', 'الاسم']),
             new Field('student_email', false, ['إيميل الطالب', 'ايميل الطالب', 'بريد الطالب الإلكتروني', 'بريد الطالب', 'student email']),
@@ -58,6 +75,8 @@ final class FamiliesImporter implements Importer
     public function import(array $row, ImportContext $context): RowOutcome
     {
         $e = 'import::rows.errors.';
+        // An adults academy's sheet has no guardian columns.
+        $row += ['guardian_name' => '', 'guardian_email' => '', 'guardian_phone' => '', 'relationship' => ''];
         if ($row['student_name'] === '') {
             throw ValidationException::withMessages(['student_name' => __($e.'name')]);
         }

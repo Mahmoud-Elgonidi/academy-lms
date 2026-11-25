@@ -64,7 +64,8 @@ export function SitePageView({ site, page, look, locale, t, phones, accent, acce
     locale,
     t,
     phones,
-    audience: settings.audience,
+    // An academy for adults speaks to adults on every page it shows; a families academy's page says whom it speaks to.
+    audience: look.audience === 'adults' ? 'adults' : settings.audience,
     character: characterOf(page),
     accentInk,
     links: {

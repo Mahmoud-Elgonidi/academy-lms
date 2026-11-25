@@ -19,6 +19,7 @@ use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
@@ -46,7 +47,7 @@ final class SendAnnouncement
      * @param  list<string>  $channels  besides the inbox: push, email
      *
      * @throws AuthorizationException without announcements.send
-     * @throws ValidationException the words, the channels, the subject, nobody to reach, or today's announcements used up
+     * @throws ValidationException the words, the channels, the subject, an audience an adults academy does not have, nobody to reach, or today's announcements used up
      */
     public function handle(string $senderId, string $title, string $body, Audience $audience, array $channels = []): Announcement
     {
@@ -56,6 +57,10 @@ final class SendAnnouncement
         }
         if (AuditActor::current()->onBehalfOf !== null) {
             throw ValidationException::withMessages(['announcement' => __('announcements::announcements.errors.impersonating')]);
+        }
+        // An adults academy speaks to its trainees or its trainers, never to families or a stage.
+        if (app(AcademyAudience::class)->adultsOnly() && ! $audience->fitsAdults()) {
+            throw ValidationException::withMessages(['audience' => __('announcements::announcements.errors.adults_audience')]);
         }
         $title = AnnouncementRules::title($title);
         $body = AnnouncementRules::body($body);

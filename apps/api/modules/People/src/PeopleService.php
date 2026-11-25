@@ -15,6 +15,7 @@ use Modules\People\Actions\SaveTeacherProfile;
 use Modules\People\Actions\SendWelcome;
 use Modules\People\Checks\Clearances;
 use Modules\People\Consent\ConsentRules;
+use Modules\People\Contracts\AgeGroup;
 use Modules\People\Contracts\DTOs\ConsentState;
 use Modules\People\Contracts\DTOs\PublicTeacher;
 use Modules\People\Contracts\DTOs\StudentDetails;
@@ -28,6 +29,7 @@ use Modules\People\Models\StudentProfile;
 use Modules\People\Models\TeacherProfile;
 use Modules\People\Queries\PublicTeachers;
 use Modules\People\Support\Countries;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 
 final class PeopleService implements PeopleApi
 {
@@ -40,7 +42,7 @@ final class PeopleService implements PeopleApi
     ) {}
 
     /** Under this age a student is a minor (safeguarding; the consent age is the academy's own). */
-    public const ADULT_AGE = 18;
+    public const ADULT_AGE = AgeGroup::ADULT_AGE;
 
     public function minors(array $studentIds): array
     {
@@ -82,13 +84,18 @@ final class PeopleService implements PeopleApi
         $profile = StudentProfile::query()->find($studentId);
         $age = $profile?->birth_date ? (int) $profile->birth_date->diffInYears($today ?? CarbonImmutable::now()) : null;
         $chosen = $profile?->stage ? LearnerStage::from($profile->stage) : null;
+        // An academy of adults only has one look for everyone (docs/architecture/02, section 29).
+        $stage = $this->adultsOnly() ? LearnerStage::Classic : ($chosen ?? LearnerStage::forAge($age));
 
-        return new StudentProfileData($studentId, $profile?->birth_date, $chosen, $chosen ?? LearnerStage::forAge($age), $age);
+        return new StudentProfileData($studentId, $profile?->birth_date, $chosen, $stage, $age);
     }
 
     public function stages(array $studentIds, ?CarbonImmutable $today = null): array
     {
         $ids = array_values(array_unique($studentIds));
+        if ($this->adultsOnly()) {
+            return array_fill_keys($ids, LearnerStage::Classic);
+        }
         $profiles = StudentProfile::query()->whereIn('user_id', $ids)->get()->keyBy('user_id');
         $stages = [];
         foreach ($ids as $id) {
@@ -98,6 +105,11 @@ final class PeopleService implements PeopleApi
         }
 
         return $stages;
+    }
+
+    private function adultsOnly(): bool
+    {
+        return app(AcademyAudience::class)->adultsOnly();
     }
 
     public function studentDetails(string $studentId): StudentDetails

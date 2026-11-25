@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
+use Modules\Curriculum\Contracts\Events\LessonsRemoved;
+use Modules\Curriculum\Contracts\NodeUses;
 use Modules\Enrollment\Contracts\Events\CurriculumAttached;
 use Modules\Learning\Console\SendWeeklyDigestsCommand;
 use Modules\Learning\Console\SweepLearningCommand;
@@ -32,12 +34,14 @@ use Modules\Learning\Http\Web\SubmissionFileController;
 use Modules\Learning\Http\Web\WeeklyVoiceController;
 use Modules\Learning\LearningService;
 use Modules\Learning\Listeners\OpenReportWhenSessionCloses;
+use Modules\Learning\Listeners\RebuildProgressOnLessonsRemoved;
 use Modules\Learning\Listeners\RebuildProgressOnProgramChange;
 use Modules\Learning\Listeners\SendLearningNotifications;
 use Modules\Learning\Live\HomeworkChanged;
 use Modules\Learning\Live\PracticeChanged;
 use Modules\Learning\Privacy\LearningData;
 use Modules\Learning\Queries\Journey\NoJourneyGames;
+use Modules\Learning\Queries\LearnerNodeUses;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\SharedKernel\Ai\AiFeature;
@@ -57,6 +61,8 @@ final class LearningServiceProvider extends ServiceProvider
         $this->app->singleton(LearningApi::class, LearningService::class);
         // The journey without games until the Games module binds its own.
         $this->app->bindIf(JourneyGames::class, NoJourneyGames::class);
+        // Reports, progress, homework and practice on a lesson keep it in its published version (Curriculum's DeleteNode asks).
+        $this->app->tag([LearnerNodeUses::class], NodeUses::SOURCES);
     }
 
     public function boot(): void
@@ -116,6 +122,7 @@ final class LearningServiceProvider extends ServiceProvider
         Event::listen(CheerSent::class, [SendLearningNotifications::class, 'cheerSent']);
         Event::listen(SessionFinalized::class, [SendLearningNotifications::class, 'lessonStars']);
         Event::listen(CurriculumAttached::class, RebuildProgressOnProgramChange::class);
+        Event::listen(LessonsRemoved::class, RebuildProgressOnLessonsRemoved::class);
 
         // Homework pages refresh when homework changes (the homework triggers raise "homework:{person}").
         $this->app->make(LiveSignals::class)->on('homework', fn (string $userId) => new HomeworkChanged($userId));

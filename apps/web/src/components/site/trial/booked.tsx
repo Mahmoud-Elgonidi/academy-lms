@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useRef, type ReactNode } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import { dayLabel, zoneName } from '@/lib/format';
 import { calendarFileUrl, googleCalendarUrl, type CalendarEvent } from '@/lib/site/trial';
 import { formatClock, type LocalTime, type TimeFormat } from '@/lib/time';
 import { Icon } from '../icons';
 import { Confetti } from '../join-platform';
+import { useTrialWords } from './words';
 
 /** A heading that takes the focus when its card appears, so a screen reader starts there. */
 export function FocusHeading({ children, level = 3, className }: { children: ReactNode; level?: 2 | 3; className?: string }) {
@@ -37,7 +38,7 @@ export function BigTime({ time, timeFormat }: { time: LocalTime; timeFormat: Tim
 
 /** "Add to calendar": a calendar file written on the server, and Google Calendar, both from the API's UTC instant. */
 export function AddToCalendar({ event }: { event: CalendarEvent }) {
-  const t = useTranslations('site.trial.booked');
+  const t = useTrialWords('booked');
   return (
     <div className="lt-calendar">
       <a className="ls-btn ls-btn-dark ls-btn-small" href={calendarFileUrl(event)} download="trial-lesson.ics">
@@ -67,7 +68,7 @@ export function BookedCard({ time, subject, teacher, minutes, academy, timeForma
   next: string[];
   actions?: ReactNode;
 }) {
-  const t = useTranslations('site.trial.booked');
+  const t = useTrialWords('booked');
   const length = minutes && minutes > 0 ? minutes : 30;
   const event: CalendarEvent = {
     utc: time.utc,

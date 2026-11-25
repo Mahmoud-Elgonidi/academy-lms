@@ -6,6 +6,7 @@ import { buttonLook, join } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import { read } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
+import { mayAddChild } from '@/lib/family/rules';
 import { choiceFrom, learnerOf, stepToShow, type Choice } from '@/lib/start/flow';
 import type { StartOptions, StartSlots } from '@/lib/start/types';
 import { academySite } from '@/lib/site/server';
@@ -86,6 +87,7 @@ export default async function StartCourse({ searchParams }: Props) {
       whatsapp={whatsapp}
       recommended={recommended}
       trial={trial}
+      canAddChild={mayAddChild({ ...fam, roles: person.roles })}
     />
   );
 }

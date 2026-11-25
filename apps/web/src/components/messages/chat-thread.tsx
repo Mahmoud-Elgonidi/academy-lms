@@ -28,6 +28,8 @@ export function ChatThread({ conversation }: { conversation: Conversation }) {
   }, [last]);
 
   const others = conversation.members.filter((m) => m.id !== conversation.with.id && !m.me);
+  // Guardians read along only when the student has them (never in an academy for adults): the first line says who reads.
+  const guardians = conversation.members.some((m) => m.side === 'guardian');
   const write = (data: FormData) => {
     const body = String(data.get('body') ?? '').trim();
     if (!body) return;
@@ -49,7 +51,7 @@ export function ChatThread({ conversation }: { conversation: Conversation }) {
     <Card className="space-y-0 p-0!">
       <header className="border-b border-line px-4 py-3">
         <h1 className="font-heading text-lg font-bold">{conversation.with.name}</h1>
-        <p className="text-xs text-muted">{t('inIt', { names: others.map((m) => `${m.name} (${m.label})`).join('، ') })}</p>
+        {others.length > 0 ? <p className="text-xs text-muted">{t('inIt', { names: others.map((m) => `${m.name} (${m.label})`).join('، ') })}</p> : null}
       </header>
       <p className="flex items-start gap-2 bg-brand-soft px-4 py-2 text-xs leading-6 text-brand-strong">
         <Icon name="eyeOff" size={16} className="mt-1 shrink-0" />
@@ -57,7 +59,7 @@ export function ChatThread({ conversation }: { conversation: Conversation }) {
       </p>
 
       <ol ref={list} className="max-h-[60dvh] space-y-3 overflow-y-auto px-4 py-4" aria-label={t('conversation')}>
-        {conversation.messages.length === 0 ? <li className="py-8 text-center text-sm text-muted">{t('first')}</li> : null}
+        {conversation.messages.length === 0 ? <li className="py-8 text-center text-sm text-muted">{t(guardians ? 'first' : 'firstNoGuardians')}</li> : null}
         {conversation.messages.map((m) => (
           <li key={m.id} className={join('flex flex-col gap-1', m.mine ? 'items-end' : 'items-start')}>
             <div

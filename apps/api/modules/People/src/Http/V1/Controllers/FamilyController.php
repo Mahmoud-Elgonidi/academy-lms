@@ -10,6 +10,7 @@ use Modules\People\Consent\ConsentRules;
 use Modules\People\Contracts\DTOs\Learner;
 use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\PeopleApi;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 
 final class FamilyController
 {
@@ -42,11 +43,13 @@ final class FamilyController
      * A guardian adds their own child (a managed minor under them, with no sign-in of their own) and goes straight into
      * the start flow (GET family/start/options?learner_id={id}). birth_date (Y-m-d), else birth_year; gender optional.
      * agree with the consent wording's version (GET family/consents gives the text; age is when it is needed): the
-     * guardian's consent is recorded at once. 403 for an account that is not a guardian; 422 with why, in plain words
+     * guardian's consent is recorded at once. 404 in an academy of adults only (branding audience: adults); 403 for an
+     * account that is not a guardian; 422 with why, in plain words
      * (the same name and year of birth as one of their children, too many children). Send an Idempotency-Key.
      */
-    public function addChild(Request $request, AddOwnChild $add, PeopleApi $people, ConsentRules $rules): JsonResponse
+    public function addChild(Request $request, AddOwnChild $add, PeopleApi $people, ConsentRules $rules, AcademyAudience $audience): JsonResponse
     {
+        abort_if($audience->adultsOnly(), 404);
         $data = $request->validate([
             'name' => ['required', 'string', 'min:2', 'max:80'],
             'birth_date' => ['nullable', 'date_format:Y-m-d', 'required_without:birth_year'],

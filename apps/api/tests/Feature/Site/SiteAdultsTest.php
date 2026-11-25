@@ -122,3 +122,44 @@ it('shows a cards block\'s own courses with their pictures and buttons', functio
         ->and($cards['data']['items'][1]['media'])->toBeNull()
         ->and($cards['data']['items'][1]['link'])->toBe(['label' => '', 'action' => ['kind' => 'block', 'block' => 'b-contact1']]);
 });
+
+/**
+ * The words of a school or a university that a page for adults (an academy
+ * that trains institutions and professionals) never says by default in its
+ * trial flow: the portal's list (components/site/trial/school-words.ts), as
+ * whole words with their attached letters, the short vowels taken out.
+ */
+function schoolWords(string $text): array
+{
+    $stems = 'حصة|حصتك|حصتي|حصص|درس|دروس|مادة|مادتك|مواد|موادك|مقرر|مقررات|منهج|مناهج|منهاج|طالب|طالبة|طلاب|طلبة|تلميذ|تلاميذ|متعلم|متعلمة|متعلمون|متعلمين|معلم|معلمة|معلمك|معلمون|معلمين|مدرسة|مدرستك|مدارس|جامعة|جامعات|محاضرة|محاضرات|واجب|واجبات|واجبك|امتحان|امتحانات|ولي الأمر|ولي أمر|أولياء|طفل|طفلك|طفلة|أطفال|ابن|ابنك|ابنتك|ابني|ابنتي';
+    $letters = '\x{0621}-\x{064A}\x{0671}-\x{06D3}';
+    $plain = (string) preg_replace('/[\x{064B}-\x{0652}\x{0670}]/u', '', $text);
+    preg_match_all("/(?<![{$letters}])(?:[وفب]?(?:لل|ال|ل|ك)?(?:{$stems})|[وفب]?(?:لل|ال)صف)(?![{$letters}])/u", $plain, $ar);
+    preg_match_all('/\b(?:lessons?|teachers?|tutors?|students?|pupils?|learners?|class(?:es|room)?|schools?|universit(?:y|ies)|college|lectures?|homework|curricul(?:um|a)|subjects?|child|children|kids?|parents?|guardians?|sons?|daughters?)\b/i', $text, $en);
+
+    return [...$ar[0], ...$en[0]];
+}
+
+it('says the trial flow\'s own words in training words on a page for adults: fields, refusals, the reply and the booked message', function () {
+    expect(schoolWords('احجز حصتك مع المعلّم، والطالب في الصف'))->toBe(['حصتك', 'المعلم', 'والطالب', 'الصف'])
+        ->and(schoolWords('جلسة تعريفية مع مدرّب في مجالك، ووصف البرنامج'))->toBe([]);
+
+    $wrong = [];
+    foreach (['ar', 'en'] as $locale) {
+        foreach ([
+            'site::site.request.fields_adults',               // the names of the fields the API refuses
+            'site::notifications.request_received_adults',    // the reply by WhatsApp and email
+            'crm::leads.errors_adults',                       // booking with a code: why it cannot be booked
+            'scheduling::notifications.trial_booked_adults',  // the booked session's message
+        ] as $group) {
+            $words = trans($group, [], $locale);
+            expect($words)->toBeArray("{$group} in {$locale}");
+            foreach ((array) $words as $key => $text) {
+                foreach (schoolWords((string) preg_replace('/:\w+/', ' ', (string) $text)) as $word) {
+                    $wrong[] = "{$locale} {$group}.{$key}: {$word}";
+                }
+            }
+        }
+    }
+    expect($wrong)->toBe([]);
+});

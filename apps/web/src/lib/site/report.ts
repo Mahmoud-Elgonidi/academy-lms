@@ -10,6 +10,21 @@ import type { LocalTime } from '@/lib/time';
  * (the end is the API's UTC instant, the labels are the API's).
  */
 
+/**
+ * The key a report says in the first person (`self.<key>`: "your report",
+ * "you started") when it is read by the learner themself (rules.readsAsSelf:
+ * an academy for adults, or an adult reading their own trial), else the usual
+ * one about the learner by name.
+ */
+export function selfKey(has: (key: string) => boolean, self: boolean, key: string): string {
+  return self && has(`self.${key}`) ? `self.${key}` : key;
+}
+
+/** A translator under `site.report` that says a key in the first person where `self` has its own. */
+export function selfWords<V>(t: ((key: string, values?: V) => string) & { has(key: string): boolean }, self: boolean): (key: string, values?: V) => string {
+  return (key, values) => t(selfKey((k) => t.has(k), self, key), values);
+}
+
 export type Money = { price: string; amount_minor: number; currency: string };
 
 export type ReportPlan = {

@@ -11,6 +11,8 @@ use Modules\Platform\Contracts\DTOs\NewAcademy;
 use Modules\Platform\Contracts\PlatformApi;
 use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Contact\Phone;
+use Modules\SharedKernel\Plans\Feature;
+use Modules\SharedKernel\Tenancy\Audience;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantRef;
 
@@ -21,7 +23,9 @@ use Modules\SharedKernel\Tenancy\TenantRef;
  * link to choose one. The owner's details are checked before the academy is
  * made, so a bad email does not leave an academy without an owner. The
  * console shows the link to pass on; from the server (platform:onboard) the
- * owner gets it by email instead (welcome()).
+ * owner gets it by email instead (welcome()). An academy of adults only
+ * (docs/architecture/02, section 29) starts with the games hidden; its owner
+ * may show them from Settings › Academy modules.
  */
 final class OnboardAcademy
 {
@@ -56,6 +60,9 @@ final class OnboardAcademy
                 timezone: $tenant->defaultTimezone,
             ));
             app(AuditTrail::class)->record('academy.created', 'academy', $tenant->id, ['slug' => $tenant->slug, 'owner' => trim($ownerName)]);
+            if ($tenant->audience === Audience::Adults) {
+                $this->platform->hideAcademyModules([Feature::Games->value]);
+            }
 
             return ['academy' => $tenant, 'owner_id' => $ownerId, 'link' => $this->identity->welcomeLink($ownerId)];
         });

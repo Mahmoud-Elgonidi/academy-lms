@@ -27,12 +27,14 @@ use Modules\Crm\Models\LeadTrial;
 use Modules\Crm\Privacy\LeadsData;
 use Modules\Crm\Queries\TrialConversion;
 use Modules\Crm\Support\StartOffersFromTrials;
+use Modules\Crm\Support\TrialAudienceFromSite;
 use Modules\Enrollment\Contracts\Events\EnrollmentCreated;
 use Modules\Scheduling\Contracts\Events\SessionCancelled;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\Scheduling\Contracts\Events\SessionRescheduled;
 use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
 use Modules\Scheduling\Contracts\StartOffers;
+use Modules\Scheduling\Contracts\TrialAudience;
 use Modules\Scheduling\Contracts\TrialConversionRates;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\Site\Contracts\Events\JoinRequested;
@@ -49,6 +51,8 @@ final class CrmServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(TrialConversionRates::class, TrialConversion::class);
+        // A booked trial's message speaks as the academy's page does (adults: a session, a trainer).
+        $this->app->bind(TrialAudience::class, TrialAudienceFromSite::class);
         // The trial's offer goes on the course the family starts on its own (J3).
         $this->app->bind(StartOffers::class, StartOffersFromTrials::class);
     }

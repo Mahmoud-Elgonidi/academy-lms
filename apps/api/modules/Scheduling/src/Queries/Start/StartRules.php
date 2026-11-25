@@ -19,6 +19,7 @@ use Modules\Scheduling\Domain\Availability\StudentPreference;
 use Modules\Scheduling\Domain\Models\CourseStart;
 use Modules\Scheduling\Queries\FindTeachersQuery;
 use Modules\Scheduling\Support\StartRefused;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 
 /**
  * The rules of a family starting a course on its own (docs/architecture/02,
@@ -59,10 +60,14 @@ final class StartRules implements OwnCourseStart
         return new StartCheck(true, null, null, $fits ? $teacherId : null);
     }
 
-    /** The academy lets families start, and the viewer reads money (the classic look). */
+    /**
+     * The academy lets families start, and the viewer reads money (the classic
+     * look). In an academy that trains adults only, every learner starts their
+     * own course: there is no guardian to send them to.
+     */
     public function assertCanStart(string $viewerId): void
     {
-        if ($this->family->stage($viewerId) !== LearnerStage::Classic) {
+        if (! app(AcademyAudience::class)->adultsOnly() && $this->family->stage($viewerId) !== LearnerStage::Classic) {
             throw StartRefused::because('family_only', status: 403);
         }
         if (! $this->billing->selfServeEnrol()) {

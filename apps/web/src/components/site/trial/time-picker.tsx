@@ -1,11 +1,12 @@
 'use client';
 
 import { useId, useState, type ReactNode } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import { dayLabel, zoneName } from '@/lib/format';
 import { byDay, openingDay, suits, type TrialDraft } from '@/lib/site/trial';
 import { formatClock, type LocalTime, type TimeFormat } from '@/lib/time';
 import { Icon } from '../icons';
+import { useTrialWords } from './words';
 
 export type TimesState =
   | { status: 'loading' }
@@ -33,7 +34,7 @@ export function TimePicker({ state, chosen, onChoose, onRetry, onLater, onSoones
   empty: ReactNode;
   name: string;
 }) {
-  const t = useTranslations('site.trial.time');
+  const t = useTrialWords('time');
   const locale = useLocale();
   const id = useId();
   const wishes = prefs ?? { days: [], from: '', to: '' };

@@ -16,13 +16,16 @@ use Modules\People\Actions\SaveStudentProfile;
 use Modules\People\Actions\SendWelcome;
 use Modules\People\Contracts\DTOs\StudentDetails;
 use Modules\People\Contracts\LearnerStage;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 
 /**
  * A student added by hand, as an import adds one: with their own email or
  * number they sign in themselves; without, they are a child under their
  * guardian (no sign-in of their own). The guardian is someone already here
  * or made now; linking asks them for consent when the child needs it.
- * The welcome goes, if asked, to whoever new can sign in.
+ * The welcome goes, if asked, to whoever new can sign in. In an academy of
+ * adults only every student signs in themselves (an email or a number) and
+ * has no guardian.
  */
 final class AddStudent
 {
@@ -32,12 +35,21 @@ final class AddStudent
         private readonly SaveStudentProfile $profile,
         private readonly SaveStudentDetails $details,
         private readonly SendWelcome $welcome,
+        private readonly AcademyAudience $audience,
     ) {}
 
     /** @param  bool  $askConsent  false when the guardian agrees in the same step (a guardian adding their own child) */
     public function handle(UserDetails $who, ?NewGuardian $guardian, ?CarbonImmutable $birthDate, ?LearnerStage $stage, StudentDetails $details, bool $welcome, bool $askConsent = true): string
     {
         $own = $who->email !== null || $who->phoneE164 !== null;
+        if ($this->audience->adultsOnly()) {
+            if ($guardian !== null && ($guardian->existingId !== null || $guardian->details !== null)) {
+                throw ValidationException::withMessages(['guardian' => __('people::directory.errors.adults_no_guardians')]);
+            }
+            if (! $own) {
+                throw ValidationException::withMessages(['email' => __('people::directory.errors.adults_own_contact')]);
+            }
+        }
         if (! $own && ($guardian === null || ($guardian->existingId === null && $guardian->details === null))) {
             throw ValidationException::withMessages(['guardian' => __('people::directory.errors.child_needs_guardian')]);
         }

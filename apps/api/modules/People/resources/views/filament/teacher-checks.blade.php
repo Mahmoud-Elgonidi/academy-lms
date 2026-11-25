@@ -27,10 +27,12 @@
         .dark .tc-card, .dark .tc-scroll { background: var(--gray-900); border-color: var(--gray-800); }
     </style>
 
-    <div class="tc-rule" @if ($b['required']) data-on @endif>
-        <x-filament::icon :icon="$b['required'] ? 'heroicon-o-shield-check' : 'heroicon-o-information-circle'" class="h-5 w-5" />
-        <span>{{ $b['required'] ? __($l.'rule_on') : __($l.'rule_off') }}</span>
-    </div>
+    @if ($b['minors'])
+        <div class="tc-rule" @if ($b['required']) data-on @endif>
+            <x-filament::icon :icon="$b['required'] ? 'heroicon-o-shield-check' : 'heroicon-o-information-circle'" class="h-5 w-5" />
+            <span>{{ $b['required'] ? __($l.'rule_on') : __($l.'rule_off') }}</span>
+        </div>
+    @endif
 
     <section>
         <h2 class="tc-h2">{{ __($l.'pending') }}</h2>
@@ -77,6 +79,7 @@
         </section>
     @endif
 
+    @if ($b['minors'])
     <section>
         <h2 class="tc-h2">{{ __($l.'teachers') }}</h2>
         <div class="tc-scroll">
@@ -104,6 +107,7 @@
             </table>
         </div>
     </section>
+    @endif
 
     <x-filament-actions::modals />
 </x-filament-panels::page>

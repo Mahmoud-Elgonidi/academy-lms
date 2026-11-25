@@ -14,8 +14,10 @@ use Modules\People\Consent\ConsentRules;
 use Modules\People\Contracts\DTOs\StudentDetails;
 use Modules\People\Models\GuardianConsent;
 use Modules\SharedKernel\Audit\AuditTrail;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Text\ArabicText;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * «إضافة طفل» (docs/architecture/02, section 27, J5a): a guardian adds their
@@ -29,7 +31,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  * refused (the child is already there). One at a time per guardian (a lock),
  * so two taps never make two. The academy's plan counts a child only once a
  * course of theirs starts (StartOwnCourse, `academy_full`). Audited without
- * the name.
+ * the name. Not there at all (404) in an academy of adults only.
  */
 final class AddOwnChild
 {
@@ -40,6 +42,7 @@ final class AddOwnChild
         private readonly GrantConsent $consent,
         private readonly ConsentRules $rules,
         private readonly AuditTrail $audit,
+        private readonly AcademyAudience $audience,
     ) {}
 
     /**
@@ -48,6 +51,9 @@ final class AddOwnChild
      */
     public function handle(string $guardianId, string $name, ?CarbonImmutable $birthDate, ?int $birthYear, ?string $gender, int $consentVersion, ?string $ip = null, ?string $userAgent = null): string
     {
+        if ($this->audience->adultsOnly()) {
+            throw new NotFoundHttpException;
+        }
         if (! DB::table('user_roles')->where('user_id', $guardianId)->where('role', Role::Guardian->value)->exists()) {
             throw new AccessDeniedHttpException(__('people::family.add_child.errors.not_guardian'));
         }

@@ -154,7 +154,7 @@ it('reorders lessons and normalizes their ordinals after a draft lesson is delet
         ->and(Node::query()->where('version_id', $this->version->id)->where('parent_id', $level->id)->orderBy('ordinal')->pluck('ordinal')->all())->toBe([1, 2]);
 });
 
-it('shows the delete control but disables it on a published curriculum', function () {
+it('keeps the delete control open on a published curriculum, saying what deleting does there', function () {
     $level = bNode($this->program, 'level', null, 'Beginner');
     $lesson = bNode($this->program, 'lesson', $level, 'Alif');
 
@@ -164,7 +164,9 @@ it('shows the delete control but disables it on a published curriculum', functio
     app(PublishVersion::class)->handle($this->version, (string) $this->admin->id);
 
     Livewire::test(EditCurriculum::class, ['record' => $this->program->id])
-        ->assertActionDisabled(TestAction::make('deleteNode')->arguments(['node' => $lesson->id]));
+        ->assertActionEnabled(TestAction::make('deleteNode')->arguments(['node' => $lesson->id]))
+        ->mountAction(TestAction::make('deleteNode')->arguments(['node' => $lesson->id]))
+        ->assertMountedActionModalSee(__('curriculum::curriculum.builder.delete_published'));
 });
 
 it('previews the levels as islands and the lessons as stations, with no learner', function () {

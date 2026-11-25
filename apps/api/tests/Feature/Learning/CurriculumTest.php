@@ -40,7 +40,7 @@ it('keeps levels on top, units in levels and lessons in units or levels', functi
     expect(array_map(fn ($n) => $n->titleEn, app(CurriculumApi::class)->tree($version->id)->lessons()))->toBe(['B', 'A']);
 });
 
-it('publishes a version with lessons, then refuses deleting from it', function () {
+it('publishes a version with lessons, and deletes from it only what no learner has reached', function () {
     $program = app(SaveProgram::class)->handle(null, ['subject_id' => $this->subject, 'name_ar' => 'برنامج', 'name_en' => 'Program']);
     $version = $program->workingVersion();
     expect(fn () => app(PublishVersion::class)->handle($version, null))->toThrow(ValidationException::class)
@@ -50,10 +50,12 @@ it('publishes a version with lessons, then refuses deleting from it', function (
     $lesson = app(SaveNode::class)->handle($version, null, ['kind' => 'lesson', 'parent_id' => $level->id, 'title_ar' => 'د', 'title_en' => 'Lesson']);
     app(PublishVersion::class)->handle($version, null);
 
-    expect(fn () => app(DeleteNode::class)->handle($lesson))->toThrow(ValidationException::class)
-        ->and(Node::query()->count())->toBe(2)
-        ->and(app(CurriculumApi::class)->programsFor($this->subject))->toHaveCount(1)
+    expect(app(CurriculumApi::class)->programsFor($this->subject))->toHaveCount(1)
         ->and(app(CurriculumApi::class)->programsFor($this->subject)[0]->lessons)->toBe(1);
+
+    // Nobody has reached it yet: it goes (what learners have reached stays: PublishedCurriculumEditTest).
+    app(DeleteNode::class)->handle($lesson);
+    expect(Node::query()->count())->toBe(1);
 });
 
 it('puts a new enrolment on the subject\'s program when it has exactly one', function () {

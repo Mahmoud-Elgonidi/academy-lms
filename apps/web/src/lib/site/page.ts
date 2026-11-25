@@ -78,7 +78,15 @@ export type CardsBlock = Base<'cards', 'grid' | 'list' | 'overlay', Heading & { 
 export type CtaBlock = Base<'cta', 'banner' | 'card' | 'split', {
   title: string; lead: string | null; primary: PageLink | null; secondary: PageLink | null; media: Media | null;
 }>;
-export type FormBlock = Base<'form', 'split' | 'centered', Heading & { points: string[] | null; teach: boolean; whatsapp_button: boolean }>;
+/** Who may ask for a trial from the form (the API sends adults alone on a page for adults). */
+export type Bookers = 'both' | 'adults' | 'children';
+export type FormBlock = Base<'form', 'split' | 'centered', Heading & {
+  points: string[] | null; teach: boolean; whatsapp_button: boolean;
+  /** The WhatsApp button's words (null: the page's own). Absent from a page published before it. */
+  whatsapp_label?: string | null;
+  /** Absent from a page published before it: both. */
+  who?: Bookers;
+}>;
 export type ContactBlock = Base<'contact', 'cards' | 'band', Heading & {
   email: string | null; phone: string | null; address: string | null; hours: string | null; whatsapp: boolean;
 }>;
@@ -123,7 +131,7 @@ export function isKnownBlock(block: { type: string }): block is PageBlock {
 
 /** The messages under `site` that differ for adults (`site.adults.*`). */
 const ADULT_KEYS = new Set([
-  'trust', 'why.title', 'why.lead', 'subjects.lead', 'steps.items', 'app.lead', 'app.steps', 'testimonials.title', 'join.points', 'phonesLabel', 'floating.report', 'floating.reportValue', 'pricing.shared',
+  'trust', 'why.title', 'why.lead', 'subjects.lead', 'steps.items', 'app.lead', 'app.steps', 'testimonials.title', 'join.title', 'join.lead', 'join.leadBook', 'join.points', 'phonesLabel', 'floating.report', 'floating.reportValue', 'pricing.shared',
 ]);
 
 /** The message key (under `site`) a page for this audience says when the academy left a field unset. */
@@ -334,4 +342,10 @@ export function structuredData(page: SitePageData, academy: { name: string }, or
     });
   }
   return out;
+}
+
+/** Who the form takes: the block's choice, and adults alone on a page for adults. */
+export function bookersOf(block: FormBlock, audience: PageSettings['audience']): Bookers {
+  if (audience === 'adults') return 'adults';
+  return block.data.who ?? 'both';
 }

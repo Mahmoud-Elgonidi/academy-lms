@@ -10,6 +10,7 @@ use Modules\Identity\Contracts\DTOs\NewUser;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Enums\Role;
 use Modules\People\Contracts\PeopleApi;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 
 /**
  * Gives a lead's learner (and, for a child, the parent) an account the
@@ -25,6 +26,7 @@ use Modules\People\Contracts\PeopleApi;
  * The parent is not asked for the child's consent yet: they bring the child
  * to the trial by their own link, and the consent is asked when the child
  * first needs a way in of their own (their sign-in, their seat, a course).
+ * An academy that trains adults only takes no lead for a child.
  */
 final class PrepareLearner
 {
@@ -39,6 +41,11 @@ final class PrepareLearner
         // Its contact's account was erased (no number left): nobody to make an account for.
         if ($lead->phone_e164 === null) {
             throw ValidationException::withMessages(['phone_e164' => __('crm::leads.errors.no_phone')]);
+        }
+
+        // An academy that trains adults only has no children and no guardians: each learner is their own contact.
+        if ($lead->for_child && app(AcademyAudience::class)->adultsOnly()) {
+            throw ValidationException::withMessages(['for_child' => __('crm::leads.errors.adults_only')]);
         }
 
         // An email already another account's here is left off the new one (the number is the way in).

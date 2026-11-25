@@ -2047,7 +2047,8 @@ export interface paths {
          * @description A guardian adds their own child (a managed minor under them, with no sign-in of their own) and goes straight into
          *     the start flow (GET family/start/options?learner_id={id}). birth_date (Y-m-d), else birth_year; gender optional.
          *     agree with the consent wording's version (GET family/consents gives the text; age is when it is needed): the
-         *     guardian's consent is recorded at once. 403 for an account that is not a guardian; 422 with why, in plain words
+         *     guardian's consent is recorded at once. 404 in an academy of adults only (branding audience: adults); 403 for an
+         *     account that is not a guardian; 422 with why, in plain words
          *     (the same name and year of birth as one of their children, too many children). Send an Idempotency-Key.
          */
         post: operations["family.children.add"];
@@ -2210,6 +2211,7 @@ export interface paths {
          * @description With `app`: the oldest app version still served (an older app asks to be updated first) and where to update it.
          *     `time_format` is how the academy writes a clock for everyone who has not chosen their own (pages before sign-in).
          *     `modules` are the academy's modules that are on (Settings › Academy modules and its plan), for screens before sign-in.
+         *     `audience` is whom the academy teaches: families (children with guardians, and adults) or adults (professionals only: no guardians, no children).
          */
         get: operations["platform.branding"];
         put?: never;
@@ -3067,7 +3069,7 @@ export interface components {
     schemas: {
         /**
          * AgeGroup
-         * @description The ages a teacher teaches, as the stages of a student's area cut them: children (under 12), middle school (12–14), secondary (15–18), adults.
+         * @description The ages a teacher teaches, as the stages of a student's area cut them: children (under 12), middle school (12–14), secondary (15–17), adults (18 and over: the age a student stops being a minor, PeopleService::ADULT_AGE).
          * @enum {string}
          */
         AgeGroup: "kids" | "middle" | "teen" | "adults";
@@ -3305,6 +3307,11 @@ export interface components {
                 timezone_label: string;
                 /** @description The academy's clock for everyone who has not chosen their own: h12 or h24. */
                 time_format: string;
+                /**
+                 * @description Whom the academy teaches: families (children with their guardians, and adults) or adults
+                 *     (adults and professionals only: no guardians, no children, no kids' looks).
+                 */
+                audience: string;
             } | null;
         };
         /** VerifyCodeRequest */
@@ -10687,6 +10694,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
             422: components["responses"]["ValidationException"];
         };
     };
@@ -11255,6 +11263,8 @@ export interface operations {
                          *     ai, groups, curriculum, games, messaging, announcements, support, evaluation, site); the core is always on and not listed.
                          */
                         modules: string[];
+                        /** @description Whom the academy teaches: families (children with their guardians, and adults) or adults (adults and professionals only: no guardians, no children, no kids' looks). */
+                        audience: string;
                         app: {
                             /** @description The oldest app version still served, like "1.0.0". */
                             min_version: string;

@@ -66,7 +66,9 @@
         .cb-children > .cb-unit:first-child { border-top: 0; }
         .cb-unit-head { padding-inline-start: 1.25rem; }
         .cb-lessons { display: flex; flex-direction: column; min-height: .5rem; margin-inline-start: 1.6rem; border-inline-start: 2px solid var(--gray-100); }
-        .cb-unit-empty { margin-inline-start: 2.6rem; padding: .3rem 0; font-size: .78rem; color: var(--gray-500); }
+        .cb-lessons[data-empty] { min-height: 2.6rem; justify-content: center; border: 2px dashed var(--gray-200); border-radius: var(--radius-lg); }
+        .cb-lessons[data-empty]::before { content: attr(data-empty); padding: .3rem 1rem; font-size: .78rem; color: var(--gray-500); }
+        .cb-lessons[data-empty]:has(.cb-lesson)::before { display: none; }
         .cb-lesson { scroll-margin-top: 10rem; }
         .cb-lesson > .cb-head { padding-block: .45rem; border-top: 1px dashed var(--gray-100); }
         .cb-num { flex: none; display: grid; place-items: center; min-width: 1.7rem; height: 1.7rem; padding-inline: .3rem; border-radius: 999px; background: var(--gray-100); color: var(--gray-700); font-size: .75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -223,7 +225,7 @@
                 @php $n = 0; @endphp
                 @foreach ($levelNodes as $li => $level)
                     @php $children = $tree->childrenOf($level->id); $count = count($tree->lessons($level->id)); @endphp
-                    <section class="cb-level" id="node-{{ $level->id }}" wire:key="lvl-{{ $level->id }}" wire:sort:item="'{{ $level->id }}'" aria-labelledby="title-{{ $level->id }}">
+                    <section class="cb-level" id="node-{{ $level->id }}" wire:key="lvl-{{ $level->id }}" wire:sort:item="{{ $level->id }}" aria-labelledby="title-{{ $level->id }}">
                         <div class="cb-head cb-level-head">
                             <span class="cb-grip cb-grip-level" title="{{ __($b.'drag') }}">{!! $grip !!}</span>
                             <span class="cb-level-no" aria-hidden="true">{{ $li + 1 }}</span>
@@ -244,7 +246,7 @@
                             @foreach ($children as $child)
                                 @if ($child->kind === 'unit')
                                     @php $unitLessons = $tree->childrenOf($child->id); @endphp
-                                    <div class="cb-unit" id="node-{{ $child->id }}" wire:key="unit-{{ $child->id }}" wire:sort:item="'{{ $child->id }}'">
+                                    <div class="cb-unit" id="node-{{ $child->id }}" wire:key="unit-{{ $child->id }}" wire:sort:item="{{ $child->id }}">
                                         <div class="cb-head cb-unit-head">
                                             <span class="cb-grip cb-grip-child" title="{{ __($b.'drag') }}">{!! $grip !!}</span>
                                             <span class="cb-kind" data-k="unit">{{ __('curriculum::curriculum.kinds.unit') }}</span>
@@ -257,14 +259,12 @@
                                                 {{ ($this->deleteNodeAction)(['node' => $child->id]) }}
                                             </span>
                                         </div>
-                                        <div class="cb-lessons" wire:sort="sortNode" wire:sort:config="{ handle: '.cb-grip-lesson' }" wire:sort:group-id="{{ $child->id }}" wire:sort:group="lessons-{{ $level->id }}">
+                                        {{-- An empty unit keeps a drop area the size of a row, its hint drawn by CSS so the list holds lessons only. --}}
+                                        <div class="cb-lessons" wire:sort="sortNode" wire:sort:config="{ handle: '.cb-grip-lesson' }" wire:sort:group-id="{{ $child->id }}" wire:sort:group="lessons-{{ $level->id }}" @if ($unitLessons === []) data-empty="{{ __($b.'unit_empty') }}" @endif>
                                             @foreach ($unitLessons as $lesson)
                                                 @include('curriculum::filament.builder-lesson', ['lesson' => $lesson, 'n' => ++$n, 'gripClass' => 'cb-grip-lesson'])
                                             @endforeach
                                         </div>
-                                        @if ($unitLessons === [])
-                                            <div class="cb-unit-empty">{{ __($b.'unit_empty') }}</div>
-                                        @endif
                                         @include('curriculum::filament.builder-quick', ['parent' => $child->id, 'kind' => 'lesson'])
                                     </div>
                                 @else

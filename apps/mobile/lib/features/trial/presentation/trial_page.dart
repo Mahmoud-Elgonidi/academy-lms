@@ -67,9 +67,9 @@ class _TrialFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocBuilder<TrialCubit, TrialState>(
-    buildWhen: (a, b) => a.branding != b.branding,
+    buildWhen: (a, b) => a.branding != b.branding || a.adults != b.adults || a.audienceKnown != b.audienceKnown,
     builder: (context, state) {
-      final frame = BlocBuilder<TrialCubit, TrialState>(
+      final steps = BlocBuilder<TrialCubit, TrialState>(
         buildWhen: (a, b) => a.step != b.step || a.page != b.page || a.steps.length != b.steps.length,
         builder: (context, state) => PopScope(
           canPop: state.step == TrialStep.academy || state.step == TrialStep.done || state.steps.indexOf(state.step) <= 0,
@@ -111,6 +111,14 @@ class _TrialFrame extends StatelessWidget {
           ),
         ),
       );
+      // The academy's own words once known: the training words for an academy for adults, whoever is signed in.
+      final frame = state.audienceKnown
+          ? Localizations.override(
+              context: context,
+              delegates: [AppWords(adults: state.adults)],
+              child: steps,
+            )
+          : steps;
       final json = state.branding;
       // The academy's own colours once known (the app's until then).
       return json == null ? frame : Theme(data: buildTheme(Branding.fromJson(json), Stage.classic), child: frame);

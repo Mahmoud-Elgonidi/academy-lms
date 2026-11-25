@@ -1,12 +1,13 @@
 'use client';
 
 import { useActionState, useState, useSyncExternalStore } from 'react';
-import { useTranslations } from 'next-intl';
 import { askTheAcademy, type SiteFormState } from '@/lib/site/actions';
+import type { Bookers } from '@/lib/site/page';
 import type { TrialSettings } from '@/lib/site/trial';
 import type { TimeFormat } from '@/lib/time';
 import { Done } from './join-platform';
 import { TrialRequest } from './trial/trial-request';
+import { TrialWords, useJoinWords } from './trial/words';
 
 type Kind = 'trial' | 'teach';
 type Option = { id: string; name: string };
@@ -36,7 +37,7 @@ const browserZone = () => {
  * #teach opens the second. The visitor's time zone rides along, read in the
  * browser after the page shows (the form reads the same without it).
  */
-export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosenSubject, trials, whatsapp, academy, timeFormat, adults = false }: {
+export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosenSubject, trials, whatsapp, academy, timeFormat, who = 'both', adultsWords = false }: {
   token: string;
   subjects: Option[];
   countries: { code: string; name: string }[];
@@ -49,10 +50,32 @@ export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosen
   whatsapp: string | null;
   academy: string;
   timeFormat: TimeFormat;
-  /** The academy teaches adults: the lesson is always for the one asking, never a child. */
-  adults?: boolean;
+  /** Who may ask for a trial: both, adults (the one asking, never a child) or children (a guardian for a child). */
+  who?: Bookers;
+  /** The page is for adults (site.adults.*): the form speaks of sessions and trainers, not lessons and teachers. */
+  adultsWords?: boolean;
 }) {
-  const t = useTranslations('site.join');
+  return (
+    <TrialWords adults={adultsWords}>
+      <Doors {...{ token, subjects, countries, utm, teach, chosenSubject, trials, whatsapp, academy, timeFormat, who }} />
+    </TrialWords>
+  );
+}
+
+function Doors({ token, subjects, countries, utm, teach, chosenSubject, trials, whatsapp, academy, timeFormat, who }: {
+  token: string;
+  subjects: Option[];
+  countries: { code: string; name: string }[];
+  utm: { source?: string; medium?: string; campaign?: string };
+  teach: boolean;
+  chosenSubject?: string;
+  trials: TrialSettings;
+  whatsapp: string | null;
+  academy: string;
+  timeFormat: TimeFormat;
+  who: Bookers;
+}) {
+  const t = useJoinWords();
   const hash = useSyncExternalStore(onHash, () => window.location.hash, () => '');
   const kind: Kind = teach && hash === '#teach' ? 'teach' : 'trial';
   const open = (tab: Kind) => {
@@ -92,10 +115,10 @@ export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosen
               whatsapp={whatsapp}
               academy={academy}
               timeFormat={timeFormat}
-              adults={adults}
+              who={who}
             />
           ) : (
-            <OneForm kind={tab} token={token} subjects={subjects} countries={countries} utm={utm} chosenSubject={chosenSubject} adults={adults} />
+            <OneForm kind={tab} token={token} subjects={subjects} countries={countries} utm={utm} chosenSubject={chosenSubject} adults={who === 'adults'} />
           )}
         </div>
       ))}
@@ -112,7 +135,7 @@ function OneForm({ kind, token, subjects, countries, utm, chosenSubject, adults 
   chosenSubject?: string;
   adults: boolean;
 }) {
-  const t = useTranslations('site.join');
+  const t = useJoinWords();
   const [state, action, pending] = useActionState<SiteFormState, FormData>(askTheAcademy, { status: 'idle', errors: {} });
   const [forChild, setForChild] = useState(true);
   // The visitor's own zone, once the page runs in their browser (without it, the academy's stands in).

@@ -8,7 +8,7 @@ import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
 import { momentsOf } from '@/lib/live';
 import { balanceMoments } from '@/lib/family/balance';
-import { isGuardian, seesMoney } from '@/lib/family/rules';
+import { isGuardian, mayAddChild, seesMoney } from '@/lib/family/rules';
 import type { Balance, Consents, CourseBalance, FamilyLessons, Homework, Invoices } from '@/lib/family/types';
 import type { JourneyMap } from '@/lib/journey/types';
 import { hasModule, modulesOf } from '@/lib/modules';
@@ -35,7 +35,7 @@ export default async function FamilyHome() {
     get<{ data: Homework[] }>('/v1/learning/homework', { query: { student_id: learner.id } }),
     get<Balance>('/v1/family/balance', { query: who }),
     seesMoney(fam.stage) ? get<Invoices>('/v1/family/invoices') : Promise.resolve(null),
-    isGuardian(fam.learners) ? get<Consents>('/v1/family/consents') : Promise.resolve(null),
+    isGuardian(fam.learners, fam.adults) ? get<Consents>('/v1/family/consents') : Promise.resolve(null),
   ]);
   const waiting = consents?.children.filter((c) => c.state === 'waiting').map((c) => c.student.name) ?? [];
   // Each course's own balance (J5a): the lessons left, the plan, expiry, and the invoice waiting or coming.
@@ -56,7 +56,7 @@ export default async function FamilyHome() {
         lessons={lessons.data}
         notices={lessons.notices}
         courses={courses}
-        guardian={isGuardian(fam.learners)}
+        guardian={mayAddChild({ ...fam, roles: person.roles })}
         invoices={invoices}
         homework={homework.data}
         journey={journey?.data ?? null}

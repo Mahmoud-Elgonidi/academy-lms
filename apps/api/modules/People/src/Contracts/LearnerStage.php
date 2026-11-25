@@ -12,13 +12,13 @@ enum LearnerStage: string
 {
     case Kids = 'kids';          // under 12: primary school
     case Middle = 'middle';      // 12–14: middle school (إعدادي)
-    case Teen = 'teen';          // 15–18: secondary school
-    case Classic = 'classic';    // adults, or nobody knows
+    case Teen = 'teen';          // 15–17: secondary school
+    case Classic = 'classic';    // adults (18 and over), or nobody knows
 
     public static function forAge(?int $age): self
     {
         return match (true) {
-            $age === null, $age >= 19 => self::Classic,
+            $age === null, $age >= AgeGroup::ADULT_AGE => self::Classic,
             $age >= 15 => self::Teen,
             $age >= 12 => self::Middle,
             default => self::Kids,

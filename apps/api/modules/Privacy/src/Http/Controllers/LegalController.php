@@ -53,13 +53,14 @@ final class LegalController
         $locale = $this->locale($request, $academy);
         app()->setLocale($locale);
 
-        $about = $academy === null ? $this->platform() : $this->tenants->run($academy, fn () => $this->ofAcademy($page));
-
-        return response()->view('privacy::legal', $about + [
+        $render = fn (array $about) => response()->view('privacy::legal', $about + [
             'page' => $page,
             'locale' => $locale,
             'version' => self::VERSION,
         ])->header('Content-Language', $locale)->header('Cache-Control', 'public, max-age=300');
+
+        // An academy's page is written inside it, so an academy of adults only reads its own words (AudienceTranslator).
+        return $academy === null ? $render($this->platform()) : $this->tenants->run($academy, fn () => $render($this->ofAcademy($page)));
     }
 
     /** @return array<string, mixed> */

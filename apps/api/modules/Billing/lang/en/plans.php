@@ -45,6 +45,7 @@ return [
         'sessions_per_block' => 'Sessions per block',
         'validity_days' => 'Validity',
         'renew_at_sessions' => 'Renewal invoice',
+        'renew_when' => 'When does the renewal invoice go out?',
         'prices' => 'Prices',
         'region' => 'Region',
         'amount' => 'Block price',
@@ -56,10 +57,10 @@ return [
     ],
     'hints' => [
         'credit_scope' => 'A shared package is one balance for a student in any subject (say 12 lessons a month across Arabic and maths). Each new course of theirs on it draws on the same balance, with no new invoice, and the lessons a week here are for all their subjects together. It stays as it is once someone is on it.',
-        'validity' => 'The weeks the block needs plus two weeks\' grace. Minutes left after that expire.',
+        'validity' => 'How long the block\'s lessons can be used: the weeks it needs plus two weeks\' grace. Lessons left after that expire.',
         'format_locked' => 'Students are on this plan, so its lesson format stays as it is. For the other format, make a new plan.',
         'shape' => 'Lesson length, lessons a week and lessons per block stay as they are once someone is on it. For another shape, make a new plan.',
-        'renew' => 'How many sessions are left when the next block\'s invoice goes out.',
+        'renew' => 'When the student\'s balance is down to this many lessons, the payer gets the next block\'s invoice, so they can pay before the lessons run out and nothing stops.',
     ],
     'regions' => [
         'action' => 'Price regions',

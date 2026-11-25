@@ -164,6 +164,15 @@ return [
             'preferred_to' => 'إلى الساعة',
             'teacher_gender' => 'المعلّم المفضّل',
         ],
+        // A page for adults (settings.audience) names these in training words; the rest as above.
+        'fields_adults' => [
+            'subject_id' => 'المجال',
+            'subject_ids' => 'مجالات التدريب التي تقدّمها',
+            'subject_ids.*' => 'المجال',
+            'years_teaching' => 'سنوات الخبرة في التدريب',
+            'help_choose' => 'ساعدوني في اختيار المجال',
+            'teacher_gender' => 'المدرّب المفضّل',
+        ],
     ],
     'requests' => [
         'nav' => 'طلبات الصفحة',
@@ -215,6 +224,8 @@ return [
     'errors' => [
         'phone' => 'اكتب رقم هاتف صحيحًا بالرمز الدولي، مثل +201001234567.',
         'cannot_handle' => 'ليس من صلاحيتك الرد على هذا الطلب.',
+        'adults_only' => 'هذا النموذج لمن يحجز لنفسه: اكتب اسمك أنت وأرسل الطلب، أو تواصل مع الأكاديمية لترتيب غير ذلك.',
+        'children_only' => 'هذا النموذج لحجز حصة لطفل: اكتب اسم الطفل وعمره وأرسل الطلب. وإن كانت الحصة لك فتواصل مع الأكاديمية.',
     ],
     'setup' => [
         'title' => 'صفحة الأكاديمية',

@@ -185,6 +185,9 @@ final class Blocks
                 'points' => ['lines', 120, 5, 'd'],
                 'teach' => ['bool', false],
                 'whatsapp_button' => ['bool', true],
+                'whatsapp_label' => ['text', 40, 'd'],
+                // Who may ask for a trial here (Audience::bookers): both, the learner alone, a guardian for a child.
+                'who' => ['enum', Audience::BOOKERS],
             ]],
             'contact' => ['variants' => ['cards', 'band'], 'tone' => 'paper', 'fields' => $h + [
                 'email' => ['email'],

@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Translation\Translator;
 use Livewire\Livewire;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\Capabilities;
@@ -46,8 +47,11 @@ use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\Console\LiveRelayCommand;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Setup\SetupChecklist;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
+use Modules\SharedKernel\Tenancy\AudienceTranslator;
 use Modules\SharedKernel\Tenancy\Console\AnalyzeTablesCommand;
 use Modules\SharedKernel\Tenancy\PgTenantSession;
+use Modules\SharedKernel\Tenancy\TenantAudience;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantResolver;
 use Modules\SharedKernel\Time\LocalTimePresenter;
@@ -66,6 +70,12 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->scoped(ViewerTimezone::class);
         $this->app->scoped(ViewerClock::class);
         $this->app->scoped(LocalTimePresenter::class);
+        // Whom the academy teaches (families, or adults only), from its TenantRef; and its words follow it:
+        // an adults academy reads a module's lang/{locale}/adults/{file}.php first (AudienceTranslator).
+        $this->app->scopedIf(AcademyAudience::class, TenantAudience::class);
+        $this->app->extend('translator', fn (mixed $translator, $app) => $translator instanceof Translator && ! $translator instanceof AudienceTranslator
+            ? AudienceTranslator::over($translator, fn (): bool => $app->resolved(TenantContext::class) && $app->make(AcademyAudience::class)->adultsOnly())
+            : $translator);
         $this->app->singleton(LocalTimeResolver::class);
         $this->app->singleton(LiveSignals::class);
         // Who saves a person's own zone, by the kind of account (Identity's users, Platform's console team).

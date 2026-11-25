@@ -5,9 +5,12 @@ namespace Modules\Site\Models;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
+use Modules\Site\Domain\Page\Audience;
 use Modules\Site\Domain\Page\LegacyImport;
 use Modules\Site\Domain\Page\PageDoc;
+use Modules\Site\Domain\Page\Templates;
 
 /**
  * The academy's page as its builder keeps it (docs/architecture/site-builder.md,
@@ -66,12 +69,24 @@ final class SitePage extends Model
         return self::query()->lockForUpdate()->first() ?? self::legacy();
     }
 
-    /** The page built from what the academy saved before the builder. */
+    /**
+     * The page built from what the academy saved before the builder. An
+     * academy that trains adults only and saved no words of its own starts
+     * from the page for adults (Templates::forAudience), not the one for
+     * children and their families.
+     */
     public static function legacy(): self
     {
-        $doc = LegacyImport::fromContent(SiteSettings::current()->said());
+        $settings = SiteSettings::current();
+        $template = 'kids_families';
+        if (app(AcademyAudience::class)->adultsOnly() && ! ($settings->exists && is_array($settings->content) && $settings->content !== [])) {
+            $template = Templates::forAudience(Audience::ADULTS);
+            $doc = Templates::make($template, Audience::ADULTS);
+        } else {
+            $doc = LegacyImport::fromContent($settings->said());
+        }
         $page = new self;
-        $page->forceFill(['draft' => $doc, 'published' => $doc, 'draft_revision' => 1, 'published_revision' => 1, 'template' => 'kids_families']);
+        $page->forceFill(['draft' => $doc, 'published' => $doc, 'draft_revision' => 1, 'published_revision' => 1, 'template' => $template]);
 
         return $page;
     }
@@ -94,14 +109,20 @@ final class SitePage extends Model
         return $this->published === null ? null : self::read($this->published);
     }
 
-    /** A kept document, read as this version's (an unreadable one: a blank page, never an error on the public page). */
+    /**
+     * A kept document, read as this version's (an unreadable one: a blank
+     * page, never an error on the public page), speaking to adults in an
+     * academy that trains adults only (Audience::forAcademy).
+     */
     public static function read(mixed $doc): array
     {
         try {
-            return PageDoc::normalize(is_array($doc) ? $doc : []);
+            $read = PageDoc::normalize(is_array($doc) ? $doc : []);
         } catch (\Throwable) {
-            return PageDoc::upgrade(is_array($doc) ? $doc : []) + ['settings' => [], 'blocks' => []];
+            $read = PageDoc::upgrade(is_array($doc) ? $doc : []) + ['settings' => [], 'blocks' => []];
         }
+
+        return Audience::forAcademy($read, app(AcademyAudience::class)->adultsOnly());
     }
 
     protected function setKeysForSaveQuery($query): Builder

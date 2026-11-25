@@ -33,6 +33,7 @@ use Modules\Platform\Contracts\ConsoleApi;
 use Modules\Platform\Contracts\DTOs\NewAcademy as NewAcademyData;
 use Modules\SharedKernel\Contact\Phone;
 use Modules\SharedKernel\Geo\Countries;
+use Modules\SharedKernel\Tenancy\Audience;
 use Modules\SharedKernel\Tenancy\TenantRef;
 
 /**
@@ -91,7 +92,7 @@ final class NewAcademy extends Page
 
     public function mount(): void
     {
-        $fill = ['country' => 'SA', 'plan' => null];
+        $fill = ['country' => 'SA', 'plan' => null, 'audience' => Audience::DEFAULT->value];
         $asked = $this->request !== null && preg_match('/^[0-9a-f-]{36}$/', $this->request) === 1 ? app(ConsoleApi::class)->signupRequest($this->request) : null;
         if ($asked !== null && $asked->status !== 'created') {
             $plans = app(ConsoleApi::class)->offeredPlans();
@@ -105,6 +106,7 @@ final class NewAcademy extends Page
                 'owner_phone' => $asked->phone,
                 'country' => $country,
                 'plan' => $asked->planCode !== null && isset($plans[$asked->planCode]) ? $asked->planCode : null,
+                'audience' => Audience::DEFAULT->value,
             ];
             $fill = self::countryFill($country) + ['base_currency' => 'USD', 'default_timezone' => 'UTC'] + $fill;
             // The request's own language wins over the country's.
@@ -171,7 +173,31 @@ final class NewAcademy extends Page
                     }
                 }])
                 ->columnSpanFull(),
+            // Whom it teaches: families unless an owner of the console says adults only (changed later only through SetAcademyAudience).
+            ToggleButtons::make('audience')->label(__($l.'fields.audience'))->helperText(__($l.'fields.audience_hint'))->inline()
+                ->options(self::audienceOptions())->default(Audience::DEFAULT->value)
+                ->visible(fn (): bool => self::ownerOfConsole())
+                ->columnSpanFull(),
         ];
+    }
+
+    /** @return array<string, string> */
+    private static function audienceOptions(): array
+    {
+        $options = [];
+        foreach (Audience::cases() as $audience) {
+            $options[$audience->value] = __('identity::onboarding.fields.audiences.'.$audience->value);
+        }
+
+        return $options;
+    }
+
+    /** Whether the one signed in to the console is an active owner (only they choose an adults academy). */
+    private static function ownerOfConsole(): bool
+    {
+        $admin = auth('platform')->user();
+
+        return (bool) ($admin?->is_owner ?? false) && (bool) ($admin?->is_active ?? false);
     }
 
     /** @return list<Component> */
@@ -304,6 +330,7 @@ final class NewAcademy extends Page
                 defaultLocale: (string) $d['default_locale'],
                 country: filled($d['country'] ?? null) ? strtoupper((string) $d['country']) : null,
                 plan: filled($d['plan'] ?? null) ? (string) $d['plan'] : null,
+                audience: self::ownerOfConsole() ? Audience::of(is_string($d['audience'] ?? null) ? $d['audience'] : null) : Audience::DEFAULT,
             ),
             (string) $d['owner_name'],
             (string) $d['owner_email'],
@@ -428,6 +455,7 @@ final class NewAcademy extends Page
             ['label' => __($l.'fields.owner_email'), 'value' => "\u{2066}".$get('owner_email')."\u{2069}"],
             ['label' => __($l.'fields.owner_phone'), 'value' => $phone === '' ? '—' : "\u{2066}".(self::phone($phone, $get('owner_dial')) ?? $phone)."\u{2069}"],
             ['label' => __($l.'fields.plan'), 'value' => $plans[(string) $get('plan')] ?? __($l.'fields.plan_default')],
+            ['label' => __($l.'fields.audience'), 'value' => self::audienceOptions()[self::ownerOfConsole() ? Audience::of(is_string($get('audience')) ? $get('audience') : null)->value : Audience::DEFAULT->value]],
         ];
     }
 }

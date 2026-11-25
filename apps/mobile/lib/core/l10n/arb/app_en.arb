@@ -1188,6 +1188,7 @@
   "trialAcademyNotFound": "We couldn't find an academy taking free trial requests with this code. Check the code with the academy, or type it exactly as they sent it.",
   "trialAcademyChange": "Another academy",
   "trialWhoTitle": "Who is the lesson for?",
+  "trialNameTitle": "What's your name?",
   "trialWhoMe": "For me",
   "trialWhoMeHint": "I'm the one learning.",
   "trialWhoChild": "For my child",

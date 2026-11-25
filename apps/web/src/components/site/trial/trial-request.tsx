@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import { weekOrder, weekdayName } from '@/lib/format';
+import type { Bookers } from '@/lib/site/page';
 import {
   askForTrial,
   bookTrial,
@@ -33,6 +34,7 @@ import { formatClock, type LocalTime, type TimeFormat } from '@/lib/time';
 import { Icon, WhatsAppIcon } from '../icons';
 import { BigTime, BookedCard, FocusHeading } from './booked';
 import { TimePicker, type TimesState } from './time-picker';
+import { useTrialWords } from './words';
 import './trial.css';
 
 type Option = { id: string; name: string };
@@ -88,6 +90,29 @@ const API_FIELDS: Record<string, [StepKey, keyof TrialDraft]> = {
 };
 
 /**
+ * Where the API's refusals go: each field's message beside it (the who choice
+ * included: who may book from this form is the published page's to say, so a
+ * page open since before the owner changed it hears why), on the first of
+ * these steps that has one; null when none of them is the flow's.
+ */
+export function placeRefusals(errors: Record<string, string>, steps: StepKey[]): { at: StepKey | null; wrong: Record<string, string> } {
+  const wrong: Record<string, string> = {};
+  let at: StepKey | null = null;
+  for (const [field, message] of Object.entries(errors)) {
+    const place = API_FIELDS[field];
+    if (!place) continue;
+    wrong[place[1]] = message;
+    if (at === null || steps.indexOf(place[0]) < steps.indexOf(at)) at = place[0];
+  }
+  return { at, wrong };
+}
+
+/** A field's refusal, said under it (and named by the field's aria-describedby). */
+export function FieldError({ field, message }: { field: string; message: string | undefined }) {
+  return message ? <small id={`lt-${field}-error`} className="lt-error">{message}</small> : null;
+}
+
+/**
  * The free trial request on the academy's page, as a calm stepper: who is
  * learning and what (or "help me choose"), when suits them and the teacher
  * they would rather have, then, while the academy lets families book, a time
@@ -97,7 +122,7 @@ const API_FIELDS: Record<string, [StepKey, keyof TrialDraft]> = {
  * typed stays whatever fails; Back goes back; each step's heading takes the
  * focus; refusals are said in the API's words, near what they are about.
  */
-export function TrialRequest({ token, subjects, countries, utm, chosenSubject, settings, whatsapp, academy, timeFormat, adults = false }: {
+export function TrialRequest({ token, subjects, countries, utm, chosenSubject, settings, whatsapp, academy, timeFormat, who: bookers = 'both' }: {
   token: string;
   subjects: Option[];
   countries: { code: string; name: string }[];
@@ -107,13 +132,17 @@ export function TrialRequest({ token, subjects, countries, utm, chosenSubject, s
   whatsapp: string | null;
   academy: string;
   timeFormat: TimeFormat;
-  /** The academy teaches adults: the lesson is for the one asking, so no "for my child" choice. */
-  adults?: boolean;
+  /**
+   * Who may ask (the page's form block): both (the "for whom?" choice), adults
+   * (the lesson is for the one asking, no "for my child" choice) or children
+   * (a guardian asks for a child, no "for me" choice).
+   */
+  who?: Bookers;
 }) {
-  const t = useTranslations('site.trial');
+  const t = useTrialWords();
   const locale = useLocale();
   const zone = useBrowserZone();
-  const [draft, setDraft] = useState<TrialDraft>({ ...EMPTY_DRAFT, ...(adults ? { who: 'me' as const } : {}), subjectId: chosenSubject ?? '' });
+  const [draft, setDraft] = useState<TrialDraft>({ ...EMPTY_DRAFT, ...(bookers === 'adults' ? { who: 'me' as const } : {}), ...(bookers === 'children' ? { who: 'child' as const } : {}), subjectId: chosenSubject ?? '' });
   const [leaveToUs, setLeaveToUs] = useState(false);
   const [at, setAt] = useState<StepKey>('who');
   const [moved, setMoved] = useState(false);
@@ -192,14 +221,7 @@ export function TrialRequest({ token, subjects, countries, utm, chosenSubject, s
 
   /** What the API said about fields, put next to them, on the first step that has one. */
   const showFieldErrors = (errors: Record<string, string>, fallback: string) => {
-    const mapped: Record<string, string> = {};
-    let first: StepKey | null = null;
-    for (const [field, message] of Object.entries(errors)) {
-      const place = API_FIELDS[field];
-      if (!place) continue;
-      mapped[place[1]] = message;
-      if (first === null || steps.indexOf(place[0]) < steps.indexOf(first)) first = place[0];
-    }
+    const { at: first, wrong: mapped } = placeRefusals(errors, steps);
     if (first) {
       setMoved(true);
       setAt(first);
@@ -373,7 +395,7 @@ export function TrialRequest({ token, subjects, countries, utm, chosenSubject, s
   );
   const err = (field: string) => wrong[field];
   const described = (field: string) => (err(field) ? { 'aria-invalid': true as const, 'aria-describedby': `lt-${field}-error` } : {});
-  const fieldError = (field: string) => (err(field) ? <small id={`lt-${field}-error`} className="lt-error">{err(field)}</small> : null);
+  const fieldError = (field: string) => <FieldError field={field} message={err(field)} />;
 
   return (
     <form
@@ -394,9 +416,13 @@ export function TrialRequest({ token, subjects, countries, utm, chosenSubject, s
 
       {at === 'who' ? (
         <section className="lt-step" aria-labelledby="lt-step-title">
-          {adults ? heading('who.titleAdults', t('who.leadAdults')) : heading('who.title', t('who.lead'))}
-          {adults ? null : (
-            <fieldset className="lt-fieldset">
+          {bookers === 'adults'
+            ? heading('who.titleAdults', t('who.leadAdults'))
+            : bookers === 'children' ? heading('who.titleChildren', t('who.leadChildren')) : heading('who.title', t('who.lead'))}
+          {/* Who may book is the published page's: its refusal (for_child) is said here, whether or not the choice shows. */}
+          {fieldError('who')}
+          {bookers !== 'both' ? null : (
+            <fieldset className="lt-fieldset" aria-describedby={err('who') ? 'lt-who-error' : undefined}>
               <legend className="ls-sr">{t('who.title')}</legend>
               <div className="lt-who">
                 {(['child', 'me'] as const).map((who) => (
@@ -594,7 +620,7 @@ export function TrialRequest({ token, subjects, countries, utm, chosenSubject, s
 }
 
 function SubmitButton({ at, booking, code, chosen, busy, times, now }: { at: StepKey; booking: boolean; code: Code | null; chosen: LocalTime | null; busy: boolean; times: TimesState; now: number }) {
-  const t = useTranslations('site.trial');
+  const t = useTrialWords();
   if (at === 'time') {
     const ready = times.status === 'ready' && times.times.length > 0;
     if (!ready) return null;
@@ -628,7 +654,7 @@ function StepHeading({ children, focus }: { children: ReactNode; focus: boolean 
 
 /** Where the family is: each step's name, the one they are on marked, and "step 2 of 4" for a screen reader. */
 function Progress({ steps, index }: { steps: StepKey[]; index: number }) {
-  const t = useTranslations('site.trial');
+  const t = useTrialWords();
   return (
     <nav className="lt-progress" aria-label={t('progress', { at: index + 1, count: steps.length })}>
       <ol>
@@ -655,7 +681,7 @@ function WhenStep({ draft, set, heading, wrong, timeFormat, locale, zone }: {
   locale: string;
   zone: string;
 }) {
-  const t = useTranslations('site.trial.when');
+  const t = useTrialWords('when');
   const hour = (h: number) => formatClock(`${String(h).padStart(2, '0')}:00`, timeFormat, locale);
   const toggleDay = (day: number) => set('days', draft.days.includes(day) ? draft.days.filter((d) => d !== day) : [...draft.days, day].sort());
   return (
@@ -739,7 +765,7 @@ function CodeStep({ code, now, busy, error, notice, onCode, onResend, onChangeNu
   onResend: (channel?: 'whatsapp' | 'sms') => void;
   onChangeNumber: () => void;
 }) {
-  const t = useTranslations('site.trial.contact');
+  const t = useTrialWords('contact');
   const wait = secondsUntil(code.resendAt, now);
   const ended = secondsUntil(code.endsAt, now) === 0;
   const locked = code.wrong >= 5;
@@ -796,7 +822,7 @@ function CodeStep({ code, now, busy, error, notice, onCode, onResend, onChangeNu
 
 /** A request sent: the promise to answer, and what happens until then. */
 function SentCard({ settings, picked, onAgain }: { settings: TrialSettings; picked: boolean; onAgain: () => void }) {
-  const t = useTranslations('site.trial.sent');
+  const t = useTrialWords('sent');
   const family = settings.booking === 'family' && !picked;
   return (
     <div className="lt-booked lt-sent">
@@ -821,7 +847,7 @@ function SentCard({ settings, picked, onAgain }: { settings: TrialSettings; pick
 
 /** The academy books this one itself: the API's sentence, and the ways on. */
 function RefusedCard({ message, whatsapp, onEdit, onRequest }: { message: string; whatsapp: string | null; onEdit: () => void; onRequest: () => void }) {
-  const t = useTranslations('site.trial.refused');
+  const t = useTrialWords('refused');
   return (
     <div className="lt-calm" data-tone="attention">
       <span className="lt-calm-icon" aria-hidden="true"><Icon name="chat" /></span>

@@ -20,5 +20,7 @@ final readonly class TenantRef
         public bool $active,
         /** How the academy writes a clock time for everyone (Time\TimeFormat: h12 or h24). */
         public string $timeFormat = 'h12',
+        /** Whom the academy teaches: families (the default) or adults only (AcademyAudience). */
+        public Audience $audience = Audience::Families,
     ) {}
 }

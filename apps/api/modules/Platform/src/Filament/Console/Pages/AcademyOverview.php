@@ -4,6 +4,7 @@ namespace Modules\Platform\Filament\Console\Pages;
 
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -19,6 +20,7 @@ use Livewire\Attributes\Computed;
 use Modules\Platform\Actions\Metering\GrantUsage;
 use Modules\Platform\Actions\Metering\SetVideoHardLimit;
 use Modules\Platform\Actions\Plans\ChangeAcademyPlan;
+use Modules\Platform\Actions\SetAcademyAudience;
 use Modules\Platform\Actions\SetAcademyStatus;
 use Modules\Platform\Console\AcademyPeople;
 use Modules\Platform\Console\AcademyUsage;
@@ -42,6 +44,7 @@ use Modules\Platform\Plans\PlanTerms;
 use Modules\SharedKernel\Audit\AuditEntries;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\Meter;
+use Modules\SharedKernel\Tenancy\Audience;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Modules\SharedKernel\Time\ZoneHint;
@@ -113,6 +116,10 @@ final class AcademyOverview extends Page
                 ->url(app(TenantDirectory::class)->baseUrl($record->toTenantRef()).'/admin', shouldOpenInNewTab: true);
         }
         $actions[] = $this->planAction();
+        // Whom it teaches, families or adults only (owners).
+        if (AiCreditRatesPage::canAccess()) {
+            $actions[] = $this->audienceChoice();
+        }
         // The academy's balance (owners): a bonus, a correction or a refund, and the hard limit on video.
         if (AiCreditRatesPage::canAccess() && SaasSubscription::currentFor($this->academy) !== null) {
             $actions[] = $this->creditAction();
@@ -203,6 +210,32 @@ final class AcademyOverview extends Page
                     array_values([...($data['features_off'] ?? []), ...($data['features_off_optional'] ?? [])]));
                 Notification::make()->success()->title(__($l.'done'))->send();
                 unset($this->plan);
+            });
+    }
+
+    /** Whom the academy teaches: families, or adults and professionals only, with a reason (SetAcademyAudience). */
+    private function audienceChoice(): Action
+    {
+        $l = 'platform::console.audience.';
+        $current = $this->record->audience ?? Audience::DEFAULT;
+
+        return Action::make('audience')->label(__($l.'label').' · '.__($l.'short.'.$current->value))->icon(Heroicon::OutlinedUserGroup)->color('gray')
+            ->modalHeading(__($l.'heading', ['name' => ConsoleView::name($this->record)]))
+            ->modalDescription(__($l.'body'))
+            ->modalSubmitActionLabel(__($l.'confirm'))
+            ->fillForm(fn () => ['audience' => $current->value])
+            ->schema([
+                Radio::make('audience')->label(__($l.'field'))->required()
+                    ->options(array_combine(array_column(Audience::cases(), 'value'), array_map(fn (Audience $a) => __($l.'kinds.'.$a->value), Audience::cases()))),
+                Textarea::make('reason')->label(__($l.'reason'))->helperText(__($l.'reason_hint'))
+                    ->required()->minLength(SetAcademyAudience::REASON_MIN)->maxLength(300)->rows(2),
+            ])
+            ->action(function (array $data) use ($l): void {
+                $admin = auth('platform')->user();
+                abort_unless($admin instanceof PlatformAdmin, 403);
+                app(SetAcademyAudience::class)->handle($admin, $this->academy, Audience::of((string) $data['audience']), (string) $data['reason']);
+                Notification::make()->success()->title(__($l.'done'))->send();
+                $this->reloadPage();
             });
     }
 

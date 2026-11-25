@@ -19,7 +19,7 @@ final class CreateStudent extends CreateRecord
     {
         $id = DirectoryForm::attempt(function () use ($data) {
             $who = DirectoryForm::details($data);
-            if (! ($data['own_contact'] ?? false)) {
+            if (! StudentResource::adultsOnly() && ! ($data['own_contact'] ?? false)) {
                 // A child under their guardian: no ways in of their own.
                 $who = new UserDetails($who->name, null, null, $who->locale, $who->timezone);
             }

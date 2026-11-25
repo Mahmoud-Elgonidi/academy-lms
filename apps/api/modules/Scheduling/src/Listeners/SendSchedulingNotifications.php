@@ -36,6 +36,7 @@ use Modules\Scheduling\Contracts\Events\TeacherLessonsShifted;
 use Modules\Scheduling\Contracts\Events\TimeOffDecided;
 use Modules\Scheduling\Contracts\Events\TimeOffRequested;
 use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
+use Modules\Scheduling\Contracts\TrialAudience;
 use Modules\Scheduling\Contracts\TrialBooking;
 use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Domain\Models\CourseStart;
@@ -80,6 +81,7 @@ final class SendSchedulingNotifications
             ['session_cancelled', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson + ['outcome' => 'ولكم حصة تعويضية.']],
             ['session_cancelled_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson],
             ['trial_booked', 'lessons', $a.'family', ['whatsapp', 'email', 'push'], $lesson + $link + ['change' => 'https://demo.lms.test/ar/trial/lesson/…/change', 'cancel' => 'https://demo.lms.test/ar/trial/lesson/…/cancel']],
+            ['trial_booked_adults', 'lessons', $a.'trial_adults', ['whatsapp', 'email', 'push'], $lesson + $link + ['change' => 'https://demo.lms.test/ar/trial/lesson/…/change', 'cancel' => 'https://demo.lms.test/ar/trial/lesson/…/cancel']],
             ['trial_booked_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson],
             ['session_moved', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson + ['from' => 'السبت 10 أكتوبر · 6:00 م']],
             ['session_moved_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson + ['from' => 'السبت 10 أكتوبر · 6:00 م']],
@@ -211,7 +213,9 @@ final class SendSchedulingNotifications
         $locale = (string) (DB::table('users')->whereIn('id', $s['family'])->orderByRaw('id = ? desc', [$s['student_id']])->value('locale') ?? app()->getLocale());
         $links = app(TrialBooking::class)->familyLinks($s['session_id'], $locale) ?? ['change' => '', 'cancel' => ''];
 
-        $this->notifications->send(new Message('scheduling.trial_booked', $s['family'], self::lessonData($s) + $links, $action, $key));
+        // An academy whose page is for adults hears it in training words (a session, a trainer).
+        $template = app(TrialAudience::class)->forAdults() ? 'scheduling.trial_booked_adults' : 'scheduling.trial_booked';
+        $this->notifications->send(new Message($template, $s['family'], self::lessonData($s) + $links, $action, $key));
         $this->notifications->send(new Message('scheduling.trial_booked_teacher', $this->without([$s['teacher_id']], $event->actorId), self::lessonData($s), $action, $key));
     }
 

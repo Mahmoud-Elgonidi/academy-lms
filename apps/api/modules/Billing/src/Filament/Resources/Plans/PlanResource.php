@@ -118,8 +118,9 @@ final class PlanResource extends Resource
                 TextInput::make('validity_days')->label(__('billing::plans.fields.validity_days'))
                     ->numeric()->minValue(1)->maxValue(365)->default(42)->suffix(__('billing::plans.days'))
                     ->helperText(__('billing::plans.hints.validity')),
-                Select::make('renew_at_sessions')->label(__('billing::plans.fields.renew_at_sessions'))
-                    ->options([1 => 1, 2 => 2, 3 => 3, 4 => 4])->default(2)->native(false)
+                Select::make('renew_at_sessions')->label(__('billing::plans.fields.renew_when'))
+                    ->options(collect([1, 2, 3, 4])->mapWithKeys(fn (int $n) => [$n => trans_choice('billing::plans.renew_when', $n, ['n' => $n])])->all())
+                    ->default(2)->native(false)
                     ->helperText(__('billing::plans.hints.renew')),
             ]),
             Repeater::make('prices')->label(__('billing::plans.fields.prices'))

@@ -66,6 +66,9 @@ final class UserResource extends JsonResource
                 'timezone_label' => Timezones::label($academy->defaultTimezone),
                 // The academy's clock for everyone who has not chosen their own: h12 or h24.
                 'time_format' => (TimeFormat::of($academy->timeFormat) ?? TimeFormat::DEFAULT)->value,
+                // Whom the academy teaches: families (children with their guardians, and adults) or adults
+                // (adults and professionals only: no guardians, no children, no kids' looks).
+                'audience' => $academy->audience->value,
             ],
         ];
     }

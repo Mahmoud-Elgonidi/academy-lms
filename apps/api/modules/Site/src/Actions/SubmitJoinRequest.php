@@ -11,7 +11,9 @@ use Modules\SharedKernel\Http\FormToken;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\Site\Contracts\Events\JoinRequested;
+use Modules\Site\Domain\Page\Audience;
 use Modules\Site\Models\JoinRequest;
+use Modules\Site\Models\SitePage;
 use Modules\Site\Models\SiteSettings;
 
 /**
@@ -24,8 +26,10 @@ use Modules\Site\Models\SiteSettings;
  * week is the same request. A trial says its subject, or asks the academy to
  * help choose (the academy's default trial subject, else its staff choose),
  * and may say when the family is free (days and hours on their clock) and
- * the teacher they would rather have. A family that books its own trial
- * with a code to its number comes through record() (the code proved them).
+ * the teacher they would rather have. Who may ask is the page's form's to
+ * say (adults, children or both: Audience::pageBookers). A family that books
+ * its own trial with a code to its number comes through record() (the code
+ * proved them).
  *
  * Plain loops and no collection closures: the public controller calls it,
  * and Scramble's inference of those breaks other endpoints.
@@ -111,12 +115,15 @@ final class SubmitJoinRequest
             'message' => $this->text($data['message'] ?? null),
         ];
         $year = CarbonImmutable::now()->year;
+        $page = self::publishedPage();
+        // A page for adults names the fields in its training words (an area, a trainer), as its form does.
+        $words = Audience::of($page) === Audience::ADULTS ? 'site::site.request.fields_adults.' : 'site::site.request.fields.';
         $attributes = [];
-        foreach (self::FIELDS as $field) {
-            $attributes[$field] = (string) __('site::site.request.fields.'.$field);
+        foreach ([...self::FIELDS, 'subject_ids.*'] as $field) {
+            $key = trans()->has($words.$field) ? $words.$field : 'site::site.request.fields.'.$field;
+            $attributes[$field] = (string) __($key);
         }
-        $attributes['subject_ids.*'] = (string) __('site::site.request.fields.subject_ids.*');
-        $attributes['preferred_days.*'] = (string) __('site::site.request.fields.preferred_days');
+        $attributes['preferred_days.*'] = $attributes['preferred_days'];
         $valid = Validator::make($input, [
             'kind' => ['required', Rule::in(JoinRequest::KINDS)],
             'name' => ['required', 'string', 'min:2', 'max:120'],
@@ -139,6 +146,9 @@ final class SubmitJoinRequest
             'years_teaching' => ['nullable', 'integer', 'between:0,60'],
             'message' => ['nullable', 'string', 'max:1000'],
         ], ['phone.regex' => __('site::site.errors.phone')], $attributes)->validate();
+        if ($trial) {
+            $this->forWhomThePageTakes($page, $forChild);
+        }
 
         $same = JoinRequest::query()->where('phone', $valid['phone'])->where('kind', $valid['kind'])->where('status', 'new')
             ->where('created_at', '>=', CarbonImmutable::now()->subDays(self::SAME_FOR_DAYS))->latest()->first();
@@ -182,6 +192,39 @@ final class SubmitJoinRequest
 
             return $request;
         });
+    }
+
+    /**
+     * The page the visitor asked from: the published one (an old page never
+     * built reads as it was, SitePage::legacy()).
+     *
+     * @return array<string, mixed> a normalized PageDoc
+     */
+    public static function publishedPage(): array
+    {
+        $page = SitePage::current();
+
+        return $page->publishedDoc() ?? $page->draftDoc();
+    }
+
+    /**
+     * The page's form says who may ask (Audience::pageBookers, the published
+     * page's): a trial for a child where it takes adults alone, or for the
+     * one asking where it takes children alone, is refused with what to do.
+     *
+     * @param  array<string, mixed>  $page  a normalized PageDoc
+     *
+     * @throws ValidationException
+     */
+    private function forWhomThePageTakes(array $page, bool $forChild): void
+    {
+        $bookers = Audience::pageBookers($page);
+        if ($forChild && $bookers === 'adults') {
+            throw ValidationException::withMessages(['for_child' => __('site::site.errors.adults_only')]);
+        }
+        if (! $forChild && $bookers === 'children') {
+            throw ValidationException::withMessages(['for_child' => __('site::site.errors.children_only')]);
+        }
     }
 
     /** Text as typed, trimmed, without what cannot be read; null when empty. */

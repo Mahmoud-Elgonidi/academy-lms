@@ -30,11 +30,14 @@ use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\SharedKernel\Http\FormToken;
+use Modules\Site\Actions\PublishSitePage;
+use Modules\Site\Actions\SaveSiteDraft;
 use Modules\Site\Actions\SubmitJoinRequest;
 use Modules\Site\Contracts\Events\JoinRequested;
 use Modules\Site\Domain\SiteContent;
 use Modules\Site\Filament\Pages\SiteRequests;
 use Modules\Site\Models\JoinRequest;
+use Modules\Site\Models\SitePage;
 use Modules\Site\Models\SiteSettings;
 use Tests\Support\EnrolledStudent;
 
@@ -243,6 +246,34 @@ it('answers a request at once: the hours, and the link to pick a time while fami
     $staff = Queue::pushed(SendContactDelivery::class)->last(fn (SendContactDelivery $j) => $j->channel === 'whatsapp');
     expect($staff->address)->toBe('+966509999999')
         ->and($staff->body)->toContain(__('site::notifications.request_received.wait', [], 'en'))->not->toContain('/trial/');
+});
+
+it('speaks to professionals on a page for adults: the reply, the booked message and the refusals', function () {
+    // Noor publishes a page for adults (settings.audience), as an academy that trains professionals.
+    $this->actingAs($this->admin);
+    $page = app(SaveSiteDraft::class)->handle(['settings' => ['audience' => 'adults'], 'blocks' => [['type' => 'form', 'data' => []]]], SitePage::current()->draft_revision);
+    app(PublishSitePage::class)->handle($page->draft_revision);
+    app('auth')->forgetGuards();
+    $self = ['for_child' => false, 'child_name' => null, 'child_birth_year' => null];
+
+    Queue::fake([SendContactDelivery::class]);
+    noor('POST', 'site/requests', trialForm2($self))->assertCreated();
+    $reply = Queue::pushed(SendContactDelivery::class)->first(fn (SendContactDelivery $j) => $j->channel === 'whatsapp');
+    expect($reply->body)->toContain('introductory session')->toContain('/trial/')->not->toContain('lesson');
+
+    $phone = ['phone' => '+966509999999', 'name' => 'Huda Adel'];
+    bookOwnTrial('2026-10-06 19:00', $self + $phone)->assertCreated();
+    $contact = Lead::query()->where('phone_e164', '+966509999999')->sole()->contact_id;
+    $body = Notification::query()->where('user_id', $contact)->where('template_key', 'scheduling.trial_booked_adults')->value('body');
+    expect($body)->toContain('introductory session')->toContain('/trial/lesson/')->not->toContain('lesson ')
+        ->and(Notification::query()->where('template_key', 'scheduling.trial_booked')->count())->toBe(0);
+
+    // Why it cannot be booked, in the page's words.
+    $this->travel(2)->minutes();
+    expect(bookOwnTrial('2026-10-10 19:00', $self + $phone)->assertStatus(422)->json('errors.starts_at.0'))->toBe(__('crm::leads.errors_adults.trial_open', [], 'en'));
+    SiteSettings::query()->update(['trial_booking' => 'staff']);
+    expect(noor('POST', 'site/trials', ownTrialRequest($self) + ['challenge_id' => (string) Str::uuid(), 'code' => '123456', 'starts_at' => '2026-10-06T16:00:00Z'])
+        ->assertStatus(422)->json('errors.starts_at.0'))->toBe(__('crm::leads.errors_adults.booking_off', [], 'en'));
 });
 
 it('hands leads from the page out in turn to whoever works leads, unless the academy does it itself', function () {

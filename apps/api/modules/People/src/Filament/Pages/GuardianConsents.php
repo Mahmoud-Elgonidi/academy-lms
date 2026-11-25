@@ -28,6 +28,7 @@ use Modules\People\Models\PeopleSettings;
 use Modules\People\Queries\ConsentBoard;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Filament\NavGroup;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
 
@@ -58,9 +59,10 @@ final class GuardianConsents extends Page implements HasTable
         return NavGroup::People;
     }
 
+    /** Not in an academy of adults only (nobody there waits for a guardian). */
     public static function canAccess(): bool
     {
-        return Gate::allows(Ability::ManageConsents->value);
+        return Gate::allows(Ability::ManageConsents->value) && ! app(AcademyAudience::class)->adultsOnly();
     }
 
     public static function getNavigationLabel(): string

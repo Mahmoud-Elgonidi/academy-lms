@@ -1,0 +1,518 @@
+{
+  "account": {
+    "contact": {
+      "managed": "The academy changes your email and number."
+    },
+    "meetingLink": {
+      "needed": "The academy runs sessions on outside links, and no session can open without yours.",
+      "title": "Your session link"
+    }
+  },
+  "cards": {
+    "how": {
+      "charge": "The invoice is charged to your card on time, and the sessions go on without a break."
+    }
+  },
+  "chat": {
+    "emptyFamily": "When you have a trainer, you will find them here.",
+    "emptyTeacher": "When you have trainees, you will find them here to talk to them.",
+    "first": "Start the conversation: the academy can read what is said here.",
+    "inIt": "Also here: {names}",
+    "title": {
+      "classic": "Messages with trainers"
+    }
+  },
+  "common": {
+    "lessons": "{n, plural, =0 {No sessions} =1 {1 session} other {# sessions}}",
+    "newChats": "{n, plural, =1 {1 new message from a trainer or trainee} other {# new messages in conversations}}"
+  },
+  "dispute": {
+    "introFamily": "If the session was recorded wrongly, tell us what happened within 48 hours of its end. The academy checks the session room's attendance and answers you.",
+    "introTeacher": "If the session was recorded wrongly, tell us what happened within 48 hours of its end. The academy checks the session room's attendance and answers you.",
+    "sent": "Your dispute reached the academy; the session is under review.",
+    "title": "Dispute this session's outcome"
+  },
+  "documents": {
+    "lead": "The academy checks these documents against the original and asks for what your work as a trainer here needs."
+  },
+  "myData": {
+    "lead": "Everything the academy keeps about you: correct your details, download a copy, or ask for your account to be erased.",
+    "learner": "Trainee"
+  },
+  "nav": {
+    "classic": {
+      "homework": "Tasks",
+      "lessons": "Sessions",
+      "recordings": "Session recordings",
+      "trials": "Introductory sessions"
+    }
+  },
+  "recordings": {
+    "list": "{name}'s session recordings",
+    "off": "The academy does not record sessions now.",
+    "start": "Record the session",
+    "teacherList": "Your sessions' recordings",
+    "teacherTitle": "My session recordings",
+    "title": "Session recordings"
+  },
+  "roadmap": {
+    "lessonsMastered": "{done} of {total} units",
+    "materials": "Unit materials",
+    "pace": "Pace: {pace} units per session",
+    "roadmap": "Programme",
+    "teachersOnly": "Trainers only"
+  },
+  "room": {
+    "alone": "You are the only one here now; the others appear here when they join.",
+    "controls": "Session controls",
+    "leaveHint": "Leave the session",
+    "lesson": "Session",
+    "people": "People in the session: {count}",
+    "pipClose": "Back to the session",
+    "stage": "People in the session",
+    "timer": "Time since you joined"
+  },
+  "safeguarding": {
+    "lead": {
+      "classic": "If anything about a session, a trainer or anyone on the platform worries you, tell us here. Only the people responsible for safety and conduct at the academy read it.",
+      "teacher": "If something about a trainee's safety or wellbeing worries you, or someone else's behaviour, tell the academy's safety and conduct leads here. Only they read it. Do not look into it yourself."
+    },
+    "lesson": "In which session (if any)?",
+    "noLesson": "Not about a session",
+    "noStudent": "Not about one trainee",
+    "student": "Which trainee?",
+    "title": {
+      "classic": "Report a conduct or safety concern",
+      "teacher": "Raise a concern about a trainee's safety"
+    }
+  },
+  "signIn": {
+    "social": {
+      "held": "This account is not active yet. Contact the academy."
+    }
+  },
+  "support": {
+    "hints": {
+      "complaint": "About a trainer or a session. The academy looks into it and tells you what it did.",
+      "technical": "The session room, the app or signing in not working."
+    },
+    "lead": "Write to the academy about a session, a payment, a technical problem or anything else. The answers come here and in a message.",
+    "lesson": "Which session? (if any)",
+    "noLesson": "No particular session"
+  },
+  "teach": {
+    "absenceHint": "The trainee didn't come. Say what happened and anything the trainee should know.",
+    "addLesson": "Add a unit",
+    "backToLesson": "Back to the session",
+    "coverState": "{covered} of {total} sessions covered",
+    "enter": "Enter the session",
+    "externalLead": "This session is on an outside link. It opens in a new tab.",
+    "feedbackLabel": "Your words for the trainee",
+    "giveHomework": "Give a task",
+    "groupReport": "Group session report",
+    "groupShared": "For the whole group",
+    "groupSharedHint": "What was covered, the questions, the task and the note for the academy are written once for the group; the task goes to each trainee.",
+    "groupStudents": "Trainees ({n})",
+    "groupStudentsHint": "Each trainee gets their own ratings and note; for one who was absent, an absence note is enough.",
+    "homeworkLocked": "The trainee handed this task in, so it stays as it is.",
+    "homeworkTitle": "Task",
+    "homeworkToMark": "{n, plural, =1 {1 task to mark} other {# tasks to mark}}",
+    "itemNote": "Note on this unit",
+    "leadNotes": "About the trainee",
+    "leaveRoom": "Leave the session",
+    "lessonOn": "Session: {when}",
+    "lessonPay": "Sessions",
+    "lessonsMastered": "{done} of {total} units",
+    "lessonsTitle": "Sessions",
+    "nextLesson": "Next session",
+    "noAnswer": "Nothing was handed in with this task.",
+    "noEarnings": "No sessions this month.",
+    "noHomeworkMarked": "No marked tasks yet.",
+    "noHomeworkToMark": "No tasks to mark.",
+    "noLessonsDay": "No sessions",
+    "noLessonsWeek": "No sessions this week.",
+    "noStudents": "No trainees yet.",
+    "noTrials": "No introductory sessions right now.",
+    "notesForFamily": "Notes for the trainee",
+    "notesInternalHint": "For the academy only; the trainee never sees them.",
+    "openLink": "Open the session link",
+    "pace": "Pace: {pace} units per session",
+    "pendingNote": "{n, plural, =1 {1 session still to count once it is over} other {# sessions still to count once they are over}}.",
+    "perfLead": "The last {days} days · sessions lost to the platform do not count",
+    "pickLesson": "Pick a unit…",
+    "planHint": "Pick what happened with each unit.",
+    "questionsHint": "Questions your academy asks in every report of this area.",
+    "ratingsTitle": "Trainee ratings",
+    "reasonNext": "Next unit",
+    "reason_family": "Personal",
+    "reportLesson": "Session report",
+    "roadmap": "Programme",
+    "roomEnded": "You left the session.",
+    "roster": "Trainees in the session",
+    "rowAbsenceNote": "Absence note",
+    "rowNote": "A note for the trainee",
+    "rowsMissing": "{n, plural, =1 {One trainee's row is missing something} other {# trainees' rows are missing something}}: see the ones marked in red.",
+    "todayCount": "{n, plural, =0 {No sessions today} =1 {Today: 1 session} other {Today: # sessions}}",
+    "trialPerWeek": "Sessions a week",
+    "trialsToAssess": "{n, plural, =1 {1 introductory session to assess} other {# introductory sessions to assess}}",
+    "unpricedNote": "{n, plural, =1 {1 session has no price yet} other {# sessions have no price yet}}. The academy will set it and they count in this month.",
+    "voiceHint": "Say what you did in the session, how the trainee did, and the task. The draft fills only the empty fields; you check it before sending."
+  },
+  "teachCard": {
+    "bioHint": "Your experience and the areas you love training in, up to 280 characters. No numbers or links.",
+    "lead": "The card visitors see about you on the academy's page. You write it, and you decide whether it shows. Your phone number and email never show.",
+    "preview": "How visitors will see your card",
+    "subjectsFrom": "Areas from your profile at the academy"
+  },
+  "balance": {
+    "emptyNoInvoice": "No paid sessions right now. Contact the academy if you are expecting an invoice.",
+    "estimate": "An estimate: it moves if a session is cancelled or moved.",
+    "firstPayment": "The course starts and its sessions are booked once its first invoice is paid.",
+    "group": "Group sessions",
+    "makeup": "{n, plural, =1 {Plus one makeup session.} other {Plus # makeup sessions.}}",
+    "markPayer": "{n, plural, =1 {The next invoice goes out when one session is left} other {The next invoice goes out when # sessions are left}}",
+    "markStudent": "{n, plural, =1 {The package renews when one session is left} other {The package renews when # sessions are left}}",
+    "meter": "Sessions left: {left} of {total}",
+    "noCount": "This balance is not counted in sessions",
+    "otherPayer": "Someone else pays this invoice, such as your employer or whoever sponsors your training.",
+    "shared": "Shared across areas",
+    "state": {
+      "empty": "No sessions left",
+      "low": "Running low"
+    },
+    "title": "Sessions balance"
+  },
+  "games": {
+    "album": {
+      "from": {
+        "mastery": "Hatched when you mastered a session"
+      },
+      "hint": "Every {need} stars on your journey hatch an egg, and every session you master hatches a creature."
+    },
+    "homeworkDone": "The task “{title}” is handed in with this practice.",
+    "noLearner": "There is no trainee to show games for.",
+    "notEnough": "Your sessions do not have enough practice for this game yet. Try another game.",
+    "refused": {
+      "paused": "Games are paused for now. Try again later."
+    }
+  },
+  "invoice": {
+    "cancel": {
+      "lessons": "The booked sessions are cancelled and the times are free for the trainer again."
+    },
+    "coupon": {
+      "offerOn": "Your introductory session's offer is on this invoice."
+    },
+    "lessons": "Go to the sessions",
+    "welcome": {
+      "booked": "{count, plural, one {One session is booked so far; the rest are booked week by week.} other {# sessions are booked so far; the rest are booked week by week.}}",
+      "first": "First session",
+      "firstLater": "When the group has enough trainees",
+      "group": "Group and trainer",
+      "plainText": "Pay the invoice below to keep the sessions. The course is in your sessions once paid.",
+      "skipped": "{count, plural, one {One day was skipped because you or the trainer were busy.} other {# days were skipped because you or the trainer were busy.}}",
+      "skippedNote": "No session is booked on these days; the times carry on as usual after them.",
+      "skippedWeeks": "Days with no session",
+      "teacher": "Trainer"
+    }
+  },
+  "payReturn": {
+    "hint": {
+      "paid": "The sessions are confirmed, and the receipt is on its way.",
+      "waiting": "Pay the invoice to keep the sessions."
+    },
+    "notYours": {
+      "text": "Perhaps someone else pays it, such as your employer. Your invoices are on the payments page."
+    },
+    "paid": {
+      "app": "Get the app for reminders and joining sessions easily",
+      "first": "First session: {when}, with {teacher}.",
+      "join": "Sessions and the join link",
+      "joinHint": "The session's link opens on the sessions page a few minutes before it, in the browser or the app.",
+      "text": "Your sessions and their times are on the sessions page."
+    }
+  },
+  "start": {
+    "backToReport": "Introductory session report",
+    "closed": {
+      "academyTitle": "The academy enrols trainees itself",
+      "familyOnly": "You cannot start from here now"
+    },
+    "entry": {
+      "text": "Choose the area, the plan, the trainer and the times, then pay here."
+    },
+    "group": {
+      "held": "{count, plural, one {It has held one session} other {It has held # sessions}}; the academy decides how what was missed is made up.",
+      "next": "Next session: {when}",
+      "none": "There is no open group of this shape with a seat right now. Choose one-to-one sessions, or write to the academy to hear when a group opens.",
+      "private": "Choose one-to-one sessions",
+      "startsAt": "It starts once it has {count} trainees; it has {taken} now."
+    },
+    "hints": {
+      "plan": "Prices are for the whole plan, with one session's share. Nothing is paid before the review.",
+      "subject": "The areas the academy's trainers train in now.",
+      "teacher": "The trainers who take new trainees in this area."
+    },
+    "joined": {
+      "lessons": "Go to the sessions",
+      "text": "Its sessions come from the shared package's balance, so there is no new invoice."
+    },
+    "plan": {
+      "groupHint": "With other trainees, at the group's fixed times and a lower price.",
+      "groupTitle": "Group sessions",
+      "offerEnded": "The introductory session's offer has ended, so these are the usual prices.",
+      "offerTitle": "Your introductory session's offer: {percent}% off the first invoice.",
+      "perLesson": "{price} a session",
+      "privateHint": "The trainer with you alone, at times you choose.",
+      "privateTitle": "One-to-one sessions",
+      "recommended": "The trainer recommends it",
+      "renews": "{count, plural, one {Renews when one session is left, and you can stop any time.} other {Renews when # sessions are left, and you can stop any time.}}",
+      "sharedHint": "One balance for all your areas on this plan."
+    },
+    "refused": {
+      "openCourse": "Open the sessions",
+      "otherSubject": "Choose another area"
+    },
+    "review": {
+      "first": "First session: <b>{when}</b>",
+      "formingFirst": "The group starts once it has enough trainees; we will tell you the first session.",
+      "offerEnded": "The introductory session's offer has ended, so this is the usual price.",
+      "offerOn": "Your introductory session's offer is on: {percent}% off. It stays yours if you confirm before {until}.",
+      "offerOnAny": "Your introductory session's offer is on: {percent}% off.",
+      "pay2": "Pay it at least {hours} hours before the first session. Unpaid sessions are cancelled then, with nothing charged.",
+      "pay2Any": "Pay it before the first session to keep the sessions.",
+      "renews": "{count, plural, one {The next plan's invoice comes when one session is left, and you can stop any time.} other {The next plan's invoice comes when # sessions are left, and you can stop any time.}}",
+      "siblingBigger": "The multi-trainee discount is bigger than the introductory session's offer, so it applies instead; the two never add up.",
+      "skipped": "Days with no session",
+      "skippedNote": "No session is booked on these days; the times carry on as usual after them."
+    },
+    "shape": {
+      "block": "{count, plural, one {One session} other {# sessions}} in the plan",
+      "line": "{perWeek, plural, one {One session} other {# sessions}} a week · {minutes} minutes",
+      "perWeek": "{count, plural, one {One session} other {# sessions}} a week"
+    },
+    "short": {
+      "learner": "Trainee",
+      "subject": "Area",
+      "teacher": "Trainer"
+    },
+    "steps": {
+      "subject": "Choose the area",
+      "teacher": "Choose the trainer"
+    },
+    "subject": {
+      "already": "Areas you train in now",
+      "none": "The academy's trainers are not taking new trainees right now. Write to the academy to hear when a place opens.",
+      "openCourse": "Open the sessions",
+      "status": {
+        "active": "Running"
+      }
+    },
+    "summary": {
+      "first": "First session",
+      "learner": "Trainee",
+      "perLesson": "That is {price} a session",
+      "skipped": "Days with no session",
+      "subject": "Area",
+      "teacher": "Trainer"
+    },
+    "teacher": {
+      "none": "No trainer is taking new trainees in this area right now. Try a group plan, or write to the academy.",
+      "trialGone": "The introductory session's trainer is not taking new trainees right now, so choose another trainer from the list.",
+      "trialTeacher": "Your introductory session's trainer",
+      "yourTrialTeacher": "Your introductory session's trainer"
+    },
+    "times": {
+      "fewerLessons": "Choose a plan with fewer sessions",
+      "firstDay": "The earliest start is {day}, leaving time to pay before the first session.",
+      "otherTeacher": "Choose another trainer",
+      "timeLabel": "{time}, first session {first}"
+    }
+  },
+  "family": {
+    "absence": "You did not attend",
+    "allLessons": "All sessions",
+    "backToLessons": "Back to sessions",
+    "cancelLesson": "Cancel the session",
+    "cancelTitle": "Cancel the session on {day}?",
+    "cancelled": "The session is cancelled.",
+    "excuseAction": "I won't attend this session",
+    "excuseLead": "This is a group session: it goes on for the others at its time; only your seat is excused, and the session is not cancelled.",
+    "excuseTitle": "Not attending the session on {day}?",
+    "excused": "The trainer knows you won't attend this session; your seat in the group stays for the sessions after it.",
+    "extraAction": "Extra sessions",
+    "extraBody": "Choose how many; you get an invoice to pay like any other. Once it is paid, the academy books the sessions with you.",
+    "extraCount": "How many sessions?",
+    "extraHint": "An extra session is {price} ({minutes} min).",
+    "extraTitle": "Extra sessions in {subject}",
+    "extraWaiting": "Invoice {number} for extra sessions is waiting to be paid.",
+    "familyInvoice": "Combined invoice",
+    "handedIn": "Handed in. The trainer will review it.",
+    "homeworkLine": "Task: {title}",
+    "joinLesson": "Join the session",
+    "lessonsLeft": "{n, plural, =0 {No sessions} =1 {1 session} other {# sessions}}",
+    "lessonsLeftTitle": "Sessions left",
+    "lessonsOf": "{name}'s sessions",
+    "nextLesson": "Next session",
+    "noHomework": "No tasks right now.",
+    "noLearner": "Your account is not linked to a training programme yet. Contact the academy.",
+    "noNextLesson": "No sessions in the next four weeks.",
+    "noPast": "No sessions in the last four weeks.",
+    "noProgram": "No programme",
+    "noUpcoming": "No sessions in the next four weeks.",
+    "opensAt": "The session room opens at {time}",
+    "rateAnonymous": "The trainer sees the rating without your name.",
+    "rateLesson": "Rate the session",
+    "rateTitle": "How was the session?",
+    "rateGood": "What went well?",
+    "rateBad": "What could be better?",
+    "refuseSubstituteBody": "The session is cancelled on the academy's account and its minutes come back as a makeup session to book later.",
+    "refusedSubstitute": "Cancelled. You have {days} days to book the makeup.",
+    "roadmap": "Programme",
+    "substituteFor": "Substitute trainer: {name} is on leave",
+    "switchLearner": "Choose the account",
+    "teacherFeedback": "Trainer's feedback",
+    "teacherSaid": "The trainer's words"
+  },
+  "journey": {
+    "games": "This unit's games",
+    "hasHomework": "Has a task",
+    "join": "Join the session",
+    "lastLesson": "Last session",
+    "mark": {
+      "here": "Current unit"
+    },
+    "mastered": "{done} of {total} units mastered",
+    "nextLesson": "Next session",
+    "noCurriculum": "This course has no detailed programme yet. Its missions are here.",
+    "noGames": "No games on this unit yet. Once the trainer adds practice, it will be here.",
+    "noLearner": "No programme to show the journey for.",
+    "noLesson": "No sessions in the next two weeks.",
+    "onStation": "On “{title}”",
+    "opensAt": "The session room opens at {time}",
+    "practiceUnavailable": "This practice can't be played right now. It can be handed in from the tasks page.",
+    "roadmapReports": "Programme and the trainer's reports",
+    "stationAhead": "This unit opens when you get to it.",
+    "streak": "{n, plural, =0 {No sessions in a row yet} one {# session in a row} other {# sessions in a row}}",
+    "streakLabel": "sessions in a row",
+    "teacherChose": "Trainer's pick"
+  },
+  "site": {
+    "report": {
+      "metaTitle": "Introductory session report",
+      "kicker": "Introductory session report",
+      "kickerSecond": "Second introductory session report",
+      "teacherRole": "The session's trainer",
+      "level": {
+        "hint": "As the trainer found it in the session"
+      },
+      "note": "The trainer's words",
+      "nothingWritten": "The trainer wrote nothing more.",
+      "plan": {
+        "title": "The plan the trainer recommends",
+        "perWeek": "{count, plural, one {# session} other {# sessions}} a week",
+        "minutes": "{minutes} minutes a session",
+        "block": "{count, plural, one {# session} other {# sessions}} in the plan",
+        "private": "One-to-one sessions",
+        "group": "Group sessions",
+        "teacherPerWeek": "The trainer suggests {count, plural, one {# session} other {# sessions}} a week.",
+        "noPlan": "The trainer did not name a plan, and suggests {count, plural, one {# session} other {# sessions}} a week. Message us and we will suggest the right plan.",
+        "noPlanAtAll": "The trainer did not name a plan. Message us and we will suggest the right one.",
+        "withdrawn": "The plan the trainer recommended is no longer offered. Message us and we will suggest one that suits you.",
+        "perLesson": "That is {price} a session"
+      },
+      "offer": {
+        "title": "A special offer after the introductory session",
+        "familyBigger": "Your multi-trainee discount is bigger than this offer, so the bigger one applies (the two are never added together).",
+        "ended": {
+          "text": "The offer after the introductory session has ended. The price below is the plan's usual price, and you are welcome to start any time."
+        },
+        "used": "The offer was used on your first payment. Thank you for your trust."
+      },
+      "started": {
+        "title": "{learner} has started training with us",
+        "text": "{learner} is enrolled in {subject}, so there is no new offer. Sessions and payments are in the account.",
+        "status": {
+          "active": "Training under way"
+        },
+        "openFamily": "{learner}'s sessions"
+      },
+      "start": {
+        "words": "Hello, I would like to start training in {subject} with the plan \"{plan}\".",
+        "wordsAny": "Hello, I would like to start training in {subject}.",
+        "wordsOffer": " I received the offer after the introductory session ({percent}% off).",
+        "flow": "Choose the trainer and the times, and check the invoice before confirming. Then pay from your account.",
+        "flowOffer": "Choose the trainer and the times, and check the invoice before confirming. The offer applies by itself while it is open.",
+        "flowSignIn": "Sign in with your mobile number, then choose the trainer and the times and check the invoice before confirming.",
+        "flowSignInOffer": "Sign in with your mobile number, then choose the trainer and the times. The offer applies to the invoice by itself while it is open.",
+        "openCourse": "Open the sessions"
+      },
+      "next": {
+        "title": "Not the right trainer?",
+        "text": "Book a free second introductory session with another trainer in {subject}.",
+        "cta": "Pick a time with another trainer",
+        "pickTitle": "Pick the second session's time",
+        "pickLead": "Other trainers' times in {subject}.",
+        "empty": "No times with another trainer in these two weeks. Show the next weeks, or message us and we will find one.",
+        "notNow": "The second session is not open now",
+        "booked": {
+          "title": "Your second introductory session is booked",
+          "lead": "With another trainer, and free.",
+          "after": "After the session the new trainer writes a report you can read here."
+        }
+      },
+      "rebook": {
+        "metaTitle": "Book another time for the free session",
+        "kicker": "A session that did not take place",
+        "title": "Book another time",
+        "student_absent": "We missed you in the {subject} session on {when}. No problem: pick another time that suits you.",
+        "teacher_absent": "We are sorry: your {subject} session on {when} did not take place because the trainer could not attend.",
+        "academy": "We are sorry: the academy cancelled your {subject} session on {when}.",
+        "noCount": "This session does not count as your free session",
+        "pickLead": "Free times of {subject} trainers, on your clock.",
+        "booked": {
+          "title": "Your new time is booked"
+        }
+      },
+      "family": {
+        "lead": "Your introductory sessions and their reports.",
+        "leadStudent": "Your introductory sessions and what the trainer wrote about them.",
+        "empty": "No introductory sessions yet.",
+        "emptyStudent": "No introductory sessions yet.",
+        "back": "All introductory sessions",
+        "kind": {
+          "second": "Second session"
+        },
+        "badge": {
+          "missed": "You did not attend",
+          "teacherMissed": "The trainer did not attend"
+        },
+        "nextSecond": "Book a second session with another trainer",
+        "missedTitle": "The {subject} session did not take place"
+      },
+      "self": {
+        "title": "Your report in {subject}",
+        "started": {
+          "title": "You have started training with us",
+          "text": "You are enrolled in {subject}, so there is no new offer. Sessions and payments are in your account.",
+          "openFamily": "My sessions"
+        },
+        "start": {
+          "words": "Hello, I would like to start training in {subject} with the plan \"{plan}\".",
+          "wordsAny": "Hello, I would like to start training in {subject}."
+        },
+        "next": {
+          "pickLead": "Other trainers' times in {subject}.",
+          "booked": {
+            "title": "Your second introductory session is booked"
+          }
+        },
+        "rebook": {
+          "student_absent": "We missed you in the {subject} session on {when}. No problem: pick another time that suits you.",
+          "teacher_absent": "We are sorry: your {subject} session on {when} did not take place because the trainer could not attend.",
+          "academy": "We are sorry: the academy cancelled your {subject} session on {when}."
+        }
+      }
+    }
+  }
+}

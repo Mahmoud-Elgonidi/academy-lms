@@ -8,18 +8,20 @@ use Modules\People\Contracts\CheckKind;
 use Modules\People\Contracts\DTOs\TeacherClearance;
 use Modules\People\Models\PeopleSettings;
 use Modules\People\Models\TeacherCheck;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 
 /**
  * The academy's view of its teachers' vetting (the safeguarding leads):
  * documents waiting to be checked, verified ones that run out within a
  * month, and, for every active teacher, whether they may take new lessons
- * with students under 18 and why not.
+ * with students under 18 and why not (`minors` false in an academy of
+ * adults only: the page then shows the documents alone).
  */
 final class TeacherChecksBoard
 {
     public function __construct(private readonly Clearances $clearances) {}
 
-    /** @return array{required: bool, pending: list<array<string, mixed>>, expiring: list<array<string, mixed>>, teachers: list<array<string, mixed>>} */
+    /** @return array{required: bool, minors: bool, pending: list<array<string, mixed>>, expiring: list<array<string, mixed>>, teachers: list<array<string, mixed>>} */
     public function forAcademy(): array
     {
         $names = DB::table('users as u')->join('teacher_profiles as tp', fn ($j) => $j->on('tp.academy_id', '=', 'u.academy_id')->on('tp.user_id', '=', 'u.id'))
@@ -38,6 +40,7 @@ final class TeacherChecksBoard
 
         return [
             'required' => PeopleSettings::current()->require_minor_check,
+            'minors' => ! app(AcademyAudience::class)->adultsOnly(),
             'pending' => TeacherCheck::query()->where('status', 'pending')->orderBy('created_at')->get()->map($row)->all(),
             'expiring' => TeacherCheck::query()->where('status', 'verified')->whereNotNull('expires_on')->where('expires_on', '<=', $soon)->where('expires_on', '>=', $today)
                 ->orderBy('expires_on')->get()->map($row)->all(),

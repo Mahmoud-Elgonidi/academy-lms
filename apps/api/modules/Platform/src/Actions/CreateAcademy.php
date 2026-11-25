@@ -50,6 +50,8 @@ final class CreateAcademy
                 'default_timezone' => $data->defaultTimezone,
                 'default_locale' => $data->defaultLocale,
                 'country' => $data->country,
+                // Whom it teaches, chosen at its birth; changed later only through SetAcademyAudience.
+                'audience' => $data->audience,
             ]);
 
             $academy->domains()->create([

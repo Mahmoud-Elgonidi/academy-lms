@@ -9,13 +9,15 @@ use Modules\Enrollment\Contracts\EnrollmentStatus;
 use Modules\Learning\Domain\Journey\Week;
 use Modules\Learning\Jobs\SendWeeklyDigestJob;
 use Modules\Learning\Models\LearningSettings;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
  * Each hour, in the current academy: every learner with a course running or
  * paused whose own clock says Friday, 7 pm or later, gets their week's note
  * on its way, once (one row per learner and week, held by the database), on
- * the assist queue. Nothing while the academy has the note off.
+ * the assist queue. Nothing while the academy has the note off, nor in an
+ * adults academy (no guardians to read it; docs/architecture/02, section 29).
  */
 final class QueueWeeklyDigests
 {
@@ -28,7 +30,7 @@ final class QueueWeeklyDigests
     /** @return int how many notes went on their way */
     public function handle(?CarbonImmutable $now = null): int
     {
-        if (! LearningSettings::current()->weekly_digest) {
+        if (! LearningSettings::current()->weekly_digest || app(AcademyAudience::class)->adultsOnly()) {
             return 0;
         }
         $now ??= CarbonImmutable::now();

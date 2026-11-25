@@ -19,7 +19,8 @@ import 'theme/app_theme.dart';
 
 /// One app for every academy: the open account picks the colours (its
 /// academy's branding), the look (teacher, guardian, or a student's stage),
-/// the language and how a clock is written.
+/// the language and its words (the training words in an academy for adults)
+/// and how a clock is written.
 class AcademyApp extends StatefulWidget {
   const AcademyApp({required this.services, required this.session, super.key});
 
@@ -79,7 +80,7 @@ class _AcademyAppState extends State<AcademyApp> {
 
   /// A push while the app is open: a line at the bottom, with a way in.
   void _show(({String title, String body, Map<String, String> data}) m) {
-    final l = lookupAppLocalizations(Locale(widget.session.state.locale));
+    final l = wordsFor(widget.session.state.locale, adults: widget.session.state.adults);
     _messenger.currentState?.showSnackBar(
       SnackBar(
         content: Text([m.title, m.body].where((t) => t.isNotEmpty).join('\n')),
@@ -100,7 +101,7 @@ class _AcademyAppState extends State<AcademyApp> {
         listener: (context, state) {
           Juice.sounds = state.sounds;
           if (state.notice == null) return;
-          final l = lookupAppLocalizations(Locale(state.locale));
+          final l = wordsFor(state.locale, adults: state.adults);
           final text = switch (state.notice!) {
             SessionNotice.expired => l.noticeExpired,
             SessionNotice.signedOut => l.noticeSignedOut,
@@ -112,7 +113,12 @@ class _AcademyAppState extends State<AcademyApp> {
           _messenger.currentState?.showSnackBar(SnackBar(content: Text(text)));
           context.read<SessionCubit>().noticeShown();
         },
-        buildWhen: (a, b) => a.branding != b.branding || a.locale != b.locale || a.stage != b.stage || a.timeFormat != b.timeFormat,
+        buildWhen: (a, b) =>
+            a.branding != b.branding ||
+            a.locale != b.locale ||
+            a.stage != b.stage ||
+            a.timeFormat != b.timeFormat ||
+            a.audience != b.audience,
         builder: (context, state) {
           // Set here rather than in the listener: the first build (and a
           // test's new app) takes it too, before anything below writes a clock.
@@ -124,9 +130,10 @@ class _AcademyAppState extends State<AcademyApp> {
             scaffoldMessengerKey: _messenger,
             theme: buildTheme(state.branding, state.stage),
             locale: Locale(state.locale),
-            supportedLocales: AppLocalizations.supportedLocales,
+            supportedLocales: appLocales,
             localizationsDelegates: [
-              AppLocalizations.delegate,
+              // An academy for adults reads the training words.
+              AppWords(adults: state.adults),
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,

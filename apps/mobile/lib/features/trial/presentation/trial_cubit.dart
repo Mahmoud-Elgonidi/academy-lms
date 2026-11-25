@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/auth/audience.dart';
 import '../../../core/network/api_problem.dart';
 import '../data/trial_repository.dart';
 import '../domain/trial.dart';
@@ -54,7 +55,7 @@ class TrialState extends Equatable {
   final String academyCode;
   final AcademyPage? page;
 
-  /// The academy's own look (`GET branding`), once known.
+  /// The academy's own look (`GET branding`, with its `audience`), once known.
   final Map<String, dynamic>? branding;
   final TrialDraft draft;
 
@@ -94,6 +95,12 @@ class TrialState extends Equatable {
 
   /// The request went to the academy (no time booked).
   final bool requested;
+
+  /// Whom the academy teaches is known (from its look, or its page while the look is on its way).
+  bool get audienceKnown => branding != null || page != null;
+
+  /// An academy for adults (its own word, else its page's): the trial is the reader's own, in the training words.
+  bool get adults => (branding != null && Audience.parse(branding!['audience']) == Audience.adults) || (page?.adults ?? false);
 
   /// The academy lets this family pick its own time: a subject chosen, or help asked for where the academy starts
   /// such trials with its own subject.
@@ -259,13 +266,24 @@ class TrialCubit extends Cubit<TrialState> {
     try {
       final page = await _repo.page(slug, now: _clock());
       emit(state.copyWith(page: page, busy: false, step: TrialStep.who));
+      _ownTrial();
       await _remember?.call(page.slug);
       final branding = await _repo.branding(page.slug);
-      if (branding != null && !isClosed) emit(state.copyWith(branding: branding));
+      if (branding != null && !isClosed) {
+        emit(state.copyWith(branding: branding));
+        _ownTrial();
+      }
       return true;
     } on ApiProblem catch (p) {
       emit(state.copyWith(busy: false, problem: () => p, step: TrialStep.academy));
       return false;
+    }
+  }
+
+  /// In an academy for adults the trial is always the reader's own: the choice of who is learning is not asked.
+  void _ownTrial() {
+    if (!isClosed && state.adults && state.draft.learner != Learner.me) {
+      emit(state.copyWith(draft: state.draft.copyWith(learner: Learner.me)));
     }
   }
 
@@ -554,7 +572,7 @@ class TrialCubit extends Cubit<TrialState> {
       academyCode: state.academyCode,
       page: state.page,
       branding: state.branding,
-      draft: state.draft.anotherChild(),
+      draft: state.draft.anotherChild(adults: state.adults),
     ),
   );
 

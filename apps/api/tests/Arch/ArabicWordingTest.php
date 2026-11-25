@@ -43,7 +43,8 @@ function arabicStrings(array $node, string $path = ''): array
 
 it('writes Arabic in Modern Standard Arabic', function () {
     $root = dirname(__DIR__, 2);
-    $files = array_merge(glob($root.'/modules/*/lang/ar/*.php') ?: [], glob($root.'/lang/ar/*.php') ?: []);
+    // With the adults academies' words (lang/ar/adults/*.php, AudienceTranslator).
+    $files = array_merge(glob($root.'/modules/*/lang/ar/*.php') ?: [], glob($root.'/modules/*/lang/ar/adults/*.php') ?: [], glob($root.'/lang/ar/*.php') ?: []);
     $letter = '\x{0621}-\x{064A}\x{0671}';
     $words = [];
     foreach (ARABIC_COLLOQUIAL as $word) {

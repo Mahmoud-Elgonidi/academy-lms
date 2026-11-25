@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import ar from '../../messages/ar.json';
 import en from '../../messages/en.json';
+import adultsAr from '../../messages/adults/ar.json';
 
 /** Every string in a messages file, with its path ("nav.kids.messages"). */
 function strings(node: unknown, path = ''): [string, string][] {
@@ -32,7 +33,8 @@ const RULES: [RegExp, string][] = [
 
 describe('the portal’s words', () => {
   it('are Modern Standard Arabic, one word for one thing', () => {
-    const wrong = strings(ar).flatMap(([path, text]) =>
+    // The adults' words (messages/adults, an academy that trains professionals) are held to the same rules.
+    const wrong = [...strings(ar), ...strings(adultsAr).map(([path, text]): [string, string] => [`adults.${path}`, text])].flatMap(([path, text]) =>
       RULES.filter(([rule]) => rule.test(text)).map(([rule, why]) => `${path}: "${text.match(rule)![0]}" (${why})`),
     );
     expect(wrong).toEqual([]);

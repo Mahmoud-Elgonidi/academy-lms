@@ -16,6 +16,7 @@ use Modules\Platform\Contracts\PlatformApi;
 use Modules\SharedKernel\Contact\Phone;
 use Modules\SharedKernel\Geo\Countries;
 use Modules\SharedKernel\Plans\Feature;
+use Modules\SharedKernel\Tenancy\Audience;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantRef;
 use Symfony\Component\Console\Input\StreamableInputInterface;
@@ -27,7 +28,8 @@ use Throwable;
  * console's "New academy" does it, for when nobody can sign in to the
  * console: one JSON object on stdin with the academy, its owner, its plan
  * (its code), the plan's areas taken away (features_off) and the optional
- * areas the academy starts with hidden (hidden), and the reason. Everything
+ * areas the academy starts with hidden (hidden), whom it teaches (audience:
+ * families, the default, or adults), and the reason. Everything
  * is checked before anything is made; then the academy and its owner
  * (OnboardAcademy), the plan's terms (ChangeAcademyPlan), the hidden areas
  * (SaveAcademyModules, as the platform), and last the owner's welcome by
@@ -72,6 +74,7 @@ final class OnboardAcademyCommand extends Command
                 defaultLocale: $d['locale'],
                 country: $d['country'],
                 plan: $d['plan'],
+                audience: Audience::of($d['audience']),
             ), $d['owner_name'], $d['owner_email'], $d['owner_phone']);
         } catch (ValidationException $e) {
             return $this->refused($e);
@@ -107,6 +110,7 @@ final class OnboardAcademyCommand extends Command
         $this->info("Academy opened: https://{$host}");
         $this->line("  id:            {$academy->id}");
         $this->line("  plan:          {$d['plan']}");
+        $this->line("  audience:      {$d['audience']}");
         $this->line('  features off:  '.($d['features_off'] === [] ? '-' : implode(', ', $d['features_off'])));
         $this->line('  hidden:        '.($hidden === [] ? '-' : implode(', ', $hidden)));
         $this->line("  welcome sent to {$d['owner_email']} (a link to choose a password)");
@@ -118,7 +122,7 @@ final class OnboardAcademyCommand extends Command
      * What the JSON says, checked as the console's wizard checks it, and before anything is made.
      *
      * @param  array<mixed>  $input
-     * @return array{slug: string, name_ar: string, name_en: string, country: string, currency: string, timezone: string, locale: string, owner_name: string, owner_email: string, owner_phone: ?string, plan: string, features_off: list<string>, hidden: list<string>, reason: string}
+     * @return array{slug: string, name_ar: string, name_en: string, country: string, currency: string, timezone: string, locale: string, owner_name: string, owner_email: string, owner_phone: ?string, plan: string, features_off: list<string>, hidden: list<string>, audience: string, reason: string}
      */
     private function check(array $input, ConsoleApi $console): array
     {
@@ -138,6 +142,7 @@ final class OnboardAcademyCommand extends Command
             'plan' => $text('plan'),
             'features_off' => $list('features_off'),
             'hidden' => $list('hidden'),
+            'audience' => $text('audience') === '' ? Audience::DEFAULT->value : strtolower($text('audience')),
             'reason' => $text('reason'),
         ];
 
@@ -165,10 +170,12 @@ final class OnboardAcademyCommand extends Command
             'features_off.*' => ['string', Rule::in(array_column(Feature::cases(), 'value'))],
             'hidden' => ['array', 'list'],
             'hidden.*' => ['string', Rule::in($optional)],
+            'audience' => ['required', Rule::in(array_column(Audience::cases(), 'value'))],
             'reason' => ['required', 'string', 'min:5', 'max:300'],
         ], [
             'owner_email.*' => __('identity::onboarding.errors.owner_email'),
             'hidden.*.in' => 'Only optional modules can be hidden: '.implode(', ', $optional).'.',
+            'audience.in' => 'The audience is families or adults.',
         ])->validate();
 
         // The owner's mobile with the country's code when it has none ("05…" in Saudi Arabia).

@@ -41,9 +41,9 @@ final class SchedulesImporter implements Importer
     public function fields(): array
     {
         return [
-            new Field('student_name', true, ['الطالب', 'اسم الطالب', 'الطالبة', 'student', 'student name']),
+            new Field('student_name', true, ['الطالب', 'اسم الطالب', 'الطالبة', 'student', 'student name', 'المتدرب', 'اسم المتدرب', 'trainee', 'trainee name']),
             new Field('contact', true, ['رقم التواصل', 'التواصل', 'الموبايل', 'الجوال', 'رقم ولي الأمر', 'موبايل ولي الأمر', 'الإيميل', 'الايميل', 'contact', 'phone', 'mobile', 'email', 'guardian phone']),
-            new Field('teacher', true, ['المدرس', 'اسم المدرس', 'المعلم', 'teacher']),
+            new Field('teacher', true, ['المدرس', 'اسم المدرس', 'المعلم', 'teacher', 'المدرب', 'اسم المدرب', 'trainer']),
             new Field('subject', true, ['المادة', 'subject']),
             new Field('duration', true, ['مدة الحصة', 'المدة', 'الدقايق', 'الدقائق', 'duration', 'minutes', 'lesson minutes']),
             new Field('times', true, ['المواعيد', 'الأيام', 'الميعاد', 'المواعيد الأسبوعية', 'الأيام والمواعيد', 'times', 'schedule', 'days', 'weekly times']),
@@ -65,8 +65,8 @@ final class SchedulesImporter implements Importer
         $duration = Cells::minutes($row['duration']) ?? throw ValidationException::withMessages(['duration' => __($e.'number', ['value' => $row['duration']])]);
         $times = Cells::weeklyTimes($row['times']) ?? throw ValidationException::withMessages(['times' => __('scheduling::import.errors.times')]);
         $clock = match (Text::key($row['clock'])) {
-            '', 'المدرس', 'المعلم', 'teacher' => null,
-            'الطالب', 'student' => $this->directory->timezoneOf($studentId) ?? $context->timezone,
+            '', 'المدرس', 'المعلم', 'teacher', 'المدرب', 'trainer' => null,
+            'الطالب', 'student', 'المتدرب', 'trainee' => $this->directory->timezoneOf($studentId) ?? $context->timezone,
             default => Places::timezone($row['clock']) ?? throw ValidationException::withMessages(['clock' => __($e.'timezone', ['value' => $row['clock']])]),
         };
         $today = CarbonImmutable::now($context->timezone)->startOfDay();

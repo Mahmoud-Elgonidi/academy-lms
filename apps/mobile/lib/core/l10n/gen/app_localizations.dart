@@ -90,7 +90,7 @@ abstract class AppLocalizations {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('ar'), Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[Locale('ar'), Locale('ar', 'ZZ'), Locale('en'), Locale('en', 'ZZ')];
 
   /// No description provided for @appName.
   ///
@@ -7220,6 +7220,12 @@ abstract class AppLocalizations {
   /// **'لمن الحصة؟'**
   String get trialWhoTitle;
 
+  /// No description provided for @trialNameTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'ما اسمك؟'**
+  String get trialNameTitle;
+
   /// No description provided for @trialWhoMe.
   ///
   /// In ar, this message translates to:
@@ -9769,6 +9775,26 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when language+country codes are specified.
+  switch (locale.languageCode) {
+    case 'ar':
+      {
+        switch (locale.countryCode) {
+          case 'ZZ':
+            return AppLocalizationsArZz();
+        }
+        break;
+      }
+    case 'en':
+      {
+        switch (locale.countryCode) {
+          case 'ZZ':
+            return AppLocalizationsEnZz();
+        }
+        break;
+      }
+  }
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
     case 'ar':

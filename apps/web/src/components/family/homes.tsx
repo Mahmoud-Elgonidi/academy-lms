@@ -146,7 +146,7 @@ export async function ClassicHome({ name, learner, lessons, notices, courses, gu
   notices: string[];
   /** The learner's courses, each with its balance (GET family/courses/{enrollment}/balance). */
   courses: { subject: string | null; balance: CourseBalance }[];
-  /** Whether the person signed in is a guardian (they may add a child). */
+  /** Whether the person signed in may add a child (a guardian, never in an academy for adults: rules.mayAddChild). */
   guardian: boolean;
   invoices: Invoices | null;
   homework: Homework[];

@@ -18,6 +18,7 @@ use Modules\People\Filament\Directory\DirectoryForm;
 use Modules\People\Queries\Models\Person;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Filament\NavGroup;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use UnitEnum;
 
 /** Guardians (docs/architecture/01, section 6): who signs in for their children and pays; their children on their page. */
@@ -33,9 +34,10 @@ final class GuardianResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /** Not in an academy of adults only (nobody has a guardian there). */
     public static function canAccess(): bool
     {
-        return Gate::allows(Ability::ManageStudents->value);
+        return Gate::allows(Ability::ManageStudents->value) && ! app(AcademyAudience::class)->adultsOnly();
     }
 
     public static function getNavigationGroup(): string|UnitEnum|null

@@ -19763,7 +19763,7 @@
         "/v1/family/children": {
             "post": {
                 "operationId": "family.children.add",
-                "description": "A guardian adds their own child (a managed minor under them, with no sign-in of their own) and goes straight into\nthe start flow (GET family/start/options?learner_id={id}). birth_date (Y-m-d), else birth_year; gender optional.\nagree with the consent wording's version (GET family/consents gives the text; age is when it is needed): the\nguardian's consent is recorded at once. 403 for an account that is not a guardian; 422 with why, in plain words\n(the same name and year of birth as one of their children, too many children). Send an Idempotency-Key.",
+                "description": "A guardian adds their own child (a managed minor under them, with no sign-in of their own) and goes straight into\nthe start flow (GET family/start/options?learner_id={id}). birth_date (Y-m-d), else birth_year; gender optional.\nagree with the consent wording's version (GET family/consents gives the text; age is when it is needed): the\nguardian's consent is recorded at once. 404 in an academy of adults only (branding audience: adults); 403 for an\naccount that is not a guardian; 422 with why, in plain words\n(the same name and year of birth as one of their children, too many children). Send an Idempotency-Key.",
                 "summary": "Add a child",
                 "tags": [
                     "People"
@@ -19929,6 +19929,9 @@
                                 }
                             }
                         }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
@@ -21124,7 +21127,7 @@
         "/v1/branding": {
             "get": {
                 "operationId": "platform.branding",
-                "description": "With `app`: the oldest app version still served (an older app asks to be updated first) and where to update it.\n`time_format` is how the academy writes a clock for everyone who has not chosen their own (pages before sign-in).\n`modules` are the academy's modules that are on (Settings \u203a Academy modules and its plan), for screens before sign-in.",
+                "description": "With `app`: the oldest app version still served (an older app asks to be updated first) and where to update it.\n`time_format` is how the academy writes a clock for everyone who has not chosen their own (pages before sign-in).\n`modules` are the academy's modules that are on (Settings \u203a Academy modules and its plan), for screens before sign-in.\n`audience` is whom the academy teaches: families (children with guardians, and adults) or adults (professionals only: no guardians, no children).",
                 "summary": "The academy's look",
                 "tags": [
                     "Platform"
@@ -21299,6 +21302,10 @@
                                                 "type": "string"
                                             }
                                         },
+                                        "audience": {
+                                            "type": "string",
+                                            "description": "Whom the academy teaches: families (children with their guardians, and adults) or adults (adults and professionals only: no guardians, no children, no kids' looks)."
+                                        },
                                         "app": {
                                             "type": "object",
                                             "properties": {
@@ -21326,6 +21333,7 @@
                                         "data",
                                         "time_format",
                                         "modules",
+                                        "audience",
                                         "app"
                                     ]
                                 }
@@ -35591,7 +35599,7 @@
         "schemas": {
             "AgeGroup": {
                 "type": "string",
-                "description": "The ages a teacher teaches, as the stages of a student's area cut them: children (under 12), middle school (12\u201314), secondary (15\u201318), adults.\n",
+                "description": "The ages a teacher teaches, as the stages of a student's area cut them: children (under 12), middle school (12\u201314), secondary (15\u201317), adults (18 and over: the age a student stops being a minor, PeopleService::ADULT_AGE).\n",
                 "enum": [
                     "kids",
                     "middle",
@@ -36318,6 +36326,10 @@
                             "time_format": {
                                 "type": "string",
                                 "description": "The academy's clock for everyone who has not chosen their own: h12 or h24."
+                            },
+                            "audience": {
+                                "type": "string",
+                                "description": "Whom the academy teaches: families (children with their guardians, and adults) or adults\n(adults and professionals only: no guardians, no children, no kids' looks)."
                             }
                         },
                         "required": [
@@ -36327,7 +36339,8 @@
                             "name_en",
                             "default_timezone",
                             "timezone_label",
-                            "time_format"
+                            "time_format",
+                            "audience"
                         ]
                     }
                 },

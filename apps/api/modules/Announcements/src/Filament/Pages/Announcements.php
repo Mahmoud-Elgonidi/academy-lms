@@ -35,6 +35,7 @@ use Modules\Announcements\Queries\TodaysAnnouncements;
 use Modules\Catalog\Contracts\CatalogApi;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Filament\NavGroup;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
@@ -105,12 +106,14 @@ final class Announcements extends Page implements HasTable
     /** @return array<string, mixed> */
     private static function blank(): array
     {
-        return ['title' => '', 'body' => '', 'audience' => Audience::FAMILIES, 'stage' => 'all', 'subject_id' => null, 'channels' => ['push']];
+        return ['title' => '', 'body' => '', 'audience' => app(AcademyAudience::class)->adultsOnly() ? Audience::STUDENTS : Audience::FAMILIES, 'stage' => 'all', 'subject_id' => null, 'channels' => ['push']];
     }
 
     public function form(Schema $schema): Schema
     {
         $l = 'announcements::announcements.form.';
+        // An adults academy: its trainees or its trainers, no stage (docs/architecture/02, section 29).
+        $adults = app(AcademyAudience::class)->adultsOnly();
 
         return $schema->statePath('data')->components([
             TextInput::make('title')->label(__($l.'title'))->helperText(__($l.'title_hint', ['max' => AnnouncementRules::TITLE_MAX]))
@@ -118,13 +121,13 @@ final class Announcements extends Page implements HasTable
             Textarea::make('body')->label(__($l.'body'))->helperText(__($l.'body_hint', ['max' => AnnouncementRules::BODY_MAX]))
                 ->required()->maxLength(AnnouncementRules::BODY_MAX)->rows(6)->autosize(),
             ToggleButtons::make('audience')->label(__($l.'audience'))->inline()->required()->live()
-                ->options(collect(Audience::KINDS)->mapWithKeys(fn (string $k) => [$k => __($l.'audiences.'.$k)])->all())
+                ->options(collect(Audience::kinds($adults))->mapWithKeys(fn (string $k) => [$k => __($l.'audiences.'.$k)])->all())
                 ->icons([Audience::FAMILIES => Heroicon::OutlinedHome, Audience::GUARDIANS => Heroicon::OutlinedUsers, Audience::STUDENTS => Heroicon::OutlinedAcademicCap,
                     Audience::SUBJECT => Heroicon::OutlinedBookOpen, Audience::TEACHERS => Heroicon::OutlinedPresentationChartBar])
                 ->helperText(fn (Get $get) => in_array($get('audience'), Audience::KINDS, true) ? __($l.'audience_hints.'.$get('audience')) : null),
             ToggleButtons::make('stage')->label(__($l.'stage'))->inline()->live()->grouped()
                 ->options(collect(['all', ...Audience::STAGES])->mapWithKeys(fn (string $s) => [$s => __($l.'stages.'.$s)])->all())
-                ->visible(fn (Get $get) => $get('audience') === Audience::STUDENTS),
+                ->visible(fn (Get $get) => ! $adults && $get('audience') === Audience::STUDENTS),
             Select::make('subject_id')->label(__($l.'subject'))->searchable()->required()->live()
                 ->options(fn () => app(CatalogApi::class)->subjectNames())
                 ->visible(fn (Get $get) => $get('audience') === Audience::SUBJECT),

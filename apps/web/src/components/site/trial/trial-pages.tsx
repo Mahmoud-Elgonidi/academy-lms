@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import {
   bookFromPick,
   cancelTrial,
@@ -18,6 +18,7 @@ import { Icon, WhatsAppIcon } from '../icons';
 import { AddToCalendar, BigTime, BookedCard, FocusHeading } from './booked';
 import { TimePicker, type TimesState } from './time-picker';
 import { newKey, useBrowserZone } from './trial-request';
+import { useTrialWords } from './words';
 
 /** What a "pick a time" link's request says (GET site/trials/pick/{token}). */
 export type PickRequest = {
@@ -37,7 +38,7 @@ type Common = { token: string; academy: string; whatsapp: string | null; timeFor
 
 /** A link that stopped working while the page was open: what happened and the ways on. */
 function Gone({ title, text, whatsapp, home, homeLabel }: { title: string; text: string; whatsapp: string | null; home?: string; homeLabel?: string }) {
-  const t = useTranslations('site.trial');
+  const t = useTrialWords();
   const chat = whatsappLink(whatsapp, t('whatsappWords'));
   return (
     <section className="lt-card lt-calm" data-tone="attention">
@@ -58,7 +59,7 @@ function Gone({ title, text, whatsapp, home, homeLabel }: { title: string; text:
  * and booking with no code (the link went to their number).
  */
 export function PickTrial({ request, token, academy, whatsapp, timeFormat, locale }: Common & { request: PickRequest }) {
-  const t = useTranslations('site.trial');
+  const t = useTrialWords();
   const browser = useBrowserZone();
   const zone = browser || request.timezone || '';
   const subject = request.subject!;
@@ -192,7 +193,7 @@ export function PickTrial({ request, token, academy, whatsapp, timeFormat, local
 
 /** The trial as it stands: when, what, with whom, how long. */
 function LessonFacts({ lesson, timeFormat }: { lesson: TrialLesson; timeFormat: TimeFormat }) {
-  const t = useTranslations('site.trial');
+  const t = useTrialWords();
   return (
     <div className="lt-lesson">
       {lesson.starts_at ? <BigTime time={lesson.starts_at} timeFormat={timeFormat} /> : null}
@@ -211,7 +212,7 @@ function LessonFacts({ lesson, timeFormat }: { lesson: TrialLesson; timeFormat: 
  * every reason it cannot move as its own calm card with the ways on.
  */
 export function ChangeTrial({ lesson: first, token, academy, whatsapp, timeFormat, locale }: Common & { lesson: TrialLesson }) {
-  const t = useTranslations('site.trial');
+  const t = useTrialWords();
   const zone = useBrowserZone();
   const [lesson, setLesson] = useState(first);
   const [times, setTimes] = useState<TimesState>({ status: 'loading' });
@@ -348,7 +349,7 @@ export function ChangeTrial({ lesson: first, token, academy, whatsapp, timeForma
  * an optional reason, keeping it instead, and what to do after.
  */
 export function CancelTrial({ lesson: first, token, academy, whatsapp, timeFormat, locale }: Common & { lesson: TrialLesson }) {
-  const t = useTranslations('site.trial');
+  const t = useTrialWords();
   const pageLocale = useLocale();
   const zone = useBrowserZone();
   const [lesson, setLesson] = useState(first);

@@ -19,6 +19,17 @@ final class Templates
 {
     public const KEYS = ['online_courses', 'training', 'kids_families', 'language_school', 'blank'];
 
+    /**
+     * The templates an academy may start from: an academy that trains adults
+     * only never starts from the page for children and their families.
+     *
+     * @return list<string>
+     */
+    public static function keysFor(bool $adultsOnly): array
+    {
+        return $adultsOnly ? array_values(array_diff(self::KEYS, ['kids_families'])) : self::KEYS;
+    }
+
     /** The template a new page starts from, by the audience it speaks to. */
     public static function forAudience(string $audience): string
     {

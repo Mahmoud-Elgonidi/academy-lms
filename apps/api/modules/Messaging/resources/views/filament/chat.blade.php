@@ -3,6 +3,8 @@
     $look = $this->look();
     $open = $this->opened;
     $rows = $this->rows;
+    // The teacher hears that guardians read along only when the student has some.
+    $alone = $look === 'teacher' && $open && ! $open['guardians'] ? 'teacher_alone' : $look;
 @endphp
 <x-filament-panels::page>
     @include('messaging::filament.styles')
@@ -47,7 +49,7 @@
                             <small>@unless ($line['mine']){{ $line['author'] }} · {{ $line['sideLabel'] }} · @endunless<time title="{{ $line['when'] }}">{{ $line['ago'] }}</time></small>
                         </div>
                     @empty
-                        <p class="ms-first">{{ __($l.'first.'.$look) }}</p>
+                        <p class="ms-first">{{ __($l.'first.'.$alone) }}</p>
                     @endforelse
                 </div>
 
@@ -55,7 +57,7 @@
                     <p class="ms-why">{{ $open['whyNot'] }}</p>
                 @else
                     <form class="ms-compose" wire:submit="send">
-                        <textarea wire:model="body" maxlength="{{ \Modules\Messaging\MessagingRules::MAX_LENGTH }}" rows="1" aria-label="{{ __($l.'write.'.$look) }}" placeholder="{{ __($l.'write.'.$look) }}" x-data x-on:keydown.enter="if (! $event.shiftKey && ! $event.isComposing) { $event.preventDefault(); $el.form.requestSubmit() }"></textarea>
+                        <textarea wire:model="body" maxlength="{{ \Modules\Messaging\MessagingRules::MAX_LENGTH }}" rows="1" aria-label="{{ __($l.'write.'.$alone) }}" placeholder="{{ __($l.'write.'.$alone) }}" x-data x-on:keydown.enter="if (! $event.shiftKey && ! $event.isComposing) { $event.preventDefault(); $el.form.requestSubmit() }"></textarea>
                         <x-filament::button type="submit" icon="heroicon-m-paper-airplane" wire:loading.attr="disabled" wire:target="send">{{ __($l.'send') }}</x-filament::button>
                     </form>
                     <p class="ms-hint">{{ __($l.'enter_hint') }}</p>

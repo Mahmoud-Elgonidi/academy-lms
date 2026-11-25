@@ -4,6 +4,7 @@ import '../network/api_problem.dart';
 import 'gen/app_localizations.dart';
 
 export 'gen/app_localizations.dart';
+export 'words.dart';
 
 extension L10nContext on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);

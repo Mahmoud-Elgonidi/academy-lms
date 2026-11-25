@@ -18,6 +18,7 @@ use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Filament\NavGroup;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use UnitEnum;
 
 /**
@@ -40,7 +41,8 @@ final class WeeklyNoteSettings extends Page
 
     public static function canAccess(): bool
     {
-        return Gate::allows(Ability::ManageTemplates->value);
+        // A note to guardians: an adults academy has none (docs/architecture/02, section 29).
+        return Gate::allows(Ability::ManageTemplates->value) && ! app(AcademyAudience::class)->adultsOnly();
     }
 
     public static function getNavigationGroup(): string|UnitEnum|null

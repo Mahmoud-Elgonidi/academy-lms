@@ -11,5 +11,6 @@ final readonly class TrialSettings
         public int $responseHours,           // how soon the academy promises to answer a request
         public ?string $defaultSubjectId,    // a family that asks for help choosing starts here (null: the staff choose)
         public int $noticeHours = 3,         // a family books its own trial at least this long ahead
+        public bool $forAdults = false,      // the published page speaks to adults (settings.audience): its refusals and messages say a session, a trainer, an area
     ) {}
 }

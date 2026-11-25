@@ -2,6 +2,7 @@
 
 namespace Modules\Site\Filament\Forms;
 
+use Filament\Actions\Action;
 use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -21,13 +22,17 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 use Modules\Billing\Contracts\BillingApi;
 use Modules\Catalog\Contracts\CatalogApi;
 use Modules\People\Contracts\PeopleApi;
+use Modules\SharedKernel\Authorization\Ability;
+use Modules\Site\Domain\Page\Audience;
 use Modules\Site\Domain\Page\Blocks;
 use Modules\Site\Domain\Page\Localize;
 use Modules\Site\Filament\Pages\SiteBuilder;
+use Modules\Site\Filament\Pages\SiteSettings;
 
 /**
  * The page builder's forms, one Filament Builder block per block type
@@ -304,15 +309,7 @@ final class BlockForms
                 ]),
                 self::media($c.'media.media', __(self::B.'fields.media'), 'image')->visible(fn (Get $get) => in_array($get('variant'), ['split', 'banner'], true)),
             ],
-            'form' => [
-                $note('form'),
-                ...$heading(),
-                self::defaultable($c.'points', __(self::B.'fields.points'), __(self::B.'fields.points_hint'), self::lines($c.'points', 120, 5)),
-                Grid::make(2)->schema([
-                    self::toggle($c.'teach', __(self::B.'fields.teach')),
-                    self::toggle($c.'whatsapp_button', __(self::B.'fields.whatsapp_button')),
-                ]),
-            ],
+            'form' => self::trialForm($note('form')),
             'contact' => [
                 ...$heading(),
                 Grid::make(2)->schema([
@@ -330,6 +327,55 @@ final class BlockForms
             default => [],
         };
     }
+
+    /**
+     * The trial form's content, as the visitor reads it: the words beside the
+     * form (every one of them here, the small line above the title included),
+     * then the form's own choices (who books, "teach with us"), then where the
+     * rest of its choices are set (the subjects, the trial settings).
+     *
+     * @return list<Component>
+     */
+    private static function trialForm(Callout $note): array
+    {
+        $c = 'content.';
+        $f = self::B.'form.';
+        $adultsPage = fn ($livewire): bool => $livewire instanceof SiteBuilder && ($livewire->settings['audience'] ?? null) === Audience::ADULTS;
+
+        return [
+            $note,
+            Section::make(__($f.'words'))->description(__($f.'words_hint'))->icon(Heroicon::OutlinedChatBubbleLeftEllipsis)->compact()->schema([
+                self::toggle('style.eyebrow', __(self::B.'fields.eyebrow_on')),
+                self::pair($c.'eyebrow', __(self::B.'fields.eyebrow'), 40, placeholder: __(self::B.'fields.empty_default'))->visible(fn (Get $get) => (bool) $get('style.eyebrow')),
+                self::pair($c.'title', __(self::B.'fields.title'), 120, placeholder: __(self::B.'fields.empty_default')),
+                self::pair($c.'lead', __(self::B.'fields.lead'), 300, long: true, placeholder: __(self::B.'fields.empty_default')),
+                self::defaultable($c.'points', __(self::B.'fields.points'), __(self::B.'fields.points_hint'), self::lines($c.'points', 120, 5)),
+                self::toggle($c.'whatsapp_button', __(self::B.'fields.whatsapp_button'))->helperText(__($f.'whatsapp_hint')),
+                self::pair($c.'whatsapp_label', __(self::B.'fields.whatsapp_label'), 40, placeholder: __(self::B.'fields.empty_default'))
+                    ->visible(fn (Get $get) => (bool) $get($c.'whatsapp_button')),
+            ]),
+            Section::make(__($f.'choices'))->description(__($f.'choices_hint'))->icon(Heroicon::OutlinedAdjustmentsHorizontal)->compact()->schema([
+                ToggleButtons::make($c.'who')->label(__(self::B.'fields.who'))->helperText(__(self::B.'fields.who_hint'))
+                    ->options(self::opts('who', Audience::BOOKERS))->live()->afterStateUpdated(self::save())
+                    ->visible(fn ($livewire) => ! $adultsPage($livewire)),
+                Callout::make(__($f.'adults_page'))->icon(Heroicon::OutlinedUser)->color('gray')
+                    ->visible(fn ($livewire) => $adultsPage($livewire)),
+                self::toggle($c.'teach', __(self::B.'fields.teach')),
+            ]),
+            Callout::make(__($f.'sources_title'))->description(__($f.'sources'))->icon(Heroicon::OutlinedLink)->color('gray')
+                ->actions([
+                    Action::make('subjects')->label(__($f.'open_subjects'))->link()->icon(Heroicon::OutlinedArrowTopRightOnSquare)
+                        ->url(fn () => route(self::SUBJECTS))->openUrlInNewTab()
+                        ->visible(fn () => app('router')->has(self::SUBJECTS) && Gate::allows(Ability::ManageCatalog->value)),
+                    Action::make('trials')->label(__($f.'open_trials'))->link()->icon(Heroicon::OutlinedArrowTopRightOnSquare)
+                        ->url(fn () => SiteSettings::getUrl(['tab' => 'trials']))->openUrlInNewTab()
+                        ->visible(fn () => SiteSettings::canAccess()),
+                ]),
+        ];
+    }
+
+    /** Catalog's subjects screen, by route name (Site knows no other module's screens). */
+    private const SUBJECTS = 'filament.academy.resources.subjects.index';
 
     // ---- Layout ---------------------------------------------------------------
 
@@ -391,7 +437,8 @@ final class BlockForms
                 $buttons('space', Blocks::SPACE),
             ]),
             $buttons('width', Blocks::WIDTH),
-            self::toggle('style.eyebrow', __(self::B.'fields.eyebrow_on')),
+            // The trial form shows this switch beside its words (Content).
+            ...($type === 'form' ? [] : [self::toggle('style.eyebrow', __(self::B.'fields.eyebrow_on'))]),
             self::pair('nav', __(self::B.'fields.nav'), 24),
             Callout::make(__(self::B.'fields.nav_hint'))->icon(Heroicon::OutlinedBars3)->color('gray'),
         ];

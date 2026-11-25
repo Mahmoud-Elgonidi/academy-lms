@@ -5,7 +5,8 @@ import { NextTrialPanel } from '@/components/site/trial/next-trial';
 import { NotNow } from '@/components/site/trial/report';
 import { CalmCard, TrialShell } from '@/components/site/trial/shell';
 import { read } from '@/lib/api/server';
-import type { RebookInfo } from '@/lib/site/report';
+import { audienceOf } from '@/lib/audience';
+import { selfWords, type RebookInfo } from '@/lib/site/report';
 import { academySite } from '@/lib/site/server';
 import { timeFormatOf } from '@/lib/time';
 import { branding } from '@/lib/viewer';
@@ -44,9 +45,11 @@ export default async function RebookPage({ params }: Props) {
     );
   }
   const info = found.data.data;
+  // An academy for adults: the trainee books their own new time, in the first person.
+  const say = selfWords(t, audienceOf(look.audience) === 'adults');
   const when = info.was_at?.label ?? '';
   const ours = info.outcome === 'teacher_absent' || info.outcome === 'academy';
-  const happened = t(ours ? `rebook.${info.outcome as 'academy'}` : 'rebook.student_absent', { learner: info.learner, subject: info.subject.name, when });
+  const happened = say(ours ? `rebook.${info.outcome as 'academy'}` : 'rebook.student_absent', { learner: info.learner, subject: info.subject.name, when });
 
   return (
     <TrialShell look={look} path={path}>
@@ -54,7 +57,7 @@ export default async function RebookPage({ params }: Props) {
         <section className="lt-card" aria-labelledby="lr-rebook-title">
           <header className="lt-step-head">
             <p className="lt-kicker">{t('rebook.kicker')}</p>
-            <h1 id="lr-rebook-title">{t('rebook.title', { learner: info.learner })}</h1>
+            <h1 id="lr-rebook-title">{say('rebook.title', { learner: info.learner })}</h1>
             <p className="lt-muted">{happened}</p>
           </header>
           {ours ? <p className="lr-chip"><Icon name="shield" />{t('rebook.noCount')}</p> : null}
@@ -69,6 +72,7 @@ export default async function RebookPage({ params }: Props) {
             whatsapp={whatsapp}
             timeFormat={timeFormatOf(look.time_format)}
             zone={info.timezone}
+            self={audienceOf(look.audience) === 'adults'}
           />
         ) : (
           <NotNow title={t('rebook.cantTitle')} text={info.why_not ?? ''} whatsapp={whatsapp} />

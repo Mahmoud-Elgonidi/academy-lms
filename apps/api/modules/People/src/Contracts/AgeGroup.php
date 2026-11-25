@@ -4,7 +4,8 @@ namespace Modules\People\Contracts;
 
 /**
  * The ages a teacher teaches, as the stages of a student's area cut them:
- * children (under 12), middle school (12–14), secondary (15–18), adults.
+ * children (under 12), middle school (12–14), secondary (15–17), adults (18
+ * and over: the age a student stops being a minor, PeopleService::ADULT_AGE).
  */
 enum AgeGroup: string
 {
@@ -13,12 +14,15 @@ enum AgeGroup: string
     case Teen = 'teen';
     case Adults = 'adults';
 
+    /** From this age a student is an adult (the same bound as PeopleService::ADULT_AGE and LearnerStage). */
+    public const ADULT_AGE = 18;
+
     /** The group of a student this old; null when nobody knows. */
     public static function forAge(?int $age): ?self
     {
         return match (true) {
             $age === null => null,
-            $age >= 19 => self::Adults,
+            $age >= self::ADULT_AGE => self::Adults,
             $age >= 15 => self::Teen,
             $age >= 12 => self::Middle,
             default => self::Kids,

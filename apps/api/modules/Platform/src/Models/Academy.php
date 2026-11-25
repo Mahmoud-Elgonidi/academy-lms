@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Platform\Database\Factories\AcademyFactory;
 use Modules\Platform\Enums\AcademyStatus;
+use Modules\SharedKernel\Tenancy\Audience;
 use Modules\SharedKernel\Tenancy\TenantRef;
 
 /**
@@ -24,6 +25,7 @@ use Modules\SharedKernel\Tenancy\TenantRef;
  * @property string $base_currency
  * @property ?string $country
  * @property string $time_format h12 or h24 (SharedKernel\Time\TimeFormat)
+ * @property Audience $audience families or adults (changed only through SetAcademyAudience)
  * @property array<string, mixed> $settings
  */
 final class Academy extends Model
@@ -46,6 +48,7 @@ final class Academy extends Model
         return [
             'status' => AcademyStatus::class,
             'settings' => 'array',
+            'audience' => Audience::class,
         ];
     }
 
@@ -66,6 +69,7 @@ final class Academy extends Model
             defaultLocale: $this->default_locale,
             active: $this->status === AcademyStatus::Active,
             timeFormat: (string) ($this->time_format ?? 'h12'),
+            audience: $this->audience ?? Audience::DEFAULT,
         );
     }
 

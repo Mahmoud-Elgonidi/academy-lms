@@ -3203,6 +3203,7 @@
   "trialAcademyNotFound": "لم نجد أكاديمية تستقبل طلبات الحصص التجريبية بهذا الرمز. تأكّد من الرمز مع الأكاديمية، أو اكتبه كما يصلك منها.",
   "trialAcademyChange": "أكاديمية أخرى",
   "trialWhoTitle": "لمن الحصة؟",
+  "trialNameTitle": "ما اسمك؟",
   "trialWhoMe": "لي",
   "trialWhoMeHint": "أنا من سيتعلّم.",
   "trialWhoChild": "لطفلي",

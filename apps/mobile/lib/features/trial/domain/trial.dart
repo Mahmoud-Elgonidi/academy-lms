@@ -73,6 +73,7 @@ class AcademyPage extends Equatable {
     required this.formToken,
     required this.loadedAt,
     this.whatsapp,
+    this.adults = false,
   });
 
   factory AcademyPage.fromJson(String slug, Map<String, dynamic> json, DateTime loadedAt) {
@@ -86,6 +87,7 @@ class AcademyPage extends Equatable {
       formToken: data['form_token'] as String? ?? '',
       whatsapp: data['whatsapp'] as String?,
       loadedAt: loadedAt,
+      adults: _audience(data['page']) == 'adults',
     );
   }
 
@@ -102,8 +104,16 @@ class AcademyPage extends Equatable {
   /// The academy's WhatsApp number (E.164), or null.
   final String? whatsapp;
 
+  /// The page is for adults (`page.settings.audience`): nobody books for a child there.
+  final bool adults;
+
+  static Object? _audience(Object? page) {
+    final settings = page is Map<String, dynamic> ? page['settings'] : null;
+    return settings is Map<String, dynamic> ? settings['audience'] : null;
+  }
+
   @override
-  List<Object?> get props => [slug, name, subjects, trials, formToken, loadedAt, whatsapp];
+  List<Object?> get props => [slug, name, subjects, trials, formToken, loadedAt, whatsapp, adults];
 }
 
 /// A time a free trial may start at (`GET site/trial-slots`), on the family's clock as the API wrote it.
@@ -251,8 +261,10 @@ class TrialDraft extends Equatable {
     email: email ?? this.email,
   );
 
-  /// Another child of the same family: who we talk to and how, kept; the rest anew.
-  TrialDraft anotherChild() => TrialDraft(learner: Learner.child, name: name, phone: phone, email: email);
+  /// Another child of the same family (or, in an academy for adults, another trial of one's own): who we talk to
+  /// and how, kept; the rest anew.
+  TrialDraft anotherChild({bool adults = false}) =>
+      TrialDraft(learner: adults ? Learner.me : Learner.child, name: name, phone: phone, email: email);
 
   /// The request as the page's form sends it (`site/requests`, and with the code `site/trials`).
   Map<String, Object?> toJson({required int thisYear, String? timezone}) => {

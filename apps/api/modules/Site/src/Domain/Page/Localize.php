@@ -31,7 +31,7 @@ final class Localize
 
         $blocks = [];
         foreach ($visible as $block) {
-            $out = self::block($block, $ctx, $state);
+            $out = self::block($block, $ctx, $state, (string) ($settings['audience'] ?? Audience::FAMILIES));
             if ($out !== null) {
                 $blocks[] = $out;
             }
@@ -77,9 +77,10 @@ final class Localize
     /**
      * @param  array<string, mixed>  $block
      * @param  array{anchors: array<string, string>, form: bool, teach: bool, whatsapp: bool}  $state
+     * @param  string  $audience  the page's (a page for adults takes adults alone in its form)
      * @return array<string, mixed>|null null when the block has nothing to show (a video with no file)
      */
-    private static function block(array $block, PageContext $ctx, array $state): ?array
+    private static function block(array $block, PageContext $ctx, array $state, string $audience): ?array
     {
         $type = (string) $block['type'];
         $data = self::fields(Blocks::fields($type), is_array($block['data'] ?? null) ? $block['data'] : [], $ctx, $state);
@@ -98,6 +99,9 @@ final class Localize
         }
         if ($type === 'teachers') {
             unset($data['max']);
+        }
+        if ($type === 'form') {
+            $data['who'] = Audience::bookers($data['who'] ?? null, $audience);
         }
 
         return [

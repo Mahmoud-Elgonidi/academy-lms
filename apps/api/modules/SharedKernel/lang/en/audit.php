@@ -168,6 +168,7 @@ return [
             'created' => 'Academy created, owner :owner',
             'suspended' => 'Academy suspended: :reason',
             'reactivated' => 'Academy back on',
+            'audience_changed' => 'The academy now teaches :academy_audience (was :previous_audience): :reason',
             'plan_changed' => 'The academy moved to the :plan plan: :reason',
             'topup_requested' => 'Extra pack asked for: :limit (+:amount)',
             'topup_cancelled' => 'Extra pack request cancelled: :limit (+:amount)',
@@ -248,6 +249,8 @@ return [
         ],
     ],
     'values' => [
+        'academy_audience' => ['families' => 'families', 'adults' => 'adults only'],
+        'previous_audience' => ['families' => 'families', 'adults' => 'adults only'],
         'template' => ['online_courses' => 'online courses academy', 'training' => 'training and development', 'kids_families' => 'school for children and families', 'language_school' => 'language school', 'blank' => 'blank page'],
         'types' => ['hero' => 'opening', 'features' => 'why us', 'subjects' => 'subjects', 'teachers' => 'teachers', 'pricing' => 'prices', 'steps' => 'how it starts', 'app' => 'app', 'testimonials' => 'testimonials', 'faq' => 'questions', 'stats' => 'numbers', 'rich_text' => 'text', 'image_text' => 'picture and text', 'gallery' => 'gallery', 'video' => 'video', 'logos' => 'logos', 'cta' => 'call to action', 'form' => 'form', 'contact' => 'contact', 'spacer' => 'spacer'],
         'offer' => ['applied' => 'applied', 'ended' => 'ended', 'family_discount_bigger' => 'sibling discount bigger', 'not_for_plan' => 'not for this plan', 'package' => 'shared package', 'none' => 'none'],

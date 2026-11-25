@@ -4,15 +4,17 @@ namespace Modules\Learning\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Modules\SharedKernel\Tenancy\AcademyAudience;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
- * Report and homework settings of the current academy; defaults when it has no row.
+ * Report and homework settings of the current academy; defaults when it has no row
+ * (an adults academy's journey starts plain: no stars, no islands; it may change it).
  *
  * @property int $report_due_hours after the lesson ends
  * @property int $homework_days default time to hand homework in
  * @property string $journey_style playful | calm | plain (how students see their journey)
- * @property bool $weekly_digest the weekly note to guardians goes out (Actions\Digest\SendWeeklyDigest)
+ * @property bool $weekly_digest the weekly note to guardians goes out (Actions\Digest\SendWeeklyDigest; never in an adults academy)
  */
 final class LearningSettings extends Model
 {
@@ -35,7 +37,7 @@ final class LearningSettings extends Model
 
     public static function current(): self
     {
-        return self::query()->first() ?? new self;
+        return self::query()->first() ?? new self(app(AcademyAudience::class)->adultsOnly() ? ['journey_style' => 'plain'] : []);
     }
 
     protected function setKeysForSaveQuery($query): Builder

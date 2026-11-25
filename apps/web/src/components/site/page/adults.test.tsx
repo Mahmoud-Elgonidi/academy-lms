@@ -8,6 +8,7 @@ import { ageGroupsFor, onAccent, type PageBlock, type SitePageData } from '@/lib
 import type { AcademySite } from '@/lib/site/server';
 import type { Branding } from '@/lib/viewer';
 import { screensFor, type PhoneWords } from '../phones';
+import { refusedSchool } from '../trial/school-words';
 import type { Say } from './context';
 import { SitePageView } from './view';
 
@@ -98,6 +99,24 @@ describe('a page for adults', () => {
         expect(html).toContain('ls-phone');
         expect(html).toContain('ls-s-cert');
         expect(refused(readable(html))).toEqual([]);
+      });
+    }
+  }
+
+  // An academy for adults trains institutions and professionals: the trial section's own words (site.adults.join) say no school word either.
+  for (const locale of ['ar', 'en'] as const) {
+    for (const variant of ['split', 'centered'] as const) {
+      it(`says the trial section in training words, never a school's: ${variant}, ${locale}`, () => {
+        const { site, page } = adultPage('training', locale);
+        const blocks = page.blocks.map((block) => (block.type === 'form' ? { ...block, variant, style: { ...block.style, eyebrow: true } } as PageBlock : block));
+        for (const booking of ['family', 'staff'] as const) {
+          const html = render({ ...site, trials: site.trials ? { ...site.trials, booking } : site.trials }, { ...page, blocks }, locale);
+          const section = html.slice(html.indexOf('data-block="form"'));
+          const form = section.slice(0, section.indexOf('</section>'));
+          expect(form).toContain(MESSAGES[locale].site.adults.join.points[0]);
+          expect(refusedSchool(readable(form))).toEqual([]);
+          expect(refused(readable(form))).toEqual([]);
+        }
       });
     }
   }
