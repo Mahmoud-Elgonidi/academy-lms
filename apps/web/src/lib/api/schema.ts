@@ -3272,7 +3272,7 @@ export interface components {
             phone: string | null;
             username: string | null;
             /** @description Whether the person may change their email and mobile themselves (me/contact): not a child the academy runs under a guardian, never while the platform team is signed in as them. */
-            can_change_contact: string;
+            can_change_contact: boolean;
             locale: string | null;
             timezone: string | null;
             /** @description The zone this response's times are written in (device, else profile, else academy). */
@@ -3282,9 +3282,12 @@ export interface components {
             /** @description The device's clock differs from the profile's: the app offers to update the profile. */
             timezone_mismatch: string;
             /** @description How this person reads a clock: h12 (5:00 PM) or h24 (17:00), their own choice else the academy's. */
-            time_format: string;
-            /** @description Their own choice (h12, h24), or null when they follow the academy's. */
-            time_format_choice: string | null;
+            time_format: string | ("h12" | "h24");
+            /**
+             * @description Their own choice (h12, h24), or null when they follow the academy's.
+             * @enum {string|null}
+             */
+            time_format_choice: "h12" | "h24" | null;
             /** @description Whether the person shows the floating time-zone chip (they may hide it from its card, and show it again from the account page). */
             zone_chip: boolean;
             roles: unknown[];
@@ -3305,8 +3308,11 @@ export interface components {
                 default_timezone: string;
                 /** @description default_timezone as people read it, in the reader's language: "الرياض (UTC+3)". */
                 timezone_label: string;
-                /** @description The academy's clock for everyone who has not chosen their own: h12 or h24. */
-                time_format: string;
+                /**
+                 * @description The academy's clock for everyone who has not chosen their own: h12 or h24.
+                 * @enum {string}
+                 */
+                time_format: "h12" | "h24";
                 /**
                  * @description Whom the academy teaches: families (children with their guardians, and adults) or adults
                  *     (adults and professionals only: no guardians, no children, no kids' looks).
@@ -3324,6 +3330,15 @@ export interface components {
     responses: {
         /** @description Not found */
         ModelNotFoundException: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["ProblemDetails"];
+            };
+        };
+        /** @description Too many requests: wait Retry-After seconds */
+        ThrottleRequestsException: {
             headers: {
                 [name: string]: unknown;
             };
@@ -3526,10 +3541,16 @@ export interface operations {
                     "application/json": {
                         data: {
                             enrollment_id: string;
-                            /** @description pending_payment, active, paused or ended */
-                            status: string;
-                            /** @description The look these fields follow (kids, middle, teen or classic): a field the look does not show is null. */
-                            viewer_stage: string;
+                            /**
+                             * @description pending_payment, active, paused or ended
+                             * @enum {string}
+                             */
+                            status: "pending_payment" | "active" | "paused" | "ended";
+                            /**
+                             * @description The look these fields follow (kids, middle, teen or classic): a field the look does not show is null.
+                             * @enum {string}
+                             */
+                            viewer_stage: "kids" | "middle" | "teen" | "classic";
                             /** @description Paid-for lessons left (makeup lessons aside); null when the plan has no lesson length. */
                             lessons_left: number | null;
                             /** @description In words ("5 lessons left"). */
@@ -3557,12 +3578,12 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 lessons: unknown;
                                 /** @description Within 7 days: show it as a warning. */
-                                soon: string;
+                                soon: boolean;
                                 text: string;
                             } | null;
                             /** @description The pause's last day, on the academy's calendar. Not in the kids' look. */
@@ -3582,7 +3603,7 @@ export interface operations {
                             /** @description Whether the person signed in pays for this course (the classic look). */
                             is_payer: boolean | null;
                             /** @description Whether the course renews (on, not ending; the classic look). */
-                            renews: string | null;
+                            renews: boolean | null;
                             /** @description The next package's invoice waiting to be paid (the classic look); its id only to the payer (GET family/invoices/{id}). */
                             waiting_invoice: {
                                 id: string | null;
@@ -3593,7 +3614,7 @@ export interface operations {
                                 due_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 text: string;
@@ -3645,7 +3666,7 @@ export interface operations {
                                     at: {
                                         utc: string;
                                         local: string;
-                                        timezone: null;
+                                        timezone: string;
                                         label: string;
                                     } | null;
                                     amount: string;
@@ -3660,6 +3681,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.extra-lessons": {
@@ -3787,19 +3809,19 @@ export interface operations {
                             issued_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             paid_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             document_url: string;
@@ -3827,7 +3849,7 @@ export interface operations {
                                 sent_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description Where it stands, in a sentence for the payer. */
@@ -3841,7 +3863,7 @@ export interface operations {
                              */
                             transfer_details: string | null;
                             /** @description Whether a proof can be sent now (the academy wrote where to transfer, something is owed, none is waiting). */
-                            can_send_proof: string;
+                            can_send_proof: boolean;
                         }[];
                     };
                 };
@@ -3925,13 +3947,13 @@ export interface operations {
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description The coupon on it (personal: the trial's offer, which stays on). */
                             coupon: {
                                 code: string;
-                                personal: string;
+                                personal: boolean | string;
                             } | null;
                             /** @description Whether a coupon can be typed or taken off now; why not in the payer's words when not. */
                             coupon_entry: {
@@ -3951,7 +3973,7 @@ export interface operations {
                             text: string;
                             hint: string;
                             /** @description Whether the card was kept (the payer asked, and the gateway kept it): renewals are charged to it. */
-                            card_saved: string;
+                            card_saved: boolean;
                         } | null;
                         /** @description Saving the card while paying (J5b): the words to tick, their version, and whether this payer's look allows it. */
                         save_card: {
@@ -4052,13 +4074,13 @@ export interface operations {
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description The coupon on it (personal: the trial's offer, which stays on). */
                             coupon: {
                                 code: string;
-                                personal: string;
+                                personal: boolean | string;
                             } | null;
                             /** @description Whether a coupon can be typed or taken off now; why not in the payer's words when not. */
                             coupon_entry: {
@@ -4076,6 +4098,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.invoices.coupon.remove": {
@@ -4158,13 +4181,13 @@ export interface operations {
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description The coupon on it (personal: the trial's offer, which stays on). */
                             coupon: {
                                 code: string;
-                                personal: string;
+                                personal: boolean | string;
                             } | null;
                             /** @description Whether a coupon can be typed or taken off now; why not in the payer's words when not. */
                             coupon_entry: {
@@ -4181,6 +4204,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.invoices.checkout": {
@@ -4241,7 +4265,7 @@ export interface operations {
                         expires_at: {
                             utc: string;
                             local: string;
-                            timezone: null;
+                            timezone: string;
                             label: string;
                         } | null;
                     };
@@ -4301,7 +4325,7 @@ export interface operations {
                                 saved_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -4328,7 +4352,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -4343,6 +4367,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.cards.auto-renew": {
@@ -4408,7 +4433,7 @@ export interface operations {
                                 saved_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -4435,7 +4460,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -4453,6 +4478,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.cards.revoke": {
@@ -4512,7 +4538,7 @@ export interface operations {
                                 saved_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -4539,7 +4565,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -4556,6 +4582,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.invoices.proofs": {
@@ -4625,7 +4652,7 @@ export interface operations {
                             sent_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Where it stands, in a sentence for the payer. */
@@ -4638,6 +4665,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "lessons.join": {
@@ -4813,6 +4841,7 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "recordings.consents": {
@@ -4859,7 +4888,7 @@ export interface operations {
                             granted_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Who agreed, in words ("You agreed on 5 October 2026"); null when nobody has. */
@@ -5020,7 +5049,7 @@ export interface operations {
                             at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             teacher: string;
@@ -5032,7 +5061,7 @@ export interface operations {
                             expires_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                         }[];
@@ -5081,7 +5110,7 @@ export interface operations {
                             at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             teacher: string;
@@ -5093,7 +5122,7 @@ export interface operations {
                             expires_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                         }[];
@@ -5143,7 +5172,7 @@ export interface operations {
                         expires_at: {
                             utc: string;
                             local: string;
-                            timezone: null;
+                            timezone: string;
                             label: string;
                         } | null;
                     };
@@ -5293,7 +5322,7 @@ export interface operations {
                             created_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                         }[];
@@ -5671,6 +5700,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials.code": {
@@ -5721,7 +5751,7 @@ export interface operations {
                             expires_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Seconds before another code may be asked for. */
@@ -5731,6 +5761,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials": {
@@ -5796,6 +5827,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials.pick": {
@@ -5854,6 +5886,7 @@ export interface operations {
                     };
                 };
             };
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials.pick.book": {
@@ -5920,6 +5953,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials.report": {
@@ -6019,7 +6053,8 @@ export interface operations {
                             };
                             /** @description The learner's course in this subject that has not ended (pending_payment, active, paused): they have started, so no offer. */
                             course: {
-                                status: string;
+                                /** @enum {string} */
+                                status: "pending_payment" | "active" | "paused" | "ended";
                             } | null;
                             /**
                              * @description The academy's offer: open, ended (its time passed), used, started (a course began) or none (classic look only).
@@ -6039,17 +6074,17 @@ export interface operations {
                                 /** @description The recommended plan's first block with the offer (and the family discount, whichever is bigger); null without a plan or a price. */
                                 price: {
                                     price: string;
-                                    amount_minor: number;
+                                    amount_minor: string;
                                     currency: string;
                                 } | null;
                                 /** @description How much less than without the offer. */
                                 saving: {
                                     price: string;
-                                    amount_minor: number;
+                                    amount_minor: null;
                                     currency: string;
                                 } | null;
                                 /** @description The family discount is bigger than the offer, so it applies instead (they never add up). */
-                                family_discount_bigger: string;
+                                family_discount_bigger: boolean;
                             } | null;
                             /** @description The free second trial with another teacher, when the academy gives one (classic look only). */
                             next_trial: {
@@ -6082,7 +6117,7 @@ export interface operations {
                                 learner_id: string | null;
                                 subject_id: string;
                                 /** @description The recommended plan, while the academy offers it. */
-                                plan_id: string;
+                                plan_id: string | null;
                                 /** @description The trial's teacher, while they still take the learner (else the family chooses another). */
                                 teacher_id: string | null;
                                 /** @description The learner's course in the subject, when that is why not. */
@@ -6092,6 +6127,7 @@ export interface operations {
                     };
                 };
             };
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials.report.slots": {
@@ -6138,6 +6174,7 @@ export interface operations {
                     };
                 };
             };
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials.report.book": {
@@ -6196,6 +6233,7 @@ export interface operations {
                     };
                 };
             };
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials.rebook": {
@@ -6256,6 +6294,7 @@ export interface operations {
                     };
                 };
             };
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials.rebook.slots": {
@@ -6302,6 +6341,7 @@ export interface operations {
                     };
                 };
             };
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials.rebook.book": {
@@ -6360,6 +6400,7 @@ export interface operations {
                     };
                 };
             };
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.trials": {
@@ -6399,8 +6440,11 @@ export interface operations {
                             id: string;
                             name: string;
                         };
-                        /** @description The viewer's look: kids, middle, teen or classic (prices, the offer and booking only in classic). */
-                        viewer_stage: string;
+                        /**
+                         * @description The viewer's look: kids, middle, teen or classic (prices, the offer and booking only in classic).
+                         * @enum {string}
+                         */
+                        viewer_stage: "kids" | "middle" | "teen" | "classic";
                         data: {
                             /** @description The trial lesson's id: its report is family/trials/{id}. */
                             id: string;
@@ -6426,13 +6470,8 @@ export interface operations {
                             report_ready: boolean;
                             /** @description One more trial it allows (classic look only), or null. */
                             next: {
-                                /**
-                                 * @description second (with another teacher) or rebook (after one that did not take place).
-                                 * @enum {string|null}
-                                 */
-                                kind: "second" | "rebook" | null;
+                                kind: string;
                                 available: boolean;
-                                /** @description Why not, in the family's words (what to do instead); null when it may be booked. */
                                 why_not: string | null;
                             } | null;
                         }[];
@@ -6476,7 +6515,8 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        viewer_stage: string;
+                        /** @enum {string} */
+                        viewer_stage: "kids" | "middle" | "teen" | "classic";
                         data: {
                             /** @description The trial lesson's id (the family's trials are named by their lesson). */
                             id: string;
@@ -6541,7 +6581,8 @@ export interface operations {
                             };
                             /** @description The learner's course in this subject that has not ended (pending_payment, active, paused): they have started, so no offer. */
                             course: {
-                                status: string;
+                                /** @enum {string} */
+                                status: "pending_payment" | "active" | "paused" | "ended";
                             } | null;
                             /**
                              * @description The academy's offer: open, ended (its time passed), used, started (a course began) or none (classic look only).
@@ -6561,17 +6602,17 @@ export interface operations {
                                 /** @description The recommended plan's first block with the offer (and the family discount, whichever is bigger); null without a plan or a price. */
                                 price: {
                                     price: string;
-                                    amount_minor: number;
+                                    amount_minor: string;
                                     currency: string;
                                 } | null;
                                 /** @description How much less than without the offer. */
                                 saving: {
                                     price: string;
-                                    amount_minor: number;
+                                    amount_minor: null;
                                     currency: string;
                                 } | null;
                                 /** @description The family discount is bigger than the offer, so it applies instead (they never add up). */
-                                family_discount_bigger: string;
+                                family_discount_bigger: boolean;
                             } | null;
                             /** @description The free second trial with another teacher, when the academy gives one (classic look only). */
                             next_trial: {
@@ -6604,7 +6645,7 @@ export interface operations {
                                 learner_id: string | null;
                                 subject_id: string;
                                 /** @description The recommended plan, while the academy offers it. */
-                                plan_id: string;
+                                plan_id: string | null;
                                 /** @description The trial's teacher, while they still take the learner (else the family chooses another). */
                                 teacher_id: string | null;
                                 /** @description The learner's course in the subject, when that is why not. */
@@ -6666,6 +6707,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.trials.book": {
@@ -6733,6 +6775,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "lessons.rating": {
@@ -6902,7 +6945,8 @@ export interface operations {
                     "application/json": {
                         data: {
                             learner_id: string;
-                            stage: string;
+                            /** @enum {string} */
+                            stage: "kids" | "middle" | "teen" | "classic";
                             /** @description Whether the learner may start a round now, and why not: off (the academy), paused (a guardian), night (a guardian's night lock, 21:00 to 7:00 on the learner's clock), limit (today's minutes). */
                             allowance: unknown[];
                             stars: number;
@@ -6953,14 +6997,14 @@ export interface operations {
                                 rounds: number;
                                 /** @description The lesson the child went back to most this week: its title, rounds, and in how many games. */
                                 practised: {
-                                    title: string | null;
-                                    rounds: string;
+                                    title: string;
+                                    rounds: number;
                                     games: number;
                                 } | null;
                                 /** @description The question the child got wrong first time most often this week, written as question → answer. */
                                 hardest: {
                                     text: string;
-                                    wrong: string;
+                                    wrong: number;
                                 } | null;
                                 /** @description The round with the most right first time this week. */
                                 best: {
@@ -7050,7 +7094,8 @@ export interface operations {
                             /** @description What the page is handed: {lms: 1, type: "start", round: this}. */
                             round: {
                                 items: unknown[];
-                                stage: string;
+                                /** @enum {string} */
+                                stage: "kids" | "middle" | "teen" | "classic";
                                 /** @enum {string} */
                                 locale: "ar" | "en";
                                 /** @enum {string} */
@@ -7065,6 +7110,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "games.plays.finish": {
@@ -7114,9 +7160,9 @@ export interface operations {
                         data: {
                             stars: number;
                             correct: number;
-                            total: string;
+                            total: number;
                             /** @description How long the round took, in seconds (the race against yourself). */
-                            seconds: string;
+                            seconds: number | null;
                             /** @description A creature hatched by this round: with the three names the child chooses from, and how many they have found of all. */
                             creature: unknown[] | null;
                             /** @description Stars of the journey toward the next egg. */
@@ -7126,8 +7172,8 @@ export interface operations {
                                 need: 12;
                             };
                             homework: {
-                                title: string;
-                                handed_in: string;
+                                title: string | null;
+                                handed_in: boolean;
                             } | null;
                         };
                     };
@@ -7135,6 +7181,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "games.hatch": {
@@ -7195,6 +7242,7 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AccessDeniedHttpException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "games.limits": {
@@ -7261,6 +7309,7 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AccessDeniedHttpException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "games.creatures": {
@@ -7355,6 +7404,7 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AccessDeniedHttpException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "identity.login": {
@@ -7401,6 +7451,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "identity.code.send": {
@@ -7584,6 +7635,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "identity.social.providers": {
@@ -7674,6 +7726,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "identity.social.ticket": {
@@ -7720,6 +7773,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "identity.social.api-start": {
@@ -7764,6 +7818,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "identity.me": {
@@ -7938,6 +7993,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "identity.contact.confirm": {
@@ -7985,6 +8041,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "identity.sessions": {
@@ -8026,19 +8083,19 @@ export interface operations {
                             created_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             last_used_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             expires_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                         }[];
@@ -8125,13 +8182,13 @@ export interface operations {
                             linked_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             last_used_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                         }[];
@@ -8185,13 +8242,13 @@ export interface operations {
                             linked_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             last_used_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                         }[];
@@ -8200,6 +8257,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "identity.social.link-ticket": {
@@ -8246,13 +8304,13 @@ export interface operations {
                             linked_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             last_used_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                         }[];
@@ -8262,6 +8320,7 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             409: components["responses"]["ProblemException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "identity.social.link-start": {
@@ -8307,6 +8366,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "identity.social.unlink": {
@@ -8351,13 +8411,13 @@ export interface operations {
                             linked_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             last_used_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                         }[];
@@ -8440,7 +8500,7 @@ export interface operations {
                             key: string | null;
                             /** @description null: the same host as the page (or the API) you came from. */
                             host: string | null;
-                            port: string | null;
+                            port: number | string | null;
                             tls: boolean;
                             /** @description My own private channel: subscribe to "private-" and this. */
                             channel: string;
@@ -8570,7 +8630,7 @@ export interface operations {
                         expires_at: {
                             utc: string;
                             local: string;
-                            timezone: null;
+                            timezone: string;
                             label: string;
                         } | null;
                         accounts: components["schemas"]["DiscoveredAccountResource"][];
@@ -8615,7 +8675,7 @@ export interface operations {
                         expires_at: {
                             utc: string;
                             local: string;
-                            timezone: null;
+                            timezone: string;
                             label: string;
                         } | null;
                         accounts: components["schemas"]["DiscoveredAccountResource"][];
@@ -8623,6 +8683,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "teacher.students": {
@@ -8720,19 +8781,19 @@ export interface operations {
                             lesson_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             submitted_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             late: boolean;
@@ -8869,19 +8930,19 @@ export interface operations {
                             lesson_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             submitted_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             late: boolean;
@@ -8971,6 +9032,7 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "teacher.homework.index": {
@@ -9026,7 +9088,7 @@ export interface operations {
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             grade: number | null;
@@ -9034,15 +9096,15 @@ export interface operations {
                             reviewed_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Practice in the games on the report's lessons (null: none): how the best round went, or not yet. */
                             practice: {
                                 done: boolean;
-                                correct: string | null;
-                                total: string | null;
-                                stars: string | null;
+                                correct: number | string | null;
+                                total: number | string | null;
+                                stars: number | string | null;
                                 game: string | null;
                                 label: string;
                             } | null;
@@ -9059,7 +9121,7 @@ export interface operations {
                                 submitted_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -9130,7 +9192,7 @@ export interface operations {
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             grade: number | null;
@@ -9138,15 +9200,15 @@ export interface operations {
                             reviewed_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Practice in the games on the report's lessons (null: none): how the best round went, or not yet. */
                             practice: {
                                 done: boolean;
-                                correct: string | null;
-                                total: string | null;
-                                stars: string | null;
+                                correct: number | string | null;
+                                total: number | string | null;
+                                stars: number | string | null;
                                 game: string | null;
                                 label: string;
                             } | null;
@@ -9163,7 +9225,7 @@ export interface operations {
                                 submitted_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -9305,7 +9367,8 @@ export interface operations {
                     "application/json": {
                         data: {
                             learner_id: string;
-                            stage: string;
+                            /** @enum {string} */
+                            stage: "kids" | "middle" | "teen" | "classic";
                             /** @description playful (each stage's look, islands and games), calm (levels and missions) or plain (no stars) */
                             style: string;
                             /**
@@ -9325,39 +9388,39 @@ export interface operations {
                             streak: number;
                             /** @description The latest lesson of the last week and the stars it brought. */
                             last_lesson: {
-                                id: string;
+                                id: unknown;
                                 starts_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
-                                stars: string;
-                                late_min: string;
-                                on_time: string;
-                                stayed: string;
+                                stars: unknown;
+                                late_min: unknown;
+                                on_time: unknown;
+                                stayed: unknown;
                                 labels: string[];
                             } | null;
                             courses: unknown[];
                             missions: unknown[];
                             chest: {
                                 period: string;
-                                target: string;
-                                progress: string;
+                                target: string | number;
+                                progress: unknown;
                                 /** @description active, missed, done (ready to open, by the student) or opened */
-                                state: string;
-                                stars: string;
+                                state: string | ("opened" | "done" | "missed" | "active");
+                                stars: string | 10;
                                 sticker: {
-                                    key: string;
+                                    key: string | null;
                                     name: string;
                                 } | null;
                                 ends_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
-                                can_open: string;
+                                can_open: boolean;
                             } | null;
                             /** @description The kids' sticker album (one sticker for each week's chest opened); null in other looks and the plain style. */
                             stickers: {
@@ -9392,7 +9455,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -9404,6 +9467,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "learning.journey.chest": {
@@ -9453,7 +9517,7 @@ export interface operations {
                             /** @constant */
                             stars: 10;
                             sticker: {
-                                key: string;
+                                key: string | null;
                                 name: string;
                             } | null;
                             total_before: number;
@@ -9467,6 +9531,7 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AccessDeniedHttpException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "learning.roadmap": {
@@ -9523,21 +9588,21 @@ export interface operations {
                                 title: string;
                                 path: unknown[];
                             } | null;
-                            finished: string;
+                            finished: boolean;
                             levels: {
                                 id: string;
                                 kind: string;
                                 title: string;
                                 percent: number;
-                                has_current: string;
+                                has_current: boolean;
                                 lessons: {
                                     id: string;
                                     title: string;
                                     /** @enum {string} */
                                     state: "review" | "done" | "here" | "todo";
-                                    times_seen: number;
-                                    last_outcome: string | null;
-                                    last_score: number | null;
+                                    times_seen: string;
+                                    last_outcome: string;
+                                    last_score: string;
                                     est_sessions: number;
                                     weight: number;
                                     /** @description Files and links on the lesson (a file's url is signed for twelve hours); empty when not asked for. */
@@ -9559,9 +9624,9 @@ export interface operations {
                                         title: string;
                                         /** @enum {string} */
                                         state: "review" | "done" | "here" | "todo";
-                                        times_seen: number;
-                                        last_outcome: string | null;
-                                        last_score: number | null;
+                                        times_seen: string;
+                                        last_outcome: string;
+                                        last_score: string;
                                         est_sessions: number;
                                         weight: number;
                                         /** @description Files and links on the lesson (a file's url is signed for twelve hours); empty when not asked for. */
@@ -9641,19 +9706,19 @@ export interface operations {
                             lesson_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             submitted_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             late: boolean;
@@ -9742,7 +9807,7 @@ export interface operations {
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             grade: number | null;
@@ -9750,15 +9815,15 @@ export interface operations {
                             reviewed_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Practice in the games on the report's lessons (null: none): how the best round went, or not yet. */
                             practice: {
                                 done: boolean;
-                                correct: string | null;
-                                total: string | null;
-                                stars: string | null;
+                                correct: number | string | null;
+                                total: number | string | null;
+                                stars: number | string | null;
                                 game: string | null;
                                 label: string;
                             } | null;
@@ -9775,7 +9840,7 @@ export interface operations {
                                 submitted_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -9845,7 +9910,7 @@ export interface operations {
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             grade: number | null;
@@ -9853,15 +9918,15 @@ export interface operations {
                             reviewed_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Practice in the games on the report's lessons (null: none): how the best round went, or not yet. */
                             practice: {
                                 done: boolean;
-                                correct: string | null;
-                                total: string | null;
-                                stars: string | null;
+                                correct: number | string | null;
+                                total: number | string | null;
+                                stars: number | string | null;
                                 game: string | null;
                                 label: string;
                             } | null;
@@ -9878,7 +9943,7 @@ export interface operations {
                                 submitted_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -9974,20 +10039,21 @@ export interface operations {
                     "application/json": {
                         data: {
                             learner_id: string;
-                            stage: string;
+                            /** @enum {string} */
+                            stage: "kids" | "middle" | "teen" | "classic";
                             /** @description Only the student collects rewards; a guardian watches and cheers. */
                             can_claim: boolean;
                             week: {
                                 starts_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 ends_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             };
@@ -9998,7 +10064,7 @@ export interface operations {
                             challenges: unknown[];
                             /** @description The kids' album (null for other stages). */
                             stickers: {
-                                earned: string;
+                                earned: string | number;
                                 items: unknown[];
                             } | null;
                             cheers: {
@@ -10009,7 +10075,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -10087,6 +10153,7 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AccessDeniedHttpException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "learning.cheers.send": {
@@ -10137,6 +10204,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "learning.cheers.seen": {
@@ -10172,6 +10240,7 @@ export interface operations {
                 content?: never;
             };
             401: components["responses"]["AuthenticationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "messages.conversations": {
@@ -10219,7 +10288,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             } | null;
@@ -10316,7 +10385,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -10331,6 +10400,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "messages.unread": {
@@ -10438,7 +10508,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -10512,7 +10582,7 @@ export interface operations {
                             at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                         };
@@ -10521,6 +10591,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "teacher.earnings": {
@@ -10562,7 +10633,7 @@ export interface operations {
                         closed_at: {
                             utc: string;
                             local: string;
-                            timezone: null;
+                            timezone: string;
                             label: string;
                         } | null;
                         /** @description Lessons of the month still waiting for their outcome. */
@@ -10613,7 +10684,8 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: unknown[];
-                        viewer_stage: string;
+                        /** @enum {string} */
+                        viewer_stage: "kids" | "middle" | "teen" | "classic";
                     };
                 };
             };
@@ -10677,8 +10749,11 @@ export interface operations {
                         data: {
                             id: string;
                             name: string;
-                            /** @description The look of the child's own area: kids, middle, teen or classic. */
-                            stage: string;
+                            /**
+                             * @description The look of the child's own area: kids, middle, teen or classic.
+                             * @enum {string}
+                             */
+                            stage: "kids" | "middle" | "teen" | "classic";
                             /**
                              * @description granted (the guardian agreed now) or not_needed (old enough).
                              * @enum {string}
@@ -10696,6 +10771,7 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.consents": {
@@ -10743,7 +10819,7 @@ export interface operations {
                             granted_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Who agreed, in words ("You agreed on 5 October 2026"); null while waiting. */
@@ -10833,6 +10909,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.consents.withdraw": {
@@ -10874,6 +10951,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "teacher.checks": {
@@ -10923,8 +11001,10 @@ export interface operations {
                                 id: string;
                                 /** @description criminal_record | identity | qualification | other */
                                 kind: {
-                                    key: string;
-                                    label: string;
+                                    /** @enum {string} */
+                                    key: "criminal_record" | "identity" | "qualification" | "other";
+                                    /** @enum {string} */
+                                    label: "people::checks.kinds.criminal_record" | "people::checks.kinds.identity" | "people::checks.kinds.qualification" | "people::checks.kinds.other";
                                 };
                                 reference: string | null;
                                 issued_on: string | null;
@@ -11006,8 +11086,10 @@ export interface operations {
                             id: string;
                             /** @description criminal_record | identity | qualification | other */
                             kind: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "criminal_record" | "identity" | "qualification" | "other";
+                                /** @enum {string} */
+                                label: "people::checks.kinds.criminal_record" | "people::checks.kinds.identity" | "people::checks.kinds.qualification" | "people::checks.kinds.other";
                             };
                             reference: string | null;
                             issued_on: string | null;
@@ -11030,6 +11112,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "teacher.checks.file": {
@@ -11198,6 +11281,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "platform.branding": {
@@ -11256,15 +11340,21 @@ export interface operations {
                                 modified: boolean;
                             };
                         };
-                        /** @description h12 (5:00 PM) or h24 (17:00): the academy's choice. */
-                        time_format: string;
+                        /**
+                         * @description h12 (5:00 PM) or h24 (17:00): the academy's choice.
+                         * @enum {string}
+                         */
+                        time_format: "h12" | "h24";
                         /**
                          * @description Every module that is on, paid and optional, as Feature values (crm, online_payments, import, custom_branding, payroll,
                          *     ai, groups, curriculum, games, messaging, announcements, support, evaluation, site); the core is always on and not listed.
                          */
                         modules: string[];
-                        /** @description Whom the academy teaches: families (children with their guardians, and adults) or adults (adults and professionals only: no guardians, no children, no kids' looks). */
-                        audience: string;
+                        /**
+                         * @description Whom the academy teaches: families (children with their guardians, and adults) or adults (adults and professionals only: no guardians, no children, no kids' looks).
+                         * @enum {string}
+                         */
+                        audience: "families" | "adults";
                         app: {
                             /** @description The oldest app version still served, like "1.0.0". */
                             min_version: string;
@@ -11313,7 +11403,7 @@ export interface operations {
                                     whatsapp: string | null | "";
                                     email: string | null | "";
                                 };
-                                demo_url: string | null | "";
+                                demo_url: unknown;
                                 seo: {
                                     [key: string]: string;
                                 };
@@ -11348,6 +11438,7 @@ export interface operations {
                 };
             };
             404: components["responses"]["ModelNotFoundException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "platform.site.requests": {
@@ -11379,6 +11470,7 @@ export interface operations {
             };
             404: components["responses"]["ModelNotFoundException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "privacy.requests": {
@@ -11457,34 +11549,34 @@ export interface operations {
                                     created_at: {
                                         utc: string;
                                         local: string;
-                                        timezone: null;
+                                        timezone: string;
                                         label: string;
                                     } | null;
                                     /** @description When the academy answers by (erasure, correction). */
                                     due_at: {
                                         utc: string;
                                         local: string;
-                                        timezone: null;
+                                        timezone: string;
                                         label: string;
                                     } | null;
                                     /** @description When the account is erased, once approved. */
                                     erase_after: {
                                         utc: string;
                                         local: string;
-                                        timezone: null;
+                                        timezone: string;
                                         label: string;
                                     } | null;
                                     done_at: {
                                         utc: string;
                                         local: string;
-                                        timezone: null;
+                                        timezone: string;
                                         label: string;
                                     } | null;
                                     /** @description Until when a ready copy can be downloaded. */
                                     expires_at: {
                                         utc: string;
                                         local: string;
-                                        timezone: null;
+                                        timezone: string;
                                         label: string;
                                     } | null;
                                     /** @description Bytes of a ready copy. */
@@ -11523,34 +11615,34 @@ export interface operations {
                                 created_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description When the academy answers by (erasure, correction). */
                                 due_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description When the account is erased, once approved. */
                                 erase_after: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 done_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description Until when a ready copy can be downloaded. */
                                 expires_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description Bytes of a ready copy. */
@@ -11682,34 +11774,34 @@ export interface operations {
                             created_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description When the academy answers by (erasure, correction). */
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description When the account is erased, once approved. */
                             erase_after: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             done_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Until when a ready copy can be downloaded. */
                             expires_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Bytes of a ready copy. */
@@ -11726,6 +11818,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "privacy.requests.cancel": {
@@ -11787,34 +11880,34 @@ export interface operations {
                             created_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description When the academy answers by (erasure, correction). */
                             due_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description When the account is erased, once approved. */
                             erase_after: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             done_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Until when a ready copy can be downloaded. */
                             expires_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Bytes of a ready copy. */
@@ -11831,6 +11924,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "privacy.details.update": {
@@ -11900,6 +11994,7 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "safeguarding.new": {
@@ -11958,7 +12053,7 @@ export interface operations {
                                 starts_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description The other side of the lesson: its student for a teacher, its teacher for a family. */
@@ -12016,12 +12111,15 @@ export interface operations {
                             id: string;
                             number: string;
                             category: {
-                                key: string;
+                                /** @enum {string} */
+                                key: "adult_behaviour" | "outside_contact" | "content" | "bullying" | "wellbeing" | "other";
                                 label: string;
                             };
                             status: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "new" | "open" | "closed";
+                                /** @enum {string} */
+                                label: "safeguarding::concerns.reporter_status.new" | "safeguarding::concerns.reporter_status.open" | "safeguarding::concerns.reporter_status.closed";
                             };
                             urgent: boolean;
                             text: string;
@@ -12029,13 +12127,13 @@ export interface operations {
                             created_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             closed_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                         }[];
@@ -12100,12 +12198,15 @@ export interface operations {
                             id: string;
                             number: string;
                             category: {
-                                key: string;
+                                /** @enum {string} */
+                                key: "adult_behaviour" | "outside_contact" | "content" | "bullying" | "wellbeing" | "other";
                                 label: string;
                             };
                             status: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "new" | "open" | "closed";
+                                /** @enum {string} */
+                                label: "safeguarding::concerns.reporter_status.new" | "safeguarding::concerns.reporter_status.open" | "safeguarding::concerns.reporter_status.closed";
                             };
                             urgent: boolean;
                             text: string;
@@ -12113,13 +12214,13 @@ export interface operations {
                             created_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             closed_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                         } | null;
@@ -12130,6 +12231,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "teacher.shifts.show": {
@@ -12187,8 +12289,10 @@ export interface operations {
                             } | null;
                             proposal: {
                                 id: string;
-                                status: string;
-                                status_label: string;
+                                /** @enum {string} */
+                                status: "draft" | "submitted" | "changes_requested" | "countered" | "approved" | "rejected" | "withdrawn" | "superseded";
+                                /** @enum {string} */
+                                status_label: "scheduling::shifts.statuses.draft" | "scheduling::shifts.statuses.submitted" | "scheduling::shifts.statuses.changes_requested" | "scheduling::shifts.statuses.countered" | "scheduling::shifts.statuses.approved" | "scheduling::shifts.statuses.rejected" | "scheduling::shifts.statuses.withdrawn" | "scheduling::shifts.statuses.superseded";
                                 /** @enum {string|null} */
                                 waiting_on: "admin" | "teacher" | null;
                                 revision: number;
@@ -12210,7 +12314,7 @@ export interface operations {
                                 submitted_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 comments: {
@@ -12220,7 +12324,7 @@ export interface operations {
                                     at: {
                                         utc: string;
                                         local: string;
-                                        timezone: null;
+                                        timezone: string;
                                         label: string;
                                     } | null;
                                 }[];
@@ -12228,14 +12332,16 @@ export interface operations {
                             /** @description The last three decided proposals, newest first. */
                             history: {
                                 id: string;
-                                status: string;
-                                status_label: string;
+                                /** @enum {string} */
+                                status: "draft" | "submitted" | "changes_requested" | "countered" | "approved" | "rejected" | "withdrawn" | "superseded";
+                                /** @enum {string} */
+                                status_label: "scheduling::shifts.statuses.draft" | "scheduling::shifts.statuses.submitted" | "scheduling::shifts.statuses.changes_requested" | "scheduling::shifts.statuses.countered" | "scheduling::shifts.statuses.approved" | "scheduling::shifts.statuses.rejected" | "scheduling::shifts.statuses.withdrawn" | "scheduling::shifts.statuses.superseded";
                                 /** @description The start date the proposal asked for. */
                                 effective_from: string;
                                 decided_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description The admins' reason, for a rejected proposal only. */
@@ -12290,8 +12396,10 @@ export interface operations {
                     "application/json": {
                         data: {
                             id: string;
-                            status: string;
-                            status_label: string;
+                            /** @enum {string} */
+                            status: "draft" | "submitted" | "changes_requested" | "countered" | "approved" | "rejected" | "withdrawn" | "superseded";
+                            /** @enum {string} */
+                            status_label: "scheduling::shifts.statuses.draft" | "scheduling::shifts.statuses.submitted" | "scheduling::shifts.statuses.changes_requested" | "scheduling::shifts.statuses.countered" | "scheduling::shifts.statuses.approved" | "scheduling::shifts.statuses.rejected" | "scheduling::shifts.statuses.withdrawn" | "scheduling::shifts.statuses.superseded";
                             /** @enum {string|null} */
                             waiting_on: "admin" | "teacher" | null;
                             revision: number;
@@ -12313,7 +12421,7 @@ export interface operations {
                             submitted_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             comments: {
@@ -12323,7 +12431,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -12369,8 +12477,10 @@ export interface operations {
                     "application/json": {
                         data: {
                             id: string;
-                            status: string;
-                            status_label: string;
+                            /** @enum {string} */
+                            status: "draft" | "submitted" | "changes_requested" | "countered" | "approved" | "rejected" | "withdrawn" | "superseded";
+                            /** @enum {string} */
+                            status_label: "scheduling::shifts.statuses.draft" | "scheduling::shifts.statuses.submitted" | "scheduling::shifts.statuses.changes_requested" | "scheduling::shifts.statuses.countered" | "scheduling::shifts.statuses.approved" | "scheduling::shifts.statuses.rejected" | "scheduling::shifts.statuses.withdrawn" | "scheduling::shifts.statuses.superseded";
                             /** @enum {string|null} */
                             waiting_on: "admin" | "teacher" | null;
                             revision: number;
@@ -12392,7 +12502,7 @@ export interface operations {
                             submitted_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             comments: {
@@ -12402,7 +12512,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -12447,8 +12557,10 @@ export interface operations {
                     "application/json": {
                         data: {
                             id: string;
-                            status: string;
-                            status_label: string;
+                            /** @enum {string} */
+                            status: "draft" | "submitted" | "changes_requested" | "countered" | "approved" | "rejected" | "withdrawn" | "superseded";
+                            /** @enum {string} */
+                            status_label: "scheduling::shifts.statuses.draft" | "scheduling::shifts.statuses.submitted" | "scheduling::shifts.statuses.changes_requested" | "scheduling::shifts.statuses.countered" | "scheduling::shifts.statuses.approved" | "scheduling::shifts.statuses.rejected" | "scheduling::shifts.statuses.withdrawn" | "scheduling::shifts.statuses.superseded";
                             /** @enum {string|null} */
                             waiting_on: "admin" | "teacher" | null;
                             revision: number;
@@ -12470,7 +12582,7 @@ export interface operations {
                             submitted_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             comments: {
@@ -12480,7 +12592,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -12531,8 +12643,10 @@ export interface operations {
                     "application/json": {
                         data: {
                             id: string;
-                            status: string;
-                            status_label: string;
+                            /** @enum {string} */
+                            status: "draft" | "submitted" | "changes_requested" | "countered" | "approved" | "rejected" | "withdrawn" | "superseded";
+                            /** @enum {string} */
+                            status_label: "scheduling::shifts.statuses.draft" | "scheduling::shifts.statuses.submitted" | "scheduling::shifts.statuses.changes_requested" | "scheduling::shifts.statuses.countered" | "scheduling::shifts.statuses.approved" | "scheduling::shifts.statuses.rejected" | "scheduling::shifts.statuses.withdrawn" | "scheduling::shifts.statuses.superseded";
                             /** @enum {string|null} */
                             waiting_on: "admin" | "teacher" | null;
                             revision: number;
@@ -12554,7 +12668,7 @@ export interface operations {
                             submitted_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             comments: {
@@ -12564,7 +12678,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -12662,13 +12776,13 @@ export interface operations {
                             starts_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             ends_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             minutes: number;
@@ -12709,22 +12823,22 @@ export interface operations {
                             type: string;
                             type_label: string | null;
                             /** @description Booked but not yet paid for. */
-                            unfunded: string;
+                            unfunded: boolean;
                             join: {
                                 /** @description The room is open: POST /lessons/{id}/join for a ticket. */
-                                open: string;
+                                open: boolean;
                                 opens_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             };
                             /** @description A substitute has the lesson: the family's own teacher (family), or whom the teacher covers (teacher). */
                             substitute_for: string | null;
                             /** @description A group lesson's "I won't attend": the learner's own seat is excused, never the lesson cancelled. */
-                            can_cancel: string;
-                            can_refuse_substitute: string;
+                            can_cancel: boolean;
+                            can_refuse_substitute: boolean;
                             /** @description Why the academy cancelled it (a holiday, the teacher's leave, the course paused or ended), when it did. */
                             cancelled_because: string | null;
                             /** @description The viewer's own dispute of this lesson's outcome, and the academy's answer once decided. */
@@ -12736,11 +12850,11 @@ export interface operations {
                                 answer: string | null;
                             } | null;
                             /** @description Decided and within 48 hours of its end: POST …/lessons/{id}/dispute with one of dispute_reasons and a note. */
-                            can_dispute: string;
+                            can_dispute: boolean;
                             dispute_until: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description The reasons that fit what the lesson was, each with its label. */
@@ -12799,13 +12913,13 @@ export interface operations {
                             starts_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             ends_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             minutes: number;
@@ -12846,22 +12960,22 @@ export interface operations {
                             type: string;
                             type_label: string | null;
                             /** @description Booked but not yet paid for. */
-                            unfunded: string;
+                            unfunded: boolean;
                             join: {
                                 /** @description The room is open: POST /lessons/{id}/join for a ticket. */
-                                open: string;
+                                open: boolean;
                                 opens_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             };
                             /** @description A substitute has the lesson: the family's own teacher (family), or whom the teacher covers (teacher). */
                             substitute_for: string | null;
                             /** @description A group lesson's "I won't attend": the learner's own seat is excused, never the lesson cancelled. */
-                            can_cancel: string;
-                            can_refuse_substitute: string;
+                            can_cancel: boolean;
+                            can_refuse_substitute: boolean;
                             /** @description Why the academy cancelled it (a holiday, the teacher's leave, the course paused or ended), when it did. */
                             cancelled_because: string | null;
                             /** @description The viewer's own dispute of this lesson's outcome, and the academy's answer once decided. */
@@ -12873,11 +12987,11 @@ export interface operations {
                                 answer: string | null;
                             } | null;
                             /** @description Decided and within 48 hours of its end: POST …/lessons/{id}/dispute with one of dispute_reasons and a note. */
-                            can_dispute: string;
+                            can_dispute: boolean;
                             dispute_until: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description The reasons that fit what the lesson was, each with its label. */
@@ -12940,9 +13054,13 @@ export interface operations {
                             reason: string;
                             reason_label: string;
                             note: string | null;
-                            /** @description pending, approved, rejected, withdrawn */
-                            status: string;
-                            status_label: string;
+                            /**
+                             * @description pending, approved, rejected, withdrawn
+                             * @enum {string}
+                             */
+                            status: "pending" | "approved" | "rejected" | "withdrawn";
+                            /** @enum {string} */
+                            status_label: "scheduling::timeoff.statuses.pending" | "scheduling::timeoff.statuses.approved" | "scheduling::timeoff.statuses.rejected" | "scheduling::timeoff.statuses.withdrawn";
                             decision_note: string | null;
                             /** @description Recorded by the academy, not asked by me. */
                             by_academy: boolean;
@@ -12953,7 +13071,7 @@ export interface operations {
                                 cancelled: unknown;
                                 left: unknown;
                             } | null;
-                            can_withdraw: string;
+                            can_withdraw: boolean;
                         }[];
                         holidays: {
                             name: string;
@@ -12961,13 +13079,13 @@ export interface operations {
                             starts_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             ends_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                         }[];
@@ -13037,9 +13155,13 @@ export interface operations {
                             reason: string;
                             reason_label: string;
                             note: string | null;
-                            /** @description pending, approved, rejected, withdrawn */
-                            status: string;
-                            status_label: string;
+                            /**
+                             * @description pending, approved, rejected, withdrawn
+                             * @enum {string}
+                             */
+                            status: "pending" | "approved" | "rejected" | "withdrawn";
+                            /** @enum {string} */
+                            status_label: "scheduling::timeoff.statuses.pending" | "scheduling::timeoff.statuses.approved" | "scheduling::timeoff.statuses.rejected" | "scheduling::timeoff.statuses.withdrawn";
                             decision_note: string | null;
                             /** @description Recorded by the academy, not asked by me. */
                             by_academy: boolean;
@@ -13050,7 +13172,7 @@ export interface operations {
                                 cancelled: unknown;
                                 left: unknown;
                             } | null;
-                            can_withdraw: string;
+                            can_withdraw: boolean;
                         };
                     };
                 };
@@ -13138,10 +13260,7 @@ export interface operations {
                         };
                         data: unknown[];
                         /** @description Coming holidays; the learner's courses paused, ending or just ended; clock changes that move the learner's hour. */
-                        notices: [
-                            unknown[],
-                            string[]
-                        ];
+                        notices: unknown[];
                     };
                 };
             };
@@ -13404,6 +13523,7 @@ export interface operations {
                     };
                 };
             };
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials.lesson.slots": {
@@ -13454,6 +13574,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials.lesson.move": {
@@ -13531,6 +13652,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.trials.lesson.cancel": {
@@ -13584,6 +13706,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.start.options": {
@@ -13643,7 +13766,8 @@ export interface operations {
                                 /** @description The learner's course in it that has not ended: pending_payment, active or paused. */
                                 course: {
                                     enrollment_id: string;
-                                    status: string;
+                                    /** @enum {string} */
+                                    status: "pending_payment" | "active" | "paused" | "ended";
                                 } | null;
                                 can_start: boolean;
                                 /** @description Why not, in the family's words (what to do instead). */
@@ -13695,7 +13819,7 @@ export interface operations {
                                         amount: string;
                                     } | null;
                                     /** @description The trial's offer is the discount here (open, for this plan, and bigger than the sibling discount). */
-                                    offer_applied: string;
+                                    offer_applied: boolean;
                                 };
                             }[];
                             teachers: {
@@ -13724,7 +13848,7 @@ export interface operations {
                                 ends_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             };
@@ -13746,6 +13870,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.start.slots": {
@@ -13851,6 +13976,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.courses.start": {
@@ -14017,7 +14143,7 @@ export interface operations {
                                 due_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description The coupon on it (personal: the trial's offer, which stays on). */
@@ -14061,13 +14187,14 @@ export interface operations {
                                 renews: string | null;
                             };
                             /** @description The family may call it off before paying (POST family/courses/{enrollment}/cancel). */
-                            can_cancel: string;
+                            can_cancel: boolean;
                         };
                     };
                 };
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "family.courses.cancel": {
@@ -14121,6 +14248,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.show": {
@@ -14184,25 +14312,7 @@ export interface operations {
                                         cta: {
                                             label: string;
                                             action: {
-                                                /** @constant */
-                                                kind: "trial";
-                                            } | null | {
-                                                /** @constant */
-                                                kind: "teach";
-                                            } | {
-                                                /** @constant */
-                                                kind: "sign_in";
-                                            } | {
-                                                /** @constant */
-                                                kind: "whatsapp";
-                                            } | {
-                                                /** @constant */
-                                                kind: "block";
-                                                block: string;
-                                            } | {
-                                                /** @constant */
-                                                kind: "url";
-                                                url: string;
+                                                [key: string]: string;
                                             };
                                         } | null;
                                         sign_in: boolean;
@@ -14226,8 +14336,8 @@ export interface operations {
                                         description: string | null;
                                         image: {
                                             url: string;
-                                            width: string;
-                                            height: string;
+                                            width: number | null;
+                                            height: number | null;
                                             alt: string;
                                             mime: string;
                                         } | null;
@@ -14266,7 +14376,7 @@ export interface operations {
                                     title: string;
                                     lead: string;
                                 };
-                                audience: string | "families";
+                                audience: unknown;
                                 why: {
                                     title: string;
                                     lead: string;
@@ -14397,6 +14507,7 @@ export interface operations {
                 };
             };
             404: components["responses"]["ModelNotFoundException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.preview": {
@@ -14462,25 +14573,7 @@ export interface operations {
                                         cta: {
                                             label: string;
                                             action: {
-                                                /** @constant */
-                                                kind: "trial";
-                                            } | null | {
-                                                /** @constant */
-                                                kind: "teach";
-                                            } | {
-                                                /** @constant */
-                                                kind: "sign_in";
-                                            } | {
-                                                /** @constant */
-                                                kind: "whatsapp";
-                                            } | {
-                                                /** @constant */
-                                                kind: "block";
-                                                block: string;
-                                            } | {
-                                                /** @constant */
-                                                kind: "url";
-                                                url: string;
+                                                [key: string]: string;
                                             };
                                         } | null;
                                         sign_in: boolean;
@@ -14504,8 +14597,8 @@ export interface operations {
                                         description: string | null;
                                         image: {
                                             url: string;
-                                            width: string;
-                                            height: string;
+                                            width: number | null;
+                                            height: number | null;
                                             alt: string;
                                             mime: string;
                                         } | null;
@@ -14544,7 +14637,7 @@ export interface operations {
                                     title: string;
                                     lead: string;
                                 };
-                                audience: string | "families";
+                                audience: unknown;
                                 why: {
                                     title: string;
                                     lead: string;
@@ -14668,8 +14761,11 @@ export interface operations {
                                 /** @description That subject (one of `subjects`), whose times a family that asks for help choosing books from; null when sales choose with them. */
                                 help_choose_subject_id: string | null;
                             };
-                            /** @description Sent back with the request form, unchanged ("" in the preview: its form does not send). */
-                            form_token: string;
+                            /**
+                             * @description Sent back with the request form, unchanged ("" in the preview: its form does not send).
+                             * @constant
+                             */
+                            form_token: "";
                             preview: {
                                 /** @description The draft's revision shown. */
                                 revision: number;
@@ -14684,6 +14780,7 @@ export interface operations {
             };
             404: components["responses"]["ModelNotFoundException"];
             409: components["responses"]["ProblemException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "site.requests": {
@@ -14725,6 +14822,7 @@ export interface operations {
             };
             404: components["responses"]["ModelNotFoundException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "support.new": {
@@ -14778,7 +14876,7 @@ export interface operations {
                                 starts_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
@@ -14829,13 +14927,17 @@ export interface operations {
                             subject: string;
                             /** @description complaint | billing | technical | other */
                             kind: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "complaint" | "billing" | "technical" | "other";
+                                /** @enum {string} */
+                                label: "support::tickets.kinds.complaint" | "support::tickets.kinds.billing" | "support::tickets.kinds.technical" | "support::tickets.kinds.other";
                             };
                             /** @description open (the academy's turn) | waiting (yours) | resolved | closed */
                             status: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "open" | "waiting" | "resolved" | "closed";
+                                /** @enum {string} */
+                                label: "support::tickets.statuses.open" | "support::tickets.statuses.waiting" | "support::tickets.statuses.resolved" | "support::tickets.statuses.closed";
                             };
                             /** @description The learner it is about (a family's ticket). */
                             learner: {
@@ -14845,13 +14947,13 @@ export interface operations {
                             created_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             last_message_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description The academy answered last and waits for you. */
@@ -14924,13 +15026,17 @@ export interface operations {
                             subject: string;
                             /** @description complaint | billing | technical | other */
                             kind: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "complaint" | "billing" | "technical" | "other";
+                                /** @enum {string} */
+                                label: "support::tickets.kinds.complaint" | "support::tickets.kinds.billing" | "support::tickets.kinds.technical" | "support::tickets.kinds.other";
                             };
                             /** @description open (the academy's turn) | waiting (yours) | resolved | closed */
                             status: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "open" | "waiting" | "resolved" | "closed";
+                                /** @enum {string} */
+                                label: "support::tickets.statuses.open" | "support::tickets.statuses.waiting" | "support::tickets.statuses.resolved" | "support::tickets.statuses.closed";
                             };
                             /** @description The learner it is about (a family's ticket). */
                             learner: {
@@ -14940,13 +15046,13 @@ export interface operations {
                             created_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             last_message_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description The academy answered last and waits for you. */
@@ -14960,21 +15066,21 @@ export interface operations {
                                 starts_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
                                 status: string;
                             } | null;
                             /** @description Whether a message can still be sent (not closed; a resolved one only within its week). */
-                            can_reply: string;
+                            can_reply: boolean;
                             can_reopen: boolean;
                             can_close: boolean;
                             /** @description Until when a resolved ticket can be reopened. */
                             reopen_until: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Oldest first. */
@@ -14999,7 +15105,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -15009,6 +15115,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "support.tickets.show": {
@@ -15051,13 +15158,17 @@ export interface operations {
                             subject: string;
                             /** @description complaint | billing | technical | other */
                             kind: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "complaint" | "billing" | "technical" | "other";
+                                /** @enum {string} */
+                                label: "support::tickets.kinds.complaint" | "support::tickets.kinds.billing" | "support::tickets.kinds.technical" | "support::tickets.kinds.other";
                             };
                             /** @description open (the academy's turn) | waiting (yours) | resolved | closed */
                             status: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "open" | "waiting" | "resolved" | "closed";
+                                /** @enum {string} */
+                                label: "support::tickets.statuses.open" | "support::tickets.statuses.waiting" | "support::tickets.statuses.resolved" | "support::tickets.statuses.closed";
                             };
                             /** @description The learner it is about (a family's ticket). */
                             learner: {
@@ -15067,13 +15178,13 @@ export interface operations {
                             created_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             last_message_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description The academy answered last and waits for you. */
@@ -15087,21 +15198,21 @@ export interface operations {
                                 starts_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
                                 status: string;
                             } | null;
                             /** @description Whether a message can still be sent (not closed; a resolved one only within its week). */
-                            can_reply: string;
+                            can_reply: boolean;
                             can_reopen: boolean;
                             can_close: boolean;
                             /** @description Until when a resolved ticket can be reopened. */
                             reopen_until: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Oldest first. */
@@ -15126,7 +15237,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -15193,13 +15304,17 @@ export interface operations {
                             subject: string;
                             /** @description complaint | billing | technical | other */
                             kind: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "complaint" | "billing" | "technical" | "other";
+                                /** @enum {string} */
+                                label: "support::tickets.kinds.complaint" | "support::tickets.kinds.billing" | "support::tickets.kinds.technical" | "support::tickets.kinds.other";
                             };
                             /** @description open (the academy's turn) | waiting (yours) | resolved | closed */
                             status: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "open" | "waiting" | "resolved" | "closed";
+                                /** @enum {string} */
+                                label: "support::tickets.statuses.open" | "support::tickets.statuses.waiting" | "support::tickets.statuses.resolved" | "support::tickets.statuses.closed";
                             };
                             /** @description The learner it is about (a family's ticket). */
                             learner: {
@@ -15209,13 +15324,13 @@ export interface operations {
                             created_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             last_message_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description The academy answered last and waits for you. */
@@ -15229,21 +15344,21 @@ export interface operations {
                                 starts_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
                                 status: string;
                             } | null;
                             /** @description Whether a message can still be sent (not closed; a resolved one only within its week). */
-                            can_reply: string;
+                            can_reply: boolean;
                             can_reopen: boolean;
                             can_close: boolean;
                             /** @description Until when a resolved ticket can be reopened. */
                             reopen_until: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Oldest first. */
@@ -15268,7 +15383,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -15278,6 +15393,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "support.tickets.reopen": {
@@ -15320,13 +15436,17 @@ export interface operations {
                             subject: string;
                             /** @description complaint | billing | technical | other */
                             kind: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "complaint" | "billing" | "technical" | "other";
+                                /** @enum {string} */
+                                label: "support::tickets.kinds.complaint" | "support::tickets.kinds.billing" | "support::tickets.kinds.technical" | "support::tickets.kinds.other";
                             };
                             /** @description open (the academy's turn) | waiting (yours) | resolved | closed */
                             status: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "open" | "waiting" | "resolved" | "closed";
+                                /** @enum {string} */
+                                label: "support::tickets.statuses.open" | "support::tickets.statuses.waiting" | "support::tickets.statuses.resolved" | "support::tickets.statuses.closed";
                             };
                             /** @description The learner it is about (a family's ticket). */
                             learner: {
@@ -15336,13 +15456,13 @@ export interface operations {
                             created_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             last_message_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description The academy answered last and waits for you. */
@@ -15356,21 +15476,21 @@ export interface operations {
                                 starts_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
                                 status: string;
                             } | null;
                             /** @description Whether a message can still be sent (not closed; a resolved one only within its week). */
-                            can_reply: string;
+                            can_reply: boolean;
                             can_reopen: boolean;
                             can_close: boolean;
                             /** @description Until when a resolved ticket can be reopened. */
                             reopen_until: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Oldest first. */
@@ -15395,7 +15515,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -15404,6 +15524,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "support.tickets.close": {
@@ -15446,13 +15567,17 @@ export interface operations {
                             subject: string;
                             /** @description complaint | billing | technical | other */
                             kind: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "complaint" | "billing" | "technical" | "other";
+                                /** @enum {string} */
+                                label: "support::tickets.kinds.complaint" | "support::tickets.kinds.billing" | "support::tickets.kinds.technical" | "support::tickets.kinds.other";
                             };
                             /** @description open (the academy's turn) | waiting (yours) | resolved | closed */
                             status: {
-                                key: string;
-                                label: string;
+                                /** @enum {string} */
+                                key: "open" | "waiting" | "resolved" | "closed";
+                                /** @enum {string} */
+                                label: "support::tickets.statuses.open" | "support::tickets.statuses.waiting" | "support::tickets.statuses.resolved" | "support::tickets.statuses.closed";
                             };
                             /** @description The learner it is about (a family's ticket). */
                             learner: {
@@ -15462,13 +15587,13 @@ export interface operations {
                             created_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             last_message_at: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description The academy answered last and waits for you. */
@@ -15482,21 +15607,21 @@ export interface operations {
                                 starts_at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                                 /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
                                 status: string;
                             } | null;
                             /** @description Whether a message can still be sent (not closed; a resolved one only within its week). */
-                            can_reply: string;
+                            can_reply: boolean;
                             can_reopen: boolean;
                             can_close: boolean;
                             /** @description Until when a resolved ticket can be reopened. */
                             reopen_until: {
                                 utc: string;
                                 local: string;
-                                timezone: null;
+                                timezone: string;
                                 label: string;
                             } | null;
                             /** @description Oldest first. */
@@ -15521,7 +15646,7 @@ export interface operations {
                                 at: {
                                     utc: string;
                                     local: string;
-                                    timezone: null;
+                                    timezone: string;
                                     label: string;
                                 } | null;
                             }[];
@@ -15530,6 +15655,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+            429: components["responses"]["ThrottleRequestsException"];
         };
     };
     "support.tickets.file": {
