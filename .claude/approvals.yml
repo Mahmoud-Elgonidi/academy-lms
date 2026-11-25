@@ -1,0 +1,15 @@
+version: 1
+mode: observe
+rules:
+  - purpose: "A change takes two people. When Claude's review passes, one is enough and Claude approves."
+    paths: ["**"]
+    verdict: { claude: comments, seats: 2 }  # holds on a fail, and when the review has no result
+    # Once enforced, nobody can clear a Code Review finding by resolving its thread until a rule says who may. To allow that, delete the first "# " on each of the next two lines:
+    # findings:
+    #   resolution: humans  # every person with write access, so an author can clear their own finding and go green alone. [humans, "!pr/authors"] leaves authors out
+    override:
+      - { if: "claude/code_review = pass", verdict: { claude: approves, seats: 1 } }
+  - purpose: "A change to the review rules always takes two people."
+    paths: ["**/.claude/**"]
+    nested: inherit  # once enforced, also holds under a directory's policy file
+    verdict: { claude: comments, seats: 2 }
