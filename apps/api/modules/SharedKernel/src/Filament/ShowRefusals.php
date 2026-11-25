@@ -3,6 +3,8 @@
 namespace Modules\SharedKernel\Filament;
 
 use Filament\Notifications\Notification;
+use Filament\Notifications\NotificationMailbox;
+use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Livewire\ComponentHook;
 
@@ -67,14 +69,21 @@ final class ShowRefusals extends ComponentHook
             && (new \ReflectionProperty($this->component, $property))->isPublic();
     }
 
-    /** @return list<string> the titles of the notifications already waiting to be shown in this request */
+    /**
+     * @return list<string> the titles of the notifications already waiting to be shown in this request
+     *                      (Filament's mailbox holds them until the response publishes them; it has no reader of its own)
+     */
     private function waitingTitles(): array
     {
-        $waiting = session()->get('filament.notifications', []);
+        $pending = (fn (): array => $this->pendingNotifications)->call(app(NotificationMailbox::class));
 
-        return array_values(array_filter(array_map(
-            fn ($n) => is_array($n) ? (string) ($n['title'] ?? '') : '',
-            is_array($waiting) ? $waiting : [],
-        )));
+        return array_values(array_filter(array_map(function ($entry): string {
+            $notification = is_array($entry) ? ($entry['notification'] ?? null) : null;
+            if (is_string($notification)) {
+                $notification = unserialize($notification, ['allowed_classes' => [HtmlString::class]]);
+            }
+
+            return is_array($notification) ? (string) ($notification['title'] ?? '') : '';
+        }, $pending)));
     }
 }

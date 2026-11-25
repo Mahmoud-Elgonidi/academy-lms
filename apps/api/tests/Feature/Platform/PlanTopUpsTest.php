@@ -346,7 +346,7 @@ it('shows the academy what is used, left and extra, and asks from the plan page'
     // The warning's button opens the window in place; cancelling a waiting one from the list.
     $ai = app(RequestTopUp::class)->handle(topUpPack(Limit::AiUses, 100)->id, null, $this->owner->id);
     Livewire::withQueryParams(['buy' => 'video_minutes'])->test(AcademyPlanPage::class)->assertSet('defaultAction', 'buy')->assertSet('defaultActionArguments', ['limit' => 'video_minutes'])
-        ->assertSeeHtml('wire:init="mountAction(');
+        ->call('mountDefaultActions')->assertSet('mountedActions.0.name', 'buy')->assertSet('mountedActions.0.arguments', ['limit' => 'video_minutes']);
     Livewire::withQueryParams(['upgrade' => '1'])->test(AcademyPlanPage::class)->assertSet('defaultAction', 'upgrade');
     Livewire::test(AcademyPlanPage::class)->callAction('cancelTopUp', [], ['topup' => $ai->id])->assertHasNoActionErrors();
     expect($ai->fresh()->status)->toBe('cancelled');

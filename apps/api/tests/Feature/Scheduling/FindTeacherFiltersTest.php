@@ -3,6 +3,7 @@
 use Carbon\CarbonImmutable;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Select;
 use Livewire\Livewire;
 use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PriceRegion;
@@ -83,7 +84,8 @@ it('starts from the student\'s own profile', function () {
         ->assertSet('data.gender', 'female_only')
         ->assertSet('data.age_group', 'adults')     // born 2004
         ->fillForm(['subject_id' => $this->quran])
-        ->assertSee('جزء عم');
+        // The subject's levels are offered (a searchable list: its options load when it opens, not in the page).
+        ->assertFormFieldExists('level_id', fn (Select $field) => in_array('جزء عم', $field->getOptions(), true));
 });
 
 it('never fails to enrol for want of a plan: the button waits, and the plan can be made right there', function () {

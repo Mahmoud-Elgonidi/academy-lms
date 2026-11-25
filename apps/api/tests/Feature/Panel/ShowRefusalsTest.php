@@ -2,6 +2,7 @@
 
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
+use Filament\Notifications\NotificationMailbox;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\Livewire;
@@ -29,7 +30,10 @@ beforeEach(function () {
 /** @return list<string> the titles of the notifications the last request sent */
 function sentTitles(): array
 {
-    return array_values(array_map(fn (array $n) => (string) $n['title'], session('filament.claimed_notifications') ?? session('filament.notifications') ?? []));
+    $mailbox = app(NotificationMailbox::class);
+    $mailbox->flush();
+
+    return array_values(array_map(fn (array $n) => (string) $n['title'], $mailbox->pull()));
 }
 
 it('shows a refusal keyed by no field: publishing a version without lessons', function () {

@@ -153,13 +153,7 @@ final class SignIn extends Login
         }
 
         // Two-step sign-in on: the code proved the phone or the email; the authenticator app comes next.
-        $challenge = $this->getMultiFactorChallenge();
-        if ($provider = $challenge->getFirstEnabledProvider($user)) {
-            $this->userUndertakingMultiFactorAuthentication = encrypt($user->getAuthIdentifier());
-            $this->codePassed = encrypt([$user->getAuthIdentifier(), now()->addMinutes(10)->getTimestamp()]);
-            $challenge->beforeChallenge($user, $provider);
-            $this->multiFactorChallengeForm->fill();
-
+        if ($this->startAuthenticatorStep($user)) {
             return null;
         }
 
@@ -186,6 +180,32 @@ final class SignIn extends Login
         }
 
         return false;
+    }
+
+    /**
+     * After a way in that proved who it is (a right one-time code, or Google or
+     * Apple), the authenticator app's step when two-step sign-in is on: held in
+     * Filament's own shape (identifier, the user's scoped key and the form's
+     * hash), so its challenge form finds the person. Ten minutes to finish it.
+     */
+    private function startAuthenticatorStep(Authenticatable $user): bool
+    {
+        $challenge = $this->getMultiFactorChallenge();
+        $provider = $challenge->getFirstEnabledProvider($user);
+        if ($provider === null) {
+            return false;
+        }
+        $this->userUndertakingMultiFactorAuthentication = encrypt([
+            'identifier' => $user->getAuthIdentifier(),
+            'userKey' => Filament::getUserScopedAuthIdentifier($user),
+            'loginDataHash' => $this->getMultiFactorChallengeLoginDataHash(),
+        ]);
+        $this->codePassed = encrypt([$user->getAuthIdentifier(), now()->addMinutes(10)->getTimestamp()]);
+        $challenge->beforeChallenge($user, $provider);
+        $this->cacheSchema('multiFactorChallengeForm', null);
+        $this->multiFactorChallengeForm->fill();
+
+        return true;
     }
 
     /** The authenticator app's code after a right one-time code, within ten minutes of it. */
@@ -348,14 +368,8 @@ final class SignIn extends Login
             return;
         }
 
-        $challenge = $this->getMultiFactorChallenge();
-        if ($provider = $challenge->getFirstEnabledProvider($user)) {
-            $this->mode = 'code';
-            $this->userUndertakingMultiFactorAuthentication = encrypt($user->getAuthIdentifier());
-            $this->codePassed = encrypt([$user->getAuthIdentifier(), now()->addMinutes(10)->getTimestamp()]);
-            $challenge->beforeChallenge($user, $provider);
-            $this->multiFactorChallengeForm->fill();
-
+        $this->mode = 'code';
+        if ($this->startAuthenticatorStep($user)) {
             return;
         }
 
